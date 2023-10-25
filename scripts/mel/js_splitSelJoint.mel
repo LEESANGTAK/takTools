@@ -1,0 +1,220 @@
+/*
+    Script:     js_splitSelJoint.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Splits the selected joint into the specified number of segments.
+
+*/
+global proc js_splitSelJoint (int $numSegments)
+{
+    // This proc will split the selected joint into the specified number of segments    //
+    //
+
+    if ($numSegments < 2)
+    {
+        error ("The number of segments has to be greater than 1.. ");
+    }
+    // VARIABLES
+    //
+    string $joints[0];
+    string $joint;
+    
+    string $newChildJoints[0];
+    int $count = 0;
+    $joints = `ls -sl -type joint`;
+    for ($joint in $joints)
+    {
+        // first check the rotation order vs. the axis the joint should be rotating around.  In order for this to work
+        // correctly, the child joint of the joint specified must have translation values ONLY IN ONE AXIS.  Let's
+        // and, that axis MUST be the first one in the rotation order.  For example, if the joint structure is:
+        //      upArm->loArm
+        // and the loArm has a translate value of 6 0 0, then upArm should have a rotation order of XYZ or XZY.
+        //
+        string $child;
+
+        $child = `js_getChildJoint $joint`;
+
+        if (size($child) == "")
+        {
+            error ("Joint: " + $joint + " has no children joints.\n");
+        }
+        else
+        {
+            string $axis;
+            string $rotationOrder;
+            string $firstChar;
+            float $radius = `getAttr ($joint + ".radius")`;
+
+            $axis = `js_getJointAxis $child`;
+            
+            // now that we have the axis, we want to check and make sure the rotation order on $joint is correct.
+            int $rotOrderIndex = `getAttr ($joint + ".rotateOrder")`;
+            $rotationOrder = `js_getRotOrderString $joint`;
+
+            // ** REMOVING CHECK FOR ROTATION ORDER MATCHING
+            // check that the rotaiton order will work.
+            // 
+            //$firstChar = `substring $rotationOrder 1 1`;
+            //if ($axis == $firstChar)
+            //{
+                float $childT = 0.0;
+                float $tVal = 0.0;
+                string $attr;
+
+                // the rotation order is correct!  we're set!
+
+                // get the axis attr
+                $attr = ("t"+$axis);
+
+                // get the value of the child
+                $childT = `getAttr ($child + "." + $attr)`;
+                float $space = $childT/$numSegments; 
+                // create a series of locators along the joint based on the number of segments.
+                string $locators[0];
+
+                for ($x = 0; $x < ($numSegments-1); $x++)
+                {
+                   $tmp = `spaceLocator`; 
+                   $locators[$x] = $tmp[0];
+
+                    parent $locators[$x] $joint;
+                    setAttr ($locators[$x] + ".t") 0 0 0;
+                    setAttr ($locators[$x] + "." + $attr) ($space * ($x+1));
+                }
+               
+                // We just want to segment the joint, nothing more.
+            
+                // for each segment, we're going to insert a joint, and then move it to the position of the locator
+                string $prevJoint = $joint;
+                for ($x = 0; $x < size($locators); $x++)
+                {
+                    // insert a joint
+                    $newJoint = `insertJoint $prevJoint`;
+
+                    // get the position of the locator
+                    $pos = `xform -q -ws -rp $locators[$x]`;
+
+                    // move the joint there
+                    move -a -ws $pos[0] $pos[1] $pos[2] ($newJoint + ".scalePivot") ($newJoint + ".rotatePivot");
+                    
+                    // rename the new joint
+                    $newJoint = `rename ($newJoint) ($joint + "_seg_"+($x+1)+"_joint")`;
+                    
+                    setAttr ($newJoint + ".radius") $radius;
+
+                    // set the rotation order
+                    setAttr ($newJoint + ".rotateOrder") $rotOrderIndex;
+                    // set the prevJoint
+                    $prevJoint = $newJoint;
+                }
+
+                delete $locators;
+            // ** END ROTATION ORDER CHECK
+            //}
+            //else
+            //{
+                // The rotation order is incorrect.  The user needs to re-orient the joint
+                //js_orientJointWarning $joint $rotationOrder $axis $firstChar;
+
+            //}
+        }
+    }
+
+}
+global proc js_orientJointWarning (string $joint, string $rotationOrder, string $axis, string $firstChar )
+{
+    string $message;
+    $message = ("Warning!!!!\n\n");
+    $message += ("The rotation order and joint orient for "  + $joint + " do not match up.\n");
+    $message += ("The rotation order is: " + $rotationOrder + "\n");
+    $message += ("The axis aiming down the joint is: " + $axis + "\n\n");
+    $message += ("In order for this script to work, you need to either change the axis that\n");
+    $message += ("aims down the joint to " + $firstChar + ", or switch the rotation order to ");
+    switch ($axis)
+    {
+        case "x":
+            $message += ("xyz or xzy.\n");
+            break;
+        case "y":
+            $message += ("yxz or yzx.\n");
+            break;
+        case "z":
+            $message += ("zxy or zyx.\n");
+            break;
+    }
+    $message += ("\nSkipping Joint: " + $joint + "...\n");
+    confirmDialog -m $message -ma "left";
+    warning $message;
+
+}
+global proc string js_getRotOrderString (string $joint)
+{
+    string $return;
+    int $ro;
+    $ro = `getAttr ($joint + ".ro")`;
+
+    switch ($ro)
+    {
+        case 0:
+            $return = "xyz";
+            break;
+        case 1:
+            $return = "yzx";
+            break;
+        case 2:
+            $return = "zxy";
+            break;
+        case 3:
+            $return = "xzy";
+            break;
+        case 4:
+            $return = "yxz";
+            break;
+        case 5:
+            $return = "zyx";
+            break;
+    }
+    return $return;
+}
+global proc string js_getJointAxis (string $child)
+{
+    string $axis;
+    float $t[0];
+    $t = `getAttr ($child + ".t")`;
+
+    // get the translation values of the $child joint
+    // now check and see which one is greater than 0.  We should have a tolerance value just in case
+    float $tol = 0.0001;
+    for ($x = 0; $x <= 2; $x++)
+    {
+        if (($t[$x] > $tol) || ($t[$x] < (-1 *$tol)))
+        {
+            switch ($x)
+            {
+                case 0:
+                    $axis = "x";
+                    break;
+                case 1:
+                    $axis = "y";
+                    break;
+                case 2:
+                    $axis = "z";
+                    break;
+            }
+        }
+    }
+
+    if ($axis == "")
+    {
+        error ("The child joint is too close to the parent joint. Cannot determine the proper axis to segment.");
+    }
+    return $axis;
+}
+global proc string js_getChildJoint (string $joint)
+{
+    string $tmp[0];
+    $tmp = `listRelatives -f -c -type joint $joint`;
+    return ($tmp[0]);
+}

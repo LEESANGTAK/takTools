@@ -1,0 +1,29 @@
+/*
+    Script:     js_findOrError
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      given an object name, the root, and a message
+                we'll find the object.  If it doesn't exist,
+                we'll error out with the message
+
+    Requires;   js_error.mel
+                js_selectFromRoot.mel
+               
+*/
+global proc string js_findOrError (string $object, string $root, string $msg)
+{
+	// finds the $object  given the $root.  If it doesn't exist,
+	// error out with $msg
+
+	string $return;
+
+	$object = `js_selectFromRoot $root $object`;
+	if ($object == "")
+	{
+		js_error $msg;
+	}
+	return $object;
+}
+

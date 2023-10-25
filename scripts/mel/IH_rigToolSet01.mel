@@ -1,0 +1,2672 @@
+
+// procedure
+global proc string boxCrvBuild( float $size)
+{
+	string $boxCrv = `curve -d 1 -p (-$size) $size $size -p (-$size) $size (-$size) -p $size $size (-$size) -p $size $size $size -p (-$size) $size $size -p $size $size $size -p $size (-$size) $size -p (-$size) (-$size) $size -p (-$size) $size $size -p (-$size) (-$size) $size -p (-$size) (-$size) (-$size) -p (-$size) $size (-$size) -p (-$size) (-$size) (-$size) -p $size (-$size) (-$size) -p $size $size (-$size) -p $size (-$size) (-$size) -p $size (-$size) $size -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16` ;
+	return $boxCrv;
+}
+
+
+global proc IHmatchPosition(string $a , string $b)
+{	
+	string $ptCsObj[] = `parentConstraint $b $a`;
+	delete $ptCsObj;
+}
+
+
+global proc IHmatchPositionCMD()
+{	
+	string $list[] = `ls -sl`;
+	IHmatchPosition $list[0] $list[1];
+}
+
+global proc IHmatchTransform(string $a , string $b)
+{	
+	string $ptCsObj[] = `pointConstraint $b $a`;
+	delete $ptCsObj;
+}
+
+global proc IHmatchTransformCMD()
+{	
+	string $list[] = `ls -sl`;
+	IHmatchTransform $list[0] $list[1];
+}
+
+//matchVertex
+// vertex match - symmetery ¸¸µé¤Ô¤¨¤Â¤Ô »ç¿ë
+global proc IH_matchVertexPosition(string $target){
+
+     // vertex select
+     string $listSel[] = `ls -sl -fl`;
+
+     if (!`gmatch $listSel[0] "*.vtx*"`)
+          error "please select vertex.";
+
+     string $targetShape;
+     if (`objectType $target` == "mesh")
+          $targetShape = $target;
+     else if (`objectType $target` == "transform"){     
+          string $temp[] = `listRelatives -c -s -f $target`;
+           $targetShape = $temp[0];
+     }     
+     else 
+          error "target is not valiable.";
+
+     for ( $vertex in $listSel) {         
+          //vertexInfo
+          float $position[] = `pointPosition -w $vertex`;
+          print $position;
+          string $node = `createNode "closestPointOnMesh"`;                   
+          setAttr ($node + ".inPosition") $position[0] $position[1] $position[2];
+          connectAttr -f ($targetShape + ".outMesh") ($node + ".inMesh");
+         
+          int $num = `getAttr ($node + ".closestVertexIndex")`;
+          string $newPoint = ($targetShape + ".vtx[" + $num + "]");    
+          print $newPoint;
+          delete $node;
+         
+          float $newTr[] = `pointPosition -w $newPoint`;
+          print $newTr;
+          xform -a -t $newTr[0] $newTr[1] $newTr[2] $vertex;                   
+          }
+         
+}
+    
+
+global proc IH_matchVertexPositionCMD( string $type ){
+
+     if ($type == "get"){
+
+          string $sel[] = `ls -sl`;
+          textFieldGrp -e -text $sel[0] IH_MV_target_TxtField;
+
+     }else if ($type == "do"){
+          string $target = `textFieldGrp -q -text IH_MV_target_TxtField`;
+          IH_matchVertexPosition $target;
+     }     
+
+}
+
+global proc IH_matchVertexPositionUI(){
+
+     if (`window -ex "matchVertexPositionWin"`) 
+     {
+          deleteUI "matchVertexPositionWin";
+     }
+
+     window -width 310 -height 230
+          -resizeToFitChildren false
+          -menuBar true
+          -maximizeButton true
+          -titleBar true
+          /*-sizeable false*/
+          -menuBarVisible true
+          -title "match vertexPosition"
+          "matchVertexPositionWin";
+
+
+     columnLayout -cat left 10; 
+
+     text -l "[ MATCH VERTEX ]";
+     separator -w 300 -h 5 ;
+     separator -w 300 -h 10 -st "none";
+
+     textFieldGrp
+        -label "target : "
+        -text  ""
+        -columnWidth 1 50 -columnWidth 2 240 IH_MV_target_TxtField;
+     separator -w 300 -h 5 -st "none";
+     button -label "add Target" -w 300 -c "IH_matchVertexPositionCMD \"get\"" ;  
+
+     separator -w 300 -h 10 -st "in";
+     separator -w 300 -h 5 -st "none";
+
+     button -label "match vertex" -w 300 -c "IH_matchVertexPositionCMD \"do\"" ;
+     
+     
+     
+     setParent;
+     showWindow "matchVertexPositionWin";
+
+}    
+
+//matchVertexEnd
+
+global proc setupDynamicChain( string $name , string $path ) {
+
+	string $namespace = "hairTemp";
+
+	string $ext = "";
+	if (`fileExtension($path)` == "ma" )
+		$ext = "mayaAscii";
+	else if (`fileExtension($path)` == "mb" )
+		$ext = "mayaBinary";
+	else
+		error "It is not maya file.\n";	
+
+	file -import -type $ext  -ignoreVersion -ra true -mergeNamespacesOnClash false -namespace $namespace -options "v=0;"  -pr -loadReferenceDepth "all" $path;
+
+
+	string $list[] = `ls -typ "transform" ($namespace + ":*")`;
+
+	string $numName =  ($name + "0");
+	for ( $i=0 ; `objExists ($numName + "_*")` ; $i++ ) {
+	    $numName = $name + $i;
+	}
+
+	for ( $curList in $list ) {
+	    
+	    if (`gmatch $curList ($namespace + ":*name_*")`) 
+	    {
+	        string $newName = `substitute "name_" $curList ($numName + "_")`;
+	        //print ($curList + " >>> " + $newName + "\n");
+	        rename $curList $newName;
+	    }
+	    else 
+	        print ( $curList + " is not contian name_ \n");
+	        
+	}
+
+	namespace -force -mv $namespace ":";
+	namespace -rm $namespace;
+
+	optionVar -sv "IKchainPath" $path;
+
+}
+
+global proc BHCfileDialog(string $UI , string $dir ) {
+	string $filename[] = `fileDialog2 -fileMode 1 -ds 1 -dir $dir -caption "Import control"`;
+	if (1 == `size($filename)`){
+		textFieldButtonGrp -e -text $filename $UI;
+	}	
+}
+
+global proc skinCopyWithSkin() {
+	string $listSel[] = `ls -sl`;
+	string $temp[];
+	string $sourceShape;
+	if ( `objectType $listSel[0]` == "transform" ) {
+		$temp = `listRelatives -s $listSel[0]`;
+		$sourceShape = $temp[0];	
+	}
+	else if ( `objectType $listSel[0]` == "mesh" ) {
+		$sourceShape = $listSel[0];
+	} else
+		error "Select a Source mesh with skin cluster";
+		
+	string $skinCluster = `findRelatedSkinCluster $sourceShape`;
+	
+	string $jointList[] = `skinCluster -q -inf $sourceShape`;
+	
+	string $targetShape;
+	$temp = `listRelatives -c -s $listSel[1]`;
+	if ( `objectType $listSel[1]` == "transform" ) {
+		$temp = `listRelatives -s $listSel[1]`;
+		$targetShape = $temp[0];	
+	}
+	else if ( `objectType $listSel[1]` == "mesh" ) {
+		$targetShape = $listSel[1];
+	} else
+		error "Select a Source mesh with skin cluster";
+	
+	$temp = `skinCluster -mi 1 -dr 4.5 -tsb $jointList $targetShape` ;
+	string $DesSkin = $temp[0];	
+	
+	copySkinWeights -sa "closestPoint" -ia "oneToOne" -ss $skinCluster -ds $DesSkin -nm;
+}
+
+global proc setHairBake() {
+
+	string $list[] = `ls -sl`;
+	
+	for ( $curSel in $list ) {
+
+		string $tokenTemp[];
+		tokenize $curSel "_" $tokenTemp;
+		string $pre = $tokenTemp[0];
+		print ($pre + ":");
+		for ($i = 1 ; $i <= 5 ; ++$i ) {	
+			float $zeroRot[] = `getAttr ($pre + "_Line" + $i + "_Zero.r" )`;	
+			setAttr ($pre + "_Line" + $i + "_Bake_Zero.r" ) $zeroRot[0] $zeroRot[1] $zeroRot[2]; 
+			print ($pre + "_Line" + $i + "_Zero.r" );
+		}
+	}
+	print ("\n");
+}
+
+global proc b1checkUniqName(){
+	string $list[] = `ls `;
+	string $uniqSet = `sets -em -n "uniqSet"`;
+	for ( $curlist in $list ) {
+		string $tem[];
+		int $size = `tokenize $curlist "|" $tem`;
+		if ($size > 1 ){
+			print ($curlist + "\n");
+			sets -add $uniqSet $curlist;
+		}	
+	}
+	if (size(`sets -q $uniqSet`) == 0 ){
+		delete $uniqSet;
+		print "//result : good ! \n";	
+	}
+
+}
+
+global proc b1checkTransformFreeze(){
+	string $selGeoArray[];
+	string $noneFreezeArray[];
+	
+	string $curSel[0] = `ls -sl -head 1`;
+	string $trSet = `sets -em -n "transformSet"`;
+	string $selGeoArray[] = `listRelatives -c -ad -type "transform" $curSel[0]`;
+
+
+	for ($num = 0 ; $num < (size($selGeoArray)) ; $num++ )
+	{
+		   string $currentGeo = $selGeoArray[$num];
+           string $curShape[] = `listRelatives -s $currentGeo`;
+           
+           if ( size($curShape) > 0 && `objectType $curShape[0]` == "camera" ) 
+               continue;
+	  //1.object transform Ã¼Å©.
+	  
+			float $objectTr[] = `xform -q -t $currentGeo`;
+			float $objectRo[] = `xform -q -ro $currentGeo`; 
+			float $objectSc[] = `xform -r -q -s $currentGeo`;         
+		   
+			if (($objectTr[0] != 0) || ($objectTr[1] != 0) || ($objectTr[2] != 0)){
+					print ($currentGeo + ": \n" + "Tr : " + $objectTr[0] + " / " + $objectTr[1] + " / " + $objectTr[2] + "\n");
+					sets -add $trSet $currentGeo;
+			} else if  (($objectRo[0] != 0) || ($objectRo[1] != 0) || ($objectRo[2] != 0)){
+					print ($currentGeo + ": \n" + "Ro : " + $objectRo[0] + " / " + $objectRo[1] + " / " + $objectRo[2] + "\n");
+					sets -add $trSet $currentGeo;
+			} else if  (($objectSc[0] != 1) || ($objectSc[1] != 1) || ($objectSc[2] != 1)){ 
+					print ($currentGeo + ": \n" + "Sc : " + $objectSc[0] + " / " + $objectSc[1] + " / " + $objectSc[2] + "\n");
+					sets -add $trSet $currentGeo;
+			}		
+	}
+	if (size(`sets -q $trSet`) == 0 ){
+		delete $trSet;
+		print "//result : good ! \n";	
+	}
+	
+
+}
+//hairChain match
+//targetMesh ¼±ÅÃÇÏ°í sourceMesh ¼±ÅÃ.
+global proc b1matchingHairChain( int $mirrorX ) {
+    
+    string $sel[] = `ls -sl`;
+    string $tokenTemp[];
+	tokenize $sel[0] "_" $tokenTemp;    
+    string $target = $tokenTemp[0]; 
+    tokenize $sel[1] "_" $tokenTemp;       
+    string $source = $tokenTemp[0];
+    
+    
+	if ( !`objExists ( $target + "_Block" )` )
+		error;
+	// matchBlockTop
+	float $jointTr[] = `getAttr ($target + "_Block.t")`;
+    float $jointRt[] = `getAttr ($target + "_Block.r")`;
+    float $jointSc[] = `getAttr ($target + "_Block.s")`;
+	
+    if ( $mirrorX ) {
+		setAttr ($source + "_Block.t") (-$jointTr[0]) $jointTr[1] $jointTr[2];
+		setAttr ($source + "_Block.r")  $jointRt[0] (-$jointRt[1]) (-$jointRt[2]);
+		setAttr ($source + "_Block.s")  $jointSc[0] $jointSc[1] $jointSc[2];
+	} else {
+		setAttr ($source + "_Block.t")  $jointTr[0] $jointTr[1] $jointTr[2];
+		setAttr ($source + "_Block.r")  $jointRt[0] $jointRt[1] $jointRt[2];
+		setAttr ($source + "_Block.s")  $jointSc[0] $jointSc[1] $jointSc[2];
+	}	
+	//¿¹Àü ¹öÀü¿¡ Root°¡ µé¾î°¡ ÀÖ¾î¼­,,,	
+	string $ver;		
+	if ( `objExists ($target +  "_Line1_Zero.r" )` ) 
+		$ver = "_Line";	
+	else if ( `objExists ($target +  "_Root_Line1_Zero.r" )` )
+		$ver = "_Root_Line";	
+	
+	//match zero
+	for ($i = 1 ; $i <= 5 ; ++$i ) {	
+			if ( `objExists ($target +  $ver + $i + "_Zero.r" )` ) {
+				float $zeroRot[] = `getAttr ($target +  $ver + $i + "_Zero.r" )`;	
+				if ( $mirrorX ) 
+					setAttr ($source +  $ver + $i + "_Zero.r" ) $zeroRot[0] (-$zeroRot[1]) (-$zeroRot[2]); 
+				else 
+					setAttr ($source +  $ver + $i + "_Zero.r" ) $zeroRot[0] $zeroRot[1] $zeroRot[2]; 	
+			}	
+		}
+		
+	select ( $source + "_Block" );
+	print ("//result :  match done.\n");
+}
+
+// hairChain¿¡ constraint°¡ ÀÖÀ» °æ¿ì highlevelÄÁÆ®·Ñ·¯°¡ ¹Ùµð¸¦ µû¶ó°¡´Â °É·Î ÀÎ½ÄÇÏ°í 
+// followBodyCon attribute¸¦ Ãß°¡ÇÑ´Ù.
+global proc connectBodyFollowCon(){
+    string $selLine5[] = `ls -sl "*_Line5*"`;
+    for ($cur5 in $selLine5 ) {
+        
+        string $tokenTemp[];
+        tokenize $cur5 "_" $tokenTemp;
+		//zero constraint ¸¸ Ã£¾Æ¼­.
+        string $listCons[] = `ls ($tokenTemp[0] + "_*_Zero_parentConstraint*")`;
+        
+        //ÇØ´ç line5 ÄÁÆ®·Ñ·¯¿¡ connecAttr°¡ ¾øÀ» °æ¿ì ¸¸µé¾îÁÝ´Ï´Ù.
+        if (size($listCons) > 0 && !`objExists ($cur5 + ".followBodyCon")`) {
+             if (!`objExists ($cur5 + ".extraCon")`) {
+                 addAttr -ln "extraCon" -at "enum" -en "¡å:"  $cur5;
+                 setAttr -e -channelBox true ($cur5 + ".extraCon");
+             }
+             addAttr -ln "followBodyCon" -k 1 -at "bool" $cur5;
+        
+        }
+        
+        for ($curPar in $listCons)
+        {
+			//3¹ø±îÁö connect. ¿ø·¡ ¿¬°áÀÌ ÀÖÀ¸¸é ²÷°í ´Ù½Ã ¿¬°á.
+			for ($i=0 ; $i <= 3 ; $i++ ) {
+				if ( `objExists ($curPar + ".w" + $i)`) {
+					string $con[] = `listConnections -s 1 -d 0 -p 1 ($curPar + ".w" + $i)`;
+					if ( size($con) > 0 )
+						disconnectAttr $con[0] ($curPar + ".w" + $i);		   
+					connectAttr -f ($cur5 + ".followBodyCon")($curPar + ".w" + $i); 
+					print ("//result : connect " + $curPar + ".w" + $i + "\n");
+				}
+			}
+        }
+        
+    }    
+}
+
+
+// hairSystem constraint ¿¬°á.
+// ¿¬°áÇÒ hairSystemÀ» ¼±ÅÃÇÏ°í , 
+// connectHairConstraint "¿¬°áÇÒ constriantShape" "pinID" ½ÇÇà.
+global proc connectHairConstraint( string $constriant , int $num) {
+	string $list[] = `ls -sl`;
+	for ( $curSel in $list ) {
+		string $tokenTemp[];
+		tokenize $curSel "_" $tokenTemp;
+		string $pre = $tokenTemp[0];
+		connectAttr -f ( $constriant + ".outPin[0]" ) ($pre + "_Line_hairSystemShape.inputHairPin[" + $num + "]");
+	}
+}
+
+//ex)connectHairConstraint hairConstraint_pinTailShape 8;
+
+//get Hair connection ID
+//hairConstraint shapeÀ» ¼±ÅÃÇÏ°í ½ÇÇà.
+//cmd print
+global proc printHairConsConnectID(){
+	string $CMD;
+	string $hairCons[] = `ls -type "hairConstraint" -sl`;
+
+	for ($curHairCon in $hairCons ) {
+		string $tokenTemp[];
+		string $connection[] = `listConnections -d 1 -p 1 ($curHairCon + ".outPin[0]")`;
+		tokenize $connection[0] "[]" $tokenTemp;
+		print ( "connectHairConstraint " + $curHairCon + " " + $tokenTemp[1] + ";\n");
+
+	}
+}
+
+
+global proc parentConsBatch(){
+    string $list[] = `ls -sl`;
+    for ($i = 1; $i < size($list) ; $i++ )
+        parentConstraint -mo $list[0] $list[$i];
+}
+
+global proc addZeroTransform(){
+
+    string $ls[] = `ls -sl`;
+    
+    string $text = "zero";
+    string $result = `promptDialog
+        -title "zero transform"
+        -message "Enter Name:"
+        -tx $text
+        -button "OK" -button "Cancel"
+        -defaultButton "OK" -cancelButton "Cancel"
+        -dismissString "Cancel"`;
+    
+    if ($result == "OK") {
+        $text = `promptDialog -query -text`;
+        
+        for ( $cur in $ls ) {
+        string $dup[] =`duplicate -po -n ($cur + "_" + $text ) $cur`;
+        parent $cur $dup[0];
+        } 
+    }
+}   
+    
+
+// buildPose ¸¸µé±â--------------------------------------------------
+global proc b1setBuildPose() {
+
+	if(`objExists buildPose`){
+	    print "buildPose node already exist";
+	}
+	else {
+	    createNode -n "buildPose" dagPose;
+	    addAttr -ln udAttr -dt "string"  ("buildPose");		
+	}
+				
+	select `sets -q ("ControlSet")`;				
+	string $controlSetMembers[]=`ls -sl`;				
+	string $setAttrCmd;				
+	for ($i=0;$i<size($controlSetMembers);$i++)				
+		{			
+		$tempString=`listAttr -k $controlSetMembers[$i]`;			
+		for ($y=0;$y<size($tempString);$y++)			
+			$setAttrCmd+="setAttr "+$controlSetMembers[$i]+"."+$tempString[$y]+" "+`getAttr ($controlSetMembers[$i]+"."+$tempString[$y])`+";";		
+		}			
+	setAttr -type "string" ("buildPose.udAttr") $setAttrCmd;				
+}
+
+// delete all key
+global proc b1deleteAllKey() {
+	string $ccList[] = `sets -q "ControlSet"`;
+	cutKey -clear -time ":" -hierarchy none -controlPoints 0 -shape 1 $ccList;
+}
+
+// set noneKeyable attributes
+global proc b1beforeRelease() {
+
+
+	if ( `objExists "Sub.facialControlVis"`)
+		setAttr "Sub.facialControlVis" 1;
+	if ( `objExists "Sub.lodVis"`)
+		setAttr "Sub.lodVis" 1;	
+	if ( `objExists "Sub.geometryVis"`)
+		setAttr "Sub.geometryVis" 2;
+	if ( `objExists "MotionSystem.visibility"`)
+		setAttr "MotionSystem.visibility" 1;
+	if ( `objExists "Sub.extraControlVis"`)
+		setAttr "Sub.extraControlVis" 1;
+
+	if(`objExists eyeControl_GRP`)
+		setAttr eyeControl_GRP.v 0 ;
+
+	if(`objExists facial_GRP`)
+		setAttr "facial_GRP.inheritsTransform" 0;
+
+	//leg skinPose
+	string $legParts[] = { "IKLeg_L" , "IKLeg_R" , "PoleLeg_L" , "PoleLeg_R" , "FKIKLeg_R" , "FKIKLeg_L" , "FKAnkle_L" , "FKAnkle_R" , "FKKnee_R" , "FKKnee_L" , "FKHip_L" , "FKHip_R" };
+
+	for ($curCC in $legParts ) 
+	{
+		if (`objExists ( $curCC + ".skinPose" )`)
+			setAttr ( $curCC + ".skinPose" ) 0;
+	}    
+
+	b1JointVisMaya2014 0;
+	asGoToBuildPose bodySetup;
+
+	setAttr "root.inheritsTransform" 0;
+	setAttr "geometry.inheritsTransform" 0;
+	setAttr "lod03_GRP.inheritsTransform" 0;
+
+
+	//namespace check
+	string $nsList[] = `namespaceInfo -listOnlyNamespaces ":"`;
+	if ( size ($nsList) > 2 ){
+		NamespaceEditor;
+	    warning " namespace exist!! ";
+	}
+
+}
+
+// ¼±ÅÃÇÑ meshÀÇ namespace return
+global proc string getNSfromSel(){
+	string $ns;
+	string $sel[] = `ls -sl -head 1`;
+	
+	if ( size($sel) == 0 )
+		error "please select something!!";
+	
+	string $tokenTemp[];
+	int $tokenSize = `tokenize $sel[0] ":" $tokenTemp`;
+	
+	if ( $tokenSize == 2 )
+		$ns = $tokenTemp[0];
+	else if ( $tokenSize > 2 )
+	    error "more Than two namespace. please set less than one namespace.";
+	else    
+	    $ns = ":";		
+	return $ns; 	
+
+}
+
+// make Tpose / buildPose / legExcept
+global proc b1goTpose( int $val , int $leg)
+{
+	string $curNS = `getNSfromSel`;
+	string $listControl[] = `sets -q ($curNS + ":ControlSet")`;	
+
+	string $legParts[] = { "IKLeg_L" , "IKLeg_R" , "PoleLeg_L" , "PoleLeg_R" , "FKIKLeg_R" , "FKIKLeg_L" , "FKAnkle_L" , "FKAnkle_R" , "FKKnee_R" , "FKKnee_L" , "FKHip_L" , "FKHip_R" };
+
+	int $value = (10 * $val);
+	for ($curCon in $listControl)
+		if (`objExists ($curCon + ".skinPose")`)
+			setAttr ($curCon + ".skinPose") $value;
+	if ( $leg == 1 ){
+		for ($curCC in $legParts ) 
+			if (`objExists ( $curNS + ":" + $curCC + ".skinPose" )`)
+				setAttr ( $curNS + ":" + $curCC + ".skinPose" ) 0;	
+	}			
+}
+
+
+global proc b1connectVisLod02ToLod03(){
+
+    if ( `objExists "lod02_GRP"`)  
+    {    
+        string $lod02List[] = `listRelatives -c -ad -type "transform" "lod02_GRP"`;
+        
+        for ($curLod02 in $lod02List ) 
+        {
+            string $lod03 = `substitute "lod02_" $curLod02 ""`;
+            if (`objExists $lod03`) 
+            {
+				string $visResults[] = `listConnections -d 0 -s 1 -p 1 ($lod03 + ".v")`;
+				string $lod03type = `objectType $lod03`;
+				if (size($visResults) == 0 && $lod03type == "transform" ){
+					connectAttr -f ($curLod02 + ".v") ($lod03 + ".v");
+					print ( "connect Visibility from " + $curLod02 + " to " + $lod03 + "\n");
+				}	
+            }       
+        }    
+    }
+}
+
+
+
+
+
+global proc getJointList() {
+	
+	string $listSel[] = `ls -sl`;
+	string $temp[];
+	string $jointList[];
+	
+	for ( $curSel  in $listSel ) {
+		$temp = `listRelatives -c -s $curSel`;
+		string $curShape = $temp[0];
+		$temp = `listConnections -s 1 -t "skinCluster" $curShape`;
+		string $skinCluster = $temp[0];		
+		string $curjointList[] = `listConnections -s 1 -t "joint" $skinCluster`;
+		appendStringArray($jointList, $curjointList, size($curjointList));		
+	}	
+	$jointList = stringArrayRemoveDuplicates($jointList);
+	select $jointList;
+	//skinCluster -mi 1 -dr 4.5 -tsb $jointList $targetMesh;		
+}
+
+global proc copySkinFromPartialMesh(string $targetMesh) {
+	string $mesh[] = `ls -sl`;
+
+	select -r $mesh[0];
+	PolySelectConvert 3;
+	string $allVerts[] = `ls -sl -fl`;
+
+	string $targetVers[];
+	string $targetShape[] = `listRelatives -s -c $targetMesh`;
+
+	for ( $i=0 ; $i < size($allVerts) ; ++$i ) {
+	//vertexInfo
+		float $position[] = `pointPosition -w $allVerts[$i]`;	
+
+		string $node = `createNode "closestPointOnMesh"`;				
+		setAttr ($node + ".inPosition") $position[0] $position[1] $position[2];
+		connectAttr -f ($targetShape[0] + ".outMesh") ($node + ".inMesh");		
+		int $num = `getAttr ($node + ".closestVertexIndex")`;
+		$targetVers[$i] = ($targetMesh + ".vtx[" + $num + "]");
+		delete $node;
+
+	}	
+
+	select -r $mesh[0];
+	select -add $targetVers;
+	CopySkinWeights;
+
+}
+
+global proc b1insertLayer( string $name){
+	//¼±ÅÃµÈ°ÍµéÀ» layer¿¡ ³ÖÀ½.
+	string $sel[] = `ls -sl`;
+	
+	if ( !`objExists $name`)
+		createNode -n $name displayLayer;
+		
+	editDisplayLayerMembers -noRecurse $name $sel;
+}
+//geomety¿Í Geometry ÇÏÀ§ÀÇ ¸ðµç transformÀ» geoLayer¿¡ ³Ö¾îÁÖ°í.
+//SubControl°ú ¿¬°áÇØÁØ´Ù.
+global proc b1InsetGeoLayer(){
+	string $geometry[] = `listRelatives -c -ad -type "transform" "geometry" "Geometry"`;
+
+	if ( !`objExists "geoLayer"`)
+			createNode -n "geoLayer" displayLayer;
+	
+	string $expCon[] = `listConnections -s 1 -t "expression" "geoLayer"`;
+	string $geoVisCon;
+	if (`objExists "Sub.geometryVis"`)
+		$geoVisCon = "Sub.geometryVis";
+	else if	(`objExists "Main.geometryVis"`)	
+		$geoVisCon = "Main.geometryVis";
+		
+	if (!`objExists $expCon[0]`&&`objExists $geoVisCon`)		
+		expression -s ("if (" + $geoVisCon + " == 0) \n\tgeoLayer.displayType = 0;\nelse if (" + $geoVisCon + " == 1) \n\tgeoLayer.displayType = 1;\nelse \n\tgeoLayer.displayType = 2;")  -o "" -n "exp_geoLayer" -ae 1 -uc all ;
+	
+	editDisplayLayerMembers -noRecurse "geoLayer" $geometry;
+}	
+
+global proc b1JointVisMaya2014 (int $onOff)
+{
+	string $joints[];
+	if (!`objExists "root"`){
+		string $list[] = `ls -sl -head 1`;
+		string $tokenTemp[];
+		int $tokenSize = `tokenize $list[0] ":" $tokenTemp`;
+		if ( `objExists ($tokenTemp[0] + ":root")`)
+			$joints =`listRelatives -type joint -ad ($tokenTemp[0] + ":root")`;
+		else
+			return;		
+	}
+	else	
+		$joints =`listRelatives -type joint -ad root`;
+		
+	int $drawStyle=0;
+	if (!$onOff)
+		$drawStyle=2;
+	for ($i=0;$i<size($joints);$i++)
+		setAttr ($joints[$i]+".drawStyle") $drawStyle;
+}
+
+global proc asGoToBuildPose (string $uiName)
+{
+	int $ctrlButton;
+	if ((`getModifiers`/4) %  2)
+		$ctrlButton=1;
+	string $nameSpace;
+	string $controlSets[];
+	if ($uiName=="bodySetup")
+		{
+		$nameSpace="";
+		$controlSets[0]="ControlSet";
+		}
+	else if ($uiName=="faceSetup")
+		{
+		$nameSpace="";
+		$controlSets[0]="FaceControlSet";
+		}
+	else
+		{
+		$nameSpace=`optionMenu -q -v ($uiName+"OptionMenu")`;
+		$controlSets=`asGetControlSetsFromUI $uiName`;
+		}
+	if ($nameSpace==":")
+		$nameSpace="";
+
+	string $buildPose="buildPose";
+	if (`gmatch $controlSets[0] "*FaceControlSet"`)
+	    $buildPose="faceBuildPose";
+
+	string $tempString[],$tempString2[],$buffer[];
+	string $setAttrCmd,$cmd;
+
+
+	$setAttrCmd=`getAttr ($nameSpace+$buildPose+".udAttr")`;
+	tokenize $setAttrCmd ";" $tempString;
+	for ($y=0;$y<size($tempString);$y++)
+		{
+		$cmd=$tempString[$y];
+		if ($nameSpace!="")
+			{
+			tokenize $cmd $buffer;
+			if (`gmatch $cmd "xform*"`)
+				$substituteWordNr=size($buffer)-1;
+			else
+				$substituteWordNr=1;
+			$cmd="";
+			for ($z=0;$z<size($buffer);$z++)
+				{
+				if ($z==$substituteWordNr)
+					$cmd+=$nameSpace;
+				$cmd+=$buffer[$z]+" ";
+				}
+			}
+		if ($ctrlButton)
+			if (`gmatch $cmd "*Main.*"`)
+				continue;
+		if (catchQuiet (`eval ($cmd)`)) warning ("Failed: "+$cmd+"\n");
+		}
+
+	//run
+	string $run,$fitTopNode,$cmd,$objAttr;
+	for ($i=0;$i<size($controlSets);$i++)
+		{
+		if (`gmatch $controlSets[$i] "*ControlSet"`)
+			if (`objExists ($nameSpace+"FitSkeleton")`)
+				$fitTopNode=$nameSpace+"FitSkeleton";
+		if (`gmatch $controlSets[$i] "*FaceControlSet"`)
+			$fitTopNode=($nameSpace+"FaceFitSkeleton");
+		}
+
+	if (`objExists $fitTopNode`)
+		if (`attributeExists "run" $fitTopNode`)
+			{
+			$run=`getAttr ($fitTopNode+".run")`;
+			if ($nameSpace=="")
+				catch (`evalEcho ($run)`);
+			else
+				{
+				tokenize $run ";" $tempString;
+				for ($i=0;$i<size($tempString);$i++)
+					{
+					tokenize $tempString[$i] $tempString2;
+					$objAttr=`substitute "\"" $tempString2[1] ""`;
+					$objAttr=`substitute "\"" $objAttr ""`;
+					$cmd=$tempString2[0]+" "+$nameSpace+$objAttr+" "+$tempString2[2]+";";
+					catch (`evalEcho ($cmd)`);
+					}
+				}
+			}
+}
+
+global proc b1ExportLod03FromRig() {
+	//export lod03 form rig
+	source "C:/Program Files/Autodesk/Maya2014/scripts/startup/channelBoxCommand.mel";
+
+	if (!`objExists "lod03_GRP"`)
+	    error "lod03_GRP not exist.";
+
+	//layer
+	select "lod03_GRP";
+	select -hi;
+	string $listAll[] = `ls -sl -typ "mesh"`;
+	//layer
+	editDisplayLayerMembers -noRecurse "defaultLayer" $listAll;
+
+	string $list[] = `ls -sl -typ "mesh"`;
+	//constraint
+	delete -constraints;
+
+	//expression
+	CBdeleteConnection "lod03_GRP.v";
+	CBdeleteConnection "geometry.v";
+
+	//blendshape
+	string $temp[];
+	for ($cur in $list ) {
+	    $temp = `listConnections -s 1 -t "blendShape" ($cur + ".inMesh")`;
+	    if (`objExists $temp[0]`)
+	        delete $temp[0];
+	}        
+	        
+	//history
+	select "lod03_GRP";
+	select -hi;
+	DeleteHistory;
+
+	string $listShape[] = `listRelatives -ad -c -typ "mesh" "lod03_GRP"`;
+
+	for ($curShape in $listShape ){
+	    if (`getAttr ($curShape + ".intermediateObject")`){
+	        delete $curShape;
+	        print ("//delete : " + $curShape + "\n"); 
+	    }
+	} 
+			
+	//unlock
+	string $unlockList[] = `listRelatives -ad -c -type "transform" "lod03_GRP"`;
+	$unlockList[size($unlockList)] = "lod03_GRP";
+	for ($curMesh in $unlockList)
+	   	b1unLock $curMesh;		
+			
+	//delete Layer
+	if (`objExists "geoLayer"`)
+		delete "geoLayer";
+			
+	//delete rig
+	 if (`objExists "rig"`)
+	    delete "rig";
+	    
+
+	setAttr "lod03_GRP.visibility" 1;	
+	select "lod03_GRP" "set";  
+
+	setAttr "geometry.inheritsTransform" 0;
+	setAttr "lod03_GRP.inheritsTransform" 0;
+
+	select -add -ne set ;
+    
+}
+
+//lod02_shader assign tool.
+//material ¼±ÅÃÇÏ°í Àû¿ëÇÒ texure¸¦ ¼±ÅÃÇÑ µÚ ½ÇÇà.
+global proc b1addlod02Tex(){
+
+    string $selMT[] = `ls -sl`;
+    string $tex = $selMT[1];
+    
+    string $SG[] = `listConnections -d 1 -s 0 ($selMT[0] + ".outColor")`;
+    string $lsShape[] = `sets -q $SG[0]`;
+    
+    //make lambert
+    string $lambMT = `shadingNode -asShader lambert`;
+    string $lambSG = `sets -renderable true -noSurfaceShader true -empty -n ($lambMT + "SG")`;
+    connectAttr -f ($lambMT + ".outColor") ($lambSG+ ".surfaceShader");
+    connectAttr -force ($tex + ".outColor") ($lambMT + ".color");
+    
+    
+    for ($curShape in $lsShape )
+        if (`gmatch $curShape "lod02_*"`)
+            sets -e -forceElement $lambSG $curShape;
+    
+
+}
+
+
+
+global proc deleteIntermediateMesh(){
+    string $curSel[] = `ls -sl -head 1`;
+    string $listShape[] = `listRelatives -ad -c -f -typ "mesh" $curSel[0]`;
+    for ($curShape in $listShape ){
+        if (`getAttr ($curShape + ".intermediateObject")`){
+            delete $curShape;
+            print ("//delete : " + $curShape + "\n"); 
+        }
+    } 
+}
+
+//facial
+// facial control position mirror copy
+global proc b1mirrorfacialCC( string $type )
+{
+	
+    string $listControl[] = `ls -sl`;
+
+    if ($type == "LtoR"){
+    	$listControl = `ls "fac*_L_ctr_crv"`;
+    }
+    
+    for ( $curCtr in $listControl) {
+        string $side;
+        string $otherSide;
+		//$side = `substring $curCtr (size($curCtr)-1) (size($curCtr))`;
+		if( `gmatch $curCtr "*_L_*"` )
+        {
+            $side = "_L_";
+            $otherSide = "_R_";
+        }    
+        else if( `gmatch $curCtr "*_R_*"` )       
+        {
+            $side = "_R_";
+            $otherSide = "_L_";
+        }
+        else
+            continue;
+            
+        string $otherSideCtr = `substitute $side $curCtr $otherSide`;     
+        print ($curCtr + " : " + $otherSideCtr +"\n");
+
+        float $ctrTr[] = `getAttr ($curCtr + ".t")`;
+        float $ctrRt[] = `getAttr ($curCtr + ".r")`;
+        setAttr ($otherSideCtr + ".t") (-$ctrTr[0]) (-$ctrTr[1]) (-$ctrTr[2]);
+        setAttr ($otherSideCtr + ".r")  $ctrRt[0] $ctrRt[1] $ctrRt[2];
+        
+    }
+
+}
+
+// joint position mirror copy
+global proc b1mirrorJointPositioin()
+{
+    string $listJoint[] = `ls -sl -type "joint"`;
+    
+    for ( $curJoint in $listJoint) {
+        string $side;
+        string $otherSide;
+        if( `gmatch $curJoint "*_L_*"` )
+        {
+            $side = "_L_";
+            $otherSide = "_R_";
+        }    
+        else if( `gmatch $curJoint "*_R_*"` )       
+        {
+            $side = "_R_";
+            $otherSide = "_L_";
+        }
+        else
+            continue;
+            
+        string $otherSideJoint = `substitute $side $curJoint $otherSide`;     
+            
+        float $jointTr[] = `getAttr ($curJoint + ".t")`;
+        float $jointRt[] = `getAttr ($curJoint + ".r")`;
+        setAttr ($otherSideJoint + ".t") (-$jointTr[0]) $jointTr[1] $jointTr[2];
+        setAttr ($otherSideJoint + ".r")  $jointRt[0] $jointRt[1] $jointRt[2];
+        
+    }
+
+}
+
+
+
+
+
+// center¿¡ ÀÖ´Â cluster °ª  mirrorÇÏ±â.
+// mesh ¼±ÅÃÇÏ°í cluster ¼±ÅÃ.
+global proc b1mirrorCenterCluster() {
+
+	string $listSel[] = `ls -sl`;
+	string $mesh = $listSel[0];
+	string $meshShape[] = `listRelatives -s -c $mesh`;
+	string $clusterHandle = $listSel[1]; 
+	string $clusters[] = `listConnections -type "cluster" $clusterHandle`;
+	string $cluster = $clusters[0];
+
+	//get cluster members
+		string $clusterSets[] = `listConnections -type "objectSet" $cluster`;
+		string $components[] = `sets -q $clusterSets[0]`;
+		string $members[] = `filterExpand -sm 28 -sm 31 -sm 36 -sm 46 $components`;
+		
+	for ( $vertex in $members) {		
+		//vertexInfo
+		float $position[] = `pointPosition -l $vertex`;
+		
+		if ( $position[0] > 0 ) {	
+		
+		float $curVal[] = `percent -q -v $cluster $vertex`;		
+		
+		string $node = `createNode "closestPointOnMesh"`;				
+		setAttr ($node + ".inPosition") (-$position[0]) $position[1] $position[2];
+		connectAttr -f ($meshShape[0] + ".outMesh") ($node + ".inMesh");
+		
+		int $num = `getAttr ($node + ".closestVertexIndex")`;
+		string $newPoint = ($mesh + ".vtx[" + $num + "]");	
+		delete $node;
+		
+		int $found = stringArrayContains($newPoint, $members);
+				
+		if ($found == 0)
+			sets -add  $clusterSets $newPoint; 
+					
+		percent -v $curVal[0] $cluster $newPoint;
+				
+		}
+		
+	}
+	
+}
+
+
+// blenshape sortÇØ¼­ ³Ö±â.
+global proc sortBlendShape( ){
+	print ("*** sort blendShape ***\n");	
+    string $selList[] = `ls -sl`; 
+	int $lastIndex = size($selList)-1;
+	string $target = $selList[$lastIndex];
+	stringArrayRemoveAtIndex($lastIndex, $selList);	
+    string $sort[] = sort( $selList );
+	blendShape -foc $selList $target;
+	print ("*** sort blendShape to " + $target + "done.***\n");	
+}
+
+
+// ¼ø¼­´ë·Î blendShape
+global proc blendShapeGroup()
+{    
+    string $list[] = `ls -sl`;    
+    for ( $i = 0 ; $i <= size($list) ; $i = $i+2 )
+    {    
+		if ( `objExists $list[$i]` &&  `objExists $list[($i+1)]` ) {
+			string $blendShapeNode[] = `blendShape -frontOfChain $list[$i] $list[($i+1)]`;    	
+			setAttr ($blendShapeNode[0] + "." + $list[$i]) 1; 
+			print ("//result : " + $list[$i] + " >> " + $list[($i+1)] + " are connected.\n ") ;
+		}
+	}
+}	
+
+
+// blendShapeÀÇ target mesh¸¦ ¸¸µé¾îÁØ´Ù.
+// blendShape node ¼±ÅÃÇÏ°í
+// copyÇÏ°í ½ÍÀº shape groupÀ» ¼±ÅÃÇÏ°í ½ÇÇà.
+
+global proc b1makeBStargetMesh (){
+
+	string $sel[] = `ls -sl`;
+	string $blendShape;
+	string $copyMesh;
+	
+	if ( !(`objectType $sel[0]` == "blendShape") ) 
+		error "select blendShape node first";
+	else 
+		 $blendShape = $sel[0];
+		 
+	if ( !(`objectType $sel[1]` == "transform") ) 
+		error "select copy mesh or group second";
+	else 
+		 $copyMesh = $sel[1];	
+		
+	string $listTargets[] = `listAttr -m ($blendShape + ".w")`;	
+
+	int $i = 1;
+	for ( $curBS in $listTargets ) {	            
+        if( $curBS != "fix_model_eyelash")
+        {
+           	setAttr ($blendShape + "." + $curBS) 1;
+    		string $dupMesh[] = `duplicate -rr -renameChildren -n ("BS_" + $curBS) $copyMesh`;
+    		xform -r -t ($i * 30 ) 0 0 $dupMesh[0];
+    		setAttr ($blendShape + "." + $curBS) 0;
+		}
+	}
+
+}
+  
+
+global proc string boxCrvBuild( float $size)
+{
+	string $boxCrv = `curve -d 1 -p (-$size) $size $size -p (-$size) $size (-$size) -p $size $size (-$size) -p $size $size $size -p (-$size) $size $size -p $size $size $size -p $size (-$size) $size -p (-$size) (-$size) $size -p (-$size) $size $size -p (-$size) (-$size) $size -p (-$size) (-$size) (-$size) -p (-$size) $size (-$size) -p (-$size) (-$size) (-$size) -p $size (-$size) (-$size) -p $size $size (-$size) -p $size (-$size) (-$size) -p $size (-$size) $size -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16` ;
+	return $boxCrv;
+}
+
+
+global proc makeCurveCtr()
+{
+
+	string $selJoint[] = `ls -sl -type "joint"`;
+
+	string $ctrCrvGRP = `group -em -n "fac_ctr_GRP"`;
+
+	for ($curJnt in $selJoint){
+		//name
+		string $ctr = `substitute "_jnt" $curJnt "_crv"`;
+		$ctr = `substitute "_def" $ctr "_ctr"`;
+		string $offsetGrp = `substitute "_ctr" $ctr "_grp"`;
+		$offsetGrp = `substitute "_crv" $offsetGrp "_offset"`;
+		string $consGrp = `substitute "_offset" $offsetGrp "_cons"`;
+
+		//build
+		string $boxCrv = `boxCrvBuild 1`;
+		rename $boxCrv $ctr;
+
+		group -em -n $offsetGrp;
+		group -em -n $consGrp;
+		parent $ctr $consGrp;
+		parent $consGrp $offsetGrp;
+		parent $offsetGrp $curJnt;
+
+		
+		setAttr ($offsetGrp + ".t") 0 0 0;
+		setAttr ($offsetGrp + ".r") 0 0 0;
+		//setAttr ($offsetGrp + ".s") 1 1 1;
+		parent -w $offsetGrp;
+
+		parentConstraint -mo $ctr $curJnt;
+
+		//col
+		select -r $ctr;
+		if ( `gmatch $ctr "*_L_*"`)
+			IHDisplayColorOverride 13;
+		else if ( `gmatch $ctr "*_R_*"`)
+			IHDisplayColorOverride 15;	 
+		else if ( `gmatch $ctr "*_M_*"`)
+			IHDisplayColorOverride 17;	
+
+		parent $offsetGrp $ctrCrvGRP;	 
+
+	}
+
+}
+
+
+global proc IHDisplayColorOverride(int $colorIndex) 
+{
+    if ($colorIndex >= 32)
+        error "Color index out-of-range (must be less than 32)";
+    
+    $selection = `ls -sl`;
+    if (size($selection) == 0)
+        error "No objects selected";
+    
+    string $shapes[];
+    for ($obj in $selection) {
+        $relatives = `listRelatives -shapes $obj`;
+        for ($rel in $relatives)
+            $shapes[size($shapes)] = $rel;
+    }
+    
+    // Use defaults if the color index is <= 0
+    if ($colorIndex <= 0) {
+        for ($shape in $shapes) {
+            setAttr ($shape + ".overrideEnabled") 0;
+        }
+    }
+    else {
+        for ($shape in $shapes) {
+            setAttr ($shape + ".overrideEnabled") 1;
+            setAttr ($shape + ".overrideColor") $colorIndex;
+        }
+    }
+}
+
+
+
+global proc setCtrToZero ( string $type )
+{
+
+	string $list[] = `ls -sl`;
+
+	if ($type == "all")
+		$list = `ls "fac*_ctr_crv"`;
+
+	for ($cur in $list)	{
+		setAttr ($cur + ".t") 0 0 0;
+		setAttr ($cur + ".r") 0 0 0;
+		setAttr ($cur + ".s") 1 1 1;
+	}
+
+}
+
+
+
+global proc IHprojectionEyeTransfer(){
+
+	string $select[] = `ls -sl -type "place3dTexture"`;
+
+	for ( $cur in $select ){
+		//parent
+		string $temp[] = `listRelatives -p $cur`;
+		string $parentNode = $temp[0];
+		//world
+		parent -w $cur;
+		//centerPivot;
+		//float Fscale[] = `getAttr ($cur + ".s")`;
+		
+		//plane
+		string $plane[] = `polyPlane -n ($cur + "_plane") -w 1 -h 1 -sx 10 -sy 10 -ax 0 0 1 -cuv 2 -ch 0`;
+		parent $plane[0] $cur;
+		
+		setAttr ($plane[0] + ".t") 0 0 0;
+		setAttr ($plane[0] + ".r") 0 0 0;
+		setAttr ($plane[0] + ".s") 2 2 2;
+		
+		parent $cur $parentNode;
+		
+	}
+
+}
+
+
+
+// facial BS connection mel
+// facial expression 
+global proc connecFacialDriver(  float $dvS , float $valS ,float $dvF , float $valF , string $driver , string $driven )
+{
+	if (`objExists $driver` && `objExists $driven`) {	
+		setDrivenKeyframe -itt linear -ott linear -dv $dvS -v $valS -currentDriver $driver $driven;
+		setDrivenKeyframe -itt linear -ott linear -dv $dvF -v $valF -currentDriver $driver $driven;
+		//print ( $driver  + " and "  + $driven + " are connected. \n");	
+	}
+	else {
+		print ( "**** " + $driver  + " or "  + $driven + " not exists. \n");	
+	}	
+}
+
+// connect blendshape
+global proc b1connectFacialControl (string $type){
+
+
+	if ( $type == "basic" ) {
+		// eyebrows
+		//L
+		connecFacialDriver 0 0 3 1 "eyebrows_SliderL_Ctrl.translateY" "blendShape2.eyebrows_surprise_L";
+		connecFacialDriver 0 0 -3 1 "eyebrows_SliderL_Ctrl.translateY"  "blendShape2.eyebrows_angry_L";
+		connecFacialDriver 0 0 6 1 "eyebrows_SliderL_Ctrl.eyebrowsSad"  "blendShape2.eyebrows_sad_L";
+		connecFacialDriver 0 0 6 1 "eyebrows_SliderL_Ctrl.eyebrows_smile"  "blendShape2.eyebrows_smile_L";
+		connecFacialDriver 0 0 3 1 "eyebrows_SliderL_Ctrl.eyebrowUpDown"  "blendShape2.eyebrows_moveUp_L";
+		connecFacialDriver 0 0 -3 1 "eyebrows_SliderL_Ctrl.eyebrowUpDown"  "blendShape2.eyebrows_moveDown_L";
+
+
+		//R
+		connecFacialDriver 0 0 3 1 "eyebrows_SliderR_Ctrl.translateY" "blendShape2.eyebrows_surprise_R";
+		connecFacialDriver 0 0 -3 1 "eyebrows_SliderR_Ctrl.translateY"  "blendShape2.eyebrows_angry_R";
+		connecFacialDriver 0 0 6 1 "eyebrows_SliderR_Ctrl.eyebrowsSad"  "blendShape2.eyebrows_sad_R";
+		connecFacialDriver 0 0 6 1 "eyebrows_SliderR_Ctrl.eyebrows_smile"  "blendShape2.eyebrows_smile_R";
+		connecFacialDriver 0 0 3 1 "eyebrows_SliderR_Ctrl.eyebrowUpDown"  "blendShape2.eyebrows_moveUp_R";
+		connecFacialDriver 0 0 -3 1 "eyebrows_SliderR_Ctrl.eyebrowUpDown"  "blendShape2.eyebrows_moveDown_R";
+
+		// Eyes
+		//L
+		connecFacialDriver 0 0 3 1 "Eyelid_SliderL_Ctrl.translateY" "blendShape2.eye_big_L";
+		connecFacialDriver 0 0 -3 1 "Eyelid_SliderL_Ctrl.translateY" "blendShape2.eye_blink_L";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderL_Ctrl.squeent" "blendShape2.eye_squeent_L";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderL_Ctrl.smile" "blendShape2.eye_smile_L";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderL_Ctrl.sad"  "blendShape2.eye_sad_L";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderL_Ctrl.liftUnderEyelid" "blendShape2.eye_underEyelid_L";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderL_Ctrl.downUpperEyelid" "blendShape2.eye_upperEyelid_L";
+
+		//R
+		connecFacialDriver 0 0 3 1 "Eyelid_SliderR_Ctrl.translateY" "blendShape2.eye_big_R";
+		connecFacialDriver 0 0 -3 1 "Eyelid_SliderR_Ctrl.translateY" "blendShape2.eye_blink_R";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderR_Ctrl.squeent" "blendShape2.eye_squeent_R";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderR_Ctrl.smile" "blendShape2.eye_smile_R";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderR_Ctrl.sad"  "blendShape2.eye_sad_R";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderR_Ctrl.liftUnderEyelid" "blendShape2.eye_underEyelid_R";
+		connecFacialDriver 0 0 6 1 "Eyelid_SliderR_Ctrl.downUpperEyelid" "blendShape2.eye_upperEyelid_R";
+
+		// mouth
+		//L
+		connecFacialDriver 0 0 3 1 "smile_BoxL_Ctrl.translateY" "blendShape2.mouth_smile_L";
+		connecFacialDriver 0 0 -3 1 "smile_BoxL_Ctrl.translateY" "blendShape2.mouth_frown_L";
+		connecFacialDriver 0 0 3 1 "smile_BoxL_Ctrl.translateX" "blendShape2.mouth_wide_L";
+		connecFacialDriver 0 0 -3 1 "smile_BoxL_Ctrl.translateX" "blendShape2.mouth_narrow_L";
+
+		//R
+		connecFacialDriver 0 0 3 1 "smile_BoxR_Ctrl.translateY" "blendShape2.mouth_smile_R";
+		connecFacialDriver 0 0 -3 1 "smile_BoxR_Ctrl.translateY" "blendShape2.mouth_frown_R";
+		connecFacialDriver 0 0 3 1 "smile_BoxR_Ctrl.reverseX" "blendShape2.mouth_wide_R";
+		connecFacialDriver 0 0 -3 1 "smile_BoxR_Ctrl.reverseX" "blendShape2.mouth_narrow_R";
+
+
+		// openSmile
+		//L
+		connecFacialDriver 0 0 3 1 "openSmile_SliderL_Ctrl.translateY"  "blendShape2.mouth_smileOpen_L";
+		connecFacialDriver 0 0 6 0 "openSmile_SliderL_Ctrl.translateY"  "blendShape2.mouth_smileOpen_L";
+		connecFacialDriver 3 0 6 1 "openSmile_SliderL_Ctrl.translateY"  "blendShape2.mouth_smileBig_L";
+
+		//R
+		connecFacialDriver 0 0 3 1 "openSmile_SliderR_Ctrl.translateY"  "blendShape2.mouth_smileOpen_R";
+		connecFacialDriver 0 0 6 0 "openSmile_SliderR_Ctrl.translateY"  "blendShape2.mouth_smileOpen_R";
+		connecFacialDriver 3 0 6 1 "openSmile_SliderR_Ctrl.translateY"  "blendShape2.mouth_smileBig_R";
+
+		// anger
+		//L
+		connecFacialDriver 0 0 3 1 "Anger_SliderL_Ctrl.translateY"  "blendShape2.mouth_angry_L";
+		connecFacialDriver 0 0 6 0 "Anger_SliderL_Ctrl.translateY"  "blendShape2.mouth_angry_L";
+		connecFacialDriver 3 0 6 1 "Anger_SliderL_Ctrl.translateY"  "blendShape2.mouth_angryBig_L";
+
+		//R
+		connecFacialDriver 0 0 3 1 "Anger_SliderR_Ctrl.translateY"  "blendShape2.mouth_angry_R";
+		connecFacialDriver 0 0 6 0 "Anger_SliderR_Ctrl.translateY"  "blendShape2.mouth_angry_R";
+		connecFacialDriver 3 0 6 1 "Anger_SliderR_Ctrl.translateY"  "blendShape2.mouth_angryBig_R";
+
+		// jaw
+		connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY""blendShape2.jaw_open_M";
+		connecFacialDriver 0 0 3 1 "jaw_Box_Ctrl.translateX" "blendShape2.jaw_left_M";
+		connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateX" "blendShape2.jaw_right_M";
+
+		// mouthPosition move
+		connecFacialDriver 0 0 3 1 "move_Box_Ctrl.translateY""blendShape2.mouth_moveUp_M";
+		connecFacialDriver 0 0 -3 1 "move_Box_Ctrl.translateY""blendShape2.mouth_moveDown_M";
+		connecFacialDriver 0 0 3 1 "move_Box_Ctrl.translateX" "blendShape2.mouth_moveLeft_M";
+		connecFacialDriver 0 0 -3 1 "move_Box_Ctrl.translateX" "blendShape2.mouth_moveRight_M";
+
+		// lipSync
+		connecFacialDriver 0 0 3 1 "lipSync_Box_Ctrl.translateY""blendShape2.lipsync_a_M";
+		connecFacialDriver 0 0 -3 1 "lipSync_Box_Ctrl.translateY""blendShape2.lipsync_e_M";
+		connecFacialDriver 0 0 3 1 "lipSync_Box_Ctrl.translateX""blendShape2.lipsync_i_M";
+		connecFacialDriver 0 0 -3 1 "lipSync_Box_Ctrl.translateX""blendShape2.lipsync_o_M";
+
+		connecFacialDriver 0 0 6 1 "lipSync_Box_Ctrl.funnel" "blendShape2.mouth_funnel_M";
+		connecFacialDriver 0 0 6 1 "lipSync_Box_Ctrl.liftUpperLip""blendShape2.mouth_upperLip_M";
+		connecFacialDriver 0 0 6 1 "lipSync_Box_Ctrl.downUnderLip""blendShape2.mouth_underLip_M";
+		connecFacialDriver 0 0 6 1 "lipSync_Box_Ctrl.suckUpperLip""blendShape2.mouth_suckUpperLip_M";
+		connecFacialDriver 0 0 6 1 "lipSync_Box_Ctrl.suckUnderLip""blendShape2.mouth_suckUnderLip_M";
+
+
+		// etc
+		connecFacialDriver 0 0 3 1 "etc_Ctrl.cheekPuff"  "blendShape2.cheek_puff_M";
+		connecFacialDriver 0 0 -3 1 "etc_Ctrl.cheekPuff"  "blendShape2.cheek_suck_M";
+
+		connecFacialDriver 0 0 3 1 "etc_Ctrl.noseUp"  "blendShape2.nose_up_M";
+	}
+
+	if ( $type == "fix" ) {
+	// fix smile
+	//L
+	string $multSmileL = `shadingNode -asUtility multiplyDivide`;
+	connecFacialDriver 0 0 3 1 "openSmile_SliderL_Ctrl.translateY"  ($multSmileL + ".input1X");
+	connecFacialDriver 0 0 6 0 "openSmile_SliderL_Ctrl.translateY"  ($multSmileL + ".input1X");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multSmileL + ".input2X");
+	if ( `objExists "blendShape2.fix_smileOpen_L"`)
+		connectAttr -f ($multSmileL + ".outputX") "blendShape2.fix_smileOpen_L";
+		
+	connecFacialDriver 3 0 6 1 "openSmile_SliderL_Ctrl.translateY"  ($multSmileL + ".input1Y");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multSmileL + ".input2Y");
+	if ( `objExists "blendShape2.fix_smileBig_L"`)
+		connectAttr -f ($multSmileL + ".outputY") "blendShape2.fix_smileBig_L";
+
+	connecFacialDriver 0 0 3 1 "smile_BoxL_Ctrl.translateY"  ($multSmileL + ".input1Z");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multSmileL + ".input2Z");
+	if ( `objExists "blendShape2.fix_smile_L"`)
+		connectAttr -f ($multSmileL + ".outputZ") "blendShape2.fix_smile_L";
+
+	//R
+	string $multSmileR = `shadingNode -asUtility multiplyDivide`;
+	connecFacialDriver 0 0 3 1 "openSmile_SliderR_Ctrl.translateY"  ($multSmileR + ".input1X");
+	connecFacialDriver 0 0 6 0 "openSmile_SliderR_Ctrl.translateY"  ($multSmileR + ".input1X");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multSmileR + ".input2X");
+	if ( `objExists "blendShape2.fix_smileOpen_R"`)
+		connectAttr -f ($multSmileR + ".outputX") "blendShape2.fix_smileOpen_R";
+
+	connecFacialDriver 3 0 6 1 "openSmile_SliderR_Ctrl.translateY"  ($multSmileR + ".input1Y");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multSmileR + ".input2Y");
+	if ( `objExists "blendShape2.fix_smileBig_R"`)
+		connectAttr -f ($multSmileR + ".outputY") "blendShape2.fix_smileBig_R";
+
+	connecFacialDriver 0 0 3 1 "smile_BoxR_Ctrl.translateY"  ($multSmileR + ".input1Z");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multSmileR + ".input2Z");
+	if ( `objExists "blendShape2.fix_smile_R"`)
+		connectAttr -f ($multSmileR + ".outputZ") "blendShape2.fix_smile_R";
+
+
+	// fix anger
+	// L
+	string $multAngryL = `shadingNode -asUtility multiplyDivide`;
+	connecFacialDriver 0 0 3 1 "Anger_SliderL_Ctrl.translateY"  ($multAngryL + ".input1X");
+	connecFacialDriver 0 0 6 0 "Anger_SliderL_Ctrl.translateY"  ($multAngryL + ".input1X");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multAngryL + ".input2X");
+	if ( `objExists "blendShape2.fix_angry_L"`)
+		connectAttr -f ($multAngryL + ".outputX") "blendShape2.fix_angry_L";
+
+	connecFacialDriver 3 0 6 1 "Anger_SliderL_Ctrl.translateY"  ($multAngryL + ".input1Y");
+	connecFacialDriver 0 0 -3 1 "Anger_SliderL_Ctrl.translateY"  ($multAngryL + ".input2Y");
+	if ( `objExists "blendShape2.fix_angryBig_L"`)
+		connectAttr -f ($multAngryL + ".outputY") "blendShape2.fix_angryBig_L";
+
+	connecFacialDriver 0 0 -3 1 "smile_BoxL_Ctrl.translateY"  ($multAngryL + ".input1Z");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multAngryL + ".input2Z");
+	if ( `objExists "blendShape2.fix_frown_L"`)
+		connectAttr -f ($multAngryL + ".outputZ") "blendShape2.fix_frown_L";
+
+	// R
+	string $multAngryR = `shadingNode -asUtility multiplyDivide`;
+	connecFacialDriver 0 0 3 1 "Anger_SliderR_Ctrl.translateY"  ($multAngryR + ".input1X");
+	connecFacialDriver 0 0 6 0 "Anger_SliderR_Ctrl.translateY"  ($multAngryR + ".input1X");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multAngryR + ".input2X");
+	if ( `objExists "blendShape2.fix_angry_R"`)
+		connectAttr -f ($multAngryR + ".outputX") "blendShape2.fix_angry_R";
+
+	connecFacialDriver 3 0 6 1 "Anger_SliderR_Ctrl.translateY"  ($multAngryR + ".input1Y");
+	connecFacialDriver 0 0 -3 1 "Anger_SliderR_Ctrl.translateY"  ($multAngryR + ".input2Y");
+	if ( `objExists "blendShape2.fix_angryBig_R"`)
+		connectAttr -f ($multAngryR + ".outputY") "blendShape2.fix_angryBig_R";
+
+	connecFacialDriver 0 0 -3 1 "smile_BoxR_Ctrl.translateY"  ($multAngryR + ".input1Z");
+	connecFacialDriver 0 0 -3 1 "jaw_Box_Ctrl.translateY"  ($multAngryR + ".input2Z");
+	if ( `objExists "blendShape2.fix_frown_R"`)
+		connectAttr -f ($multAngryR + ".outputZ") "blendShape2.fix_frown_R";
+
+	}
+
+	// eyeAim Setup 
+	if ( $type == "eyeAim" ) {
+	setDrivenKeyframe -itt linear -ott linear -dv 0 -v 0 -currentDriver Eye_L.rotateY irisPlace_L_aim_grp.translateX;
+	setDrivenKeyframe -itt linear -ott linear -dv -25 -v -.2 -currentDriver Eye_L.rotateY irisPlace_L_aim_grp.translateX;
+	setDrivenKeyframe -itt linear -ott linear -dv 25 -v .2 -currentDriver Eye_L.rotateY irisPlace_L_aim_grp.translateX;
+
+	setDrivenKeyframe -itt linear -ott linear -dv 0 -v 0 -currentDriver Eye_L.rotateZ irisPlace_L_aim_grp.translateY;
+	setDrivenKeyframe -itt linear -ott linear -dv -20 -v -0.2 -currentDriver Eye_L.rotateZ irisPlace_L_aim_grp.translateY;
+	setDrivenKeyframe -itt linear -ott linear -dv 20 -v 0.2 -currentDriver Eye_L.rotateZ irisPlace_L_aim_grp.translateY;
+
+
+	setDrivenKeyframe -itt linear -ott linear -dv 0 -v 0 -currentDriver Eye_R.rotateY irisPlace_R_aim_grp.translateX;
+	setDrivenKeyframe -itt linear -ott linear -dv -25 -v -.2 -currentDriver Eye_R.rotateY irisPlace_R_aim_grp.translateX;
+	setDrivenKeyframe -itt linear -ott linear -dv 25 -v .2 -currentDriver Eye_R.rotateY irisPlace_R_aim_grp.translateX;
+
+	setDrivenKeyframe -itt linear -ott linear -dv 0 -v 0 -currentDriver Eye_R.rotateZ irisPlace_R_aim_grp.translateY;
+	setDrivenKeyframe -itt linear -ott linear -dv -20 -v -0.2 -currentDriver Eye_R.rotateZ irisPlace_R_aim_grp.translateY;
+	setDrivenKeyframe -itt linear -ott linear -dv 20 -v 0.2 -currentDriver Eye_R.rotateZ irisPlace_R_aim_grp.translateY;
+
+	//eye Setup
+	setDrivenKeyframe -itt linear -ott linear -dv 0 -v 0 -currentDriver Eye_BoxL_Ctrl.translateX irisPlace_L_scale.translateX;
+	setDrivenKeyframe -itt linear -ott linear -dv -3 -v -.2 -currentDriver Eye_BoxL_Ctrl.translateX irisPlace_L_scale.translateX;
+	setDrivenKeyframe -itt linear -ott linear -dv 3 -v .2 -currentDriver Eye_BoxL_Ctrl.translateX irisPlace_L_scale.translateX;
+
+	setDrivenKeyframe -itt linear -ott linear -dv 0 -v 0 -currentDriver Eye_BoxL_Ctrl.translateY irisPlace_L_scale.translateY;
+	setDrivenKeyframe -itt linear -ott linear -dv 3 -v .2 -currentDriver Eye_BoxL_Ctrl.translateY irisPlace_L_scale.translateY;
+	setDrivenKeyframe -itt linear -ott linear -dv -3 -v -.2 -currentDriver Eye_BoxL_Ctrl.translateY irisPlace_L_scale.translateY;
+
+
+	setDrivenKeyframe -itt linear -ott linear -dv 0 -v 0 -currentDriver Eye_BoxR_Ctrl.translateX irisPlace_R_scale.translateX;
+	setDrivenKeyframe -itt linear -ott linear -dv -3 -v -.2 -currentDriver Eye_BoxR_Ctrl.translateX irisPlace_R_scale.translateX;
+	setDrivenKeyframe -itt linear -ott linear -dv 3 -v .2 -currentDriver Eye_BoxR_Ctrl.translateX irisPlace_R_scale.translateX;
+
+	setDrivenKeyframe -itt linear -ott linear -dv 0 -v 0 -currentDriver Eye_BoxR_Ctrl.translateY irisPlace_R_scale.translateY;
+	setDrivenKeyframe -itt linear -ott linear -dv 3 -v .2 -currentDriver Eye_BoxR_Ctrl.translateY irisPlace_R_scale.translateY;
+	setDrivenKeyframe -itt linear -ott linear -dv -3 -v -.2 -currentDriver Eye_BoxR_Ctrl.translateY irisPlace_R_scale.translateY;
+
+	}
+
+	// pupil size
+	if ( $type == "pupil" ) {
+	addAttr -e -minValue -3 -maxValue 3 "Eye_BoxR_Ctrl.pupilScaleY";
+	addAttr -e -minValue -3 -maxValue 3 "Eye_BoxL_Ctrl.pupilScaleY";
+
+	connecFacialDriver 0 1 3 1.3 "Eye_BoxL_Ctrl.pupilSize""irisPlace_L_scale.scaleX";
+	connecFacialDriver 0 1 -3 0.5 "Eye_BoxL_Ctrl.pupilSize""irisPlace_L_scale.scaleX";
+	connecFacialDriver 0 1 3 1.3 "Eye_BoxL_Ctrl.pupilSize""irisPlace_L_scale.scaleY";
+	connecFacialDriver 0 1 -3 0.5 "Eye_BoxL_Ctrl.pupilSize""irisPlace_L_scale.scaleY";
+	connecFacialDriver 0 1 3 1.3 "Eye_BoxL_Ctrl.pupilSize""irisPlace_L_scale.scaleZ";
+	connecFacialDriver 0 1 -3 0.5 "Eye_BoxL_Ctrl.pupilSize""irisPlace_L_scale.scaleZ";
+	connecFacialDriver 0 1 -3 .5 "Eye_BoxL_Ctrl.pupilScaleY""irisPlace_L_scale_GRP.scaleY";
+	connecFacialDriver 0 1 3 1.5 "Eye_BoxL_Ctrl.pupilScaleY""irisPlace_L_scale_GRP.scaleY";
+
+
+	connecFacialDriver 0 1 3 1.3 "Eye_BoxR_Ctrl.pupilSize""irisPlace_R_scale.scaleX";
+	connecFacialDriver 0 1 -3 0.5 "Eye_BoxR_Ctrl.pupilSize""irisPlace_R_scale.scaleX";
+	connecFacialDriver 0 1 3 1.3 "Eye_BoxR_Ctrl.pupilSize""irisPlace_R_scale.scaleY";
+	connecFacialDriver 0 1 -3 0.5 "Eye_BoxR_Ctrl.pupilSize""irisPlace_R_scale.scaleY";
+	connecFacialDriver 0 1 3 1.3 "Eye_BoxR_Ctrl.pupilSize""irisPlace_R_scale.scaleZ";
+	connecFacialDriver 0 1 -3 0.5 "Eye_BoxR_Ctrl.pupilSize""irisPlace_R_scale.scaleZ";
+	connecFacialDriver 0 1 -3 0.5 "Eye_BoxR_Ctrl.pupilScaleY""irisPlace_R_scale_GRP.scaleY";
+	connecFacialDriver 0 1 3 1.5 "Eye_BoxR_Ctrl.pupilScaleY""irisPlace_R_scale_GRP.scaleY";
+
+	}
+
+	if ( $type == "BallEye" ) {
+		//eye Setup for rotation Eye
+		connecFacialDriver 0 0 3 25 "Eye_BoxR_Ctrl.translateX" "FKExtraEye_R.rotateY";
+		connecFacialDriver 0 0 -3 -25 "Eye_BoxR_Ctrl.translateX" "FKExtraEye_R.rotateY";
+
+		connecFacialDriver 0 0 3 25 "Eye_BoxR_Ctrl.translateY" "FKExtraEye_R.rotateZ";
+		connecFacialDriver 0 0 -3 -25 "Eye_BoxR_Ctrl.translateY" "FKExtraEye_R.rotateZ";
+
+
+		connecFacialDriver 0 0 3 25 "Eye_BoxL_Ctrl.translateX" "FKExtraEye_L.rotateY";
+		connecFacialDriver 0 0 -3 -25 "Eye_BoxL_Ctrl.translateX" "FKExtraEye_L.rotateY";
+
+		connecFacialDriver 0 0 3 25 "Eye_BoxL_Ctrl.translateY" "FKExtraEye_L.rotateZ";
+		connecFacialDriver 0 0 -3 -25 "Eye_BoxL_Ctrl.translateY" "FKExtraEye_L.rotateZ";
+
+		/* /pupilSize for rotation Eye with texturePlace
+		connecFacialDriver 0 1 3 .5 "Eye_BoxL_Ctrl.pupilSize" "eyeball_L_iris_place.repeatU";
+		connecFacialDriver 0 1 3 .5 "Eye_BoxL_Ctrl.pupilSize" "eyeball_L_iris_place.repeatV";
+		connecFacialDriver 0 0 3 .25 "Eye_BoxL_Ctrl.pupilSize" "eyeball_L_iris_place.offsetU";
+		connecFacialDriver 0 0 3 .25 "Eye_BoxL_Ctrl.pupilSize" "eyeball_L_iris_place.offsetV";
+
+		connecFacialDriver 0 1 -3 2 "Eye_BoxL_Ctrl.pupilSize" "eyeball_L_iris_place.repeatU";
+		connecFacialDriver 0 1 -3 2 "Eye_BoxL_Ctrl.pupilSize" "eyeball_L_iris_place.repeatV";
+		connecFacialDriver 0 0 -3 -.5 "Eye_BoxL_Ctrl.pupilSize" "eyeball_L_iris_place.offsetU";
+		connecFacialDriver 0 0 -3 -.5 "Eye_BoxL_Ctrl.pupilSize" "eyeball_L_iris_place.offsetV";
+
+
+		connecFacialDriver 0 1 3 .5 "Eye_BoxR_Ctrl.pupilSize" "eyeball_R_iris_place.repeatU";
+		connecFacialDriver 0 1 3 .5 "Eye_BoxR_Ctrl.pupilSize" "eyeball_R_iris_place.repeatV";
+		connecFacialDriver 0 0 3 .25 "Eye_BoxR_Ctrl.pupilSize" "eyeball_R_iris_place.offsetU";
+		connecFacialDriver 0 0 3 .25 "Eye_BoxR_Ctrl.pupilSize" "eyeball_R_iris_place.offsetV";
+
+		connecFacialDriver 0 1 -3 2 "Eye_BoxR_Ctrl.pupilSize" "eyeball_R_iris_place.repeatU";
+		connecFacialDriver 0 1 -3 2 "Eye_BoxR_Ctrl.pupilSize" "eyeball_R_iris_place.repeatV";
+		connecFacialDriver 0 0 -3 -.5 "Eye_BoxR_Ctrl.pupilSize" "eyeball_R_iris_place.offsetU";
+		connecFacialDriver 0 0 -3 -.5 "Eye_BoxR_Ctrl.pupilSize" "eyeball_R_iris_place.offsetV";
+		*/
+		
+		//pupilSize for rotation Eye with blendShape
+		connecFacialDriver 0 0 3 1 "Eye_BoxL_Ctrl.pupilSize" "blendShape2.pupil_big_L";
+		connecFacialDriver 0 0 -3 1 "Eye_BoxL_Ctrl.pupilSize" "blendShape2.pupil_small_L";
+		connecFacialDriver 0 0 3 1 "Eye_BoxR_Ctrl.pupilSize" "blendShape2.pupil_big_R";
+		connecFacialDriver 0 0 -3 1 "Eye_BoxR_Ctrl.pupilSize" "blendShape2.pupil_small_R";
+
+		connecFacialDriver 0 0 3 1 "Eye_BoxL_Ctrl.pupilScaleY" "blendShape2.pupil_bigY_L";
+		connecFacialDriver 0 0 -3 1 "Eye_BoxL_Ctrl.pupilScaleY" "blendShape2.pupil_smallY_L";
+		connecFacialDriver 0 0 3 1 "Eye_BoxR_Ctrl.pupilScaleY" "blendShape2.pupil_bigY_R";
+		connecFacialDriver 0 0 -3 1 "Eye_BoxR_Ctrl.pupilScaleY" "blendShape2.pupil_smallY_R";
+
+
+	}
+
+	// tongue connect
+	if ( $type == "tongue" ){
+	connecFacialDriver 0 0 3 45 "Tongue_Move_Box_Ctrl.ty" "cc_tongue1.rz";
+	connecFacialDriver 0 0 -3 -45 "Tongue_Move_Box_Ctrl.ty"  "cc_tongue1.rz";
+	connecFacialDriver 0 0 3 45 "Tongue_Move_Box_Ctrl.ty" "cc_tongue2.rz";
+	connecFacialDriver 0 0 -3 -45 "Tongue_Move_Box_Ctrl.ty"  "cc_tongue2.rz";
+
+	connecFacialDriver 0 0 3 40 "Tongue_Move_Box_Ctrl.tx" "cc_tongue1.ry";
+	connecFacialDriver 0 0 -3 -40 "Tongue_Move_Box_Ctrl.tx"  "cc_tongue1.ry";
+	connecFacialDriver 0 0 3 40 "Tongue_Move_Box_Ctrl.tx" "cc_tongue2.ry";
+	connecFacialDriver 0 0 -3 -40 "Tongue_Move_Box_Ctrl.tx"  "cc_tongue2.ry";
+
+	connecFacialDriver 0 0 3 .2 "Tongue_Move_Box_Ctrl.length" "cc_tongue1.tx";
+	connecFacialDriver 0 0 3 .2 "Tongue_Move_Box_Ctrl.length" "cc_tongue2.tx";
+	connecFacialDriver 0 0 1 8 "Tongue_Move_Box_Ctrl.length" "cc_tongue.rz";
+
+	}
+
+}
+
+
+//make correct Shape
+global proc makeCorrectShape(string $targetGrp , string $shapeL , string $shapeR , string $jaw , string $name , int $offset ){
+	if ( `objExists $shapeL` && `objExists $shapeR`  && `objExists $jaw` ) {
+				
+		string $dupMesh[] = `duplicate -rr -renameChildren -n "tempGRP" $targetGrp`;
+		xform -r -t $offset 0 0 $dupMesh[0];
+		string $BSNode[] = `blendShape -foc $shapeL $shapeR $jaw $dupMesh[0]`;
+		setAttr ($BSNode[0] + "." + $shapeL) 1;
+		setAttr ($BSNode[0] + "." + $shapeR) 1;
+		setAttr ($BSNode[0] + "." + $jaw) 1;
+		duplicate -rr -renameChildren -n ("correct_"+$name) $dupMesh[0];
+		delete $dupMesh[0];	
+	}
+}
+
+global proc b1CorrectShapeCMD () {
+        
+    string $target[] = `ls -sl -head 1`;
+    
+    makeCorrectShape $target[0] "mouth_smile_L" "mouth_smile_R" "jaw_open_M" "smile" 1.5;
+    makeCorrectShape $target[0] "mouth_smileOpen_L" "mouth_smileOpen_R" "jaw_open_M" "smileOpen" 3;
+    makeCorrectShape $target[0] "mouth_smileBig_L" "mouth_smileBig_R" "jaw_open_M" "smileBig" 4.5;
+    makeCorrectShape $target[0] "mouth_angry_L" "mouth_angry_R" "jaw_open_M" "angry" 6;
+    makeCorrectShape $target[0] "mouth_angryBig_L" "mouth_angryBig_R" "jaw_open_M" "angryBig" 7.5;
+}
+
+global proc makeFixShape( string $targetGrp , string $shapeL , string $shapeR , string $jaw , string $name , int $offset ){
+		
+	string $corShape = ("correct_"+$name);	
+	if ( `objExists $corShape` ) {
+		
+		string $dupMesh[] = `duplicate -rr -renameChildren -n "tempGRP" $targetGrp`;
+		xform -r -t $offset 0 0 $dupMesh[0];
+		
+		string $BSNode[] = `blendShape -foc $shapeL $shapeR $jaw $corShape $dupMesh[0]`;
+		setAttr ($BSNode[0] + "." + $shapeL) -1;
+		setAttr ($BSNode[0] + "." + $shapeR) -1;
+		setAttr ($BSNode[0] + "." + $jaw) -1;
+		setAttr ($BSNode[0] + "." + $corShape) 1;
+		
+		duplicate -rr -renameChildren -n ("fix_"+$name) $dupMesh[0];
+		delete $dupMesh[0];		
+	}
+	
+}
+
+global proc b1FixShapeCMD () {
+        
+    string $target[] = `ls -sl -head 1`;
+    
+    makeFixShape $target[0] "mouth_smile_L" "mouth_smile_R" "jaw_open_M" "smile" 1.5;
+    makeFixShape $target[0] "mouth_smileOpen_L" "mouth_smileOpen_R" "jaw_open_M" "smileOpen" 3;
+    makeFixShape $target[0] "mouth_smileBig_L" "mouth_smileBig_R" "jaw_open_M" "smileBig" 4.5;
+    makeFixShape $target[0] "mouth_angry_L" "mouth_angry_R" "jaw_open_M" "angry" 6;
+    makeFixShape $target[0] "mouth_angryBig_L" "mouth_angryBig_R" "jaw_open_M" "angryBig" 7.5;
+}
+
+  
+global proc b1unLock (string $node) {
+	string $attr[] = `listAttr -l $node`;
+	for ( $curAttr in $attr ) {	
+			setAttr -l 0 ($node+ "." + $curAttr);
+			print ( "*** unlock " + $node+$curAttr + "\n");			
+	}
+}
+
+global proc b1unlockCmd () {
+	string $sel[] = `ls -sl -head 1`;
+	string $unlockList[] = `listRelatives -ad -c -f -type "transform" $sel[0]`;
+	$unlockList[size($unlockList)] = $sel[0];
+	for ($curMesh in $unlockList)
+		b1unLock $curMesh;
+}
+
+
+//nCloth shader assign
+global proc assignNclShader( string $type ){
+    
+    string $listNcl[] = `ls -typ $type`;
+    
+    for  ( $curNcl in $listNcl ) {
+            
+    string $temp[];
+        
+    $temp = `listConnections -s 1 -t "mesh" ($curNcl + ".inputMesh")`;
+    string $curShape = $temp[0];
+    
+    tokenize $curShape "_" $temp;
+    string $name = $temp[1];
+    
+    string $setRan = `shadingNode -n ("setRange_" + $name) -asUtility setRange`;
+    
+    
+    
+    string $curshader = `shadingNode -n ("lambert_" + $name) -asShader lambert`;
+    string $curSG = `sets -renderable true -noSurfaceShader true -empty -name ("lambert_" + $name + "SG")`;
+    connectAttr -f ($curshader + ".outColor") ($curSG + ".surfaceShader");
+     
+     
+     if ( $type == "nRigid" ) { 
+        setAttr ($setRan + ".oldMinY") 0;
+        setAttr ($setRan + ".oldMaxY") 1;
+        setAttr ($setRan + ".minY") 1;
+        setAttr ($setRan + ".maxY") 0;       
+        
+        connectAttr -f ($curNcl+".collide") ($setRan +".valueY");
+        connectAttr -f ($setRan +".outValue") ($curshader + ".color");
+    } else if ( $type == "nCloth" ) { 
+    
+        setAttr ($setRan + ".valueX") 1;
+        setAttr ($setRan + ".oldMinX") 0;
+        setAttr ($setRan + ".oldMaxX") 1;
+        setAttr ($setRan + ".minX") 0;
+        setAttr ($setRan + ".maxX") 1;  
+             
+        setAttr ($setRan + ".oldMinY") 0;
+        setAttr ($setRan + ".oldMaxY") 1;
+        setAttr ($setRan + ".minY") .5;
+        setAttr ($setRan + ".maxY") 1; 
+        
+        setAttr ($setRan + ".valueZ") 1;
+        setAttr ($setRan + ".oldMinZ") 0;
+        setAttr ($setRan + ".oldMaxZ") 1;
+        setAttr ($setRan + ".minZ") 0;
+        setAttr ($setRan + ".maxZ") 0;        
+        
+        connectAttr -f ($curNcl+".isDynamic") ($setRan +".valueY");
+        connectAttr -f ($setRan +".outValue") ($curshader + ".color");
+    }
+    
+    sets -edit -forceElement $curSG $curShape;
+    
+    }
+
+}
+
+//make sine add to hair chain control
+global proc addSineWave(){
+	string $sel[] = `ls -sl`;
+	/*
+	string $tokenTemp[];
+	tokenize $sel[0] "_" $tokenTemp;
+	string $pre = $tokenTemp[0];
+	*/
+	string $pre = `substitute "_Line5_Bake_Con" $sel[0] ""`;
+
+	string $line5 = ($pre + "_Line5_Bake_Con");
+
+	select ($pre + "_Line_curve");
+	string $sine[] = `nonLinear -n ($pre + "_sine") -type sine -lowBound 0 -highBound 2 -amplitude .5 -wavelength 1.3 -dropoff -1 -offset 0`;
+
+
+	addAttr -ln "_______________________" -at "enum" -en "wave:"  $line5;
+	setAttr -e -channelBox true ($line5 + "." + "_______________________");
+
+	addAttr -ln "waveOn" -keyable true -at double  -min 0 -max 1 -dv 1 $line5;
+	addAttr -ln "waveSize" -keyable true -at double -min -5 -max 5 -dv .5 $line5;
+	addAttr -ln "waveSpeed" -keyable true -at double  $line5;
+	addAttr -ln "waveVis" -keyable true -at bool -dv 1 $line5;
+
+
+	connectAttr -f ($line5 + ".waveOn") ($sine[0] + ".envelope"); 
+	connectAttr -f ($line5 + ".waveSize") ($sine[0] + ".amplitude");
+	connectAttr -f ($line5 + ".waveSpeed") ($sine[0] + ".offset");
+	connectAttr -f ($line5 + ".waveVis") ($sine[1] + ".v");
+
+	parent $sine[1] $line5;
+	setAttr ($sine[1] + ".r") -90 0 0;
+}
+
+//batch make sine control
+global proc b1addSineBatch(){
+    string $sel[] = `ls -sl`;
+    
+    for ( $cur in $sel){
+        select -r $cur;
+        addSineWave;
+        
+    }
+}
+
+
+
+// UI °ü·Ã
+global proc importDynamicChainCMD() {
+	string $path = `textFieldButtonGrp -q -text BHCtxfPath`;
+	string $name = `textFieldButtonGrp -q -text BHCtxfImport`;
+	
+	setupDynamicChain $name $path;
+
+}
+
+global proc copyHairSkinCMD() {
+	// ÄÁÆ®·Ñ·¯ ¼±ÅÃ ÈÄ¿¡ Çì¾îmesh ¼±ÅÃ.
+	string $selectList[] =`ls -sl`;
+	string $temp[];
+	tokenize $selectList[0] "_" $temp;
+	string $sourceMesh = ($temp[0] + "_hairSkinMesh");
+	if ( `objExists $sourceMesh` ) {
+		select -r $sourceMesh;
+		select -add $selectList[1];
+		skinCopyWithSkin;	
+	}
+	
+	print "copyHairSkinCMD";
+}
+
+global proc setHairBakeCMD() {
+	
+	string $selection[] =`ls -sl`;
+	for ($curSel in $selection) {
+		select $curSel;
+		setHairBake;
+	}
+
+}
+
+global proc B1getSelection(string $UI) {
+	string $sel[] = `ls -sl`;
+	
+	string $selections = stringArrayToString($sel, " ");	
+	
+	textFieldButtonGrp -e -text $selections $UI;
+}
+
+global proc copyPartialSkinCopyCMD() {
+	
+	string $targetMesh = `textFieldButtonGrp -q -text BHCtxftarget`;
+	copySkinFromPartialMesh $targetMesh;
+
+}
+
+
+global proc IHsetKeyframe( string $type ){
+
+	string $list[];
+	if ($type == ""){
+		$list = `ls -sl`;
+	}
+	else if ($type == "fac"){
+		$list = `ls "fac*_ctr_crv"`;
+	}
+
+	select -r $list;
+	setKeyframe -itt "linear" -ott "linear" $list; 
+}
+
+global proc IHmakeLod02GRP(){
+
+    select -r "lod03_GRP";
+    
+    string $dupGrp[] = `duplicate -n "lod02_GRP"`; 
+    string $children[] = `listRelatives -c -ad -f -type "transform" $dupGrp[0]`;
+    
+    for ( $curChild in $children ){
+    
+        string $tokenTemp[];
+        tokenize $curChild "|" $tokenTemp;
+        string $newName = ("lod02_" + $tokenTemp[size($tokenTemp)-1]);
+        print ($curChild + ">>" + $newName + "\n");
+        rename $curChild $newName;
+    }
+
+}
+
+global proc IHsetBasicGrp(){
+	if ( !`objExists "root"`)       
+	        group -em -n "root";
+
+	if ( !`objExists "geometry"`)       
+	        group -em -p "root" -n "geometry";
+	       
+	if ( !`objExists "rig"`)       
+	        group -em -p "root" -n "rig";           
+	        
+	if ( !`objExists "Geometry"`)       
+	        group -em -p "rig" -n "Geometry";       
+
+	if ( !`objExists "lod01_GRP"`)       
+	        group -em -p "Geometry" -n "lod01_GRP";
+
+	if ( !`objExists "lod02_GRP"`)       
+	        group -em -p "Geometry" -n "lod02_GRP";
+	       
+	if ( !`objExists "lod03_GRP"`)       
+	        group -em -p "geometry" -n "lod03_GRP";
+
+
+	if ( `objExists Sub.lodVis`)
+	    expression -s "if (Sub.lodVis == 0)\n\tlod01_GRP.visibility = 1;\nelse\n\tlod01_GRP.visibility = 0;\nif (Sub.lodVis == 1)\n\tlod02_GRP.visibility = 1;\nelse\n\tlod02_GRP.visibility = 0;\nif (Sub.lodVis == 2)\n    lod03_GRP.visibility = 1;\nelse\n    lod03_GRP.visibility = 0;\n\t\t\n"  -o "" -n "exp_subCon" -ae 1 -uc all ;
+	else
+	    print ( "//result : Sub.lodVis is not exist" );
+	   
+	if ( `objExists Sub.facialControlVis` && `objExists cc_offset_facial_main` )
+	    connectAttr -f Sub.facialControlVis cc_offset_facial_main.visibility;
+	else
+	    print ( "//result : cc_offset_facial_main is not exist" );
+	    
+	if ( `objExists Sub.extraControlVis` && `objExists extra_cc_GRP` )
+	    connectAttr -f Sub.extraControlVis extra_cc_GRP.visibility;
+	else
+	    print ( "//result : extra_cc_GRP is not exist" );
+
+}
+
+// UI
+global proc IH_rigToolSet01() 
+{
+	if(`window -exists IHrigToolWin`)
+		deleteUI IHrigToolWin;
+	
+	window  -width 500 -height 250
+		-resizeToFitChildren 1
+		-menuBar true
+		-maximizeButton true
+		-titleBar true
+		-sizeable 1
+		-menuBarVisible true
+		-title "build hair dynamic chain"
+		IHrigToolWin;
+	
+	columnLayout -cat "left" 10 BHCColMain;
+	//shelfTab
+	tabLayout;
+		shelfLayout -style "iconOnly" -w 480 -h 75 "rigToolShelf";
+		//CGM				
+		shelfButton -width 35 -height 35
+					-image1 "commandButton.png" 
+					-label "commandButton.png" 
+					-annotation "cgmToolbox" 
+					-command "cgmToolbox;"
+					-imageOverlayLabel "CGM" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor .25 1 1 .5;		
+		//SHAPESBrushUI
+		shelfButton -width 35 -height 35
+					-image1 "SHAPESBrush.png" 
+					-label "SHAPESBrush.png" 
+					-annotation "SHAPESBrushUI" 
+					-command "SHAPESBrushUI" 
+					-imageOverlayLabel "shBr" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+
+		//SHAPESBrushUI
+		shelfButton -width 35 -height 35
+					-image1 "SHAPES.png" 
+					-label "SHAPES.png" 
+					-annotation "SHAPES" 
+					-command "import SHAPES\nSHAPES._buildSHAPESUI()" 
+					-sourceType "python" 
+					//-imageOverlayLabel "shBr" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;			
+
+		//studioLibrary
+		shelfButton -width 35 -height 35
+					-image1 "N:/b1Env/maya/2014/icons/qqd/studio_library.png" 
+					-label "N:/b1Env/maya/2014/icons/qqd/studio_library.png" 
+					-annotation "studioLibrary" 
+					-command "import studioLibrary\nstudioLibrary.main()" 
+					-sourceType "python" 
+					//-imageOverlayLabel "stLb" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+
+		//softCluster
+		shelfButton -width 35 -height 35
+					-image1 "softselectcluster-670x670.png" 
+					-label "softselectcluster-670x670.png" 
+					-annotation "studioLibrary" 
+					-command "import softClusterEX\nsoftClusterEX.GUI()" 
+					-sourceType "python" 
+					-imageOverlayLabel "sftCl" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+		//JointToolOptions
+		shelfButton -width 35 -height 35
+					-image1 "kinJoint.png" 
+					-label "kinJoint.png" 
+					-annotation "Joint tool options" 
+					-command "JointToolOptions" 
+					//-imageOverlayLabel "shBr" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+		//Smooth Bind
+		shelfButton -width 35 -height 35
+					-image1 "smoothSkin.png" 
+					-label "smoothSkin.png" 
+					-annotation "Select surface(s) and a joint." 
+					-command "SmoothBindSkin" 
+					-doubleClickCommand "SmoothBindSkinOptions;" 
+					//-imageOverlayLabel "shBr" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+		//Detach Skin
+		shelfButton -width 35 -height 35
+					-image1 "detachSkin.png" 
+					-label "detachSkin.png" 
+					-annotation "Select surface(s) and a joint." 
+					-command "DetachSkin" 
+					//-imageOverlayLabel "shBr" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+		//CopySkinWeights
+		shelfButton -width 35 -height 35
+					-image1 "copySkinWeight.png" 
+					-label "copySkinWeight.png" 
+					-annotation "Select the source surface and the destination surface." 
+					-command "CopySkinWeights" 
+					-doubleClickCommand "CopySkinWeightsOptions;" 
+					//-imageOverlayLabel "shBr" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;					
+		//MirrorSkinWeights
+		shelfButton -width 35 -height 35
+					-image1 "mirrorSkinWeight.png" 
+					-label "mirrorSkinWeight.png" 
+					-annotation "Select either a single skin or the source and the destination skin." 
+					-command "MirrorSkinWeights" 
+					-doubleClickCommand "MirrorSkinWeightsOptions" 
+					//-imageOverlayLabel "shBr" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+		//removeUnusedInfluences
+		shelfButton -width 35 -height 35
+					-image1 "menuIconSkinning.png" 
+					-label "menuIconSkinning.png" 
+					-annotation "Select the skin and unused joints and influences will be disconnected to improve performance." 
+					-command "removeUnusedInfluences" 
+					-imageOverlayLabel "RUI" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+		//rivet
+		shelfButton -width 35 -height 35
+					-image1 "rivet.bmp" 
+					-label "rivet.bmp" 
+					-annotation "rivet" 
+					-command "rivet" 
+					//-imageOverlayLabel "rivet" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+		//djRivet
+		shelfButton -width 35 -height 35
+					-image1 "djRivet.bmp" 
+					-label "djRivet.bmp" 
+					-annotation "djRivet" 
+					-command "djRivet" 
+					//-imageOverlayLabel "djRivet" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;			
+		//paintBlendshape
+		shelfButton -width 35 -height 35
+					-image1 "paintBlendshape.png" 
+					-label "paintBlendshape.png" 
+					-annotation "Paint blendShape weights tool options" 
+					-command "ArtPaintBlendShapeWeightsToolOptions" 
+					//-imageOverlayLabel "BSpnt" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+		//paintSkinWeights
+		shelfButton -width 35 -height 35
+					-image1 "paintSkinWeights.png" 
+					-label "paintSkinWeights.png" 
+					-annotation "Paint skin weights tool options" 
+					-command "ArtPaintSkinWeightsToolOptions" 
+					//-imageOverlayLabel "BSpnt" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;			
+		//Weight Hammer
+		shelfButton -width 35 -height 35
+					-image1 "menuIconSkinning.png" 
+					-label "menuIconSkinning.png" 
+					-annotation "Weight hammer: fix vertices that have bad weights (select them and use the hammer)" 
+					-command "weightHammerVerts" 
+					-imageOverlayLabel "WH" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+		//tf_smoothSkinWeight	
+		shelfButton -width 35 -height 35
+					-image1 "pythonFamily.png" 
+					-label "pythonFamily.png" 
+					-annotation "smooth weight" 
+					-command "import tf_smoothSkinWeight\ntf_smoothSkinWeight.paint()" 
+					-imageOverlayLabel "SW" 
+					-sourceType "python" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+		//MAXSkinWeightTool
+		shelfButton -width 35 -height 35
+					-image1 "MaxWeightTool.bmp" 
+					-label "MaxWeightTool.bmp" 
+					-annotation "MAXSkinWeightTool" 
+					-command "MAXSkinWeightTool" 
+					//-imageOverlayLabel "BSpnt" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;				
+
+		//ABweightLifter
+		shelfButton -width 35 -height 35
+					-image1 "commandButton.png" 
+					-label "commandButton.png" 
+					-annotation "ABweightLifter" 
+					-command "source \"N:/b1Env/maya/2014/scripts/b1Rigging/abWeightLifter.mel\";abWeightLifter;" 
+					-imageOverlayLabel "abWgt" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor .25 .25 1 .5;
+
+		//abSymMesh
+		shelfButton -width 35 -height 35
+					-image1 "commandButton.png" 
+					-label "commandButton.png" 
+					-annotation "abSymMesh" 
+					-command "source \"N:/b1Env/maya/2014/scripts/b1Rigging/abSymMesh.mel\";abSymMesh;"
+					-imageOverlayLabel "abSym" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor .25 .25 1 .5;
+
+		//AdvancedSkeleton
+		shelfButton -width 35 -height 35
+					-image1 "N:/b1Env/maya/2014/icons/AdvancedSkeleton/asBody.png" 
+					-label "N:/b1Env/maya/2014/icons/AdvancedSkeleton/asBody.png" 
+					-annotation "bodySetup" 
+					-command "source \"N:/b1Env/maya/2014/scripts/b1Rigging/AdvancedSkeleton/asBody.mel\";asBody;" 
+					-imageOverlayLabel "advSk" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor .25 1 .25 .5;
+		//asBiped			
+		shelfButton -width 35 -height 35
+					-image1 "N:/b1Env/maya/2014/icons/AdvancedSkeleton/asBiped.png" 
+					-label "N:/b1Env/maya/2014/icons/AdvancedSkeleton/asBiped.png" 
+					-annotation "Selector:biped" 
+					-command "source \"N:/b1Env/maya/2014/scripts/b1Rigging/AdvancedSkeleton/Selector/biped.mel\";asSelectorbiped;" 
+					-imageOverlayLabel "biped" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor .25 1 .25 .5;
+	
+		//czDisplayColorOverrideUI
+		shelfButton -width 35 -height 35
+					-image1 "commandButton.png" 
+					-label "commandButton.png" 
+					-annotation "czDisplayColorOverrideUI" 
+					-command "czDisplayColorOverrideUI"
+					-imageOverlayLabel "color" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+
+		//IH_buildSpIkChain
+		shelfButton -width 35 -height 35
+					-image "IH_buildSpIkChain.png"
+					-label "IH_buildSpIkChain" 
+					-annotation "IH_buildSpIkChain" 
+					-command "source \"N:/b1Env/maya/2014/scripts/b1Rigging/IH_buildSpIkChain.mel\";IH_buildSpIkChain;"
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;
+
+		//czDisplayColorOverrideUI
+		shelfButton -width 35 -height 35
+					-image1 "IH_BakeHairChain.png" 
+					-label "splChainBuild" 
+					-annotation "build spline IK chain." 
+					-command "source \"N:/b1Env/maya/2014/scripts/b1Rigging/IH_BakeHairChain.mel\";IH_BakeHairChain;"
+					//-imageOverlayLabel "color" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+
+	    setParent ..;
+
+	    shelfLayout -style "iconOnly" -w 500 -h 75 "mdlToolShelf";
+
+		//DeleteHistory
+		shelfButton -width 35 -height 35
+					-image1 "menuIconEdit.png" 
+					-label "menuIconEdit.png" 
+					-annotation "Delete construction history on the selected object(s)" 
+					-command "DeleteHistory" 
+					-imageOverlayLabel "Hist"  
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+		//FreezeTransformations
+		shelfButton -width 35 -height 35
+					-image1 "menuIconModify.png" 
+					-label "menuIconModify.png" 
+					-annotation "Select an object(s)" 
+					-command "FreezeTransformations" 
+					-imageOverlayLabel "FT"  
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+		//SelectHierarchy
+		shelfButton -width 35 -height 35
+					-image1 "menuIconEdit.png" 
+					-label "menuIconEdit.png" 
+					-annotation "Select all the children of the current selection" 
+					-command "SelectHierarchy" 
+					-imageOverlayLabel "SH"  
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+		//CenterPivot			
+		shelfButton -width 35 -height 35
+					-image1 "menuIconModify.png" 
+					-label "menuIconModify.png" 
+					-annotation "Select an object(s)" 
+					-command "CenterPivot" 
+					-imageOverlayLabel "CP"  
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+		//FileTextureManager			
+		shelfButton -width 35 -height 35
+					-image1 "menuIconModify.png" 
+					-label "menuIconModify.png" 
+					-annotation "FileTextureManager" 
+					-command "FileTextureManager" 
+					-imageOverlayLabel "FTX"  
+					-overlayLabelColor 0.8 0.8 0.8  
+					-overlayLabelBackColor 0 0 0 0.2 ;
+		//rename
+		shelfButton -width 35 -height 35
+					-image1 "commandButton.png" 
+					-label "commandButton.png" 
+					-annotation "rename" 
+					-command "source \"N:/b1Env/maya/2012/scripts/renameAdvanced.mel\""
+					-imageOverlayLabel "rename" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+	    //RoadKill
+		shelfButton -width 35 -height 35
+					-image1 "commandButton.png" 
+					-label "commandButton.png" 
+					-annotation "RoadKill" 
+					-command "RoadKill" 
+					-imageOverlayLabel "rdKill" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+
+		//Sculpt geometry tool		
+		shelfButton -width 35 -height 35
+					-image1 "putty.png" 
+					-label "putty.png" 
+					-annotation "Sculpt geometry tool options"
+					-command "SculptGeometryToolOptions" 
+					//-imageOverlayLabel "" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;	
+
+		//polyUnite	
+		shelfButton -width 35 -height 35
+					-image1 "polyUnite.png" 
+					-label "polyUnite.png" 
+					-annotation "Combine the selected polygon objects into one single object to allow operations such as merges or face trims" 
+    				-command "polyPerformAction polyUnite o 0" 
+					//-imageOverlayLabel "" 
+					-overlayLabelColor .1 .1 .1 
+					-overlayLabelBackColor 1 .25 .25 .5;				
+
+	    setParent ..;
+
+	setParent BHCColMain;
+	
+	separator -h 5 ;
+	gridLayout -numberOfColumns 15 -cellWidthHeight 35 35 ;
+
+		iconTextButton -style "iconOnly"
+    		-image1 "renameAdvanced.png" -label "renameAdvanced"
+    		-c "source \"N:/b1Env/maya/2012/scripts/renameAdvanced.mel\"";
+
+    	//DeleteHistory
+		iconTextButton -style "iconOnly"
+					-image1 "menuIconEdit.png" 
+					-annotation "Delete construction history on the selected object(s)" 
+					-command "DeleteHistory" 
+					-imageOverlayLabel "Hist" ;
+		//FreezeTransformations
+		shelfButton -width 35 -height 35
+					-image1 "menuIconModify.png" 
+					-label "menuIconModify.png" 
+					-annotation "Select an object(s)" 
+					-command "FreezeTransformations" 
+					-imageOverlayLabel "FT"  ;
+					
+		//SelectHierarchy
+		shelfButton -width 35 -height 35
+					-image1 "menuIconEdit.png" 
+					-label "menuIconEdit.png" 
+					-annotation "Select all the children of the current selection" 
+					-command "SelectHierarchy" 
+					-imageOverlayLabel "SH"  ;
+					
+		//CenterPivot			
+		shelfButton -width 35 -height 35
+					-image1 "menuIconModify.png" 
+					-label "menuIconModify.png" 
+					-annotation "Select an object(s)" 
+					-command "CenterPivot" 
+					-imageOverlayLabel "CP"  ;
+					
+		//FileTextureManager			
+		shelfButton -width 35 -height 35
+					-image1 "menuIconModify.png" 
+					-label "menuIconModify.png" 
+					-annotation "FileTextureManager" 
+					-command "FileTextureManager" 
+					-imageOverlayLabel "FTX"  ;
+					
+	setParent ..;
+	separator -h 5 ;
+
+	// frame -  facial
+	frameLayout -collapsable true -collapse 0  -enable 1 -label "facial setup " -borderStyle "in" -w 500 BHCframeFacial;	
+	
+	rowColumnLayout -nc 4 -cw 1 120 -cw 2 120 -cw 3 120 -cw 4 140
+		-cat 1 left 10 -cat 2 left 10 -cat 3 left 10 -cat 4 left 10 BHCRowColFaca;
+		
+		columnLayout BHCColFacaa;
+		text -l "	[ joint setup ] ";
+		separator -h 10 ;	
+		button -l " joint mirror " -w 100 -c "b1mirrorJointPositioin";
+		separator -h 10 ;
+
+
+		text -l "	[ facial HUD ] ";
+		separator -h 10 ;	
+		rowLayout -nc 2;
+		button -l "facHud on" -w 70 -c "source \"H:/mel_study/myMel/facHUD.mel\";facHUD 1;";
+		button -l "off" -w 30 -c "source \"H:/mel_study/myMel/facHUD.mel\";facHUD 0;";
+		setParent ..;
+		separator -h 10 ;			
+		
+
+		text -l "  [ cluster ] ";
+		separator -h 10 ;	
+		button -l " mirror clustor" -w 100 -c "b1mirrorCenterCluster;";
+		separator -h 10 ;	
+		
+
+		
+		setParent BHCRowColFaca;	
+		
+		columnLayout BHCColFacab;
+
+		text -l " [ facial ctr setup ] ";
+		separator -h 10 ;
+		button -l " ctr build " -w 100 -c "makeCurveCtr";
+		separator -h 10 ;
+		button -l " ctr select all" -w 100 -c "select \"fac*_ctr_crv\"";
+		separator -h 10 ;
+
+		rowLayout -nc 2;
+		button -l " ctr mirror" -w 70 -c "b1mirrorfacialCC \"\";";
+		button -l " L>R" -w 30 -c "b1mirrorfacialCC \"LtoR\";";
+		setParent ..;	
+		separator -h 10 ;
+
+		rowLayout -nc 2;
+		button -l " ctr reset" -w 70 -c "setCtrToZero \"\";";
+		button -l " all" -w 30 -c "setCtrToZero \"all\";";
+		setParent ..;
+		separator -h 10 ;
+
+		rowLayout -nc 2;
+		button -l " ctr key" -w 70 -c "IHsetKeyframe \"\"";
+		button -l " all" -w 30 -c "IHsetKeyframe \"fac\"";
+		setParent ..;
+		separator -h 10 ;	
+
+
+		setParent BHCRowColFaca;	
+		
+		columnLayout BHCColFacac;
+
+		text -l "  [ setup ] ";
+		separator -h 10 ;
+
+		rowLayout -nc 2;
+		button -l " eye prj plane " 
+				-ann " ÇÁ·ÎÁ§¼Ç ´«À» ´ë½ÅÇÒ polyPlane¸¦ »ý¼ºÇÕ´Ï´Ù.place3dTexture¸¦ ¼±ÅÃÇÏ°í ½ÇÇà."
+				-w 70 -c "IHprojectionEyeTransfer;";
+		button -l " tr" 
+				-ann " transfer UV."
+				-w 30 -c "transferAttributes -transferPositions 0 -transferNormals 0 -transferUVs 2 -transferColors 0 -sampleSpace 0 -sourceUvSpace \"map1\" -targetUvSpace \"map1\" -searchMethod 3-flipUVs 0 -colorBorders 1 ";		
+		setParent ..;
+
+		separator -h 10 ;
+
+		text -l "  [ match ] ";
+		separator -h 10 ;
+
+		button -l " match transfrom " 
+				-ann "Select Source, then Target..."
+				-w 100 -c "IHmatchTransformCMD; repeatLast -ac IHmatchTransformCMD";
+		separator -h 10 ;
+
+		button -l " match tran / rot " 
+				-ann "Select Source, then Target..."
+				-w 100 -c "IHmatchPositionCMD; repeatLast -ac IHmatchPositionCMD";
+		separator -h 10 ;
+
+		button -l " match Vertex " 
+				-ann "match Vertex position."
+				-w 100 -c "IH_matchVertexPositionUI;";
+		separator -h 10 ;
+
+
+
+		/*
+		text -l "  [ connect ] ";
+		separator -h 10 ;
+		button -l " connect basic" -w 100 -c "b1connectFacialControl basic ;";
+		separator -h 10 ;
+		button -l " connect fix" -w 100 -c "b1connectFacialControl fix ;";
+		separator -h 10 ;
+		button -l " connect eyeAim" -w 100 -c "b1connectFacialControl eyeAim ;";
+		separator -h 10 ;
+		button -l " connect BallEye" -w 100 -c "b1connectFacialControl BallEye ;";
+		separator -h 10 ;
+		button -l " connect pupil" -w 100 -c "b1connectFacialControl pupil ;";
+		separator -h 10 ;
+		button -l " connect tongue" -w 100 -c "b1connectFacialControl tongue ;";
+		separator -h 10 ;
+		*/
+
+		setParent BHCRowColFaca;	
+		
+		columnLayout BHCColFacad;
+		text -l "  [ blend shape ] ";
+		separator -h 10 ;	
+		button -l " sort blendShape" -w 100 -c "sortBlendShape;";
+		separator -h 10 ;	
+		button -l " Â÷·Ê·Î blendShape" -w 100 -c "blendShapeGroup;";
+		separator -h 10 ;		
+		button -l " make BS targets" 
+		-ann " blendshape node ¼±ÅÃÇÏ°í, copy ÇÏ°í ½ÍÀº ±×·ì ¼±ÅÃÇÑ µÚ ½ÇÇà."
+		-w 100 -c "b1makeBStargetMesh;";
+		separator -h 10 ;
+		text -l "  [ correctShape ] ";
+		separator -h 10 ;	
+		button -l " correct Shape" 
+		-ann " ±âº» ±×·ì ¼±ÅÃÇÏ°í ½ÇÇà. ÇØ´çÇÏ´Â Å¸°ÙÀÌ ÀÖ¾î¾ß ½ÇÇàµÊ."
+		-w 100 -c "b1CorrectShapeCMD;";
+		separator -h 10 ;	
+		button -l " fix shape" 
+		-ann " ±âº» ±×·ì ¼±ÅÃÇÏ°í ½ÇÇà. ÇØ´çÇÏ´Â Å¸°ÙÀÌ ÀÖ¾î¾ß ½ÇÇàµÊ."
+		-w 100 -c "b1FixShapeCMD;";		
+		
+		setParent BHCRowColFaca;	
+		
+	setParent BHCframeFacial ;	
+	
+	setParent BHCColMain ;	
+	// frame -  facial
+	
+
+	
+	// frame -  rig01
+	frameLayout -collapsable true -collapse 0  -enable 1 -label "rig 1 " -borderStyle "in" -w 500 BHCframeBS;	
+	
+	
+	
+	rowColumnLayout -nc 4 -cw 1 120 -cw 2 120 -cw 3 120 -cw 4 140
+		-cat 1 left 10 -cat 2 left 10 -cat 3 left 10 -cat 4 left 10 BHCRowColBSa;
+		
+		columnLayout BHCColBSaa;
+		
+		text -l "	[  lod  ] ";			
+		separator -h 10 ;
+
+		button -l " make lod02_GRP" 
+		-ann " lod03 grpÀ» º¹»çÇØ¼­ lod02±×·ìÀ¸·Î ¸¸µé¾î ÁÝ´Ï´Ù."
+		-w 100 -c "IHmakeLod02GRP;";
+
+		separator -h 10 ;
+
+		button -l " assign lod02 tex" 
+		-ann " lod02¿¡ lambertShader Àû¿ë. material ¼±ÅÃÇÏ°í texture ¼±ÅÃÇÑ µÚ ½ÇÇà."
+		-w 100 -c "b1addlod02Tex;";
+		
+		separator -h 10 ;
+		button -l " connect vis to lod03" 
+		-ann " lod02 visibility¸¦ lod03¿¡ ¿¬°á."
+		-w 100 -c "b1connectVisLod02ToLod03;";
+		separator -h 10 ;
+
+		button -l " lod03 export " 
+		-ann " lod03 mdl¸¸ ³²±â°í ¸ðµÎ »èÁ¦ÇÕ´Ï´Ù."
+		-w 100 -c "b1ExportLod03FromRig";
+		separator -h 10 ;
+		text -l "	[ layer ] ";
+		separator -h 10 ;
+
+		button -l " insert geoLayer" 
+		-ann " geomety¿Í Geometry ÇÏÀ§ÀÇ ¸ðµç transformÀ» geoLayer¿¡ ³Ö¾îÁÖ°í. SubControl°ú ¿¬°áÇØÁØ´Ù."
+		-w 100 -c "b1InsetGeoLayer;";
+		separator -h 10 ;	
+
+		setParent BHCRowColBSa;	
+		
+		columnLayout BHCColBSab;
+		text -l "	[ joint ] ";
+		separator -h 10 ;	
+		button -l " joint show" -w 100 -c "b1JointVisMaya2014 1;";
+		separator -h 10 ;	
+		button -l " joint hide" -w 100 -c "b1JointVisMaya2014 0;";
+		separator -h 10 ;
+		
+		text -l "  [ motion system ] ";
+		separator -h 10 ;	
+		button -l " motionSystem show" -w 100 -c "setAttr MotionSystem.visibility 1;";
+		separator -h 10 ;	
+		button -l " motionSystem hide" -w 100 -c "setAttr MotionSystem.visibility 0;";
+		separator -h 10 ;	
+		
+		setParent BHCRowColBSa;	
+		
+		columnLayout BHCColBSac;		
+		text -l "  	  [ pose ] ";
+		separator -h 10 ;	
+		button -w 100 -l "go Tpose" -c "b1goTpose 0 0;";
+		separator -h 10 ;		
+		button -w 100 -l "go skin pose" -c "b1goTpose 1 0;";	
+		separator -h 10 ;
+		button -w 100 -l "go default Pose" -c "b1goTpose 1 1;";
+		separator -h 10 ;
+		
+		text -l "	[ group ] ";
+		separator -h 10 ;	
+		button -l " group same position" 
+		-ann " »óÀ§¿¡ °°Àº À§Ä¡ÀÇ zero grpÀ» ¸¸µé¾î ÁÝ´Ï´Ù. ÇÑ¹ø¿¡ ¿©·¯°³ °¡´É."
+		-w 100 -c "addZeroTransform;";
+		separator -h 10 ;
+
+		button -l " basic GRP setup" 
+		-ann " »óÀ§¿¡ °°Àº À§Ä¡ÀÇ zero grpÀ» ¸¸µé¾î ÁÝ´Ï´Ù. ÇÑ¹ø¿¡ ¿©·¯°³ °¡´É."
+		-w 100 -c "IHsetBasicGrp;";
+		separator -h 10 ;
+		
+
+		setParent BHCRowColBSa;	
+		
+		columnLayout BHCColBSad;
+		text -l "  [ check ] ";
+		separator -h 10 ;	
+		button -l " delete Int Shape " 
+		-ann " selectÇÑ ±×·ì ÇÏÀ§¿¡ ÀÖ´Â intermediate ShapeÀ» ¸ðµÎ »èÁ¦ÇÑ´Ù.."
+		-w 100 -c "deleteIntermediateMesh";
+		separator -h 10 ;	
+		button -l " unlock" 
+		-ann " selectÇÑ ±×·ì ÇÏÀ§¿¡ ÀÖ´Â nodeµéÀÇ lockÀ» Ç®¾îÁØ´Ù."
+		-w 100 -c "b1unlockCmd";
+		separator -h 10 ;
+		button -l " unique name" 
+		-ann " ¾À ¾È¿¡ °°Àº ÀÌ¸§À» ¾²´Â °ÍµéÀ» Ã£¾Æ³»¼­ uniqSet¿¡ ³Ö½À´Ï´Ù."
+		-w 100 -c "b1checkUniqName;";
+		separator -h 10 ;	
+		button -l " check transform" 
+		-ann " ¼±ÅÃµÈ °Í ÇÏÀ§¿¡ transformÀÌ freeze°¡ ¾ÈµÇ¾î ÀÖ´Â°ÍµéÀ» Ã£¾Æ³»¼­ transfomeSet¿¡ ³Ö¾îÁÝ´Ï´Ù."
+		-w 100 -c "b1checkTransformFreeze;";
+		separator -h 10 ;
+
+
+		
+		setParent BHCRowColBSa;	
+		
+	setParent BHCframeBS ;	
+	
+	setParent BHCColMain ;	
+	// frame -  rig01
+
+	// frame -  rig
+	frameLayout -collapsable true -collapse 0  -enable 1 -label "rig 2" -borderStyle "in" -w 500 BHCframeRig;	
+	
+	rowColumnLayout -nc 4 -cw 1 120 -cw 2 120 -cw 3 120 -cw 4 140
+		-cat 1 left 10 -cat 2 left 10 -cat 3 left 10 -cat 4 left 10 BHCRowColRiga;
+		
+		columnLayout BHCColRigaa;
+		text -l "	[ build ] ";
+		separator -h 10 ;	
+		button -l " add ControlSet" -w 100 -c "if (`objExists \"ControlSet\"` ) {sets -add ControlSet;} else {sets -n ControlSet;} ";
+		separator -h 10 ;	
+		button -l " set build pose " -w 100 -c "b1setBuildPose";
+		separator -h 10 ;
+		button -l " go build pose " -w 100 -c "asGoToBuildPose bodySetup;" ;
+		separator -h 10 ;
+		setParent BHCRowColRiga;
+		
+		columnLayout BHCColRigab;
+		text -l "	[ release ] ";
+		separator -h 10 ;	
+		button -l " delete all key " -w 100 -c "b1deleteAllKey";
+		separator -h 10 ;	
+		button -l " before release " -w 100 -c "b1beforeRelease";
+		separator -h 10 ;
+		
+		button -l " lod03 export " -w 100 -c "b1ExportLod03FromRig";
+		separator -h 10 ;
+		
+		
+		setParent BHCRowColRiga;
+
+		columnLayout BHCColRigac;
+		text -l "	  [ skin ] ";
+		separator -h 10 ;	
+		button -l " copy skin weight " -w 100 -c "skinCopyWithSkin";
+		separator -h 10 ;	
+		
+		text -l "	  [ IK chain ] ";
+		separator -h 10 ;	
+		button -l " IK Chain Build " -w 100 -c "source \"H:/mel_study/myMel/buildSpIkChain.mel\";IHspIkChainBuildUI;";
+		separator -h 10 ;	
+		
+
+
+		setParent BHCRowColRiga;
+
+		columnLayout BHCColRigad;
+		text -l "	  [ ncloth ] ";
+		separator -h 10 ;	
+		button -l " shader assign " -w 100 -c "assignNclShader nCloth; assignNclShader nRigid;";
+		separator -h 10 ;	
+		
+		setParent BHCRowColRiga;		
+		
+	setParent BHCframeRig ;	
+	
+	setParent BHCColMain ;	
+	// frame -  rig	
+	
+	// frame -  hair	
+	frameLayout -collapsable true -collapse 1  -enable 1 -label " hair dynamic tool " -borderStyle "in" BHCframeHair;	
+											
+									
+		string $defaultDir = "P:/1304_D40/D40_maya/scenes/rig/data/controller/";								
+		textFieldButtonGrp  -label "chain rig path:" -text "" -cw3 80 350 100 -cat 1 right 10 	
+		-buttonLabel " browse.. " 
+		-bc ("BHCfileDialog \"BHCtxfPath\" \"" + $defaultDir + "\";" ) BHCtxfPath;
+		
+		
+		string $defaultPath = "P:/1304_D40/D40_maya/scenes/rig/data/controller/dynChain_v03.mb";
+		if (`optionVar -exists "IKchainPath"`)
+			$defaultPath = `optionVar -q "IKchainPath"`;
+			
+		textFieldButtonGrp -e -text $defaultPath  BHCtxfPath;
+		
+		textFieldButtonGrp  -label "name:" -text "" -cw3 80 200 150 -cat 1 right 10 -cat 3 left 50 
+		-buttonLabel "  		import 		 " -bc "importDynamicChainCMD" BHCtxfImport;
+
+		rowColumnLayout -nc 4 -cw 1 120 -cw 2 120 -cw 3 250 
+		-cat 1 left 10 -cat 2 left 10 -cat 3 left 10 BHCRowColAa;
+		
+		columnLayout BHCColAaa;
+		text -l "	[ selection ] ";
+		separator -h 10 ;	
+		button -l "select ALL Root " -w 100 -c ("select \"*_Line_Con\"");
+		separator -h 10 ;	
+		button -l "select ALL Line5 " -w 100 -c ("select \"*_Line5_Bake_Con\"");
+		separator -h 10 ;
+		text -l "	  [ tool ] ";
+		separator -h 10 ;	
+		button -l "match Hair Chain " -w 100 -c "b1matchingHairChain 0 ";
+		separator -h 10 ;
+		button -l "		mirror X control	" 
+		-ann " controller mirrorÇÒ ¶§ »ç¿ëÇÕ´Ï´Ù. ÇöÀç´Â xÃà¸¸ Áö¿øµË´Ï´Ù. ¼Ò½º ¸ÕÀú ¼±ÅÃÇÏ°í Å¸°Ù ¼±ÅÃ ÈÄ ½ÇÇà."
+		-w 100 -c "b1matchingHairChain 1 ";		
+		separator -h 10 ;	
+		setParent BHCRowColAa;
+
+		
+		columnLayout BHCColAab;
+		text -l "	  [ tool ] ";
+		separator -h 10 ;	
+		
+
+		button -l "		match bake	" -w 100 -c "setHairBakeCMD";
+		separator -h 10 ;	
+		button -l "		skin hair	" -w 100 -c "copyHairSkinCMD; repeatLast -ac copyHairSkinCMD";		
+		separator -h 10 ;
+		
+		text -l "	  [ add ] ";
+		separator -h 10 ;	
+		
+		button -l "		add sine control	" -w 100 -c "b1addSineBatch";		
+		separator -h 10 ;
+		button -l "		add body follow	" 
+		-ann " Zero¿¡ constraint¸¦ »ç¿ëÇßÀ» °æ¿ì on/off ÇÒ ¼ö ÀÖ´Â attribute¸¦ »ý¼ºÇÏ°í ¿¬°áÇÕ´Ï´Ù. Line5 ¼±ÅÃÇÏ°í »ç¿ë."
+		-w 100 -c "connectBodyFollowCon";	
+		separator -h 10 ;	
+			
+		button -l "	par cons batch	" 
+		-ann " ÇÑ ºÎ¸ð¿¡ ¿©·¯ Ä¥µå·± µ¿½Ã¿¡ parent constraint. ºÎ¸ð ¼±ÅÃ ÈÄ ³ª¸ÓÁö Ä¥µå·± ¼±ÅÃÈÄ ½ÇÇà."
+		-w 100 -c "parentConsBatch";	
+		separator -h 10 ;	
+
+
+			
+		setParent BHCRowColAa;	
+		
+		columnLayout BHCColAac;
+			text -l "	[ skin copy ] ";
+			separator -h 8 ;			
+			textFieldButtonGrp  -label "targetMesh:" -text "" -cw3 80 100 80 -cat 1 right 5 	
+			-buttonLabel "   add   " -bc "B1getSelection BHCtxftarget;" BHCtxftarget;
+			
+			rowColumnLayout -nc 2 -cw 1 120 -cw 2 120 
+			-cat 1 left 10 -cat 2 left 10 BHCRowColAaca;
+			
+				columnLayout BHCColAacaa;
+				separator -h 8 ;						
+				button -l "		get joint list	" -w 100 -c "getJointList;";		
+				
+				setParent BHCRowColAaca;
+
+				columnLayout BHCColAacab;
+				separator -h 8 ;
+				button -l "		partial skin copy	" -w 100 -c "copyPartialSkinCopyCMD; repeatLast -ac copyPartialSkinCopyCMD";		
+				
+				setParent BHCRowColAaca;
+					
+			setParent BHCColAac;
+		
+		setParent BHCRowColAa;
+	setParent BHCframeHair;	
+	setParent BHCColMain ;	
+	// frame -  hair End
+		
+	setParent .. ;	
+	showWindow IHrigToolWin;
+
+}
+//IHrigToolset;

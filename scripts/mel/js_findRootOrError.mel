@@ -1,0 +1,24 @@
+/*
+    Script:     js_findRootOrError
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Looking at the selected object, return
+                the root node.
+                
+    Requires:   js_error.mel 
+*/
+global proc string js_findRootOrError ()
+{
+	string $return;
+    string $selected[0];
+    
+    $selected = `ls -sl`;
+    if (size($selected) == 0)
+        js_error "You don't have anything selected.";
+
+    $return = `rootOf $selected[0]`;
+	return $return;
+}
+

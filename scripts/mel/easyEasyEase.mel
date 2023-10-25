@@ -1,0 +1,252 @@
+global proc assignPerField(string $inOut,float $percent)
+{
+	global float $perEaseTangentIn;
+    global float $perEaseTangentOut;
+
+    if ($inOut=="in")
+    {
+    	$perEaseTangentIn = $percent;
+        floatField -e -v $percent perEaseInTangentAmountField;
+    }
+    if ($inOut=="out")
+    {
+    	$perEaseTangentOut = $percent;
+        floatField -e -v $percent perEaseOutTangentAmountField;
+    }
+}
+
+global proc assignAbsField(string $inOut,float $percent)
+{
+	global float $absEaseTangentIn;
+    global float $absEaseTangentOut;
+
+    if ($inOut=="in")
+    {
+    	$absEaseTangentIn = $percent;
+        floatField -e -v $percent absEaseInTangentAmountField;
+    }
+    if ($inOut=="out")
+    {
+    	$absEaseTangentOut = $percent;
+        floatField -e -v $percent absEaseOutTangentAmountField;
+    }
+}
+
+global proc queryEaseAbs(string $inOut)
+{
+	global float $absEaseTangentIn;
+    global float $absEaseTangentOut;
+
+    // Selected animCurve(s)
+	string $animCurves[] = `keyframe -q -name`;
+    float $selectTimes[] = `keyframe -q -sl -timeChange $animCurves[0]`;
+
+    $qIn = `keyTangent -q -inWeight`;
+    $qOut = `keyTangent -q -outWeight`;
+
+	if ($inOut=="in")
+    {
+    	$absEaseTangentIn=$qIn[0];
+        floatField -e -v $absEaseTangentIn absEaseInTangentAmountField;
+    }
+    if ($inOut=="out")
+    {
+    	$absEaseTangentOut=$qOut[0];
+        floatField -e -v $absEaseTangentOut absEaseOutTangentAmountField;
+    }
+}
+
+
+global proc queryEasePercent(string $inOut)
+{
+	global float $perEaseTangentIn;
+    global float $perEaseTangentOut;
+
+    // Selected animCurve(s)
+	string $animCurves[] = `keyframe -q -name`;
+    float $selectTimes[] = `keyframe -q -sl -timeChange $animCurves[0]`;
+
+    $prevKey = `findKeyframe -time $selectTimes[0] -which previous $animCurves[0]`;
+    $nextKey = `findKeyframe -time $selectTimes[0] -which next $animCurves[0]`;
+
+    $qIn = `keyTangent -q -inWeight`;// $animCurves[0]`;
+    $qOut = `keyTangent -q -outWeight`;// $animCurves[0]`;
+
+	if ($inOut=="in")
+    {
+    	$perEaseTangentIn=($qIn[0]/($selectTimes[0]-$prevKey)) * 100;
+        floatField -e -v $perEaseTangentIn perEaseInTangentAmountField;
+    }
+    if ($inOut=="out")
+    {
+    	$perEaseTangentOut=($qOut[0]/($nextKey-$selectTimes[0])) * 100;
+        floatField -e -v $perEaseTangentOut perEaseOutTangentAmountField;
+    }
+
+}
+
+global proc doEasePercent(string $inOut)
+{
+	global float $perEaseTangentIn;
+    global float $perEaseTangentOut;
+
+    $perEaseTangentIn = `floatField -q -v perEaseInTangentAmountField`;
+    $perEaseTangentOut = `floatField -q -v perEaseOutTangentAmountField`;
+
+    // Selected animCurve(s)
+	string $animCurves[] = `keyframe -q -name`;
+
+	for ($ac in $animCurves)
+    {
+		float $selectTimes[] = `keyframe -q -sl -timeChange $ac`;
+
+        for ($frame in $selectTimes)
+        {
+            //print ("\nframe = "+$frame);
+            $prevKey = `findKeyframe -time $frame -which previous $ac`;
+            $nextKey = `findKeyframe -time $frame -which next $ac`;
+
+            $valueIn= ($frame-$prevKey) * ($perEaseTangentIn*.01);
+    		$valueOut= ($nextKey-$frame) * ($perEaseTangentOut*.01);
+            //print ("\n valueIn="+$valueIn);
+            //print ("\n valueOut="+$valueOut);
+
+            //convert to weighted
+            keyTangent -edit -weightedTangents 1;
+
+            //weightLock off
+            keyTangent -weightLock off;
+            keyTangent -lock off;
+
+            if (($inOut=="in")&&($frame!=$prevKey)) keyTangent -t $frame -inAngle 0 -inWeight $valueIn $ac;
+        	if (($inOut=="out")&&($frame!=$nextKey)) keyTangent -t $frame -outAngle 0 -outWeight $valueOut $ac;
+        }
+    }
+}
+
+
+global proc doEase(string $inOut)
+{
+	global float $absEaseTangentIn;
+    global float $absEaseTangentOut;
+
+	float $selectTimes[];
+
+    string $animCurves[] = `keyframe -q -name`;
+    if (`size $animCurves`!=0) $selectTimes = `keyframe -q -sl -timeChange $animCurves[0]`;
+
+
+    if (`size $selectTimes`==0)
+    confirmDialog -title "easeTangent speaking"
+        -message "Man, select keys on the Graph Editor first!"
+        -button "Ok";
+
+    $absEaseTangentIn = `floatField -q -v absEaseInTangentAmountField`;
+    $absEaseTangentOut = `floatField -q -v absEaseOutTangentAmountField`;
+
+    $valueIn=$absEaseTangentIn;
+    $valueOut=$absEaseTangentOut;
+
+    $op = `iconTextRadioCollection -q -sl easeTangentRadio`;
+	if ($op == "easeTangentPerRadioButton")
+    {
+    	doEasePercent($inOut);
+    }
+    else
+    {
+        //convert to weighted
+        keyTangent -edit -weightedTangents 1;
+
+        //flat
+        //keyTangent -itt flat -ott flat;
+
+        //weightLock off
+        keyTangent -weightLock off;
+        keyTangent -lock off;
+
+        if ($inOut=="in") keyTangent -inAngle 0 -inWeight $valueIn;
+        if ($inOut=="out") keyTangent -outAngle 0 -outWeight $valueOut;
+    }
+}
+
+global proc easyEasyEase()
+{
+	string $easyEasyEaseVer="2.6";
+	float $c1[] = {1.0, 1.0, 0.9};
+ 	float $c2[] = {1.0, 0.8, 1.0};
+	float $c3[] = {0.8, 1.0, 0.8};
+
+	global float $absEaseTangentIn = 10;
+    global float $absEaseTangentOut = 10;
+
+    global float $perEaseTangentIn = 85;
+    global float $perEaseTangentOut = 33;
+
+	if ((`window -ex easyEasyEaseWin`) == true) {
+		deleteUI easyEasyEaseWin;
+		windowPref -remove easyEasyEaseWin;
+	}
+ 	window  -toolbox 1 -t ("easyEasyEase ver "+$easyEasyEaseVer) -w 304 -h 148 -s 0  easyEasyEaseWin;
+
+	columnLayout -columnAttach "both" 10  -adjustableColumn 1 -columnAlign "center" -rowSpacing 1;
+	separator -style "none";
+
+	rowLayout -numberOfColumns 2 -columnWidth2 230 50 -columnAlign2 "center" "center";
+	iconTextRadioCollection easeTangentRadio;
+		iconTextRadioButton  -w 225 -h 25 -st "textOnly" -l "precent (%) - like After Effects" -select
+        	-cc ("rowLayout -e -vis 1 perRowLayout;rowLayout -e -vis 0 absRowLayout")
+            easeTangentPerRadioButton;
+    	iconTextRadioButton  -w 65 -h 25 -st  "textOnly" -l "absolute"
+        	-cc ("rowLayout -e -vis 1 absRowLayout;rowLayout -e -vis 0 perRowLayout")
+            easeTangentAbsRadioButton;
+	setParent..;
+
+ 	separator;
+
+	//abs fields
+	rowLayout -vis 0 -numberOfColumns 4 -columnWidth4 80 70 70 80 -columnAlign4 "center" "center" "center" "center" absRowLayout;
+		button  -w 75 -h 30 -l "ease in" -c ("doEase(\"in\")") ;
+		floatField -w 70 -h 30 -precision 2 -v $absEaseTangentIn absEaseInTangentAmountField;
+        floatField -w 70 -h 30 -precision 2 -v $absEaseTangentOut absEaseOutTangentAmountField;
+		button  -w 75 -h 30 -l "ease out" -c ("doEase(\"out\")") ;
+    setParent..;
+    popupMenu -parent absEaseInTangentAmountField;
+			menuItem -label "query : EaseIn" -c ("queryEaseAbs(\"in\")") ;
+            menuItem -label "1"  -c ("assignAbsField(\"in\",1)");
+            menuItem -label "12"  -c ("assignAbsField(\"in\",12)");
+            menuItem -label "25"  -c ("assignAbsField(\"in\",25)");
+            menuItem -label "50"  -c ("assignAbsField(\"in\",50)");
+    popupMenu -parent absEaseOutTangentAmountField;
+			menuItem -label "query : EaseOut" -c ("queryEaseAbs(\"out\")") ;
+            menuItem -label "1"  -c ("assignAbsField(\"out\",1)");
+            menuItem -label "12"  -c ("assignAbsField(\"out\",12)");
+            menuItem -label "25"  -c ("assignAbsField(\"out\",25)");
+            menuItem -label "50"  -c ("assignAbsField(\"out\",50)");
+
+    //percentage fields
+    rowLayout -numberOfColumns 4 -columnWidth4 80 70 70 80 -columnAlign4 "center" "center" "center" "center" perRowLayout;
+		button  -w 75 -h 30 -l "ease in" -c ("doEase(\"in\")") ;
+		floatField -w 70 -h 30 -precision 2 -v $perEaseTangentIn perEaseInTangentAmountField;
+        floatField -w 70 -h 30 -precision 2 -v $perEaseTangentOut perEaseOutTangentAmountField;
+		button  -w 75 -h 30 -l "ease out" -c ("doEase(\"out\")") ;
+	setParent..;
+
+    popupMenu -parent perEaseInTangentAmountField;
+			menuItem -label "query : EaseIn"  -c ("queryEasePercent(\"in\")");
+            menuItem -label "10%"  -c ("assignPerField(\"in\",10)");
+            menuItem -label "33%"  -c ("assignPerField(\"in\",33)");
+            menuItem -label "85%"  -c ("assignPerField(\"in\",85)");
+            menuItem -label "95%"  -c ("assignPerField(\"in\",95)");
+    popupMenu -parent perEaseOutTangentAmountField;
+			menuItem -label "query : EaseOut" -c ("queryEasePercent(\"out\")");
+            menuItem -label "10%"  -c ("assignPerField(\"out\",10)");
+            menuItem -label "33%"  -c ("assignPerField(\"out\",33)");
+            menuItem -label "85%"  -c ("assignPerField(\"out\",85)");
+            menuItem -label "95%"  -c ("assignPerField(\"out\",95)");
+	separator;
+	iconTextButton -style "iconAndTextCentered"  -h 15 -align "center" -l "www.firas3d.com"
+    	-c ("showHelp -absolute \"http://www.firas3d.com\"");
+
+    showWindow easyEasyEaseWin;
+}
+easyEasyEase;

@@ -1,0 +1,39 @@
+/*
+    Script:     js_connectBlend
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Creates a blendColors node and connects it to $obj1 and $obj2, using the specified $driver
+                as the driving object.
+
+*/
+global proc js_connectBlend (string $obj1, string $obj2, string $target, string $attr, string $driver)
+{
+
+    // check the objects
+    checkExists $obj1;
+    checkExists $obj2;
+    checkExists $target;
+        
+    $bc = `createNode blendColors -n ($target + "_" + $attr + "_blend")`;
+
+    connectAttr ($obj1 + "." + $attr) ($bc + ".color2");
+    connectAttr ($obj2 + "." + $attr) ($bc + ".color1");
+    
+    connectAttr ($bc + ".output") ($target + "." + $attr);
+    
+    if ($driver != "")
+    {
+        checkExists $driver;
+        // check for attr
+        if (!`gmatch $driver "*.*"`)
+            error ("Driver must be object.attribute.  exiting.\n");
+        connectAttr $driver ($bc + ".blender");
+    }
+}
+global proc checkExists (string $obj)
+{
+    if (!`objExists $obj`)
+        error ($obj + " does not exist.\n");
+}

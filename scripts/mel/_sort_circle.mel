@@ -1,0 +1,339 @@
+//edge loop sort circle v5.0
+//2013/04/02 v5.0  vtxの取得方法を変更
+//2013/03/07 v4.2  小数点以下4位で切り捨て　中心をバウンディングBOXの中心に変更 VtxOrderOnEloopを組み込み
+//2013/02/07 v4.1
+//2013/01/24 v4.0  Align Axis, Rotate offset 追加
+//2013/01/16 v3.0
+//2013/01/08 v2.0
+//2012/12/28 v1.1
+//2012/12/06 v1.0
+
+
+proc string[] _VtxOrderOnEloop(string $targets[],int $opts)
+{
+    string $kb_sl_e[] = $targets;
+    string $kb_sl_obj[] = `ls -sl -o`;
+
+    string $kb_obj = $kb_sl_obj[0];
+    int $kb_sl_eid;
+
+    //get 1st selected edge id no.
+        {
+        string $buffer[];
+        tokenize $kb_sl_e[0] "[]" $buffer;
+        $kb_sl_eid = $buffer[1];
+    }
+
+        int $kb_eid_array[];
+
+        //get vtxID on edgeloop
+
+        if($opts == 1){
+                $kb_eid_array = `polySelect -q -elb $kb_sl_eid $kb_obj`;
+        }else if($opts == 0){
+
+                for($target in $targets)
+                {
+                        string $buffer[];
+                        tokenize $target "[]" $buffer;
+                        $kb_eid_array[`size $kb_eid_array`] = $buffer[1];
+                }
+
+        }
+
+        int $kb_num = `size $kb_eid_array`;
+        if($kb_eid_array[0] == $kb_eid_array[$kb_num -1])
+        {
+            $kb_num = $kb_num -1;
+        }
+        string $kb_vtx_order_el[];
+
+        //get 1st vtx
+        {
+                string $bufferA[] = `polyListComponentConversion  -fe -tv $kb_sl_e[0]`;
+                string $bufferB[] = `polyListComponentConversion  -fe -tv $kb_sl_e[1]`;
+
+                string $kb_vtxA[] = `ls -fl $bufferA`;
+                string $kb_vtxB[] = `ls -fl $bufferB`;
+
+                        for($vtx in $kb_vtxA)
+                {
+                        if(stringArrayContains($vtx, $kb_vtxB) == true)
+                                        $kb_vtx_order_el[0] = $vtx;
+                }
+        }
+
+
+        for($i = 0; $i < $kb_num; $i++)
+        {
+        if($i == $kb_num -1)
+        {
+                string $bufferA[] = `polyListComponentConversion  -fe -tv ($kb_obj +".e[" + $kb_eid_array[$i] +"]")`;
+                string $bufferB[] = `polyListComponentConversion  -fe -tv ($kb_obj +".e[" + $kb_eid_array[$i-1] +"]")`;
+
+                string $kb_vtxA[] = `ls -fl $bufferA`;
+                string $kb_vtxB[] = `ls -fl $bufferB`;
+
+                /*
+                for($vtx in $kb_vtxA)
+                {
+                        if(stringArrayContains($vtx, $kb_vtxB) == true)
+                                $kb_vtx_order_el[`size $kb_vtx_order_el`] = $vtx;
+
+                }
+                */
+                for($vtx in $kb_vtxA)
+                {
+                        if(stringArrayContains($vtx, $kb_vtx_order_el) == false)
+                                $kb_vtx_order_el[`size $kb_vtx_order_el`] = $vtx;
+                }
+
+        }else {
+
+                string $bufferA[] = `polyListComponentConversion  -fe -tv ($kb_obj +".e[" + $kb_eid_array[$i] +"]")`;
+                string $bufferB[] = `polyListComponentConversion  -fe -tv ($kb_obj +".e[" + $kb_eid_array[$i+1] +"]")`;
+
+                string $kb_vtxA[] = `ls -fl $bufferA`;
+                string $kb_vtxB[] = `ls -fl $bufferB`;
+
+
+                for($vtx in $kb_vtxA)
+                {
+                        if(stringArrayContains($vtx, $kb_vtxB) == true)
+                                {
+                                        if($kb_vtx_order_el[0] != $vtx)
+                                        $kb_vtx_order_el[`size $kb_vtx_order_el`] = $vtx;
+                                }
+                }
+        }
+        }
+		
+		
+        {
+                string $bufferA[] = `polyListComponentConversion  -fe -tv $kb_sl_e[0]`;
+                string $bufferB[] = `polyListComponentConversion  -fe -tv $kb_sl_e[1]`;
+
+                string $kb_vtxA[] = `ls -fl $bufferA`;
+                string $kb_vtxB[] = `ls -fl $bufferB`;
+
+                for($vtx in $kb_vtxA)
+                {
+                        if(stringArrayContains($vtx, $kb_vtx_order_el) == false)
+                                $kb_vtx_order_el[`size $kb_vtx_order_el`] = $vtx;
+                }
+
+                for($vtx in $kb_vtxB)
+                {
+                        if(stringArrayContains($vtx, $kb_vtx_order_el) == false)
+                                $kb_vtx_order_el[`size $kb_vtx_order_el`] = $vtx;
+                }
+        }
+		
+        return $kb_vtx_order_el;
+}
+
+proc float _floatClamp(float $value)
+{
+    float $result = `floor($value * 1000)`*0.001;
+
+    return $result;
+}
+
+
+proc float _getMag(string $target,vector $center)
+{
+    vector $pos = `xform -q -ws -t $target`;
+    float $dist = `mag ($pos - $center)`;
+    return $dist;
+}
+
+proc vector _getVnormal(string $target)
+{
+            float $getnormal[] = `polyNormalPerVertex -q -xyz $target`;
+            vector $sumnormal = <<0,0,0>>;
+
+
+            //clamp value
+            for($i = 0; $i < size($getnormal); $i++)
+                //$getnormal[$i] = _floatClamp($getnormal[$i]);
+                $getnormal[$i] = $getnormal[$i];
+
+
+            for($i = 0; $i < size($getnormal); $i= $i+3)
+            {
+                $sumnormal += <<$getnormal[$i],$getnormal[$i+1],$getnormal[$i+2]>>;
+            }
+
+            $sumnormal = unit($sumnormal);
+
+        return $sumnormal;
+
+}
+
+proc vector _averageVnormal(string $target_vtx[],vector $centerPoint)
+{
+        vector $result = <<0,0,0>>;
+
+        int $num = `size $target_vtx`;
+
+        for($i =0; $i<$num; $i++)
+        {
+              float $posA_f[] = `xform -q -ws -t $target_vtx[$i]`;
+              //vector $posA = <<_floatClamp($posA_f[0]),_floatClamp($posA_f[1]),_floatClamp($posA_f[2])>>;
+              vector $posA = <<$posA_f[0],$posA_f[1],$posA_f[2]>>;
+
+            vector $posB = <<0,0,0>>;
+            if($i == $num -1){
+                float $posB_f[] = `xform -q -ws -t $target_vtx[0]`;
+                //$posB = <<_floatClamp($posB_f[0]),_floatClamp($posB_f[1]),_floatClamp($posB_f[2])>>;
+                $posB = <<$posB_f[0],$posB_f[1],$posB_f[2]>>;
+
+            }else{
+                float $posB_f[] = `xform -q -ws -t $target_vtx[$i+1]`;
+                //$posB = <<_floatClamp($posB_f[0]),_floatClamp($posB_f[1]),_floatClamp($posB_f[2])>>;
+                $posB = <<$posB_f[0],$posB_f[1],$posB_f[2]>>;
+            }
+
+            vector $vectorA = $posA - $centerPoint;
+            vector $vectorB = $posB - $centerPoint;
+
+            $result += cross($vectorA,$vectorB);
+        }
+
+        $result = unit($result);
+
+        return $result;
+}
+
+
+proc vector _createCenter(string $targets[])
+{
+    float $num = `size $targets`;
+    float $center[];
+
+    float $target_bb[] = `xform -q -ws -bb $targets`;
+
+    $center[0] = ($target_bb[0]+$target_bb[3])/2;
+    $center[1] = ($target_bb[1]+$target_bb[4])/2;
+    $center[2] = ($target_bb[2]+$target_bb[5])/2;
+
+    //vector $centerPoint = <<_floatClamp($center[0]),_floatClamp($center[1]),_floatClamp($center[2])>>;
+    vector $centerPoint = <<$center[0],$center[1],$center[2]>>;
+
+    return $centerPoint;
+}
+
+
+proc float _getRadius(string $targets[],vector $centerPoint,float $num)
+{
+        string $target;
+    float $sumdist;
+
+    for($target in $targets)
+    {
+            float $dist;
+            $dist = _getMag($target,$centerPoint);
+            $sumdist = $sumdist + $dist;
+    }
+
+    //float $kb_Radius = _floatClamp($sumdist/$num);
+    float $kb_Radius = $sumdist/$num;
+
+        return $kb_Radius;
+}
+
+proc kb_sort_closestPointOnCircle(string $target_vtx[],vector $normal,vector $centerPoint,float $kb_Radius)
+{
+
+    for($target in $target_vtx){
+        vector $cur_point = `xform -q -ws -t $target`;
+        vector $nm_vector = $normal;
+        vector $c_vector = $centerPoint;
+        vector $ab_vector = `unit ($cur_point - $c_vector)`;
+        float $angle_A = rad_to_deg(`angle $nm_vector $ab_vector`);
+        float $angle_B = 90 - $angle_A;
+        float $length_N =  sin(deg_to_rad($angle_B));
+
+        vector $cb_vector = $length_N * $nm_vector;
+        vector $ac_vector = $ab_vector - $cb_vector;
+        float $ac_mag = `mag $ac_vector`;
+        $ac_vector = $ac_vector * $kb_Radius/$ac_mag;
+        float $near_point[] = {($c_vector.x)+($ac_vector.x),($c_vector.y)+($ac_vector.y),($c_vector.z)+($ac_vector.z)} ;
+
+        xform -ws -t $near_point[0] $near_point[1] $near_point[2] $target;
+    }
+}
+
+proc kb_sort_EqualityPointOnCircle(string $target_vtx[],vector $normal,vector $centerPoint,float $kb_Radius,float $offset_deg)
+{
+     vector $base_point = `xform -q -ws -t $target_vtx[0]`;
+
+     vector $base_vector = $base_point - $centerPoint;
+
+     $base_vector = unit($base_vector);
+
+     float $num = `size $target_vtx`;
+
+     float $deg_span = 360/$num;
+     float $offset_rad;
+
+     for($i = 0; $i < $num; $i++)
+     {
+
+         float $rad_span = deg_to_rad($deg_span*$i);
+
+         vector $rot_vector = `rot $base_vector $normal $rad_span`;
+
+         $rot_vector = $rot_vector * $kb_Radius;
+
+         float $trans_point[] = {($rot_vector.x)+($centerPoint.x),($rot_vector.y)+($centerPoint.y),($rot_vector.z)+($centerPoint.z)};
+
+         xform -ws -t $trans_point[0] $trans_point[1] $trans_point[2] $target_vtx[$i];
+     }
+}
+
+global proc _sort_circle(int $direction,int $opt,int $axis,int $select)
+{
+
+        string $targets[] = `ls -os -fl`;
+
+        string $target_vtx[] = `_VtxOrderOnEloop $targets $select`;
+
+        int $num = `size $target_vtx`;
+
+        vector $centerPoint = `_createCenter $target_vtx`;
+
+        vector $kb_normal = <<0,0,0>>;
+
+        if($axis == 3){
+        $kb_normal = `_averageVnormal $target_vtx $centerPoint`;
+
+        }else if($axis == 0){
+            $kb_normal = <<1,0,0>>;
+
+        }else if($axis == 1){
+            $kb_normal = <<0,1,0>>;
+
+        }else if($axis == 2){
+            $kb_normal = <<0,0,1>>;
+        }
+		
+		if($kb_normal == <<0,0,0>>)
+        error "can not get normal vector";
+		
+        float $kb_Radius = `_getRadius $target_vtx $centerPoint $num`;
+
+        $kb_Radius = $kb_Radius;
+
+
+
+        if($opt == 0){
+        kb_sort_closestPointOnCircle $target_vtx $kb_normal $centerPoint $kb_Radius;
+            kb_sort_EqualityPointOnCircle $target_vtx $kb_normal $centerPoint $kb_Radius 0;
+
+        }else if($opt == 1){
+
+        kb_sort_closestPointOnCircle $target_vtx $kb_normal $centerPoint $kb_Radius;
+        }
+
+}

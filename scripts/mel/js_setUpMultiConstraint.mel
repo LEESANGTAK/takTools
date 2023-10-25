@@ -1,0 +1,412 @@
+/*
+    Script:     js_setUpMultiConstraint
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+    
+    Descr:      This script will set up a constraint for handling multiple objects.  
+                it takes the following options:
+
+                $constObj       =>  The object that will be constrained
+
+                $targetObjs     =>  String list of all the targets.  
+                                    To be listed as "obj1,obj2,obj3" etc
+
+                $point          =>  If it will be a point constraint
+
+                $orient         =>  If it will be an orient constraint
+
+                $controllerName =>  The name of the controller attribute
+
+                $controllerObj  =>  The object the controller will be on
+    
+   When the script is created it will automatically group the $constObj to itself. 
+   This group will be the one that's going to be constrained to all the items.
+   
+
+    Req:        js_copyPivot.mel
+    
+*/
+global proc js_setUpMultiConstraint ( string $constObj, string $targetObjs, int $point, int $orient, string $controllerName, string $controllerObj)
+{
+
+    //  First add a groupNode on top of the $constObj if one doesn't already exist
+    string $constGrp = ($constObj + "_grp");
+    string $targetObjects[0];
+    string $targetGrps[0];
+    int $count = 0; 
+    string $pc[0], $oc[0];
+
+    select $constObj;
+    if (!`attributeQuery -exists -node $constObj "constGrp"`)
+    {
+        addAttr -ln "constGrp" -at message $constObj;
+    }
+
+    $constGrp = `group -name $constGrp`;
+    // copy the pivot to the location of $constObj just to be safe
+    select $constObj $constGrp;
+    js_copyPivot;
+
+    connectAttr -f ($constGrp + ".message") ($constObj + ".constGrp");
+
+    // now we're going to create empty groups for each of the targetObjs
+    $targetObjects = `js_convertToArray $targetObjs`; 
+    
+    for ($item in $targetObjects )
+    {
+        $tmp = `duplicate $constGrp`;
+        $children = `listRelatives -f -c $tmp[0]`;
+        delete $children;
+        // parent the empty group under the target
+        parent $tmp[0] $item;
+        $targetGrps[$count] = `rename $tmp[0] ($constObj + "_target_"+$item + "_grp")`;
+        $count++;
+    }
+
+
+    // now we want to add the controll attribute to the controller object
+    $enumString = "";
+    for ($item in $targetObjects)
+    {
+        $enumString += ($item + ":");
+    }
+    addAttr -ln $controllerName -at "enum" -enumName $enumString $controllerObj;
+    addAttr -ln ("const_" + $controllerName) -at "message" $controllerObj;
+    addAttr -ln ("type_" + $controllerName) -dt "string" $controllerObj;
+    connectAttr ($constObj + ".message") ($controllerObj + ".const_" + $controllerName);
+
+    setAttr -k 1 ($controllerObj + "." + $controllerName);
+
+    // now set up setDrivenKeyframes for handling the attributes correctly.
+    // for example when controllerName is set to 0, then the first item in the pointConstraint and/or orient constraint
+    // should be set to 1, and all the rest be 0.
+    // for each target we will add a point and orient constraint, depending on what they want.
+    if ($point)
+    {
+        select $targetGrps $constGrp;
+        $pc = `pointConstraint`;
+        $weightList = `pointConstraint -q -wal $pc[0]`;
+
+        $size = size($weightList);
+        for ($x = 0; $x < $size; $x++)
+        {
+            // set each of them to 0 with the setDrivenKeyframe, unless we're on $x, that one should be 1
+            for ($y = 0; $y < $size; $y++)
+            {
+                if ($y == $x)
+                    setDrivenKeyframe -cd ($controllerObj + "." + $controllerName) -dv $x -at $weightList[$y] -v 1 $pc[0];
+                else
+                    setDrivenKeyframe -cd ($controllerObj + "." + $controllerName) -dv $x -at $weightList[$y] -v 0 $pc[0];
+            }
+        }
+        setAttr -type "string" ($controllerObj + ".type_"+$controllerName) "point";
+    }
+    if ($orient)
+    {
+        select $targetGrps $constGrp;
+        $oc = `orientConstraint`;
+        $weightList = `orientConstraint -q -wal $oc[0]`;
+        $size = size($weightList);
+        for ($x = 0; $x < $size; $x++)
+        {
+            // set each of them to 0 with the setDrivenKeyframe, unless we're on $x, that one should be 1
+            for ($y = 0; $y < $size; $y++)
+            {
+                if ($y == $x)
+                    setDrivenKeyframe -cd ($controllerObj + "." + $controllerName) -dv $x -at $weightList[$y] -v 1 $oc[0];
+                else
+                    setDrivenKeyframe -cd ($controllerObj + "." + $controllerName) -dv $x -at $weightList[$y] -v 0 $oc[0];
+            }
+        }
+        string $type;
+        $type = `getAttr ($controllerObj + ".type_"+$controllerName)`;
+        $type = ($type + " orient");
+        
+        setAttr -type "string" ($controllerObj + ".type_"+$controllerName) $type;
+    }
+    select $controllerObj;
+    
+}
+global proc string[] js_convertToArray ( string $targetObjs)
+{
+    string $result[0];
+    tokenize ($targetObjs, ",", $result);
+    return $result;
+}
+
+global proc js_multiConstraintSnapUI ( )
+{
+    // based on the given object it will bring up a window that 
+    // will allow the user to snap to a new orientation
+
+    // first we have to find a list of the "constraint" attrs.  To do that, we'll look for all the user defined attributes on the 
+    // selected object that have a name that matches "const_".  Then we'll bring up an interface 
+    // that will let the user pick an attribute
+
+    $win = "jsConstraintSnapWin"; 
+    if (`window -exists $win`)
+        deleteUI $win;
+    window -title "Constraint Snap UI" $win;
+
+    $f = `formLayout -nd 100`;
+    $snap = `checkBoxGrp -v1 1 -ncb 1 -label "No Pop Snap" -label1 "On/Off" js_snapUICBG`;
+    $s = `scrollLayout -cr 1`;
+    setParent $f;
+    $b1 =`button -l "Reset" -c "js_multiConstraintSnapUI"`;
+
+    formLayout -e
+        -af $snap top 5
+        -af $snap left 5
+        -af $snap right 5
+        
+        -af $s left 5
+        -af $s right 5
+        -ac $s top 5 $snap
+        -ac $s bottom 5 $b1
+
+        -af $b1 left 5
+        -af $b1 right 5
+        -af $b1 bottom 5
+        
+        $f;
+
+    setParent $s;
+    $c = `columnLayout -adj true`;
+    // get a list of all the constraintAttrs
+    string $constraints[0];
+    $constraints = `js_getConstAttrs`;
+    for ($constraint in $constraints)
+    { 
+        setParent $c;
+       string $tmp[0];
+       string $tmp2[0];
+       
+       tokenize ($constraint, ".", $tmp);
+       tokenize ($tmp[1], ":", $tmp2);
+       $attr = $tmp2[0];
+       $obj = $tmp[0];
+       $drivenObj = $tmp2[1];
+
+       string $attrs[] = `attributeQuery -node $obj -listEnum $attr`;
+       string $attributes[0];
+       tokenize ($attrs[0], ":", $attributes);
+       $curValue = `getAttr -as ($obj + "." + $attr)`;
+       
+       $tmpOm = `optionMenuGrp -l ($obj + " " + $attr)`; 
+       for ($at in $attributes)
+       {
+            menuItem -l $at;
+       }
+       optionMenuGrp -e -v $curValue $tmpOm;
+
+       optionMenuGrp -e -cc ("js_valueChangedApply \"" + $snap +"\" \"" + $tmpOm + "\" \"" + $obj + "\" \"" + $attr + "\" \"" + $drivenObj + "\"") $tmpOm;
+    }
+    showWindow $win;
+}
+global proc js_createSetUpMultiConstraintCmd (string $objtfbg, string $tsl, string $cbg, string $ctrltfbg, string $ctrlAttrtf)
+{
+    // get the results from the items passed
+    string $constObj;
+    string $itemsSelected[0];
+    string $targetObjs;
+    int $point;
+    int $orient;
+    string $controllerName;
+    string $controllerObj;
+    
+    $constObj = `textFieldButtonGrp -q -tx $objtfbg`;
+    $itemsSelected = `textScrollList -q -ai $tsl`;
+    $point = `checkBoxGrp -q -v1 $cbg`;
+    $orient = `checkBoxGrp -q -v2 $cbg`;
+    $controllerObj = `textFieldButtonGrp -q -tx $ctrltfbg`; 
+    $controllerName = `textFieldGrp -q -tx $ctrlAttrtf`; 
+
+    // now make sure they all have something selected
+    if (!`objExists $constObj`)
+        error ("Object to be constrained: " + $constObj + " doesn't exist..");
+
+    if (size($itemsSelected) == 0)
+        error ("No items specified as targets");
+
+    if (($point == 0) && ($orient == 0))
+    {
+        error ("Both point and orient constraints are set to 0.");
+    }
+
+    if (!`objExists $controllerObj`)
+    {
+        error ("Object controller doesn't exist..");
+    }
+    if (`attributeQuery -exists -node $controllerObj $controllerName`)
+    {
+        error ("Attribute: " + $controllerName+ " already exists on " + $controllerObj + ".. exiting.");
+    }
+
+    // get the proper method of passing the targetObjs
+    for ($item in $itemsSelected)
+    {
+        $targetObjs += ($item + ",");
+    }
+
+    $cmd = ("js_setUpMultiConstraint \""+$constObj+"\" \"" + $targetObjs + "\" " + $point + " " + $orient + " \"" + $controllerName + "\" \"" + $controllerObj + "\"");
+    evalEcho $cmd;
+}
+global proc js_remSelFromTSL (string $tsl)
+{
+    // remove the selected items from the tsl
+    string $sel[0];
+    $sel = `textScrollList -q -si $tsl`;
+    if (size($sel) > 0)
+    {
+        $cmd = ("textScrollList -e ");
+
+        for ($item in $sel)
+        {
+           $cmd += ("-ri " + $item);
+        }
+        $cmd += (" " + $tsl );
+        eval $cmd;
+    }
+}
+global proc js_addSelToTSL (string $tsl)
+{
+    // get the selected objects and add them to the textScrollList
+    string $objs[0];
+    $objs = `ls -sl`;
+    for ($ob in $objs)
+    {
+        // check and see if it's already in the tsl
+        string $currentObjs[0];
+        int $match = 0;
+        $currentObjs = `textScrollList -q -ai $tsl`;
+        string $cur;
+        for ($cur in $currentObjs)
+        {
+            if ($cur == $ob)
+            {
+                $match = 1;
+            }
+        }
+        if ($match == 0)
+            textScrollList -e -a $ob $tsl;
+    }
+}
+global proc js_loadSelectedIntoButtonGrp (string $buttonGrp)
+{
+    string $objs[0];
+    $objs = `ls -sl`;
+    if (size($objs) > 0)
+    {
+        textFieldButtonGrp -e -tx $objs[0] $buttonGrp;
+    }
+}
+global proc js_valueChangedApply (string $snapCB, string $optionMenu, string $object, string $attr, string $drivenObj)
+{
+    string $objectsSelected[0];
+    $objectsSelected = `ls -sl`;
+    int $value;
+    // value changed, now we have to switch the values.
+    
+    $cmd = ("optionMenuGrp -q -sl \""+$optionMenu+"\"");
+    $value = `evalEcho $cmd`;
+
+    // check and see if snap is on
+    $snap = `checkBoxGrp -q -v1 $snapCB`;
+    if ($snap)
+    {
+        $cmd = ("js_snapObjectToConst \"" + $object + "\" \"" + $attr + "\" \"" + $drivenObj + "\" "+ $value);
+        evalEcho $cmd;
+
+    }
+    else
+    {
+     $cmd = ("setAttr \"" +$object + "." + $attr + "\" "+ ($value -1));
+     evalEcho $cmd;
+    }
+    select $objectsSelected;
+}
+global proc js_snapObjectToConst (string $object, string $attr, string $drivenObj, int $value)
+{
+        string $type = `getAttr ($object + ".type_" + $attr)`;
+        int $time = `currentTime -q`;
+        int $point;
+        int $orient;
+        if (`gmatch $type "*point*"`)
+            $point = 1;
+        if (`gmatch $type "*orient*"`)
+            $orient = 1;
+        
+
+        if ($point)
+            setKeyframe -t ($time-1) -at translate $drivenObj;
+        if ($orient)
+            setKeyframe -t ($time-1) -at rotate $drivenObj;
+
+        setKeyframe -t ($time-1) -at $attr $object;
+
+        // get the parent of $object
+        $parent = `listRelatives -f -p $drivenObj`;
+
+        // duplicate the object at it's current position
+        $dup = `duplicate -rr $drivenObj`;
+        $dup[0] = `rename $dup[0] "thisIsATempDupRename"`;
+        // parent $dup to the world
+        parent -w $dup[0];
+
+        // switch the attribute
+        setAttr ($object + "." + $attr) ($value -1);
+
+        //parent $dup back
+        parent $dup[0] $parent[0];
+	
+	$dupSel = `ls -sl`;
+	$dup[0] = $dupSel[0];
+
+        // get the translation and rotation values
+        if ($point)
+            $t = `getAttr ($dup[0] + ".t")`;
+        if ($orient)
+            $r = `getAttr ($dup[0] + ".r")`;
+
+        // set them on the other object
+        if ($point)
+            setAttr ($drivenObj + ".t") $t[0] $t[1] $t[2];
+        if ($orient)
+            setAttr ($drivenObj + ".r") $r[0] $r[1] $r[2];
+
+        //delete dup
+        delete $dup;
+
+        // now set a keyframe on the object
+        if ($point)
+            setKeyframe -t ($time) -at translate $drivenObj;
+        if ($orient)
+            setKeyframe -t ($time) -at rotate $drivenObj;
+        setKeyframe -t ($time) -at $attr $object;
+}
+global proc string[] js_getConstAttrs ()
+{
+    // based on the selected objects return the constraint attributes
+    string $return[0];
+    int $count = 0;
+    string $objs[0];
+    $objs = `ls -sl`;
+
+    for ($ob in $objs)
+    {
+        string $userDefinedAttrs[0];
+        $userDefinedAttrs = `listAttr -ud -st "const_*" $ob`;
+        string $item;
+        for ($item in $userDefinedAttrs)
+        {
+            // get the object it's connected to
+            $drivenObj = `listConnections ($ob + "." + $item)`;
+            $newName = `substitute "const_" $item ""`;
+            $return[$count++] = ($ob + "." + $newName + ":"+$drivenObj[0]);
+        
+        }
+
+    }
+    return $return;
+}

@@ -1,0 +1,132 @@
+/*
+    Script:     js_multiConstraintSnapUI
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+        
+    Descr:      Based on the given object it will bring up a window that 
+                will allow the user to snap to a new orientation
+
+                Works as part of the js_setUpMultiConstraint scripts
+
+    Required:   js_snapObjectToConst.mel
+
+*/
+global proc js_multiConstraintSnapUI ( )
+{
+    // based on the given object it will bring up a window that 
+    // will allow the user to snap to a new orientation
+
+    // first we have to find a list of the "constraint" attrs.  To do that, we'll look for all the user defined attributes on the 
+    // selected object that have a name that matches "const_".  Then we'll bring up an interface 
+    // that will let the user pick an attribute
+
+    $win = "jsConstraintSnapWin"; 
+    if (`window -exists $win`)
+        deleteUI $win;
+    window -title "Constraint Snap UI" $win;
+
+    $f = `formLayout -nd 100`;
+    $snap = `checkBoxGrp -v1 1 -ncb 1 -label "No Pop Snap" -label1 "On/Off" js_snapUICBG`;
+    $s = `scrollLayout -cr 1`;
+    setParent $f;
+    $b1 =`button -l "Reset" -c "js_multiConstraintSnapUI"`;
+
+    formLayout -e
+        -af $snap top 5
+        -af $snap left 5
+        -af $snap right 5
+        
+        -af $s left 5
+        -af $s right 5
+        -ac $s top 5 $snap
+        -ac $s bottom 5 $b1
+
+        -af $b1 left 5
+        -af $b1 right 5
+        -af $b1 bottom 5
+        
+        $f;
+
+    setParent $s;
+    $c = `columnLayout -adj true`;
+    // get a list of all the constraintAttrs
+    string $constraints[0];
+    $constraints = `js_getConstAttrs`;
+    for ($constraint in $constraints)
+    { 
+        setParent $c;
+       string $tmp[0];
+       string $tmp2[0];
+       
+       tokenize ($constraint, ".", $tmp);
+       tokenize ($tmp[1], ":", $tmp2);
+       $attr = $tmp2[0];
+       $obj = $tmp[0];
+       $drivenObj = $tmp2[1];
+
+       string $attrs[] = `attributeQuery -node $obj -listEnum $attr`;
+       string $attributes[0];
+       tokenize ($attrs[0], ":", $attributes);
+       $curValue = `getAttr -as ($obj + "." + $attr)`;
+       
+       $tmpOm = `optionMenuGrp -l ($obj + " " + $attr)`; 
+       for ($at in $attributes)
+       {
+            menuItem -l $at;
+       }
+       optionMenuGrp -e -v $curValue $tmpOm;
+
+       optionMenuGrp -e -cc ("js_valueChangedApply \"" + $snap +"\" \"" + $tmpOm + "\" \"" + $obj + "\" \"" + $attr + "\" \"" + $drivenObj + "\"") $tmpOm;
+    }
+    showWindow $win;
+}
+global proc js_valueChangedApply (string $snapCB, string $optionMenu, string $object, string $attr, string $drivenObj)
+{
+    string $objectsSelected[0];
+    $objectsSelected = `ls -sl`;
+    int $value;
+    // value changed, now we have to switch the values.
+    
+    $cmd = ("optionMenuGrp -q -sl \""+$optionMenu+"\"");
+    $value = `eval $cmd`;
+
+    // check and see if snap is on
+    $snap = `checkBoxGrp -q -v1 $snapCB`;
+    if ($snap)
+    {
+        $cmd = ("js_snapObjectToConst \"" + $object + "\" \"" + $attr + "\" \"" + $drivenObj + "\" "+ $value);
+        evalEcho $cmd;
+
+    }
+    else
+    {
+     $cmd = ("setAttr \"" +$object + "." + $attr + "\" "+ ($value -1));
+     evalEcho $cmd;
+    }
+    select $objectsSelected;
+}
+global proc string[] js_getConstAttrs ()
+{
+    // based on the selected objects return the constraint attributes
+    string $return[0];
+    int $count = 0;
+    string $objs[0];
+    $objs = `ls -sl`;
+
+    for ($ob in $objs)
+    {
+        string $userDefinedAttrs[0];
+        $userDefinedAttrs = `listAttr -ud -st "const_*" $ob`;
+        string $item;
+        for ($item in $userDefinedAttrs)
+        {
+            // get the object it's connected to
+            $drivenObj = `listConnections ($ob + "." + $item)`;
+            $newName = `substitute "const_" $item ""`;
+            $return[$count++] = ($ob + "." + $newName + ":"+$drivenObj[0]);
+        
+        }
+
+    }
+    return $return;
+}

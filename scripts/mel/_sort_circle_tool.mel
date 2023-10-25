@@ -1,0 +1,131 @@
+//2013/04/02 v5.0
+//2013/04/02 v5.0 optionVar 追加　　回転・スケール値排除　選択オプション追加
+
+
+global proc _SC_optVar(int $mode)
+{
+
+        if($mode == 0)
+        {
+            string $cur_align = `radioCollection -q -sl kb_SC_AlignOption`;
+
+            string $cur_select = `radioCollection -q -sl kb_SC_selectOption`;
+
+            string $cur_axis = `radioCollection -q -sl kb_SC_AxisOption`;
+
+            optionVar -sv "_SC_opt" ($cur_align + " " +$cur_select + " " +$cur_axis);
+        }
+
+        if($mode == 1)
+        {
+            if(`optionVar -ex "_SC_opt"`){
+			string $opt_string = `optionVar -q "_SC_opt"`;
+            string $opt_array[];
+            tokenizeList($opt_string,$opt_array);
+
+            radioButton -e -select $opt_array[0];
+            radioButton -e -select $opt_array[1];
+            radioButton -e -select $opt_array[2];
+			}
+        }
+}
+
+
+global proc _apply_sort_circle()
+{
+    //int $kb_revers = `checkBox -q -v kb_SC_ch01`;
+    int $kb_revers = 0;
+
+    //get align option
+    int $opt = 0;
+    {
+        string $cur_opt = `radioCollection -q -sl kb_SC_AlignOption`;
+
+        if($cur_opt == "kb_SC_rd01"){
+        $opt = 0;
+
+        }else if($cur_opt == "kb_SC_rd02"){
+        $opt = 1;
+
+        }
+    }
+
+    //get select option
+    int $select = 1;
+    {
+        string $cur_opt = `radioCollection -q -sl kb_SC_selectOption`;
+
+        if($cur_opt == "kb_SC_rd07"){
+        $select = 1;
+
+        }else if($cur_opt == "kb_SC_rd08"){
+        $select = 0;
+
+        }
+    }
+
+    //get axis option
+    int $axis = 3;
+    {
+        string $cur_opt = `radioCollection -q -sl kb_SC_AxisOption`;
+
+        if($cur_opt == "kb_SC_rd03"){
+        $axis = 0;
+
+        }else if($cur_opt == "kb_SC_rd04"){
+        $axis = 1;
+
+        }else if($cur_opt == "kb_SC_rd05"){
+        $axis = 2;
+
+        }else if($cur_opt == "kb_SC_rd06"){
+        $axis = 3;
+
+        }
+    }
+
+    _sort_circle $kb_revers $opt $axis $select;
+}
+
+global proc _sort_circle_tool()
+{
+    string $window_name = "_sort_circle_UI";
+
+    if ((`window -ex $window_name`) == true)
+        {
+                deleteUI  $window_name;
+        }
+
+        window -title "sort Circle Position v5.0" $window_name;
+
+    columnLayout;
+    frameLayout -w 200 -label "Align Option" -borderStyle "etchedOut";
+                radioCollection kb_SC_AlignOption;
+                radioButton -label "Equality" kb_SC_rd01;
+                radioButton -label "Closest" -select kb_SC_rd02;
+        setParent ..;
+
+        frameLayout -w 200 -label "select Option" -borderStyle "etchedOut";
+                radioCollection kb_SC_selectOption;
+                radioButton -label "select 2 edges" -select kb_SC_rd07;
+                radioButton -label "select self edge Loop" kb_SC_rd08;
+        setParent ..;
+
+        frameLayout -w 200 -label "Align Axis" -borderStyle "etchedOut";
+                radioCollection kb_SC_AxisOption;
+
+                rowColumnLayout -nc 3 -cw 1 50 -cw 2 50 -cw 3 50;
+                radioButton -label "X"  kb_SC_rd03;
+                radioButton -label "Y"  kb_SC_rd04;
+                radioButton -label "Z"  kb_SC_rd05;
+
+                radioButton -label "normal" -select  kb_SC_rd06;
+        setParent ..;
+
+        button -w 200 -label "apply" -command "_apply_sort_circle; _SC_optVar 0;";
+    setParent ..;
+
+    _SC_optVar 1;
+
+    showWindow $window_name;
+}

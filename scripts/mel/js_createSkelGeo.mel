@@ -1,0 +1,151 @@
+/*
+    Script:     js_createSkelGeo.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Will create geometry for the selected joints, or for the joints passed into the script.
+
+    Usage:      To use the script, you must give it an array.  For example:
+
+                $joints = {"joint1", "joint2", "joint3"};
+                js_createSkelGeo $joints;
+
+                If you want to do it based on the selection, pass an empty array:
+
+                string $tmp[0];
+                clear $tmp;
+                js_createSkelGeo $tmp;
+
+*/
+proc string js_createSkelGeoLength ( string $joint, string $child )
+{
+	$cube =`polyCube -name ($joint + "_geo")`;
+    	
+	parent $cube[0] $joint;
+	float $tx, $ty, $tz;
+	// the cube is parented.  Now, get the translation values of the children, and position the 
+	// cube halfway along that value
+	$tx = `getAttr ($child + ".tx")`;	
+	$ty = `getAttr ($child + ".ty")`;	
+	$tz = `getAttr ($child + ".tz")`;	
+
+	$abtx = abs($tx);
+	$abtz = abs($tz);
+	$abty = abs($ty);
+	setAttr ($cube[0] + ".tx") ($tx * .5);
+	setAttr ($cube[0] + ".ty") ($ty * .5);
+	setAttr ($cube[0] + ".tz") ($tz * .5);
+
+	setAttr ($cube[0] + ".r") 0 0 0;
+
+
+	// now scale the joint based on the translation
+	//$sx = `clamp 1 $tx $tx`;
+	//$sy = `clamp 1 $ty $ty`;
+	//$sz = `clamp 1 $tz $tz`;
+	$radius = `getAttr ($joint + ".radius")`;	
+	$sx = ($abtx > 0.001) ? $abtx : $radius;
+	$sy = ($abty > 0.001) ? $abty : $radius;
+	$sz = ($abtz > 0.001) ? $abtz : $radius;
+	setAttr ($cube[0] + ".sx") $sx;
+	setAttr ($cube[0] + ".sy") $sy;
+	setAttr ($cube[0] + ".sz") $sz;
+    
+    select $cube[0];
+    makeIdentity -t 1 -r 1 -s 1 -apply 1 $cube[0];
+    return ($cube[0]);
+}
+
+proc js_createSkelGeoKnob (string $joint)
+{
+	// This will look and see if there's a child knob for the child joint.
+
+	string $children[0];
+	string $knob = "";
+
+	$children = `listRelatives -type transform -f -c $joint`;
+	for ($child in $children)
+	{
+		if (`attributeQuery -exists -node $child "knob"`)
+		{
+			$knob = $child;
+		}
+	}	
+
+	if ($knob == "")
+	{
+		// there is no knob.. create one
+		$sphere = `sphere`;
+		addAttr -ln "knob" -at "message" $sphere[0];
+
+		parent $sphere[0] $joint;
+		setAttr ($sphere[0] + ".t") 0 0 0;
+		setAttr ($sphere[0] + ".r") 0 0 0;
+	}
+}
+
+global proc js_createSkelGeo ( string $input[] )
+{
+	// This script will create geometry for the given selected joints, or for the given
+	// joints passed into the script.
+	if (size($input) == 0)
+	{
+		$input = `ls -sl -type joint`;
+		print $input;
+	} 
+	
+	if (size($input) > 0)
+	{
+		string $joint;
+        string $geometry[0];
+        int $count = 0;
+		for ($joint in $input)
+		{
+			// for each joint, we're going to create a piece of geometry which will be a child
+			// of the joint.
+
+			// first we have to get the size of the joint, or skeletal segment.  This will be 
+			// the distance from the selected joint to the child joint.
+
+			string $children[0];
+			$children = `listRelatives -f -c -type joint $joint`;
+			if (size($children) > 0)
+			{
+				$geometry[$count] = `js_createSkelGeoLength $joint $children[0]`;
+
+                // move the pivot
+                select $joint $geometry[$count];
+                js_copyPivot;
+                $count++; 
+				//js_createSkelGeoKnob $joint;
+				//js_createSkelGeoKnob $children[0];
+			}
+		}
+
+        // now assign a shader to them
+        select $geometry;
+        createAndAssignShader lambert "";
+
+        select ".f[0]" ".f[2]";
+        createAndAssignShader lambert "";
+
+        // find the shaders
+        $shape = `listRelatives -f -s $geometry[0]`;
+        $sg1 = `listConnections -type shadingEngine ($shape[0] + ".instObjGroups[0].objectGroups[0]")`;
+        $sg2 = `listConnections -type shadingEngine ($shape[0] + ".instObjGroups[0].objectGroups[1]")`;
+
+        // for the shading groups, find the shader
+        $lambert = `listConnections ($sg1[0] + ".surfaceShader")`;
+        $lambert2 = `listConnections ($sg2[0] + ".surfaceShader")`;
+
+        setAttr ($lambert[0] + ".color") -type double3 0.3945 0.490734 0.5 ;
+        setAttr ($lambert2[0] + ".color") -type double3 0.834 0.618693 0.323592 ;
+
+        rename ($lambert[0]) ("geo_color");
+        rename ($lambert2[0]) ("geo_sideColor");
+
+        select $input;
+	}
+	
+} 

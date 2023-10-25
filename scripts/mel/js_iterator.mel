@@ -1,0 +1,143 @@
+/*
+    Script:     js_iterator
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This procedure will try and modify $objAttr to make it so obj lines up with $targetObj.  It will
+                start with the minimum value, then go to the maximum value, figure out which causes the two to be closer,
+                and then iterate through based on $numIterations until they're exact, or numIterations lines up
+    
+                or, if $ob and $targetObj have attributes, it will keep iterating until those attributes are the same.
+*/
+global proc js_iterator (float $minIn, float $maxIn, string $objAttr, string $obj, string $targetObj, int $numIterations)
+{
+    
+    float $min = 0.000000;
+    float $max = 0.000000;
+    $min = $minIn;
+    $max = $maxIn;
+    float $minDist = 0.000000;
+    float $maxDist = 0.000000;
+    vector $pos1;
+    vector $pos2;
+    // check and see if $targetObj and $obj are attributes other than .message
+    string $objBreak[0];
+    string $targetObjBreak[0];
+    tokenize ($obj, ".", $objBreak);
+    tokenize ($targetObj, ".", $targetObjBreak);
+
+    if ($objBreak[1] == "")
+        $objBreak[1] = "message";
+    if ($targetObjBreak[1] == "")
+        $targetObjBreak[1] = "message";
+
+    if (($objBreak[1] == "message") && ($targetObjBreak[1] == "message"))
+    {
+        //print ("Position.\n");
+        $obj = $objBreak[0];
+        $targetObj = $targetObjBreak[0];
+        $pos2 = `xform -q -ws -rp $targetObj`;
+
+        // check and see if autokeyframe is turned on
+        //
+        $autoKeyframe = `autoKeyframe -q -state`;
+        
+        // turn it off
+        //
+        autoKeyframe -state off;
+        for ($x = 0; $x < $numIterations; $x++)
+        {
+            // if we're on the last iteration, turn autoKeyframe back on so the value will save
+            if ($x == ($numIterations-1))
+            {
+                autoKeyframe -state $autoKeyframe;
+            }
+            // get the position of $obj and $targetObj
+            setAttr $objAttr $min;
+            $pos1 = `xform -q -ws -rp $obj`;
+            $minDist = mag($pos2 - $pos1);
+
+            setAttr $objAttr $max;
+            $pos1 = `xform -q -ws -rp $obj`;
+            $maxDist = mag($pos2 - $pos1);
+        
+            $half = (($max - $min)/2 + $min);
+            //print ("Iteration: " + $x + " - Min: " + $min + " Max: " + $max + " MinDist: " + $minDist + " Max Dist: " + $maxDist + " Half: " + $half + "\n");
+            
+            if ($minDist > $maxDist)
+            {
+                $min = $half;
+            }
+            else if ($minDist < $maxDist)
+            {
+                $max = $half; 
+            }
+            else if ($minDist == $maxDist)
+            {
+                $min = $min + .00001;
+            }
+            
+        }
+    }
+    else
+    {
+        //print ("attribute\n");
+        // they're attributes..  make sure that NEITHER are .message
+        if (($objBreak[1] == "message") || ($targetObjBreak[1] == "message"))
+        {
+            error ("Can't connect a message attribute to a regular attribute.  Exiting..");
+        }
+
+        // okay, we know that they're two separate attrs.. let's get this going!
+        $obj = ($objBreak[0] + "." + $objBreak[1]);
+
+        $targetObj = $targetObjBreak[0];
+        $targetObjAttr = $targetObjBreak[1];
+
+        float $targetValue = `getAttr ($targetObj + "." + $targetObjAttr)`;
+        //print ("$obj " + $obj + "\n");
+        //print ("targetObj: " + $targetObj + "\n");
+        //print ("targetObjAttr: " + $targetObjAttr + "\n");
+
+        //print ("target value: " + $targetValue + "\n");
+        
+        for ($x = 0; $x < $numIterations; $x++)
+        {
+            float $minDist = 0.00000;
+            float $maxDist = 0.00000;
+            float $half = 0.00000000; 
+            float $v1 = 0.00000;
+            float $v2 = 0.00000;
+            // get the value
+            //print ("setting " + $objAttr + " to min:" + $min + "\n");
+            setAttr $objAttr $min;
+            $v1 = `getAttr $obj`;
+            //print ("Obj " + $obj + " value " + $v1 + "\n");
+            $minDist = abs($targetValue - $v1);
+
+            //print ("Min dist: " + $minDist + "\n");
+            setAttr $objAttr $max;
+            //print ("setting " + $objAttr + " to max:" + $max + "\n");
+            $v2 = `getAttr $obj`;
+            //print ("Obj " + $obj + " value " + $v2 + "\n");
+            $maxDist = abs($targetValue - $v2);
+            //print ("Max dist: " + $maxDist + "\n");
+            $half = (($max - $min)/2 + $min);
+            //print ("half: " + $half + "\n");
+            //print ("Iteration: " + $x + " - Min: " + $min + " Max: " + $max + " MinDist: " + $minDist + " Max Dist: " + $maxDist + " Half: " + $half + "\n");
+            
+            if ($minDist > $maxDist)
+            {
+                //print ("min is further\n"); 
+                $min = $half;
+            }
+            else
+            {
+                //print ("max is further\n");
+                $max = $half; 
+            }
+            
+        }
+    }
+}

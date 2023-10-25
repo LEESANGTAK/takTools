@@ -1,0 +1,208 @@
+
+global proc nHairBakeKeyWin(){
+
+
+	if ( `window -exists "nHairBakeWin"` )
+		deleteUI "nHairBakeWin";
+		
+	string $window = `window -title "nHair bake key" -sizeable false nHairBakeWin`;
+	
+	columnLayout -columnWidth 310 -columnAttach "both" 5 -columnAlign "left" -rowSpacing 5;
+	separator -h 5 -st "none";
+	text -label "cc_hair 컨트롤러를 선택하고 실행해주세요.";
+	
+	separator -width 300 -h 20 -st "in";
+	
+	button -label " hair bake " -c "IHbakeNhairChain" ;
+	separator -h 5 -st "none";
+	button -label " delete key and reset " -c "IHresetNhairChain" ;
+	
+	separator -width 300 -h 20 -st "in";
+	
+	button -label " select HairSystem " -c "IHselectHairSystem" ;
+	separator -h 5 -st "none";
+	button -label " select Line Cons " -c "IHselectLineCon" ;
+	separator -h 5 -st "none";
+	
+	setParent ..;
+	showWindow $window;	
+}	
+
+global proc IHbakeNhairChain(){
+
+    string $listSel[] = `ls -sl`;
+    string $hairCon = $listSel[0];
+    
+    int $Min = `playbackOptions -q -min`;
+    int $Max = `playbackOptions -q -max`;
+    
+    
+    if ( `objExists ($hairCon + ".startFrame")`) {
+        setAttr ($hairCon + ".startFrame") $Min;
+        setAttr ($hairCon + ".enable") 1;
+    } else 
+        error "please select hairControl\n";  
+        
+    
+    //hairSystemList
+    string $listHairSys[] = `listConnections -d 1 -s 0 ($hairCon + ".hairSystem")`;    
+    for ($curHairSys in $listHairSys )    
+        setAttr ($curHairSys + ".active") 1;
+    
+    
+    //listHair
+    string $listHair[] = `listConnections -d 1 -s 0 ($hairCon + ".hairChain")`;
+    
+    string $bakeConList[];
+    string $IkHandleList[];
+    
+    for ( $curHair in $listHair ){    
+    
+        string $pre =`substitute "_Line_Con" $curHair ""`;    
+        string $listIk[] = `ls ($pre + "_Line*_IK")`;
+        appendStringArray($bakeConList, $listIk , size($listIk) );    
+        
+        setAttr ($curHair + ".ikBlend") 1;
+    }    
+    
+    //bake control show
+    for ($curHair in $listHair){
+       setAttr ($curHair +".Con_HideShow") 0;
+       setAttr ($curHair +".Skin_HideShow") 1;
+    }
+    
+    //bake
+    select -r $bakeConList;
+    
+    eval ("bakeResults -simulation true -t \"" + $Min + "\:" + $Max + "\" -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false -removeBakedAttributeFromLayer false -bakeOnOverrideLayer false -controlPoints false -shape true;");
+    
+    //afterBake - turn off dynamics
+    setAttr ($hairCon + ".startFrame") 100000;
+    setAttr ($hairCon + ".enable") 0;
+    		
+    for ($curHairSys in $listHairSys )    
+        setAttr ($curHairSys + ".active") 0;        
+    
+	for ( $curHair in $listHair )   
+		setAttr ($curHair + ".ikBlend") 0;
+    //End.    
+        
+}
+
+global proc IHresetNhairChain(){
+
+    string $listSel[] = `ls -sl`;
+    string $hairCon = $listSel[0];    
+    
+    if ( `objExists ($hairCon + ".enable")`) {
+        setAttr ($hairCon + ".startFrame") 100000;
+        setAttr ($hairCon + ".enable") 0;
+    } else 
+        error "please select hairControl\n";    
+        
+    //hairSystemList
+    string $listHairSys[] = `listConnections -d 1 -s 0 ($hairCon + ".hairSystem")`;    
+    for ($curHairSys in $listHairSys )    
+        setAttr ($curHairSys + ".active") 0;
+              
+    //listHair
+    string $listHair[] = `listConnections -d 1 -s 0 ($hairCon + ".hairChain")`;
+    
+    string $bakeConList[];
+    string $IkHandleList[];
+    
+    for ( $curHair in $listHair ){    
+    
+        string $pre =`substitute "_Line_Con" $curHair ""`;    
+        string $listIk[] = `ls ($pre + "_Line*_IK")`;
+        appendStringArray($bakeConList, $listIk , size($listIk) );    
+        
+        string $listIkHandle = ($pre + "_ikHandle");    
+        setAttr ($curHair + ".ikBlend") 1;
+    }
+    
+    
+    select -r $bakeConList;    
+    cutKey -clear -time ":" -hierarchy none -controlPoints 0 -shape 1;
+    
+	//skinCon
+	string $skinCon[];
+	for ( $curHair in $listHair ){        
+        string $pre =`substitute "_Line_Con" $curHair ""`;    
+        string $listBakeOut[] = `ls ($pre + "_Line*_Bake_Out")`;
+		string $listIkSkin[] = `ls ($pre + "_Line*_IKSkin")`;
+        appendStringArray($skinCon, $listBakeOut , size($listBakeOut) );    
+        appendStringArray($skinCon, $listBakeOut , size($listIkSkin) ); 		
+    }
+	
+	select -r $skinCon;    
+    cutKey -clear -time ":" -hierarchy none -controlPoints 0 -shape 1;
+
+	for ( $curCon in $skinCon ) {
+		setAttr ($curCon + ".t") 0 0 0;
+		setAttr ($curCon + ".r") 0 0 0;
+	}
+
+    //conVis
+    for ($curHair in $listHair){
+       setAttr ($curHair +".Con_HideShow") 1;
+       setAttr ($curHair +".Skin_HideShow") 0;
+    }
+
+
+    //hairSystemList
+    string $listHairSys[] = `listConnections -d 1 -s 0 cc_hair.hairSystem`;    
+    for ($curHairSys in $listHairSys )    
+        setAttr ($curHairSys + ".active") 0;
+
+}
+
+
+
+nHairBakeKeyWin;
+
+
+global proc IHselectHairSystem(){
+
+	string $listSel[] = `ls -sl`;
+    string $hairCon = $listSel[0];
+	string $listHairSys[] = `listConnections -d 1 -s 0 ($hairCon + ".hairSystem")`;    
+	select -r $listHairSys;
+	
+}
+
+global proc IHresetSkinCon(){
+
+	string $listSel[] = `ls -sl`;
+    string $hairCon = $listSel[0];
+	
+	//listHair
+    string $listHair[] = `listConnections -d 1 -s 0 ($hairCon + ".hairChain")`;
+    
+    string $bakeConList[];
+    
+    for ( $curHair in $listHair ){        
+        string $pre =`substitute "_Line_Con" $curHair ""`;    
+        string $listBakeOut[] = `ls ($pre + "_Line*_Bake_Out")`;
+		string $listIkSkin[] = `ls ($pre + "_Line*_IKSkin")`;
+        appendStringArray($bakeConList, $listBakeOut , size($listBakeOut) );    
+        appendStringArray($bakeConList, $listBakeOut , size($listIkSkin) ); 		
+    }
+	
+	select -r $bakeConList;    
+    cutKey -clear -time ":" -hierarchy none -controlPoints 0 -shape 1;
+
+	for ( $curCon in $bakeConList ) {
+		setAttr ($curCon + ".t") 0 0 0;
+		setAttr ($curCon + ".r") 0 0 0;
+	}
+	
+}
+
+
+global proc IHselectLineCon(){
+	string $listSel[] = `ls -sl`;
+    string $hairCon = $listSel[0];
+	string $listHair[] = `listConnections -d 1 -s 0 ($hairCon + ".hairChain")`;
+	select $listHair;
+}

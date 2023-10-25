@@ -1,0 +1,1091 @@
+/*
+    Script:     js_matchObjUI
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Creates an interface for building the attributes for js_matchObj
+    
+    Requires:   js_matchObj
+                js_loadSelectdIntoButtonGrp
+
+*/
+global proc js_matchObjUI ()
+{
+    // this procedure creates an interface for building the attributes for js_matchObj
+
+    $win = "js_setupMatchObjWin";
+
+    if (`window -exists $win`)
+    {
+        deleteUI $win;
+    }
+
+    window -w 200 -title "Setup Match Object Options" $win;
+
+    string $scrollLayout = `scrollLayout 
+         -horizontalScrollBarThickness 16 
+         -verticalScrollBarThickness   16
+         -cr true`;
+
+    $c = `columnLayout -rs 5 -adj true -cat "both" 5`; 
+
+    $so = `textFieldButtonGrp -adj 2 -l "Object:" -bl "Sel"`;
+    $fl1 = `frameLayout -w 200 -parent $c -enable 0 -l "Match Object Options" -cll true -cl false js_matchObjOptionsFL`;
+    $fl2 = `frameLayout -w 200 -parent $c -enable 0 -l "Match Iteration Options" -cll true -cl false js_matchObjIterationFL`;
+    $fl4 = `frameLayout -w 200 -parent $c -enable 0 -l "Match Pre-Settings" -cll true -cl false js_matchObjPreFL`;
+    $fl5 = `frameLayout -w 200 -parent $c -enable 0 -l "Match Post-Settings" -cll true -cl false js_matchObjPostFL`;
+    $fl3 = `frameLayout -w 200 -parent $c -enable 0 -l "Match Attribute Options" -cll true -cl true -vis 0 js_matchObjAttrFL`;
+    
+
+    // Create the Match Object Options
+    //
+    setParent $fl1;
+        columnLayout -adj true -rs 5 ;
+        button -l "Create Match Object" js_matchToObjectButton;
+        textFieldButtonGrp -l "Match To Object:" -bl "Load Sel" js_matchToObjectTFBG;
+        checkBoxGrp -l "Match Attributes:" -ncb 3 -label1 "Translate" -label2 "Rotate" -label3 "Scale" js_matchConstCBG;
+
+    // Create the Match Iteration Options
+    //
+    setParent $fl2;
+        columnLayout -w 200 -rs 5 -adj true;
+        $f = `formLayout -nd 100`;
+
+        $t = `text -l "Iteration Attributes" -align "left"`;
+        $tsl = `textScrollList -ams 0 -nr 6 js_matchIterationTSL`;
+        $addAttrB = `button -l "Add"`;
+        $delAttrB = `button -l "Del"`;
+
+        $object1 = `textFieldButtonGrp -cw 1 100 -adj 2 -cw 3 30 -l "Object 1:" -enable 0 -bl "Sel" js_matchObj1TFBG`;
+        $object2 = `textFieldButtonGrp -cw 1 100 -adj 2 -cw 3 30 -l "Object 2:" -enable 0 -bl "Sel" js_matchObj2TFBG`;
+        $min = `floatFieldGrp -cw 1 100 -adj 2 -enable 0 -l "Min Value:" js_matchObjMinIter`;
+        $max = `floatFieldGrp -cw 1 100 -adj 2 -enable 0 -l "Max Value:" js_matchObjMaxIter`;
+        $iter = `intFieldGrp -cw 1 100 -adj 2 -enable 0 -l "Num Iterations:" -nf 1 -v1 50 js_matchObjNumIter`;
+
+        $sep = `separator -style "single" -hr false`;
+        formLayout -e
+            -af $t top 10
+            -af $t left 10
+            -ap $t right 5 50
+
+            -af $tsl left 10
+            -ac $tsl top 1 $t
+            -ap $tsl right 5 50
+            
+            -af $addAttrB left 10
+            -ac $addAttrB top 5 $tsl
+            -ap $addAttrB right 1 25
+
+            -ac $delAttrB top 5 $tsl
+            -ap $delAttrB left 1 25
+            -ap $delAttrB right 5 50
+
+            -af $object1 top 5
+            -ap $object1 left 5 50
+            -af $object1 right 5
+
+            -ac $object2 top 5 $object1
+            -ap $object2 left 5 50
+            -af $object2 right 5
+
+            -ac $min top 5 $object2
+            -ap $min left 5 50
+            -af $min right 5
+
+            -ac $max top 5 $min
+            -ap $max left 5 50
+            -af $max right 5
+
+            -ac $iter top 5 $max
+            -ap $iter left 5 50
+            -af $iter right 5
+
+            -af $sep top 5
+            -ap $sep left 5 50
+            -af $sep bottom 5
+
+            $f;
+    
+    // Create the Match Pre Attribute Options
+    //
+    setParent $fl4;
+        columnLayout -w 200 -rs 5 -adj true;
+        $f_pre = `formLayout -nd 100`;
+
+        $t_pre = `text -l "Pre-Match Attributes" -align "left"`;
+        $tsl_pre = `textScrollList -ams 0 -nr 6 js_matchpreTSL`;
+        $addAttrB_pre = `button -l "Add"`;
+        $delAttrB_pre = `button -l "Del"`;
+
+        $defaultValue_pre = `floatFieldGrp -cw 1 100 -adj 2 -l "Default Value" -enable 0  js_matchObjpreFFG`;
+        $sep_pre = `separator -style "single" -hr false`;
+        formLayout -e
+            -af $t_pre top 10
+            -af $t_pre left 10
+            -ap $t_pre right 5 50
+
+            -af $tsl_pre left 10
+            -ac $tsl_pre top 1 $t_pre
+            -ap $tsl_pre right 5 50
+            
+            -af $addAttrB_pre left 10
+            -ac $addAttrB_pre top 5 $tsl_pre
+            -ap $addAttrB_pre right 1 25
+
+            -ac $delAttrB_pre top 5 $tsl_pre
+            -ap $delAttrB_pre left 1 25
+            -ap $delAttrB_pre right 5 50
+
+            -ac $defaultValue_pre top 1 $t_pre
+            -ap $defaultValue_pre left 5 50
+            -af $defaultValue_pre right 5
+
+            -af $sep_pre top 5
+            -ap $sep_pre left 5 50
+            -af $sep_pre bottom 5
+
+            $f_pre;
+    setParent $fl5;
+        columnLayout -w 200 -rs 5 -adj true;
+        $f_post = `formLayout -nd 100`;
+
+        $t_post = `text -l "post-Match Attributes" -align "left"`;
+        $tsl_post = `textScrollList -ams 0 -nr 6 js_matchpostTSL`;
+        $addAttrB_post = `button -l "Add"`;
+        $delAttrB_post = `button -l "Del"`;
+
+        $defaultValue_post = `floatFieldGrp -cw 1 100 -adj 2 -l "Default Value" -enable 0  js_matchObjpostFFG`;
+        $sep_post = `separator -style "single" -hr false`;
+        formLayout -e
+            -af $t_post top 10
+            -af $t_post left 10
+            -ap $t_post right 5 50
+
+            -af $tsl_post left 10
+            -ac $tsl_post top 1 $t_post
+            -ap $tsl_post right 5 50
+            
+            -af $addAttrB_post left 10
+            -ac $addAttrB_post top 5 $tsl_post
+            -ap $addAttrB_post right 1 25
+
+            -ac $delAttrB_post top 5 $tsl_post
+            -ap $delAttrB_post left 1 25
+            -ap $delAttrB_post right 5 50
+
+            -ac $defaultValue_post top 1 $t_post
+            -ap $defaultValue_post left 5 50
+            -af $defaultValue_post right 5
+
+            -af $sep_post top 5
+            -ap $sep_post left 5 50
+            -af $sep_post bottom 5
+
+            $f_post;
+    
+    // Create the Match Attribute Options
+    //
+    setParent $fl3;
+        columnLayout -w 200 -adj true;
+        $f2 = `formLayout -nd 100`;
+
+        $t2 = `text -l "Match Attributes" -align "left"`;
+        $tsl2 = `textScrollList -ams 0 -nr 6 js_matchAttrsTSL`;
+        $addAttrB2 = `button -l "Add"`;
+        $delAttrB2 = `button -l "Del"`;
+
+        $object3 = `textFieldButtonGrp -cw 1 100 -adj 2 -cw 3 30 -l "Object:" -bl "Sel" js_matchAttrObjTFBG`;
+        $tsl4 = `textScrollList -ams 0 -nr 6 js_matchObjAttrTSL`;
+
+        $sep1 = `separator -style "single" -hr false`;
+        formLayout -e
+            -af $t2 top 5
+            -af $t2 left 10
+            -ap $t2 right 5 50
+
+            -af $tsl2 left 10
+            -ac $tsl2 top 1 $t2
+            -ap $tsl2 right 5 50
+            
+            -af $addAttrB2 left 10
+            -ac $addAttrB2 top 5 $tsl2
+            -ap $addAttrB2 right 1 25
+
+            -ac $delAttrB2 top 5 $tsl2
+            -ap $delAttrB2 left 1 25
+            -ap $delAttrB2 right 5 50
+
+            -af $object3 top 5
+            -ap $object3 left 5 50
+            -af $object3 right 5
+
+            -ac $tsl4 top 5 $object3
+            -ap $tsl4 left 10 50
+            -af $tsl4 right 5
+
+            -af $sep1 top 5
+            -ap $sep1 left 5 50
+            -af $sep1 bottom 5
+
+            $f2;
+    
+    // Callbacks
+
+    button -e
+        -c ("js_createMatchObject \"" + $so + "\" \"js_matchToObjectTFBG\"")
+        js_matchToObjectButton;
+    textFieldButtonGrp -e
+        -bc ("js_loadSelectedIntoButtonGrp \"" + $so + "\";js_reloadMatchUI \"" + $so + "\"")
+        -cc ("js_reloadMatchUI \""+$so+"\"")
+        $so;
+
+    textFieldButtonGrp -e
+        -bc ("js_loadSelectedIntoButtonGrp \"js_matchToObjectTFBG\";js_addMatchToObj \"" + $so + "\" \"js_matchToObjectTFBG\" \"match_obj\"")
+        -cc ("js_addMatchToObj \"" + $so + "\" \"js_matchToObjectTFBG\" \"match_obj\"")
+        js_matchToObjectTFBG;
+
+    textFieldButtonGrp -e
+        -bc ("js_loadSelectedIntoButtonGrp \"js_matchObj1TFBG\";js_addMatchToObj \"" + $so + "\" \"js_matchObj1TFBG\" \"match_iterate_object\"")
+        -cc ("js_addMatchToObj \"" + $so + "\" \"js_matchObj1TFBG\" \"match_iterate_object\"")
+        js_matchObj1TFBG;
+
+    textFieldButtonGrp -e
+        -bc ("js_loadSelectedIntoButtonGrp \"js_matchObj2TFBG\";js_addMatchToObj \"" + $so + "\" \"js_matchObj2TFBG\" \"match_iterate_target\"")
+        -cc ("js_addMatchToObj \"" + $so + "\" \"js_matchObj2TFBG\" \"match_iterate_target\"")
+        js_matchObj2TFBG;
+    showWindow $win;
+
+    floatFieldGrp -e
+        -cc ("js_addMatchChangeValue \"" + $so + "\" \"js_matchObjMinIter\" \"min\"")
+        js_matchObjMinIter;
+    floatFieldGrp -e
+        -cc ("js_addMatchChangeValue \"" + $so + "\" \"js_matchObjMaxIter\" \"max\"")
+        js_matchObjMaxIter;
+    intFieldGrp -e
+        -cc ("js_addMatchChangeIntValue \"" + $so + "\" \"js_matchObjNumIter\" \"iter\"")
+        js_matchObjNumIter;
+    // trans,rot,scale checkBoxGrp
+    checkBoxGrp -e
+        -cc ("js_addMatchCBG \"" + $so + "\"")
+        js_matchConstCBG; 
+
+    // add iter button
+    button -e
+        -c ("js_addMatchIter \"" + $so + "\"")
+        $addAttrB ;
+    // del iter button
+    button -e
+        -c ("js_addMatchDelIter \"" + $so + "\"")
+        $delAttrB ;
+
+    // add pre button
+    button -e
+        -c ("js_addPrePostAdd \"" + $so + "\" \"" +$tsl_pre + "\" \"pre\"")
+        $addAttrB_pre;
+    button -e
+        -c ("js_addPrePostDel \"" + $so + "\" \"" +$tsl_pre + "\" \"pre\"")
+        $delAttrB_pre;
+
+    button -e
+        -c ("js_addPrePostAdd \"" + $so + "\" \"" +$tsl_post + "\" \"post\"")
+        $addAttrB_post;
+    button -e
+        -c ("js_addPrePostDel \"" + $so + "\" \"" +$tsl_post + "\" \"post\"")
+        $delAttrB_post;
+
+    textScrollList -e 
+        -sc ("js_addMatchIterSel \"" + $so + "\"")
+       js_matchIterationTSL ;
+
+    textScrollList -e
+        -sc ("js_addMatchPrePostSel \"" + $so + "\" \"pre\"")
+        $tsl_pre;
+
+    textScrollList -e
+        -sc ("js_addMatchPrePostSel \"" + $so + "\" \"post\"")
+        $tsl_post;
+}
+
+global proc js_createMatchObject (string $tfbg1, string $tfbg2)
+{
+    $obj = `textFieldButtonGrp -q -tx $tfbg1`;
+    
+    // duplicate $obj and use it as the match object
+    $dup = `duplicate -rr $obj`;
+
+    // rename dup
+    $match = `rename $dup[0] ($obj + "_match")`;
+    
+    // delete the children
+    string $children[0];
+    $children = `listRelatives -f -c $match`;
+    if (size($children) > 0)
+        delete $children;
+
+    select $match;
+    
+    // unlock all the attributes
+    string $attrs[0];
+    $attrs= {"tx", "ty", "tz", "rx", "ry", "rz", "sx", "sy", "sz"};
+    
+    for ($at in $attrs)
+    {
+        setAttr -l 0 ($match + "." + $at);
+    }
+    textFieldButtonGrp -e -tx $match $tfbg2;
+    js_addMatchToObj $tfbg1 $tfbg2 "match_obj";
+    
+
+}
+global proc js_addMatchPrePostSel (string $tfbg, string $type)
+{
+    $obj = `textFieldButtonGrp -q -tx $tfbg`;
+    
+    string $sel[0];
+    $tsl = ("js_match"+$type+"TSL");
+    $sel = `textScrollList -q -si $tsl`;
+    $ffg = ("js_matchObj"+$type+"FFG"); 
+
+    if (size($sel) == 0)
+    {
+        floatFieldGrp -e -enable 0 -v1 0 $ffg;
+    }
+    else
+    {
+        // get the value
+        $index = `textScrollList -q -sii $tsl`;
+       
+        $attr = ("match_"+$type+"_"+$index[0]+"_"+$sel[0]);
+        $value = `getAttr ($obj + "." + $attr)`;
+        floatFieldGrp -e -enable 1 -v1 $value $ffg;
+
+        connectControl $ffg -index 2 ($obj + "." + $attr);
+    }
+}
+global proc js_addMatchIterSel (string $tfbg )
+{
+    $obj = `textFieldButtonGrp -q -tx $tfbg`;
+    
+    string $sel[0];
+    $sel = `textScrollList -q -si js_matchIterationTSL`;
+    if (size($sel) == 0)
+    {
+        textFieldButtonGrp -e -enable 0 -tx "" js_matchObj1TFBG;
+        textFieldButtonGrp -e -enable 0 -tx "" js_matchObj2TFBG;
+        floatFieldGrp -e -enable 0 -v1 0 js_matchObjMinIter;
+        floatFieldGrp -e -enable 0 -v1 0 js_matchObjMaxIter;
+        intFieldGrp -e -enable 0 -v1 50 js_matchObjNumIter;
+    }
+    else
+    {
+        textFieldButtonGrp -e -enable 1 -tx "" js_matchObj1TFBG;
+        textFieldButtonGrp -e -enable 1 -tx "" js_matchObj2TFBG;
+        floatFieldGrp -e -enable 1 -v1 0 js_matchObjMinIter;
+        floatFieldGrp -e -enable 1 -v1 0 js_matchObjMaxIter;
+        intFieldGrp -e -enable 1 -v1 50 js_matchObjNumIter;
+
+        // what index number is selected
+        $index = `textScrollList -q -sii js_matchIterationTSL`;
+
+        // okay, now for each item grab specific information
+        string $tmp[0];
+        clear $tmp;
+        $tmp = `js_addMatchGrabIterSpecific $obj "object" $index[0]`;
+        textFieldButtonGrp -e -tx $tmp[0] js_matchObj1TFBG;
+        clear $tmp;
+        $tmp = `js_addMatchGrabIterSpecific $obj "target" $index[0]`;
+        textFieldButtonGrp -e -tx $tmp[0] js_matchObj2TFBG;
+        clear $tmp;
+        $tmp = `js_addMatchGrabIterSpecific $obj "min" $index[0]`;
+        float $val = $tmp[0];
+        floatFieldGrp -e -v1 $val js_matchObjMinIter;
+        clear $tmp;
+        $tmp = `js_addMatchGrabIterSpecific $obj "max" $index[0]`;
+        float $val = $tmp[0];
+        floatFieldGrp -e -v1 $val js_matchObjMaxIter;
+        clear $tmp;
+        $tmp = `js_addMatchGrabIterSpecific $obj "iter" $index[0]`;
+        int $val2 = $tmp[0];
+        intFieldGrp -e -v1 $val2 js_matchObjNumIter;
+
+    }
+}   
+global proc js_addPrePostDel (string $tfbg, string $tsl, string $type)
+{
+    $obj = `textFieldButtonGrp -q -tx $tfbg`;
+    string $sel[0];
+    $sel = `textScrollList -q -si $tsl`;
+    
+    if (size($sel) > 0)
+    {
+        // now we're going to delete the selected item from the list of pre or post items.  However, 
+        // in order to do this, we first must grab the current list of items, delete the one we've got, 
+        // then re-create everything with the new order
+        string $currentIterAttrs[0];
+        $currentIterAttrs = `js_addMatchReturnPrePostAsStringArray $obj $type` ;
+       
+        // now we're going to delete all of them
+        js_addMatchRemoveAllPrePost $obj $type;
+
+        // now we're going to build a new array of all of the items w/out the one that the user picked
+        string $newArray[0];
+        int $count = 0;
+        string $item;
+        for ($item in $currentIterAttrs)
+        {
+            // check for the attribute
+            if (!`gmatch $item ($sel[0] + "*")`)
+            {
+                $newArray[$count++] = $item;
+            }
+        }   
+
+        // now add the attributes
+        for ($x = 0; $x < size($newArray); $x++)
+        {
+            string $break[0];
+            tokenize ($newArray[$x],":", $break);
+            $attrName = ("match_"+$type+"_"+($x+1)+"_"+$break[0]);
+            addAttr -ln ($attrName) -at "double" $obj;
+            $newValue = $break[1];
+            $cmd = ("setAttr " + $obj + "." + $attrName + " " + $newValue);
+            evalEcho $cmd;
+        }
+        
+        // refresh the ui
+        js_addMatchUpdatePrePostList $obj $type;
+    }
+
+}
+global proc js_addMatchDelIter (string $tfbg)
+{
+    $obj = `textFieldButtonGrp -q -tx $tfbg`;
+
+    // get the selected item in the textScrollList
+    string $sel[0];
+    $sel = `textScrollList -q -si js_matchIterationTSL`;
+    if (size($sel) > 0)
+    {
+        // now we're going to delete the selected item from the list of iterating items.  However, 
+        // in order to do this, we first must grab the current list of items, then delete all the connecctions,
+        // then re-create everything with the new order
+        string $currentIterAttrs[0];
+        $currentIterAttrs = `js_addMatchReturnIterationsAsStringArray $obj` ;
+        
+        // now we're going to delete all of them
+        js_addMatchRemoveAllIterations $obj;
+
+        // now we're going to build a new array of all of the items w/out the one that the user picked
+        string $newArray[0];
+        int $count = 0;
+        string $item;
+        for ($item in $currentIterAttrs)
+        {
+            // check for the attribute
+            if (!`gmatch $item ($sel[0] + "*")`)
+            {
+                $newArray[$count++] = $item;
+            }
+        }   
+
+        // now add the attributes
+        js_addMatchAddAllIters $obj $newArray;
+
+        // refresh the ui
+        js_addMatchUpdateIterList $obj;
+        
+    }
+}
+global proc js_addMatchSelPrePost (string $obj, string $type)
+{
+    // grab the selected item
+    string $sel[0];
+    $sel = `textScrollList -q -si js_addMatchPrePostTSL`;
+    if (size($sel) > 0)
+    {
+        // okay, we have an attribute selected.  Now it's time to add a new attribute to the list of attributes
+        //
+        // first we must get the current list
+        string $currentIterAttrs[0];
+        $currentIterAttrs = `js_addMatchReturnPrePostAsStringArray $obj $type` ;
+        
+        $size = size($currentIterAttrs);
+        $num = $size+1;
+        
+        // add a new pre or post attribute
+        $newAttr = ("match_"+$type+"_"+$num+"_"+$sel[0]);
+
+        if (!`attributeQuery -exists -node $obj $newAttr`)
+        {
+            addAttr -ln $newAttr -at double $obj;
+        }
+        
+        js_addMatchUpdatePrePostList $obj $type;
+    }
+}
+
+global proc js_addMatchUpdatePrePostList (string $obj, string $type)
+{
+    // grab all the pre or post attrs
+    string $attrs[0];
+    $attrs = `js_addMatchReturnPrePostAsStringArray $obj $type`;
+    $tsl = ("js_match"+$type+"TSL");
+    textScrollList -e -ra $tsl;
+
+    string $at;
+    for ($at  in $attrs)
+    {
+        string $break[0];
+        tokenize ($at, ":", $break);
+        textScrollList -e -a $break[0] $tsl;
+    }
+
+
+
+}
+global proc js_addMatchSelItter (string $obj)
+{
+    // grab the selected item
+    string $sel[0];
+    $sel = `textScrollList -q -si js_addMatchIterTSL`;
+    if (size($sel) > 0)
+    {
+        // okay, we have an attribute selected.  Now it's time to add a new attribute to the list of attributes
+        //
+        // first we must get the current list
+        string $currentIterAttrs[0];
+        $currentIterAttrs = `js_addMatchReturnIterationsAsStringArray $obj` ;
+        $size = size($currentIterAttrs);
+        $num = $size+1;
+
+        // we're going to add the next one
+        js_addMatchAddSpecificIter $obj $num;
+
+        // set the attribute 
+        setAttr -type "string" ($obj + ".match_iterate_"+$num+"_attr") $sel[0];
+
+        // reset the list
+        js_addMatchUpdateIterList $obj;
+        
+    }
+}
+
+global proc js_addMatchUpdateIterList (string $obj)
+{
+    // grab all of the iterate attrs
+    string $attrs[0];
+    $attrs = `js_addMatchGrabIterSpecific $obj "attr" -1`;
+    textScrollList -e -ra js_matchIterationTSL;
+    for ($at in $attrs)
+    {
+        textScrollList -e -a $at js_matchIterationTSL;
+    }
+}
+
+global proc string[] js_addMatchGrabIterSpecific (string $obj, string $attr, int $index)
+{
+    // based on the index number we can get the specific attribute.  if the index is -1, then we want to get ALL of the attributes
+    string $return[0];
+
+    // first check the index.  
+    if ($index == -1)
+    {
+        // we're returning all the attributes
+        $currentIterAttrs = `js_addMatchReturnIterationsAsStringArray $obj` ;
+        string $item;
+        int $count = 0;
+        for ($item in $currentIterAttrs)
+        {
+            string $break[0];
+            tokenize ($item, ":", $break);
+            $return[$count++] = $break[0];
+        }
+
+    }
+    else
+    {
+        // we need a specific one, so we'll just query the specific attribute for that 
+        $attribute = ("match_iterate_"+$index+"_"+$attr);
+        if (($attr == "object") || ($attr == "target"))
+        {
+            // we have to grab what's connected
+            $return[0] = `js_getConItem $obj $attribute`;
+        }
+        else
+        {
+            $return[0] = `getAttr ($obj + "." + $attribute)`;
+        }
+    }
+    return $return;
+}
+global proc js_addPrePostAdd (string $tfbg, string $tsl, string $type)
+{
+    // get the item
+    $obj = `textFieldButtonGrp -q -tx $tfbg`;
+    
+    // now prompt for an iteration attr
+    $win2 = ("js_addMatch" + $type);
+    if (`window -exists $win2`)
+        deleteUI $win2;
+    window -t "Attribute List" $win2;
+
+    $f2 = `formLayout -nd 100`; 
+    $t = `text -l "Please pick an attribute:" -align "left"`;
+    $tsl = `textScrollList -ams 0 -nr 8 js_addMatchPrePostTSL`;
+    $b = `button -l "Add" -c ("js_addMatchSelPrePost \"" + $obj + "\" \""+$type+"\"; deleteUI \""+$win2+"\"")`;
+
+
+    formLayout -e 
+        -af $t top 5
+        -af $t left 5
+        -af $t right 5
+
+        -ac $tsl top 5 $t
+        -af $tsl left 5
+        -af $tsl right 5
+        -af $tsl bottom 30
+
+        -af $b left 5
+        -af $b right 5
+        -af $b bottom 5
+        -ac $b top 5 $tsl
+
+        $f2;
+    // add the attributes
+    $attrs = `listAttr -k $obj`;
+    for ($at in $attrs)
+    {
+        textScrollList -e -a $at js_addMatchPrePostTSL;
+    }
+    showWindow $win2;
+}
+global proc js_addMatchIter (string $tfbg)
+{
+    // get the item
+    $obj = `textFieldButtonGrp -q -tx $tfbg`;
+
+    // now prompt for an iteration attr
+    $win2 = "js_addMatchIter";
+    if (`window -exists $win2`)
+        deleteUI $win2;
+    window -t "Attribute List" $win2;
+
+    $f2 = `formLayout -nd 100`; 
+    $t = `text -l "Please pick an attribute:" -align "left"`;
+    $tsl = `textScrollList -ams 0 -nr 8 js_addMatchIterTSL`;
+    $b = `button -l "Add" -c ("js_addMatchSelItter \"" + $obj + "\"; deleteUI \""+$win2+"\"")`;
+
+
+    formLayout -e 
+        -af $t top 5
+        -af $t left 5
+        -af $t right 5
+
+        -ac $tsl top 5 $t
+        -af $tsl left 5
+        -af $tsl right 5
+        -af $tsl bottom 30
+
+        -af $b left 5
+        -af $b right 5
+        -af $b bottom 5
+        -ac $b top 5 $tsl
+
+        $f2;
+    // add the attributes
+    $attrs = `listAttr -k $obj`;
+    for ($at in $attrs)
+    {
+        textScrollList -e -a $at js_addMatchIterTSL;
+    }
+    showWindow $win2;
+}
+global proc js_addMatchCBG (string $tfbg)
+{
+    // get the object
+    $obj = `textFieldButtonGrp -q -tx $tfbg`;
+
+    // now check the values
+    $t = `checkBoxGrp -q -v1 js_matchConstCBG`;
+    $r = `checkBoxGrp -q -v2 js_matchConstCBG`;
+    $s = `checkBoxGrp -q -v3 js_matchConstCBG`;
+
+    // now add the attribute if it doesn't exist
+    $attr = "match_const";
+    if (!`attributeQuery -exists -node $obj $attr`)
+    {
+        addAttr -ln $attr -dt "string" $obj;
+    }
+     
+    string $val;
+
+    if ($t == 1)
+        $val += "t ";
+    if ($r == 1)
+        $val += "r ";
+    if ($s == 1)
+        $val += "s";
+
+    setAttr -type "string" ($obj + "." + $attr) $val;
+}
+
+global proc js_reloadMatchUI ( string $tfbg )
+{
+    // get the selected item
+    string $item;
+    $item = `textFieldButtonGrp -q -tx $tfbg`;
+
+    frameLayout -e -enable 0 js_matchObjOptionsFL;
+    frameLayout -e -enable 0 js_matchObjIterationFL;
+    frameLayout -e -enable 0 js_matchObjAttrFL;
+    frameLayout -e -enable 0 js_matchObjPreFL;
+    frameLayout -e -enable 0 js_matchObjPostFL;
+    // clear everything in the list of objects
+
+    // Match Object
+    textFieldButtonGrp -e -tx "" js_matchToObjectTFBG;
+    checkBoxGrp -e -v1 0 -v2 0 -v3 0 js_matchConstCBG;
+
+    // Match Iteration
+    textScrollList -e -ra js_matchIterationTSL;
+    textFieldButtonGrp -e -tx "" js_matchObj1TFBG;
+    textFieldButtonGrp -e -tx "" js_matchObj2TFBG;
+    floatFieldGrp -e -v1 0 js_matchObjMinIter;
+    floatFieldGrp -e -v1 0 js_matchObjMaxIter;
+    intFieldGrp -e -v1 50 js_matchObjNumIter;
+
+    // match attr
+    textScrollList -e -ra js_matchAttrsTSL;
+    textScrollList -e -ra js_matchObjAttrTSL;
+    textFieldButtonGrp -e -tx "" js_matchAttrObjTFBG;
+
+    // now check the selected item 
+    if (`objExists $item`)
+    {
+        frameLayout -e -enable 1 js_matchObjOptionsFL;
+        frameLayout -e -enable 1 js_matchObjIterationFL;
+        frameLayout -e -enable 1 js_matchObjAttrFL;
+        frameLayout -e -enable 1 js_matchObjPreFL;
+        frameLayout -e -enable 1 js_matchObjPostFL;
+        // the object exists.  Now we have to check and see if the object has the stuff we need
+        //
+        // match object
+        js_checkMatchObject $item;
+
+        // const
+        js_checkConstObject $item;
+
+        // iter list
+        js_addMatchUpdateIterList $item;
+        
+        // pre list
+        js_addMatchUpdatePrePostList $item "pre";
+        js_addMatchUpdatePrePostList $item "post";
+    }
+}
+global proc js_checkConstObject (string $obj)
+{
+    $attr = "match_const";
+    if (`attributeQuery -exists -node $obj $attr`)
+    {
+        string $val;
+        $val = `getAttr ($obj + "." + $attr)`;
+        if (`gmatch $val "*t*"`)
+        {
+            checkBoxGrp -e -v1 1 js_matchConstCBG;
+        }
+
+        if (`gmatch $val "*r*"`)
+        {
+            checkBoxGrp -e -v2 1 js_matchConstCBG;
+        }
+
+        if (`gmatch $val "*s*"`)
+        {
+            checkBoxGrp -e -v3 1 js_matchConstCBG;
+        }
+
+    }
+}
+global proc js_checkMatchObject (string $obj)
+{
+    $attr = "match_obj";
+    if (`attributeQuery -exists -node $obj $attr`)
+    {
+        // it exists, check and see what's connected
+        $con = `js_getConItem $obj $attr`;
+        textFieldButtonGrp -e -tx $con js_matchToObjectTFBG;
+    }
+}
+
+global proc js_addMatchChangeValue (string $tfbg, string $ffg, string $at)
+{
+    $obj = `textFieldButtonGrp -q -tx $tfbg`;
+    $sii = `textScrollList -q -sii js_matchIterationTSL`;
+
+    $attr = ("match_iterate_"+$sii[0]+"_"+$at);
+    $val = `floatFieldGrp -q -v1 $ffg`;
+    setAttr ($obj + "." + $attr) $val;
+}
+global proc js_addMatchChangeIntValue (string $tfbg, string $ifg, string $at)
+{
+    $obj = `textFieldButtonGrp -q -tx $tfbg`;
+    $sii = `textScrollList -q -sii js_matchIterationTSL`;
+
+    $attr = ("match_iterate_"+$sii[0]+"_"+$at);
+    $val = `intFieldGrp -q -v1 $ifg`;
+    setAttr ($obj + "." + $attr) $val;
+}
+global proc js_addMatchToObj (string $tfbg, string $tfbg2, string $attr)
+{
+    // get the item from $tfbg and from $tfbg2
+
+    string $obj = `textFieldButtonGrp -q -tx $tfbg`;
+    string $obj2 = `textFieldButtonGrp -q -tx $tfbg2`;
+
+    if ($obj != "")
+    {
+        if (`gmatch $attr "*iterate*"`)
+        {
+            // this is an iterate attribute, so we need to connect the object to it
+            // to do that, we gotta figure out which index number it is so we can get an accurate number
+			int $sii[0];
+            $sii = `textScrollList -q -sii js_matchIterationTSL`;
+
+            $newAttr = `substitute "iterate_" $attr ("iterate_"+$sii[0]+"_")`;
+            
+            // NEW.. add attribute if one is specified
+            string $break[0];
+            tokenize ($obj2, ".", $break);
+            if ($break[1] == "")
+                $break[1] = "message";
+            //connectAttr -f ($obj2 + ".message") ($obj + "." + $newAttr);
+            connectAttr -f ($break[0] + "." + $break[1]) ($obj + "." + $newAttr);
+            
+        }
+        else
+        {
+            if (!`attributeQuery -exists -node $obj $attr`)
+            {
+                addAttr -ln $attr -at message $obj;
+            }
+            connectAttr -f ($obj2 + ".message") ($obj + "." + $attr);
+        }
+    }
+}
+
+global proc string js_getConItem (string $obj, string $attr)
+{
+    string $return;
+    
+    string $con[0];
+    // NEW
+    $con = `listConnections -p true ($obj + "." + $attr)`;
+    string $break[0];
+    tokenize ($con[0], ".", $break);
+    if ($break[1] == "message")
+        $return = $break[0];
+    else
+        $return = $con[0];
+    return $return;
+}
+
+global proc js_addMatchRemoveAllPrePost (string $obj, string $type)
+{
+    // removes all the iteration attributes
+    string $itrAttrs[0];
+    $itrAttrs = `listAttr -string ("match_"+$type+"*") -ud $obj`;
+    
+    for ($attr in $itrAttrs)
+    {
+        deleteAttr ($obj + "." + $attr);
+    }   
+}
+global proc  js_addMatchRemoveAllIterations (string $obj)
+{
+    // removes all the iteration attributes
+    string $itrAttrs[0];
+    $itrAttrs = `listAttr -string "match_iterate*" -ud $obj`;
+    
+    for ($attr in $itrAttrs)
+    {
+        deleteAttr ($obj + "." + $attr);
+    }   
+}
+
+global proc js_addMatchAddSpecificPrePost (string $obj, int $num, string $type)
+{
+}
+global proc js_addMatchAddSpecificIter (string $obj, int $num)
+{
+        // okay, we've got everything broken apart
+        $min = ("match_iterate_"+$num+"_min"); 
+        $max = ("match_iterate_"+$num+"_max"); 
+        $attr = ("match_iterate_"+$num+"_attr"); 
+        $object = ("match_iterate_"+$num+"_object"); 
+        $target = ("match_iterate_"+$num+"_target"); 
+        $iter = ("match_iterate_"+$num+"_iter"); 
+
+        // add the attributes
+        addAttr -ln $attr -dt "string" $obj;
+        addAttr -ln $object -at message $obj;
+        addAttr -ln $target -at message $obj;
+        addAttr -ln $min -at double $obj;
+        addAttr -ln $max -at double $obj;
+        addAttr -ln $iter -at long -dv 50 $obj;
+
+}
+
+global proc js_addMatchAddAllIters (string $obj, string $iters[])
+{
+    // for each item in $iters, we'll add the correct attributes
+    // the string is in this order
+    // "attribute:object:target:min:max:numIter"
+    for ($x = 0; $x < size($iters); $x++) 
+    {
+        string $item;
+        $item = ($iters[$x]);
+        string $tmp[0];
+        tokenize ($item, ":", $tmp);
+        $num = $x + 1;    
+        // okay, we've got everything broken apart
+        $min = ("match_iterate_"+$num+"_min"); 
+        $max = ("match_iterate_"+$num+"_max"); 
+        $attr = ("match_iterate_"+$num+"_attr"); 
+        $object = ("match_iterate_"+$num+"_object"); 
+        $target = ("match_iterate_"+$num+"_target"); 
+        $iter = ("match_iterate_"+$num+"_iter"); 
+
+        // add the attributes
+        js_addMatchAddSpecificIter $obj $num;
+
+        // set the attributes
+        setAttr ($obj + "." + $attr) -type "string" $tmp[0];
+        
+
+        // try and connect the object.attribute
+        if (`objExists $tmp[1]`)
+            connectAttr ($tmp[1] + ".message") ($obj + "." + $object);
+        if (`objExists $tmp[2]`)
+            connectAttr ($tmp[2] + ".message") ($obj + "." + $target);
+
+        if ($tmp[3] != "")
+        {
+            float $item = $tmp[3];
+            setAttr ($obj + "." + $min) $item;
+        }
+        if ($tmp[4] != "")
+        {
+            float $item = $tmp[3];
+            setAttr ($obj + "." + $max) $item;
+        }
+        if ($tmp[5] != "")
+        {
+            int $item = $tmp[5];
+            setAttr ($obj + "." + $iter) $item;
+        }
+
+    }
+}
+global proc string[] js_addMatchReturnPrePostAsStringArray (string $obj, string $type)
+{
+    // this procedure will return the pre or post attributes as a string array
+    // in this format
+    // "attribute:value"
+
+    string $return[0];
+    
+    // get a list of all the attributes that match $type
+    string $itrAttrs[0];
+    $itrAttrs = `listAttr -string ("match_"+$type+"*") -ud $obj`;
+    
+    // we have all the pre or post attributes, now we just need them to be a string
+
+    string $item;
+    for ($item in $itrAttrs)
+    {
+        string $break[0];
+        tokenize ($item, "_", $break);
+        
+        // break[2] is the pre or post number, break[1] is the type, $break[3] is the attr
+        int $num = $break[2];
+        $num = $num-1;
+        $value = `getAttr ($obj + ".match_"+$type+"_"+$break[2]+"_" + $break[3])`;
+        $return[$num] = ($break[3] + ":" + $value);
+    }
+
+    return $return;
+}
+global proc string[] js_addMatchReturnIterationsAsStringArray (string $obj)
+{
+    // this procedure will return the iterations as a string array
+    // in this format:
+    // "attribute:object:target:min:max:numIter"
+    // 
+
+    string $return[0];
+   
+    // get a list of all the attributes that match iteration
+    string $itrAttrs[0];
+    $itrAttrs = `listAttr -string "match_iterate*" -ud $obj`;
+    
+    // we have all the itrAttributes, now we just need to build them into a string
+    string $min[0]; clear $min; 
+    string $max[0]; clear $max;
+    string $iter[0]; clear $iter;
+    string $object[0]; clear $object;
+    string $target[0]; clear $target;
+    string $attr[0]; clear $attr;
+
+    string $item;
+    for ($item in $itrAttrs)
+    {
+        string $break[0];
+        tokenize ($item, "_", $break);
+        
+        // break[2] is the iteration number, break[3] is the type
+        int $num = $break[2];
+        $num = $num-1;
+        switch ($break[3])
+        {
+            case "min":
+                   $min[$num] = `getAttr ($obj + "." + $item)`;
+                break;
+            case "max":
+                   $max[$num] = `getAttr ($obj + "." + $item)`;
+                break;
+            case "iter":
+                   $iter[$num] = `getAttr ($obj + "." + $item)`;
+                break;
+            case "attr":
+                   $attr[$num] = `getAttr ($obj + "." + $item)`;
+                break;
+            case "object":
+                string $con[0];
+                clear $con;
+                $con = `listConnections ($obj + "." + $item)`;
+                $object[$num] = $con[0];
+                break;
+            case "target":
+                string $con[0];
+                clear $con;
+                $con = `listConnections ($obj + "." + $item)`;
+                $target[$num] = $con[0];
+                break;
+            
+        }   
+    }
+    
+    // now we've got everything broken up.  get the size of $min
+    // now go through the number of iters to put them in the right format
+    // "attribute:object:target:min:max:numIter"
+    int $x = 0;
+    for ($item in $min)
+    {
+        $return[$x] = ($attr[$x]+":"+$object[$x]+":"+$target[$x]+":"+ $min[$x] + ":" + $max[$x] + ":" + $iter[$x]) ;
+        $x++;
+    }
+
+    return $return;
+}

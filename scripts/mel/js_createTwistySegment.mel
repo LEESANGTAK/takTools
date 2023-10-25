@@ -1,0 +1,238 @@
+/*
+    Script:     js_createTwistySegment
+    Version:    1.1
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This script creats a twisty segment of joints based on the selected joint.
+
+    Inputs:     $name           =>  Name to call this whole thing
+                $joint          =>  This joint represents the start of the joint segment that 
+                                    we're going to create a twisty segment for
+                $numSegments    =>  The number of segments we'll create
+                $geo            =>  If we want to add geometry to the segments
+                $volume         =>  Whether or not volume will be preserved
+                $worldScale     =>  If world scale will be used
+                $worldScaleObj  =>  World Scale object
+                $worldScaleAttr =>  World Scale Attr
+
+    Requires:   js_splitSelJoint
+                js_grepRename
+                js_createSkelGeo
+                js_createstretchSpline
+                js_copyPivot
+                
+    11/26/06	Version 1.1
+    			Fixed bug to ensure that joint orients and rotations are consistent.
+
+*/    
+global proc js_createTwistySegment ( string $name, string $joint, int $numSegments, int $geo, int $volume, int $worldScale, string $worldScaleObj, string $worldScaleAttr)
+{
+    
+
+    // there are a series of other variables that we need
+    string $curve;      // the nurbs curve that will be used to create the stretchSpline
+    string $children[0];
+    string $duplicatedJoint[0];
+    string $start_ctrl;
+    string $end_ctrl;
+    string $start_seg;
+    string $end_seg;
+    string $ikHandle;
+    string $start_aim;
+
+    float $start_pos[0];
+    float $end_pos[0];
+
+    // duplicate the joint
+    $duplicatedJoint = `duplicate -rr $joint`;
+
+    // find out if there's something connecte to the inverse_scale of $duplicatedJoint
+    $con = `listConnections -p true -s true -d true ($duplicatedJoint[0] + ".inverseScale")`;
+
+    if (size($con) > 0)
+    {
+        // break the conneciton
+        $cmd = ("disconnectAttr \"" + $con[0] + "\" \"" + $duplicatedJoint[0] + ".inverseScale\"");
+        catch (`eval $cmd`);
+    }
+    // delete all children of the duplicate except the first child joint
+    js_deleteAllChildrenButFirst $duplicatedJoint[0];
+
+    // rename the joint and it's child
+    // this joint is going to be the start control joint
+    $start_ctrl = ($name + "_start_ctrl");
+    $end_ctrl = ($name + "_end_ctrl");
+
+
+    $start_ctrl = `rename $duplicatedJoint[0] $start_ctrl`;
+    $child = `listRelatives -f -c $start_ctrl`;
+    $end_ctrl = `rename $child[0] $end_ctrl`;
+
+    // delete all the children of $end_ctrl
+    string $children[0];
+    $children = `listRelatives -f -c $end_ctrl`;
+    if (size($children) > 0)
+        delete $children; 
+
+    // duplicate the joint again
+    $duplicatedJoint = `duplicate -rr $start_ctrl`;
+    
+    $start_seg = `rename $duplicatedJoint[0] ($name + "_start_seg")`;
+    $child = `listRelatives -f -c $start_seg`;
+    $end_seg = `rename $child[0] ($name + "_end_seg")`;
+
+    // segment the new duplicate the number of times specified by $numSegments
+    select $start_seg;
+    js_splitSelJoint $numSegments;
+
+    // rename the segments so the duplicate _seg isn't in there
+    select -hi $start_seg;
+    js_grepRename "_seg_seg" "_seg" 0;
+
+    // check and see if we want to add geometry
+    if ($geo)
+    {
+        select -hi $start_seg;
+        select -tgl $end_seg;
+        string $tmp[0];
+        clear $tmp;
+        js_createSkelGeo $tmp;
+
+    }
+    // create a nurbs curve that goes from the start of the new duplicate to the end
+    $start_pos = `xform -q -ws -rp $start_ctrl`; 
+    $end_pos = `xform -q -ws -rp $end_ctrl`; 
+
+    $curve = `curve -d 1 
+                    -p $start_pos[0] $start_pos[1] $start_pos[2]
+                    -p $end_pos[0] $end_pos[1] $end_pos[2]
+                    -k 0 -k 1`;
+
+    $curve = `rename $curve ($name + "_curve")`;
+
+    // create clusters on the curve
+    select ($curve + ".cv[0]");
+    $clustInfo = `newCluster "-envelope 1"`;
+    $start_clust = `rename $clustInfo[1] ($name + "_start_clust")`;
+
+    select ($curve + ".cv[1]");
+    $clustInfo = `newCluster "-envelope 1"`;
+    $end_clust = `rename $clustInfo[1] ($name + "_end_clust")`;
+    
+    // create a splineIK using the new curve and the segmented joints
+    $handle = `ikHandle -startJoint $start_seg -ee $end_seg -sol "ikSplineSolver" -ccv false -pcv false -curve $curve -n ($name + "_ikHandle")`;
+    $ikHandle = $handle[0];
+
+    // duplicate the initial joint on it's own, this will be the upper aim joint
+    $dup = `duplicate $start_ctrl`;
+    $start_aim = `rename $dup[0] ($name + "_start_aim")`;
+
+    delete `listRelatives -f -c $start_aim`;
+
+    // tell the spine to stretch using js_createStretchSpline
+    js_createStretchSpline $curve $volume $worldScale $worldScaleObj $worldScaleAttr;
+
+    // attach the joints to the advanced twist controls for the ikHandle
+    setAttr ($ikHandle + ".dTwistControlEnable") 1;
+    setAttr ($ikHandle + ".dWorldUpType") 2;
+
+    //connectAttr ($start_aim + ".worldMatrix[0]") ($ikHandle + ".dWorldUpMatrix");
+    //connectAttr ($end_ctrl + ".worldMatrix[0]") ($ikHandle + ".dWorldUpMatrixEnd");
+
+    // Now we'll create two locators and place them just above the joints. These are going to be the up_vectors for the twist controls.  nifty, eh?
+    $loc1 = `spaceLocator`;
+    $start_loc = `rename $loc1[0] ($start_aim + "_loc")`;
+
+    $loc2 = `spaceLocator`;
+    $end_loc = `rename $loc1[0] ($end_ctrl + "_loc")`;
+
+    move -a -ws $start_pos[0] ($start_pos[1]+.2) $start_pos[2] $start_loc;
+    parent $start_loc $start_aim;
+
+    move -a -ws $end_pos[0] ($end_pos[1]+.2) $end_pos[2]  $end_loc;
+    parent $end_loc $end_ctrl;
+
+    hide $end_loc $start_loc;
+
+    // connect the locators to the twist control
+    connectAttr ($start_loc + ".worldMatrix[0]") ($ikHandle + ".dWorldUpMatrix");
+    connectAttr ($end_loc + ".worldMatrix[0]") ($ikHandle + ".dWorldUpMatrixEnd");
+
+    // connect the initial joint's rotation to the duplicated joint's rotation
+    connectAttr ($start_ctrl + ".rz") ($start_aim + ".rz");
+    connectAttr ($start_ctrl + ".ry") ($start_aim + ".ry");
+    connectAttr ($start_ctrl + ".t") ($start_aim + ".t");
+    
+    // group everything together
+    $start_grp = `group $start_clust`;
+    $start_grp = `rename $start_grp ($name + "_start_clust_grp")`;
+    $end_grp = `group $end_clust`;
+    $end_grp = `rename $end_grp ($name + "_end_clust_grp")`;
+    select $start_grp $start_ctrl;     parent;
+    select $end_grp $end_ctrl;     parent;
+
+    hide $start_grp $end_grp;
+
+    // set the curve's inherit transforms off
+    setAttr ($curve + ".inheritsTransform") 0 ;
+
+    // hide everything that needs to be hidden
+    js_hide $curve;
+    js_hide $ikHandle;
+    js_hide $start_aim;
+
+    // lock the attributes
+    string $objs[0];
+    $attrs = { "tx", "ty", "tz", "rx", "ry", "rz", "sx", "sy", "sz", "v" };
+    for ($at in $attrs)
+    {
+        setAttr -l 1 ($start_grp + "." + $at);
+        setAttr -l 1 ($end_grp + "." + $at);
+        setAttr -l 1 ($curve + "." + $at);
+    }
+
+    // group everything together
+    select $start_aim $curve $ikHandle;
+    $noTouchGrp = `group -n ($name + "_doNotTouch_grp")`;
+    
+    select $start_ctrl $start_seg $noTouchGrp;
+    $allGrp = `group -n ($name + "_grp")`;
+
+    // now move the pivot to the start
+    select $start_ctrl $allGrp;
+    js_copyPivot;
+    
+    // Make sure that the duplicated joint has the same rotations and jointOrient values that the original joint has
+    $r = `getAttr ($joint + ".r")`;
+    $jo = `getAttr ($joint + ".jo")`;
+
+    setAttr ($start_ctrl + ".r") $r[0] $r[1] $r[2];
+    setAttr ($start_ctrl + ".jo") $jo[0] $jo[1] $jo[2];
+    setAttr ($start_aim + ".rx") $r[0]; 
+    setAttr ($start_aim + ".jo") $jo[0] $jo[1] $jo[2];
+}
+global proc js_hide (string $obj)
+{
+    hide $obj;
+    setAttr -l 1 ($obj + ".v");
+}
+global proc js_deleteAllChildrenButFirst (string $joint)
+{
+    $children = `listRelatives -f -c $joint`;
+    int $firstChild = 0;
+    for ($child in $children)
+    {
+        if (`nodeType $child` == "joint")
+        {
+            if ($firstChild == 0)
+                $firstChild = 1;
+        }
+        else
+        {
+            if ($firstChild == 1)
+                delete $child;
+        }
+    }
+
+}

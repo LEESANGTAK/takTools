@@ -1,0 +1,45 @@
+/*
+    Script:     js_hashRenameUI
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Works with js_hashRename to rename objects replacing the ### marks with numbers.
+
+    Requires:   js_hashRename.mel
+
+*/
+global proc js_hashRenameUI ()
+{
+    // bring up an interface for hashRename
+
+    $win = "js_hashRename";
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -title "Hash Rename" $win;
+
+    columnLayout -adj true -co "both" 10 ;
+    text -align "left" -l "New Name: (example: name####me)";
+    $searchTextGrp = `textField -tx ""`;
+    textField -e -cc ("js_prepHashRename \"" + $searchTextGrp +"\"") $searchTextGrp;
+    showWindow $win;
+    
+}
+
+global proc js_prepHashRename (string $stg)
+{
+    // get the results
+    string $search;
+
+    $search = `textField -q -tx $stg`;
+    
+    if ($search != "") 
+    {
+        $cmd = ("js_hashRename \"" + $search + "\"");
+        evalEcho $cmd;
+        textField -e -tx "" -ip 1 $stg;
+        evalDeferred ("setFocus \""+$stg+"\"");
+
+    }
+}

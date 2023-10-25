@@ -1,0 +1,51 @@
+/* This file downloaded from Highend3d.com
+''  
+''  Highend3d.com File Information:
+''  
+''    Script Name: cracKut.mel
+''    Author: yudong 
+''    Last Updated: Oct 13, 2008
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/modeling/poly_tools/2484.html
+''  
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+/////////////////////////////////////////////////////////////////
+//<Script Name>: yd_crackut.mel
+//<Creation Date>: 13,Oct,2008
+//<Desciption>: cut obj by a plane_style obj
+//<Note>: MODIFY THIS AT YOUR OWN RISK :)
+//<Usage>: *Put this script in to [X:\Documents and Settings\
+//         user_Name\My Documents\maya\XXXX\scripts],
+//         source the script in Maya.
+//         *First selecet the cutPlane(planeStyle obj,but
+//         you also can use other poly obj,certainly ),
+//         next select the obj you wantto separate,than 
+//         excute this script.
+//<Last update>:
+/////////////////////////////////////////////////////////////////
+global proc yd_crackut()
+{
+//define the selection
+string $objA[] = `ls -selection -head 1`;
+string $objB[] = `ls -selection -tail 1`;
+string $objAll[] =`ls -sl`;
+
+//duplicate the cutPlane
+duplicate -rr -n cutPlane $objA;
+string $cutP[] = `ls -sl`;
+
+//make a obj's copy for a another part 
+string $copyG[] = `duplicate -rr $objAll`;
+
+polyNormal -normalMode 0 -userNormalMode 0 -ch 1 $copyG[0];
+
+string $newA[] = `polyBoolOp -op 3 -ch 0 $objA $objB`;
+
+string $newB[] = `polyBoolOp -op 3 -ch 0 $copyG[0] $copyG[1]`;
+
+//make a little gap(a little separate)
+//move -a -.2 0 -.2 $newB;
+}

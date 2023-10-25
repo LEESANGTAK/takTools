@@ -1,0 +1,177 @@
+/*
+    Script:     js_addSuffixWin
+    Version:    1.0
+    Author:     jason schleifer
+    Website:    http://jonhandhisdog.com
+    
+    Descr:      This procedure is used to add a suffix to the selected items.  It will bring up a window which will simply 
+	            have a list of all the types of suffixes that are available to add.
+	            This window will have a pulldown that will let the user decide what suffix to add.  It will also have a button
+	            for removing the suffix, if necessary.
+	
+	Exec:       Run the script by typing:
+                js_addSuffixWin;
+
+                or, you can execute the script by sourcing js_addSuffixWin first, and then calling js_addSuffix directly:
+                source js_addSuffixWin; js_addSuffix "suffix";
+
+*/
+
+global proc js_addSuffixWin ()
+{
+	
+	// VARIABLES
+	//
+	// -----------------------------------------------------------------
+	// SUFFIX LIST
+	//
+	//	If you want to add, modify, remove or do anything else to the list of suffixes, simply add it to this
+	//	list.
+	//------------------------------------------------------------------
+	global string $gSuffix[];
+    clear $gSuffix;
+    
+    $gSuffix = { 
+		"geo",		// geometry
+		"anim",		// animation controls
+		"joint",	// joints
+		"skin",		// skinning joints
+		"inf",		// influence objects
+		"grp",		// group nodes
+		"tex",		// texture
+		"place",	// placement2d or 3d node
+		"const",	// constraint
+		"ik",		// ikHandle
+		"crv",		// curve
+		"shdr",		// shader
+		"sg",		// shading group
+		"bs",		// blend shape
+		"clust", 	// custer
+		"lttce", 	// latice
+		"dfmr", 	// deformer
+		"loc"       // locator
+        };		
+		
+
+	//------------------------------------------------------------------
+	//------------------------------------------------------------------
+
+    // you can also execute the script by selecting a bunch of objects and typing:
+    // js_addSuffix "suffix";
+    //
+    $win = "js_addSuffixWindow";
+
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -t "Add Suffix Window" $win;
+    
+    $f = `formLayout -nd 100`;
+
+    $omg = `optionMenuGrp -cw 1 50 -l "Suffix:"`;
+    for ($item in $gSuffix)
+    {
+        menuItem -l $item;
+    }
+    setParent $f;
+
+    $f2 = `formLayout -nd 100`;
+    $button = `button -l "Add Suffix" -c ("js_addSuffixGet " + $omg)`;
+    $button2 = `button -l "Remove Suffix" -c ("js_addSuffix \"\"")`;
+    
+    formLayout -e 
+        -af $button top 0
+        -af $button left 0
+        -af $button bottom 0
+        -ap $button right 0 50
+
+        -af $button2 top 0
+        -af $button2 right 0
+        -af $button2 bottom 0
+        -ap $button2 left 0 50
+
+        $f2;
+    formLayout -e 
+        -af $omg left 5 
+        -af $omg top 5 
+        -af $omg right 5 
+
+        -af $f2 left 50
+        -af $f2 right 5
+        -ac $f2 top 10 $omg
+
+
+
+        $f;
+    showWindow $win;
+}
+
+global proc js_addSuffixGet (string $omg)
+{
+    $item = `optionMenuGrp -q -v $omg`;
+    js_addSuffix $item;
+
+}
+global proc string[] js_addSuffix (string $item)
+{
+    global string $gSuffix[];
+    string $objs[0];
+    string $con[0];
+    string $obj;
+    string $return[0];
+    
+
+    // now get the selected objects
+    $objs = `ls -sl`;
+
+    // create a dummy node for keeping track of all the objects.  when we rename them, it may change the object's
+    // names, which could get confusing for maya.
+    $node = `createNode unknown`;
+
+    addAttr -ln "selObjects" -at message -multi -im 0;
+
+    
+    for ($obj in $objs)
+    {
+        // connect the attributes
+        connectAttr -na ($obj + ".message") ($node + ".selObjects");
+    }
+
+    $con = `listConnections ($node + ".selObjects")`;
+   
+    for ($x = 0; $x < size($con); $x++)
+    {
+        string $tmp[0];
+        string $tmp2[0];
+        $tmp = `listConnections ($node + ".selObjects["+$x+"]")`;
+        tokenize ($tmp[0], "|", $tmp2);
+        string $shortName = $tmp2[(size($tmp2)-1)];
+        string $object = $tmp[0];
+        string $suf;
+
+        // now check and see if any of the suffixes are on the object.. if they are, replace them.
+        for ($suf in $gSuffix)
+        {
+            $shortName = `substitute ("_"+$suf) $shortName ""`;
+        }
+
+        // now add the new suffix on
+        string $newName;
+        if ($item != "")
+            $newName = ($shortName + "_" + $item);
+        else
+            $newName = ($shortName );
+
+        $result = `rename $object $newName`;
+        print ("renamed: " + $object + " --> " + $result + "\n");
+        $return[$x] = $result;
+    }
+  
+    $objs = `listConnections ($node + ".selObjects")`;
+    delete $node;
+
+    if (size($objs) > 0)
+        select $objs;
+
+    return ($return);
+}

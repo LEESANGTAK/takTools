@@ -1,0 +1,1542 @@
+source "IH_BakeHairChain.mel";
+
+
+//buildUI
+global proc IH_buildSpIkChain()
+{
+	if(`window -exists IHspIkChainBuildWin`)
+		deleteUI IHspIkChainBuildWin;
+
+	window  -width 500 -height 320
+		-resizeToFitChildren 0
+		-menuBar true
+		-maximizeButton true
+		-titleBar true
+		-sizeable 0
+		-menuBarVisible true
+		-title "build spline IK chain"
+		IHspIkChainBuildWin;
+
+	string $form = `formLayout`;
+
+	//common tool.
+	string $colC = `columnLayout`;
+
+		text -l "	  [ control select ] ";
+		separator -h 10 ;
+
+		rowLayout -nc 2;
+		button -l " convert to Root" -w 100 -c "IHCtrSelect \"Root\"";
+		button -l " Root all" -w 50 -c "select -r \":*_Root_crv\"; ";
+		setParent ..;
+
+		separator -h 10 ;
+
+		rowLayout -nc 2;
+		button -l " convert to ctrEnd " -w 100 -c "IHCtrSelect \"ctrEnd\"";
+		button -l " ctrEnd all" -w 50 -c "select -r \":*_ctrEnd_crv\"; ";
+		setParent ..;
+
+		separator -h 10 ;
+
+		button -l "reset ctr" -w 150 -c "IHCtrReset";
+
+		separator -h 10 ;
+
+		button -label "select group members" -w 150 -c "IH_selectSameLevel";
+
+		separator -h 10 ;
+
+		text -l "	  [ matching ] ";
+		separator -h 10 ;
+		rowLayout -nc 2;
+			button -l "match" -w 75 -c "IHmatchingHairChain 0 ";
+			button -l "mirror X"
+			-ann " controller mirror할 때 사용합니다. 현재는 x축만 지원됩니다. 소스 먼저 선택하고 타겟 선택 후 실행."
+			-w 75 -c "IHmatchingHairChain 1 ";
+		setParent ..;
+
+			checkBox -l "curveShape" -v 1 IHmatchCurveCheckBox;
+		separator -h 10 ;
+
+		separator -h 10 ;
+
+		button -l "	bake tool " -w 150 -bgc 0.2 0.7 0.1	-c "IH_BakeHairChain;";
+		separator -h 10 ;
+
+	setParent .. ;
+
+
+	string $tabs = `tabLayout -innerMarginWidth 5 -innerMarginHeight 5 `;
+
+
+	formLayout -edit
+    -attachForm $tabs "top"    5
+     -attachForm $tabs "left"   5
+     -attachForm $tabs "bottom" 5
+     -attachControl $tabs "right" 10 $colC
+
+     -attachForm $colC "top"    30
+     -attachNone $colC "left"
+     -attachForm $colC "bottom" 0
+     -attachForm $colC "right"  10
+
+     $form;
+
+
+	string $colA = `columnLayout`;
+
+		text -l "[ BUILD SplineIK CHAIN ]";
+
+		separator -width 300 -h 5 -st "none";
+
+		textFieldGrp
+	        -label "name : "
+	        -text  ""
+	        -columnWidth 1 90 -columnWidth 2 200 IHsicb_name_TxtField;
+
+	    checkBoxGrp -numberOfCheckBoxes 3
+		    -label "side :" -labelArray3 "L" "R" "M"
+		    -columnWidth 1 90 -columnWidth 2 40 -columnWidth 3 40 -columnWidth 4 40 IHsicb_side_checkBox;
+
+
+
+	    separator -width 300 -h 20 -st "in";
+		intFieldGrp -numberOfFields 1
+		    -label "number of Ctr :"
+		    -value1 5
+		    -cc "intFieldGrp -e -v1 ((`intFieldGrp -q -v1 \"IHsicb_ctrNum_IntField\"`*2)-1) IHsicb_jntNum_IntField"
+		    -columnWidth 1 90 -columnWidth 2 40 IHsicb_ctrNum_IntField;
+		intFieldGrp -numberOfFields 1
+		    -label "number of Joint :"
+		    -value1 9 -enable1 1
+		    -columnWidth 1 90 -columnWidth 2 40 IHsicb_jntNum_IntField;
+
+		separator -width 300 -h 20 -st "in";
+
+		rowLayout -numberOfColumns 2 -columnWidth 1 90 -columnWidth 2 200 ;
+
+			text -l "	option  :  ";
+
+			columnLayout;
+
+				checkBox -label "stretch" -v 1 IHsicb_stretch_checkBox;
+				checkBox -label "wave" -v 1 IHsicb_wave_checkBox;
+				checkBox -label "dynamic" -v 1 IHsicb_dynamic_checkBox;
+
+			setParent .. ;
+
+		setParent .. ;
+
+		separator -width 300 -h 10 -st "in";
+
+		rowLayout -numberOfColumns 2 -columnWidth 1 230 -columnWidth 2 70 ;
+
+			button -label "build" -width 227 -c "IHbuildChainCMD";
+
+			intFieldGrp -numberOfFields 1
+			    -label "X "
+			    -value1 1
+			    -columnWidth 1 10 -columnWidth 2 40 IHsicb_buildNum_IntField;
+
+		setParent .. ;
+
+		separator -width 300 -h 20 -st "in";
+
+		button -label "reset" -width 295 -c "IH_buildSpIkChain";
+
+	setParent .. ; //colA 끝.
+
+
+
+
+	string $colB = `columnLayout -cat left 10`;
+
+		rowLayout -numberOfColumns 2 -columnWidth 1 120 -columnWidth 2 180 ;
+
+			columnLayout;
+
+
+
+
+
+
+				text -l "	  [ skin ] ";
+				separator -h 10 ;
+
+				button -l "select joint"
+				-ann " select joint list from current ctrs."
+				-w 100 -c "IHCtrSelect \"joint\"";
+
+				separator -h 10 ;
+				button -l " skin copy"
+				-ann " select mesh or vertex and select ctrEnd."
+				-w 100 -c "IHskinAddcopy; repeatLast -ac IHskinAddcopy";
+
+				separator -h 10 ;
+				rowLayout -nc 2;
+				button -l "joint show" -w 70 -c "IHRootCtrShow \"skinHideShow\" 1";
+				button -l "hide" -w 30 -c "IHRootCtrShow \"skinHideShow\" 0";
+				setParent ..;
+				separator -h 10 ;
+
+			setParent .. ;
+
+			columnLayout;
+
+
+			text -l "	  [ hair system ] ";
+			separator -h 10 ;
+
+			button -l "select hairSystem" -w 150 -c "IHselectCurHairSystem \"hairSystem\" 0;";
+
+			separator -h 10 ;
+
+			rowLayout -nc 2;
+			button -l " show collide thickness" -w 120 -c "IHselectCurHairSystem \"showCollide\" 1;";
+			button -l " hide" -w 30 -c "IHselectCurHairSystem \"showCollide\" 0;";
+			setParent ..;
+
+			separator -h 10 ;
+
+			rowLayout -nc 2;
+			button -l " turn selfCollision on" -w 120 -c "IHselectCurHairSystem \"selfCollision\" 1;";
+			button -l " off" -w 30 -c "IHselectCurHairSystem \"selfCollision\" 0;";
+			setParent ..;
+
+			separator -h 10 ;
+
+			text -l "	  [ constraint ] ";
+			separator -h 10 ;
+
+			rowLayout -nc 2;
+			button -l " add cons grp" -w 80 -c "IHaddConsGRP \"\"";
+			button -l " with locator" -w 70 -c "IHaddConsGRP \"loc\"";
+			setParent ..;
+
+			separator -h 10 ;
+
+			button -l " delete cons grp" -w 150 -c "IHdeleteConsGRP";
+
+			separator -h 10 ;
+
+			button -l " add constraint attributes" -w 150 -c "addConstraintAttr";
+
+			separator -h 10 ;
+
+			button -l "mirror setDriven key" -w 150 -c "IHmirrorSetDriven";
+
+			separator -h 10 ;
+
+
+			setParent .. ;
+
+			setParent ..;
+
+	setParent .. ; //여기까지 formLayout.
+
+
+	tabLayout -edit
+	-tabLabel $colA "build"
+    -tabLabel $colB "edit"
+     $tabs;
+
+
+	showWindow IHspIkChainBuildWin;
+}
+
+global proc IHbuildChainCMD()
+{
+
+	//info
+
+	string $name = `textFieldGrp -q -text IHsicb_name_TxtField`;
+	int $sideL = `checkBoxGrp -q -v1 IHsicb_side_checkBox`;
+	int $sideR = `checkBoxGrp -q -v2 IHsicb_side_checkBox`;
+	int $sideM = `checkBoxGrp -q -v3 IHsicb_side_checkBox`;
+
+	int $ctrNum = `intFieldGrp -q -value1 IHsicb_ctrNum_IntField`;
+
+	int $stretch = `checkBox -q -v IHsicb_stretch_checkBox`;
+	int $wave = `checkBox -q -v IHsicb_wave_checkBox`;
+	int $dynamic = `checkBox -q -v IHsicb_dynamic_checkBox`;
+
+	int $num = `intFieldGrp -q -value1 IHsicb_buildNum_IntField`;
+
+	string $buildList[];
+	int $j = 0;
+
+
+	if ($name == ""){
+		error "please fill the name field.\n";
+	}
+	if ($ctrNum < 2){
+		error "ctr number should be more than 2.\n";
+	}
+
+	if ($num < 1){
+		error "number should be more than 1.\n";
+	}
+
+	//CMD
+	for ($i= 0 ; $i < $num ; $i++ ){
+
+		if ( $sideL + $sideR + $sideM ){
+			if ($sideL){
+				string $result = `IHbuildSpIkChain $name "_L" $ctrNum`;
+				if ($stretch)
+					IHstretchAdd ($result);
+				if ($wave)
+					IHsineWaveAdd ($result);
+				if ($dynamic)
+					IHdynamicAdd ($result);
+				setAttr ($result + "_Block.t") 10 ($i * 10) 0;
+				$buildList[$j++] = ($result + "_Block");
+			}
+			if ($sideR){
+				string $result = `IHbuildSpIkChain $name "_R" $ctrNum`;
+				if ($stretch)
+					IHstretchAdd ($result);
+				if ($wave)
+					IHsineWaveAdd ($result);
+				if ($dynamic)
+					IHdynamicAdd ($result);
+				setAttr ($result + "_Block.t") -10 ($i * 10) 0;
+				$buildList[$j++] = ($result + "_Block");
+			}
+			if ($sideM){
+				string $result = `IHbuildSpIkChain $name "_M" $ctrNum`;
+				if ($stretch)
+					IHstretchAdd ($result);
+				if ($wave)
+					IHsineWaveAdd ($result);
+				if ($dynamic)
+					IHdynamicAdd ($result);
+				setAttr ($result + "_Block.t") 0 ($i * 10) 0;
+				$buildList[$j++] = ($result + "_Block");
+			}
+		}
+		else{
+			string $result = `IHbuildSpIkChain $name "" $ctrNum`;
+			if ($stretch)
+				IHstretchAdd ($result);
+			if ($wave)
+				IHsineWaveAdd ($result);
+			if ($dynamic)
+				IHdynamicAdd ($result);
+			setAttr ($result + "_Block.t") 0 ($i * 10) 0;
+			$buildList[$j++] = ($result + "_Block");
+		}
+
+
+	}
+	print $buildList;
+	select -r $buildList;
+}
+
+
+//build proc
+
+
+global proc string IHbuildSpIkChain( string $baseName , string $side , int $ctrNum )
+{
+
+	//error check
+	if ($ctrNum < 2){
+		error "ctrNum should be bigger then 1";
+	}
+
+	//name check
+	string $name = ($baseName + $side);
+
+	if (`objExists ($name + "_Block")`){
+		int $match = 1;
+		for ( $i=1 ; $match ; $i++ ) {
+			if (!`objExists ($baseName + $i + $side + "_Block")`){
+				$name = ($baseName + $i + $side);
+				//print ($name + "\n");
+				$match = 0;
+			}
+		}
+	}
+
+	string $tempArray[]; // for get Array return to string.
+
+	string $topGrp = ($baseName + "_Block_GRP");
+	if (!`objExists $topGrp`){
+		$topGrp = `group -em -n ($baseName + "_Block_GRP")`;
+	}
+
+	string $topNode = `createNode "transform" -n ($name + "_Block")`;
+	parent $topNode $topGrp;
+
+	string $mainCtr = `boxCrvBuild 1.5`;
+	$mainCtr = `rename $mainCtr ($name + "_Root_crv")`;
+	string $mainZero = `group -n ($name + "_Root_zero") -parent $topNode $mainCtr`;
+
+	//build Joint
+	int $jointNum = ($ctrNum*2)-1;
+	string $jointList[];
+	for ($i=0 ; $i < $jointNum ; $i++){
+		if ( $i == 0 || ($i + 1)%2 == 0 )
+			$jointList[$i] = `joint -n ($name + "_Ik" + ($i+1)  + "_jnt") -p 0 0 ($i*-2.5)`;
+		else if ($i == $jointNum - 1)
+			$jointList[$i] = `joint -n ($name + "_bakeOutEnd_jnt") -p 0 0 ($i*-2.5)`;
+		else
+		{
+			//bakeOutJoint
+			$jointList[$i] = `joint -n ($name + "_bakeOut" + (($i+2)/2)  + "_jnt") -p 0 0 ($i*-2.5)`;
+		}
+		string $boxCrv = `diamondCrvBuild 0.5`;
+		parent $boxCrv $jointList[$i];
+		setAttr ($boxCrv + ".t") 0 0 0;
+		$tempArray = `listRelatives -c -s $boxCrv`;
+		parent -r -s $tempArray[0] $jointList[$i];
+		delete $boxCrv;
+		rename $tempArray[0] ($name + "_IK"+ ($i+1) + "_crvShape");
+	}
+	string $jointGrp = `group -em -n ($name + "_Ik_GRP") -parent $mainCtr`;
+	parent $jointList[0] $jointGrp;
+
+	//build ctr crv
+	string $ctrList[];
+	string $ctrOriList[];
+	string $ctrZeroList[];
+	for ($i=0 ; $i < $ctrNum ; $i++) {
+
+		string $num = ($i+1);
+		if ( $i == ($ctrNum -1) )
+			$num = "End";
+
+		string $boxCrv = `boxCrvBuild 1.0` ;
+		$ctrList[$i] = `rename $boxCrv ($name + "_ctr"+ $num + "_crv")`;
+		setAttr ($ctrList[$i]  + ".tz") ($i * -5);
+		//orient constraint grp
+		$tempArray = `duplicate -n ($name + "_ctr"+ $num + "_ori") -po $ctrList[$i]`;
+		$ctrOriList[$i] = $tempArray[0];
+		//zero
+		$tempArray = `duplicate -n ($name + "_ctr"+ $num + "_zero") -po $ctrList[$i]`;
+		$ctrZeroList[$i] = $tempArray[0];
+		parent $ctrList[$i] $ctrOriList[$i] $ctrZeroList[$i];
+		orientConstraint $ctrList[$i] $ctrOriList[$i];
+		if ( $i ) { //0 이 아니면
+			parent $ctrZeroList[$i] $ctrOriList[$i-1];
+		}
+	}
+
+	delete ($name + "_ctrEnd_ori");
+	parent $ctrZeroList[0] $mainCtr;
+
+	//set spline Ik
+	//if jointNum <= 3 degree should be 2
+	int $curveDegree = 3;
+	if ( $jointNum <= 3 )
+		$curveDegree = 2;
+	string $splineCurve = ($name + "_splineIKCurve");
+	string $curveCmd = ("curve -n " + $splineCurve + " -d " + $curveDegree);
+
+	for ($i=0 ; $i < $jointNum ; $i++){
+		$curveCmd += (" -p 0 0 ("+ $i + "*-2.5)");
+	}
+
+	$splineCurve = `eval ($curveCmd)`;
+
+	string $IkHandle[] = `ikHandle -n ($name + "_IkHandle") -ccv 0 -scv 0 -sj $jointList[0] -ee $jointList[$jointNum-1] -c $splineCurve -sol ikSplineSolver`;
+
+	string $curveGrp = `group -em -n ($name + "_curve_GRP") -parent $topNode`;
+	parent $splineCurve $IkHandle[0] $curveGrp;
+
+	$tempArray = `listRelatives -c -s -f $splineCurve`;
+	rename $tempArray[0] ($splineCurve+"Shape");
+
+	//cluster
+	string $clusterList[];
+	for ($i=0 ; $i < $jointNum ; $i++){
+		$tempArray = `cluster ($splineCurve + ".cv[" +  $i  + "]")`;
+		$clusterList[$i] = $tempArray[1];
+	}
+
+	for ( $i= 0 ; $i < $ctrNum ; $i++ ){
+
+		if ($i > 0){
+			if (`objExists $clusterList[(($i*2)-1)]`) {
+				pointConstraint -mo $ctrList[$i] $clusterList[(($i*2)-1)] ;
+			}
+		}
+
+		if (`objExists $clusterList[($i*2)]`){
+			pointConstraint -mo $ctrList[$i] $clusterList[($i*2)] ;
+		}
+
+		if($i != ($ctrNum - 1)){
+			if (`objExists $clusterList[($i*2)+1]`){
+				pointConstraint -mo $ctrList[$i] $clusterList[($i*2)+1] ;
+			}
+		}
+	}
+
+	string $clustereGrp = `group -em -n ($name + "_cluster_GRP") -parent $mainCtr`;
+ 	parent $clusterList $clustereGrp;
+
+
+	//inheritsTransform off
+	setAttr ( $clustereGrp + ".inheritsTransform") 0;
+	setAttr ( $curveGrp + ".inheritsTransform") 0;
+
+	//visibility
+	setAttr ( $clustereGrp + ".visibility") 0;
+	setAttr ( $curveGrp + ".visibility") 0;
+
+	//lockAndHide
+	IHLockAndHide 1 1 0 0 1 1 $mainCtr;
+	for ($curItem in $ctrList) {
+		IHLockAndHide 1 1 0 0 1 1 $curItem;
+	}
+
+
+	//colorSet
+	select -r $mainCtr;
+ 	IHDisplayColorOverride 18;
+
+ 	select -r $ctrList;
+	IHDisplayColorOverride 15;
+
+	select -r $ctrList[$ctrNum-1];
+	IHDisplayColorOverride 23;
+
+	select -r $jointList;
+	IHDisplayColorOverride 27;
+
+	//addAttr
+
+	//addAttr "skinHideShow"
+	addAttr -ln "_______________" -at "enum" -en ":vis"  $mainCtr;
+    setAttr -e -channelBox true ($mainCtr + "._______________");
+	addAttr -ln "skinHideShow" -k 1 -at long  -min 0 -max 1 -dv 1 $mainCtr;
+	connectAttr -f ($mainCtr + ".skinHideShow") ($jointGrp + ".v");
+
+	addAttr -ln "IkHandle"  -at "message" $ctrList[$ctrNum-1];
+	connectAttr -f ($IkHandle[0] + ".message") ($ctrList[$ctrNum-1] + ".IkHandle");
+
+	//addAttr IkBlend
+	/*
+	addAttr -ln "IkBlend" -k 1 -at double  -min 0 -max 10 -dv 10 $ctrList[$ctrNum-1];
+	string $multiDevide = `createNode multiplyDivide -n ($name + "_IkBlend_MD")`;
+	connectAttr -f ($ctrList[$ctrNum-1] + ".IkBlend") ($multiDevide + ".input1X");
+	setAttr ($multiDevide + ".input2X") 0.1;
+	connectAttr -f ($multiDevide + ".outputX") ($IkHandle[0] + ".ikBlend");
+	*/
+
+	//twist
+	string $reverse = `shadingNode -n ($name + "_twist_reverse") -asUtility reverse`;
+	connectAttr -f ($ctrList[$ctrNum-1] + ".rotateZ") ($reverse + ".inputX");
+	connectAttr -f ($reverse + ".outputX") ($IkHandle[0] + ".twist");
+
+	//skinMesh
+
+	string $circle[] = `circle -n ($name + "_circle") -c 0 0 0 -nr 0 1 0 -sw 360 -r 1 -d 3 -ut 0 -tol 1e-006 -s 8 -ch 0`;
+
+	string $extrude[] = `extrude -ch 0 -rn false -po 1 -et 2 -ucp 1 -fpt 1 -upn 1 -rotation 0 -scale 1 -rsp 1 $circle[0] $splineCurve` ;
+
+	string $extrudeSurface = `rename $extrude[0] ($name + "_skinMesh")`;
+	skinCluster -mi 1 -dr 1 -tsb $jointList $extrudeSurface;
+
+	delete $circle[0];
+	string $skinMeshGRP = `group -em -n ($name + "_skinMeshGRP") -p $topNode`;
+
+	//setAttr ($skinMeshGRP + ".v") 0;
+	parent $extrudeSurface $skinMeshGRP;
+	setAttr ( $skinMeshGRP + ".inheritsTransform") 0;
+
+	addAttr -ln "skinMeshShow" -k 1 -at long  -min 0 -max 1 -dv 0 $mainCtr;
+	connectAttr -f ($mainCtr + ".skinMeshShow") ($skinMeshGRP + ".v");
+
+	//add Set.
+	select -cl;
+	if(!`objExists "hairCtrSet"`)
+		sets -em -n "hairCtrSet";
+	sets -add "hairCtrSet" ($name + "_ctrEnd_crv");
+
+	return $name;
+}
+
+global proc IHstretchAdd(string $name)
+{
+
+	string $tempArray[];
+
+	//source
+	string $IkCurve = ($name + "_splineIKCurve");
+	string $endCtr = ($name + "_ctrEnd_crv");
+	string $mainCtr = ($name + "_Root_crv");
+	string $jointList[] = `ls -type "joint" ($name + "_*_jnt")`;
+	//check
+
+	//scaleCurve
+	$tempArray = `duplicate -n ($name + "_scaleCurve") $IkCurve`;
+	string $scaleCurve = $tempArray[0];
+	parent $scaleCurve $mainCtr;
+	setAttr ($scaleCurve + ".v") 0;
+
+	$tempArray = `listRelatives -c -s -f $scaleCurve`;
+	rename $tempArray[0] ($scaleCurve+"Shape");
+
+	//curveInfo
+	string $IkCurveInfo = `arclen -ch 1 $IkCurve`;
+	string $scaleCurveInfo = `arclen -ch 1 $scaleCurve`;
+
+
+	//add Attr
+	addAttr -ln "_stretch_" -nn "[       stretch      ]" -at "enum" -en ":show :hide"  $endCtr;
+    setAttr -e -channelBox true ($endCtr + "._stretch_");
+
+	addAttr -k 1 -ln "stretchOn"  -at double  -min 0 -max 10 -dv 0 $endCtr;
+	addAttr -k 1 -ln "stretchOffset"  -at double  -min 0 -max 10 -dv 10 $endCtr;
+
+	//createNod and connect -new
+	string $setRangeStretch = `shadingNode -n ($name + "_stretch_setRange") -asUtility setRange`;
+	string $setRangeStretchOffset = `shadingNode -n ($name + "_stretchOffset_setRange") -asUtility setRange`;
+
+	setAttr ($setRangeStretchOffset + ".oldMaxX") 10;
+	connectAttr -f ($endCtr + ".stretchOffset") ($setRangeStretchOffset + ".valueX");
+	connectAttr -f ($IkCurveInfo + ".arcLength") ($setRangeStretchOffset + ".maxX");
+
+	setAttr ($setRangeStretch + ".oldMaxX") 10;
+	connectAttr -f ($endCtr + ".stretchOn") ($setRangeStretch + ".valueX");
+	connectAttr -f ($scaleCurveInfo + ".arcLength") ($setRangeStretch + ".minX");
+	connectAttr -f ($setRangeStretchOffset + ".outValueX") ($setRangeStretch + ".maxX");
+
+	string $multiDevide = `createNode multiplyDivide -n ($name + "_devide_MD")`;
+
+	connectAttr -f ($setRangeStretch + ".outValueX") ($multiDevide + ".input1X");
+	connectAttr -f ($scaleCurveInfo + ".arcLength") ($multiDevide + ".input2X");
+	setAttr ($multiDevide + ".operation") 2;
+	//
+	for ($curJoint in $jointList){
+		connectAttr -f ($multiDevide + ".outputX") ($curJoint +".scaleZ");
+	}
+
+	print ("successfully add stretch to " + $name + "_Block\n");
+}
+
+//make sine add to hair chain control
+global proc IHsineWaveAdd( string $name )
+{
+	string $endCtr = ($name + "_ctrEnd_crv");
+
+	select ($name + "_splineIKCurve");
+
+	string $sine[] = `nonLinear -n ($name + "_sine") -type sine -lowBound 0 -highBound 2 -amplitude .5 -wavelength 1.3 -dropoff -1 -offset 0`;
+
+	addAttr -ln "_wave_" -nn "[        wave        ]" -at "enum" -en ":show :hide"  $endCtr;
+	setAttr -e -channelBox true ($endCtr + "." + "_wave_");
+
+	addAttr -ln "waveOn" -keyable true -at double  -min 0 -max 10 -dv 0 $endCtr;
+	addAttr -ln "waveSpeed" -keyable true -at double  $endCtr;
+	addAttr -ln "waveVis" -keyable true -at bool -dv 0 $endCtr;
+	addAttr -ln "waveSize" -keyable true -at double -min -5 -max 5 -dv .5 $endCtr;
+
+
+	string $multiWave = `createNode multiplyDivide -n ($name + "_multiWave") `;
+	connectAttr -f ($endCtr + ".waveOn") ($multiWave + ".input1X");
+	setAttr ($multiWave + ".input2X") 0.1;
+	connectAttr -f ($multiWave + ".outputX") ($sine[0] + ".envelope");
+
+	connectAttr -f ($endCtr + ".waveSize") ($sine[0] + ".amplitude");
+	connectAttr -f ($endCtr + ".waveSpeed") ($sine[0] + ".offset");
+	connectAttr -f ($endCtr + ".waveVis") ($sine[1] + ".v");
+
+	parent $sine[1] $endCtr;
+	setAttr ($sine[1] + ".r") -90 0 0;
+}
+
+global proc IHdynamicAdd( string $name )
+{
+
+	string $tempArray[];
+
+	//source
+	string $IkCurve = ($name + "_splineIKCurve");
+	string $endCtr = ($name + "_ctrEnd_crv");
+	string $mainCtr = ($name + "_Root_crv");
+
+	//wave off
+	if ( `objExists ($endCtr + ".waveOn")` ){
+		setAttr ($endCtr + ".waveOn") 0;
+	}
+
+
+	//bake con build.
+	string $dup[] = `duplicate -rc ($name + "_ctr1_zero")`;
+
+    for ( $cur in $dup ){
+
+        if ( `objExists $cur`){
+            if ( `gmatch $cur "*_zero1"` ){
+                string $newName = `substitute "_zero1" $cur "_zero"`;
+                $newName = `substitute "_ctr" $newName "_bake"`;
+                rename $cur $newName;
+            }
+            else if ( `gmatch $cur "*_ori1"` ){
+                string $newName = `substitute "_ori1" $cur "_ori"`;
+                $newName = `substitute "_ctr" $newName "_bake"`;
+                rename $cur $newName;
+            }
+            else if ( `gmatch $cur "*_crv1"` ){
+            	if (`gmatch $cur "*_ctrEnd_crv1"`){
+            		string $delCbAttr[] = `listAttr -cb $cur`;
+            		for ($curAttr in $delCbAttr ){
+            			deleteAttr -at $curAttr $cur;
+            		}
+            		string $delKeyAttr[] = `listAttr -k $cur`;
+            		for ($i = 6 ; $i < size($delKeyAttr) ; $i++ ){
+            			deleteAttr -at $delKeyAttr[$i] $cur;
+            		}
+            		sets -rm "hairCtrSet" $cur;
+            	}
+                string $newName = `substitute "_crv1" $cur "_crv"`;
+                $newName = `substitute "_ctr" $newName "_bake"`;
+                rename $cur $newName;
+                string $shapes[] = `listRelatives -c -s $newName`;
+                scale -r -cp 0.6 0.6 0.6 ($shapes[0] + ".cv[0:16]");
+                setAttr ($shapes[0] + ".overrideEnabled") 0;
+            }
+            else {
+                delete $cur;
+            }
+        }
+
+    }
+
+    addAttr -ln "bakeHideShow" -k 1 -at long  -min 0 -max 1 -dv 0 $mainCtr;
+	connectAttr -f ($mainCtr + ".bakeHideShow") ($name + "_bake1_zero.v");
+
+	//dynamic hair build.
+
+	$tempArray = `duplicate -n ($name + "_hairCurve") $IkCurve`;
+	string $hairCurve = $tempArray[0];
+
+	//Make curve dynamic.
+    select -r $hairCurve;
+    makeCurvesDynamic 2 { "1", "0", "1", "1", "0"};
+
+    //hairSystem
+	select -r $hairCurve;
+    string $hairSystemShape[] = getSelectedHairSystems();
+    $tempArray = `listRelatives -p $hairSystemShape[0]`;
+    string $hairSystem = $tempArray[0];
+    print ($hairSystem + "\n");
+	//Determine name of follicle node
+    select -r $hairCurve;
+    string $follicleShape[] = getSelectedHairCurves();
+    $tempArray = `listRelatives -p  $follicleShape[0]`;
+    string $follicle = $tempArray[0];
+    print ($follicle + "\n");
+
+   //Determine what the name of the dynamic curve is
+    string $outputCurveShape = destinationNodeNameFromConnection (
+						$follicle + ".outCurve" );
+    $tempArray = `listRelatives -p $outputCurveShape`;
+    string $outputCurve = $tempArray[0];
+    print ($outputCurve + "\n");
+    $tempArray = `listRelatives -p $outputCurve`;
+    string $outputCurveGrp = $tempArray[0];
+
+ 	//change IK curve
+    connectAttr -f ( $outputCurveShape + ".worldSpace[0]") ($name + "_IkHandle.inCurve");
+
+    //blendShape
+    string $blendShapeNode[] = `blendShape -frontOfChain $IkCurve $hairCurve`;
+	setAttr ($blendShapeNode[0] + "." + $IkCurve) 1;
+
+	//addAttr
+	setAttr ( $follicleShape[0] + ".pointLock") 1;
+
+	addAttr -k 1 -ln "dynamicType" -at "enum" -en ":off :classicHair :nHair"  $endCtr;
+	addAttr -ln "startFrame"  -at long -keyable true $endCtr;
+
+	addAttr -ln "_dynamic_" -nn "[       dynamic      ]" -at "enum" -en ":show :hide"  $endCtr;
+	setAttr -e -channelBox true ($endCtr + "._dynamic_");
+
+    addAttr -ln "LengthFlex" -at double  -min 0 -max 1 -dv 0 -keyable true $endCtr;
+    addAttr -ln "Damp" -at double -min 0 -max 100 -dv 0 -keyable true  $endCtr;
+    addAttr -ln "Drag" -at double -min 0 -max 1 -dv .05 -keyable true  $endCtr;
+    addAttr -ln "Friction" -at double -min 0 -max 1 -dv 0.5 -keyable true  $endCtr;
+	addAttr -ln "Mass" -at double -min 0 -max 100 -dv 1 -keyable true  $endCtr;
+	addAttr -ln "Dynamic" -at double -min 0 -max 100 -dv 1 -keyable true  $endCtr;
+
+	addAttr -ln "startCurveAttract" -at double -min 0 -max 1 -dv 0 -keyable true  $endCtr;
+	addAttr -ln "startCurveDamp" -at double -min 0 -max 1 -dv .5 -keyable true  $endCtr;
+
+	addAttr -ln "_classic_" -nn "[ classic hair Only ]" -at "enum" -en ":"  $endCtr;
+	setAttr -e -channelBox true ($endCtr + "._classic_");
+    addAttr -ln "Stiffness" -at double -min 0 -max 1 -dv 0.15 -keyable true  $endCtr;
+    addAttr -ln "TubulenceStrength" -at double -min 0 -max 1 -dv 0 -keyable true $endCtr;
+    addAttr -ln "TubulenceFrequency" -at double -min 0 -max 2 -dv 0.2 -keyable true $endCtr;
+    addAttr -ln "TubulenceSpeed" -at double -min 0 -max 2 -dv 0.2 -keyable true  $endCtr;
+    addAttr -ln "Gravity" -at double -min 0 -max 10 -dv 1 -keyable true $endCtr;
+
+	addAttr -ln "_nHair_" -nn "[ N hair Only ]" -at "enum" -en ":"  $endCtr;
+	setAttr -e -channelBox true ($endCtr + "._nHair_");
+    addAttr -ln "bendResistance" -at double -min 0 -max 10 -dv 1 -keyable true  $endCtr;
+
+    addAttr -ln "bakeType" -at "enum" -en ":jointBake :ctrBake"  $endCtr;
+    addAttr -ln "IkBlend" -at double  -min 0 -max 10 -dv 10 $endCtr;
+
+    //Connect attributes
+    connectAttr -f ($endCtr +".Stiffness") ($hairSystemShape[0] + ".stiffness");
+    connectAttr -f ($endCtr +".LengthFlex") ($hairSystemShape[0] + ".lengthFlex");
+    connectAttr -f ($endCtr +".Damp") ($hairSystemShape[0] + ".damp");
+    connectAttr -f ($endCtr +".Drag") ($hairSystemShape[0] + ".drag");
+    connectAttr -f ($endCtr +".Friction") ($hairSystemShape[0] + ".friction");
+	connectAttr -f ($endCtr +".Gravity") ($hairSystemShape[0] + ".gravity");
+	connectAttr -f ($endCtr +".Mass") ($hairSystemShape[0] + ".mass");
+    connectAttr -f ($endCtr +".Dynamic") ($hairSystemShape[0] + ".dynamicsWeight");
+    connectAttr -f ($endCtr +".TubulenceStrength") ($hairSystemShape[0] + ".turbulenceStrength");
+    connectAttr -f ($endCtr +".TubulenceFrequency") ($hairSystemShape[0] + ".turbulenceFrequency");
+    connectAttr -f ($endCtr +".TubulenceSpeed") ($hairSystemShape[0] + ".turbulenceSpeed");
+
+    connectAttr -f ($endCtr +".bendResistance") ($hairSystemShape[0] + ".bendResistance");
+
+    connectAttr -f ($endCtr +".startCurveAttract") ($hairSystemShape[0] + ".startCurveAttract");
+	connectAttr -f ($endCtr +".startCurveDamp") ($hairSystemShape[0] + ".attractionDamp");
+
+    string $curIKhandle[] = `listConnections -s 1 -d 0 ($endCtr + ".IkHandle")`;
+
+    string $multiDevide = `createNode multiplyDivide -n ($name + "_ikBlend_MD")`;
+    setAttr ($multiDevide + ".input2X") .1;
+    connectAttr -f ($endCtr + ".IkBlend") ($multiDevide + ".input1X") ;
+    connectAttr -f ($multiDevide + ".outputX") ($curIKhandle[0] +".ikBlend") ;
+
+   	select -r $endCtr;
+	IHDisplayColorOverride 4;
+
+    //assignNSolver "";
+    $tempArray = `listConnections -d 0 -s 1 ($hairSystemShape[0] + ".startFrame")`;
+    string $curNucleus = $tempArray[0];
+
+    print $curNucleus;
+
+    string $nameA = `textFieldGrp -q -text IHsicb_name_TxtField`;
+
+    if (`objExists ($nameA + "_nucleus")`){
+    	// Disconnect attributes connected with current nucleus.
+    	$curTimeConnection = `listConnections -plugs true ($hairSystem + ".currentTime")`;
+    	disconnectAttr $curTimeConnection ($hairSystem + ".currentTime");
+
+    	$curStateConnection = `listConnections -plugs true ($hairSystem + ".currentState")`;
+		disconnectAttr ($hairSystem + ".currentState") $curStateConnection;
+
+		$nextStateConnection = `listConnections -plugs true ($hairSystem + ".nextState")`;
+		disconnectAttr $nextStateConnection ($hairSystem + ".nextState");
+
+		$startStateConnection = `listConnections -plugs true ($hairSystem + ".startState")`;
+		disconnectAttr ($hairSystem + ".startState") $startStateConnection;
+
+		$startFrameConnection = `listConnections -plugs true ($hairSystem + ".startFrame")`;
+		disconnectAttr $startFrameConnection ($hairSystem + ".startFrame");
+
+    	// Assign nucleus solver.
+    	select -r $hairSystem;
+    	assignNSolver ($nameA + "_nucleus");
+    	/*
+    	if ($curNucleus != ($nameA + "_nucleus")){
+    		string $connectHair[] = `listConnections -s 0 -d 1 ($curNucleus + ".startFrame")`;
+    		if ( size($connectHair) == 0 ){
+    			delete $curNucleus;
+    			print ("// delete :" + $curNucleus + "\n");
+    		}
+    	}
+    	*/
+    }
+    else if ( $curNucleus != ($nameA + "_nucleus") ){
+    	// Create new solver
+    	string $solver = `createNSystem`;
+    	rename $solver ($nameA + "_nucleus");
+
+    	// Disconnect attributes connected with current nucleus.
+    	$curTimeConnection = `listConnections -plugs true ($hairSystem + ".currentTime")`;
+    	disconnectAttr $curTimeConnection ($hairSystem + ".currentTime");
+
+    	$curStateConnection = `listConnections -plugs true ($hairSystem + ".currentState")`;
+		disconnectAttr ($hairSystem + ".currentState") $curStateConnection;
+
+		$nextStateConnection = `listConnections -plugs true ($hairSystem + ".nextState")`;
+		disconnectAttr $nextStateConnection ($hairSystem + ".nextState");
+
+		$startStateConnection = `listConnections -plugs true ($hairSystem + ".startState")`;
+		disconnectAttr ($hairSystem + ".startState") $startStateConnection;
+
+		$startFrameConnection = `listConnections -plugs true ($hairSystem + ".startFrame")`;
+		disconnectAttr $startFrameConnection ($hairSystem + ".startFrame");
+
+		// Assign new necleus solver.
+    	select -r $hairSystem;
+    	assignNSolver ($nameA + "_nucleus");
+    }
+
+
+    //group
+    $tempArray = `listRelatives -p ($nameA + "_nucleus")`;
+    if ($tempArray[0] != ($nameA + "_nucleus_GRP")){
+    	group -em -p ($nameA + "_Block_GRP") -n ($nameA + "_nucleus_GRP");
+    	setAttr ($nameA + "_nucleus_GRP.inheritsTransform") 0;
+    	parent ($nameA + "_nucleus") ($nameA + "_nucleus_GRP");
+    }
+
+	//dynamic overall Ctr
+	string $dynCtr;
+
+	if (!`objExists "dyn_ctr_crv"`){
+		//dynamic Ctr
+		$dynCtr = `curve -n "dyn_ctr_crv" -d 1 -p 0 0 0 -p 0 4 0 -p -2 5 0 -p -3 7 0 -p -2 9 0 -p 0 10 0 -p 2 9 0 -p 3 7 0 -p 2 5 0 -p 0 4 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9` ;
+
+		string $group = `group -em -n "dyn_ctr_GRP"`;
+		parent $dynCtr $group;
+		IHLockAndHide 1 1 1 1 1 1 $dynCtr;
+		select -r $dynCtr;
+		IHDisplayColorOverride 22;
+		$tempArray = `listRelatives -c -s -f $dynCtr`;
+		rename $tempArray[0] ($dynCtr+"Shape");
+	}
+	else{
+		$dynCtr = "dyn_ctr_crv";
+	}
+
+	string $conditionOff = ($nameA + "_dynamicOff_condition");
+	string $conditionNhair = ($nameA + "_nHair_condition");
+
+
+	if (!`objExists ($dynCtr + "._" + $nameA + "_")`){
+
+		//addAttr
+		addAttr -ln ("_" + $nameA + "_") -nn ("[ " + $nameA + " ]") -en ( ":" + $nameA ) $dynCtr;
+		setAttr -e -channelBox true ($dynCtr + "._" +$nameA + "_");
+		addAttr -k 1 -ln ( $nameA + "_dynamic" ) -at "enum" -en ":off :classicHair :nHair"  $dynCtr;
+	   	addAttr -k 1 -ln ( $nameA + "_startFrame")  -at double -dv 100000 $dynCtr;
+
+	}
+
+	if (!`objExists $conditionOff`){
+
+		$conditionOff = `createNode condition -n ($nameA + "_dynamicOff_condition")`;
+
+		connectAttr ($dynCtr + "." + $nameA + "_dynamic") ($conditionOff + ".firstTerm");
+		setAttr  ($conditionOff + ".secondTerm") 0;
+		setAttr ($conditionOff + ".colorIfTrueR") 1;
+		setAttr ($conditionOff + ".colorIfFalseR") 3;
+
+		$conditionNhair = `createNode condition -n ($nameA + "_nHair_condition")`;
+		connectAttr ($dynCtr + "." + $nameA + "_dynamic") ($conditionNhair + ".firstTerm");
+		setAttr  ($conditionNhair + ".secondTerm") 2;
+		setAttr ($conditionNhair + ".colorIfTrueR") 1;
+		setAttr ($conditionNhair + ".colorIfFalseR") 0;
+	}
+
+
+	string $temp[] = `listConnections -s 1 -d 0 ($nameA + "_nucleus.startFrame")`;
+
+	if (size($temp) == 0 ){
+		connectAttr -f ($dynCtr + "." + $nameA + "_startFrame") ($nameA + "_nucleus.startFrame");
+	}
+
+	connectAttr ($conditionOff + ".outColorR") ($hairSystemShape[0] + ".simulationMethod ");
+	connectAttr ($conditionNhair + ".outColorR") ($hairSystem + ".active ");
+	connectAttr ($dynCtr + "." + $nameA + "_dynamic" ) ($endCtr + ".dynamicType");
+	connectAttr ($dynCtr + "." + $nameA + "_startFrame" ) ($endCtr + ".startFrame");
+
+    //rename & grp
+
+    string $hairSystemGrp = `group -em -n ($name + "_hairSystem_GRP") -parent ($name + "_Root_zero")`;
+
+    $hairSystem = `rename $hairSystem ($name + "_hairSystem")`;
+    $follicle = `rename $follicle ($name + "_follicle")`;
+    $outputCurve = `rename $outputCurve ($name + "_outputCurve")`;
+    $outputCurveGrp = `rename $outputCurveGrp ($name + "_outputCurveGrp")`;
+
+    parent $hairSystem $follicle $outputCurveGrp $hairSystemGrp;
+    parent ($name + "_curve_GRP") $hairSystemGrp;
+
+    setAttr ($hairSystemGrp + ".v") 0;
+    setAttr ($hairSystemGrp + ".inheritsTransform") 0;
+}
+
+
+
+
+
+
+//sub build proc
+
+//curve box.
+global proc string boxCrvBuild( float $size)
+{
+	string $boxCrv = `curve -d 1 -p (-$size) $size $size -p (-$size) $size (-$size) -p $size $size (-$size) -p $size $size $size -p (-$size) $size $size -p $size $size $size -p $size (-$size) $size -p (-$size) (-$size) $size -p (-$size) $size $size -p (-$size) (-$size) $size -p (-$size) (-$size) (-$size) -p (-$size) $size (-$size) -p (-$size) (-$size) (-$size) -p $size (-$size) (-$size) -p $size $size (-$size) -p $size (-$size) (-$size) -p $size (-$size) $size -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16` ;
+	return $boxCrv;
+}
+
+//curve diamond.
+global proc string diamondCrvBuild( float $size)
+{
+	string $diaCrv = `curve -d 1 -p (-$size) 0 0 -p 0 0 $size -p $size 0 0 -p 0 0 (-$size) -p (-$size) 0 0 -p 0 $size 0 -p $size 0 0 -p 0 (-$size) 0 -p (-$size) 0 0 -p 0 0 (-$size) -p 0 $size 0 -p 0 0 $size -p 0 (-$size) 0 -p 0 0 (-$size) -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 `;
+	return $diaCrv;
+}
+
+global proc IHDisplayColorOverride(int $colorIndex)
+{
+    if ($colorIndex >= 32)
+        error "Color index out-of-range (must be less than 32)";
+
+    $selection = `ls -sl`;
+    if (size($selection) == 0)
+        error "No objects selected";
+
+    string $shapes[];
+    for ($obj in $selection) {
+        $relatives = `listRelatives -shapes -path $obj`;
+        for ($rel in $relatives)
+            $shapes[size($shapes)] = $rel;
+    }
+
+    // Use defaults if the color index is <= 0
+    if ($colorIndex <= 0) {
+        for ($shape in $shapes) {
+            setAttr ($shape + ".overrideEnabled") 0;
+        }
+    }
+    else {
+        for ($shape in $shapes) {
+            setAttr ($shape + ".overrideEnabled") 1;
+            setAttr ($shape + ".overrideColor") $colorIndex;
+        }
+    }
+}
+
+global proc IHLockAndHide (int $lock , int $hide , int $tr , int $rt , int $sc , int $v ,string $node)
+{
+
+	if ($lock){
+		if ($tr){
+			setAttr -l 1 ($node+ ".t");
+		}
+		if ($rt){
+			setAttr -l 1 ($node+ ".r");
+		}
+		if ($sc){
+			setAttr -l 1 ($node+ ".s");
+		}
+		if ($v){
+			setAttr -l 1 ($node+ ".v");
+		}
+	}
+	if ($hide){
+		if ($tr){
+			setAttr -k 0 -channelBox 0 ($node+ ".tx");
+			setAttr -k 0 -channelBox 0 ($node+ ".ty");
+			setAttr -k 0 -channelBox 0 ($node+ ".tz");
+		}
+		if ($rt){
+			setAttr -k 0 -channelBox 0  ($node+ ".rx");
+			setAttr -k 0 -channelBox 0  ($node+ ".ry");
+			setAttr -k 0 -channelBox 0  ($node+ ".rz");
+		}
+		if ($sc){
+			setAttr -k 0 -channelBox 0  ($node+ ".sx");
+			setAttr -k 0 -channelBox 0  ($node+ ".sy");
+			setAttr -k 0 -channelBox 0  ($node+ ".sz");
+		}
+		if ($v){
+			setAttr -k 0 -channelBox 0  ($node+ ".v");
+		}
+	}
+}
+
+global proc showAndHideAttr(string $type)
+{
+
+	string $listSel[] = `ls -sl`;
+
+	string $attrList[];
+	string $dynamicAttr[] = { "LengthFlex" , "Damp" , "Drag", "Friction" , "Mass" , "Dynamic" ,"Stiffness" , "TubulenceStrength", "TubulenceFrequency" , "TubulenceSpeed" , "Gravity"};
+	string $stretchAttr[] = {"stretch" , "stretchOffset"};
+	string $waveAttr[] = {"waveOn" , "waveSize" , "waveSpeed", "waveVis"};
+
+	if ($type = "dynamic"){
+		$attrList = $dynamicAttr;
+	}
+	else if ($type = "stretch"){
+		$attrList = $stretchAttr;
+	}
+	else if ($type = "wave"){
+		$attrList = $waveAttr;
+	}
+
+	for ($cur in $listSel){
+		for ($curAttr in $attrList){
+			if (`objExists ($cur + "." + $curAttr)`){
+				if (`getAttr -k ($cur + "." + $curAttr)`)
+					setAttr -k 0 ($cur + "." + $curAttr);
+				else
+					setAttr -k 1 ($cur + "." + $curAttr);
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+//edit proc
+
+
+//tool
+
+global proc int IHcopyHairSkinCMD() {
+
+	string $selectList[] =`ls -sl`;
+	string $ctr;
+
+	for ($i = 0 ; $i < size($selectList) ; $i++){
+		if (`gmatch $selectList[$i] "*_ctrEnd_crv"`){
+			$ctr = $selectList[$i];
+			stringArrayRemoveAtIndex($i, $selectList);
+			continue;
+  		}
+	}
+	if ($ctr = ""){
+		warning "select ctrEnd.\n";
+		return 0;
+	}
+
+	string $name = `substitute "_ctrEnd_crv" $ctr ""`;
+	string $sourceMesh = ($name + "_skinMesh");
+
+	if ( `objExists $sourceMesh` ) {
+		for ($curTarget in $selectList){
+			select -r $sourceMesh;
+			select -add $curTarget;
+			IHskinCopyWithSkin;
+			print ("//result : skinCopy " + $sourceMesh + " to " + $curTarget + "\n");
+		}
+	}
+	return 1;
+}
+
+global proc int IHskinAddcopy(){
+
+	//vertex를 선택하고 컨트롤러 선택하고 실행.
+	string $selectList[] = `ls -sl -fl`;
+	string $control = $selectList[size($selectList)-1];
+	stringArrayRemoveAtIndex((size($selectList)-1), $selectList); //remove last.
+
+	if (!`gmatch $control "*_ctrEnd_crv"`){
+		warning "last select should be ctrEnd_crv.\n";
+		return 0;
+	}
+
+	string $name = `substitute "_ctrEnd_crv" $control ""`;
+	string $sourceShape = ($name + "_skinMeshShape");
+	string $skinCluster = `findRelatedSkinCluster $sourceShape`;
+	string $jointList[] = `skinCluster -q -inf $sourceShape`;
+
+	if (`objectType $selectList[0]` == "transform"){
+		for ($i=0 ; $i < size($selectList) ; $i++){
+
+			string $skinClusterB = `findRelatedSkinCluster $selectList[$i]`;
+			string $jointListB[];
+			if ($skinClusterB == ""){
+				skinCluster -mi 1 -dr 4.5 -tsb $jointList $selectList[$i];
+			}else{
+				$jointListB = `skinCluster -q -inf $selectList[$i]`;
+				for ($curJoint in $jointList){
+					if (!stringArrayContains($curJoint, $jointListB))
+						skinCluster -e -lw true -wt 0 -ai $curJoint $selectList[$i];
+						setAttr ($curJoint + ".liw") false;
+				}
+			}
+
+			select -r $sourceShape;
+			select -add $selectList[$i];
+			copySkinWeights  -noMirror -surfaceAssociation "closestPoint" -influenceAssociation "label" -influenceAssociation "oneToOne" -normalize;
+			print ("//result : skinCopy " + $sourceShape + " to " + $selectList[$i] + "\n");
+		}
+	}
+	else if (`gmatch $selectList[0] "*.vtx*"`){
+
+		string $tokenTemp[] = stringToStringArray( $selectList[0] ,".");
+
+		string $skinClusterB = `findRelatedSkinCluster $tokenTemp[0]`;
+		string $jointListB[];
+		if ($skinClusterB == ""){
+			skinCluster -mi 1 -dr 4.5 -tsb $jointList $tokenTemp[0];
+		}else{
+			$jointListB = `skinCluster -q -inf $tokenTemp[0]`;
+			for ($curJoint in $jointList){
+				if (!stringArrayContains($curJoint, $jointListB))
+					skinCluster -e -lw true -wt 0 -ai $curJoint $tokenTemp[0];
+					setAttr ($curJoint + ".liw") false;
+			}
+		}
+
+		select -r $sourceShape;
+		select -add $selectList;
+		copySkinWeights  -noMirror -surfaceAssociation "closestPoint" -influenceAssociation "label" -influenceAssociation "oneToOne" -normalize;
+		print ("//result : skinCopy from " + $sourceShape + "\n");
+
+	}
+	else{
+        warning "please select mesh or vertex first.\n";
+        return 0;
+    }
+
+    return 1;
+}
+
+
+//hairChain match
+//endCtr 또는 Block 선택하고 실행. source 선택 후 target 선택
+global proc IHmatchingHairChain( int $mirrorX ) {
+
+    string $sel[] = `ls -sl`;
+
+    string $parent;
+    string $child;
+
+    int $shapeMatch = `checkBox -q -v IHmatchCurveCheckBox`;
+
+    if (`gmatch $sel[0] "*_ctrEnd_crv"` && `gmatch $sel[1] "*_ctrEnd_crv"`){
+
+    	print "start matching.";
+    	$parent = `substitute "_ctrEnd_crv" $sel[0] ""`;
+   		$child = `substitute "_ctrEnd_crv" $sel[1] ""`;
+
+    }
+    else if (`gmatch $sel[0] "*_Block"` && `gmatch $sel[1] "*_Block"`){
+
+    	print "start matching.";
+    	$parent = `substitute "_Block" $sel[0] ""`;
+   		$child = `substitute "_Block" $sel[1] ""`;
+
+    }
+    else {
+    	error "select two *_ctrEnd_crv.";
+    }
+
+	if ( !`objExists ( $parent + "_Block" )` )
+		error;
+
+	// matchBlockTop
+	float $jointTr[] = `getAttr ($parent + "_Block.t")`;
+    float $jointRt[] = `getAttr ($parent + "_Block.r")`;
+    float $jointSc[] = `getAttr ($parent + "_Block.s")`;
+
+    if ( $mirrorX ) {
+		setAttr ($child + "_Block.t") (-$jointTr[0]) $jointTr[1] $jointTr[2];
+		setAttr ($child + "_Block.r")  $jointRt[0] (-$jointRt[1]) (-$jointRt[2]);
+		setAttr ($child + "_Block.s")  $jointSc[0] $jointSc[1] $jointSc[2];
+	} else {
+		setAttr ($child + "_Block.t")  $jointTr[0] $jointTr[1] $jointTr[2];
+		setAttr ($child + "_Block.r")  $jointRt[0] $jointRt[1] $jointRt[2];
+		setAttr ($child + "_Block.s")  $jointSc[0] $jointSc[1] $jointSc[2];
+	}
+
+	string $listZeroCtr[] = `ls ($child + "_ctr*_zero")`;
+
+	//match zero
+	for ($i = 0 ; $i <= size($listZeroCtr) ; ++$i ) {
+			string $parentZero = `substitute $child $listZeroCtr[$i] $parent`;
+			if ( `objExists $parentZero` ) {
+				float $zeroRot[] = `getAttr ($parentZero + ".r" )`;
+				if ( $mirrorX )
+					setAttr ($listZeroCtr[$i] + ".r" ) $zeroRot[0] (-$zeroRot[1]) (-$zeroRot[2]);
+				else
+					setAttr ($listZeroCtr[$i] + ".r" ) $zeroRot[0] $zeroRot[1] $zeroRot[2];
+			}
+		}
+
+	//match shapes
+	if ($shapeMatch)
+	{
+		string $listCtrs[] = `ls ($child + "_ctr*_crv") ($child + "_Root_crv")`;
+
+		for ($curCtr in $listCtrs ) {
+			string $parentCtr = `substitute $child $curCtr $parent`;
+			if ( `objExists $parentCtr` ) {
+				IH_matchCCshape $parentCtr $curCtr ;
+			}
+		}
+
+	}
+
+	select ( $child + "_Block" );
+	print ("//result :  match done.\n");
+}
+
+
+global proc int getCVnum(string $curve){
+
+	int $numSpans = `getAttr ( $curve + ".spans" )`;
+	int $degree   = `getAttr ( $curve + ".degree" )`;
+	int $form     = `getAttr ( $curve + ".form" )`;
+
+	int $numCVs   = $numSpans + $degree;
+
+	// Adjust for periodic curve:
+	if ( $form == 2 ) $numCVs -= $degree;
+
+	return $numCVs;
+}
+
+
+global proc IH_matchCCshape( string $source , string $target)
+{
+	//string $selection[] = `ls -sl`;
+	int $CVnum = `getCVnum $source`;
+
+	if ( $CVnum == `getCVnum $target`)
+	{
+		for ($j = 0 ; $j < $CVnum ; $j++ )
+		{
+			float $CVposition[] = `xform -q -t ($source + ".cv[" + $j + "]")`;
+
+			xform -t $CVposition[0]	$CVposition[1]	$CVposition[2] ($target + ".cv[" + $j + "]");
+
+		}
+	}
+	else
+		print "curves are not matching.\n";
+
+}
+
+
+
+global proc IHskinCopyWithSkin() {
+	string $listSel[] = `ls -sl`;
+	string $temp[];
+	string $sourceShape;
+	if ( `objectType $listSel[0]` == "transform" ) {
+		$temp = `listRelatives -s $listSel[0]`;
+		$sourceShape = $temp[0];
+	}
+	else if ( `objectType $listSel[0]` == "mesh" ) {
+		$sourceShape = $listSel[0];
+	} else
+		error "Select a Source mesh with skin cluster";
+
+	string $skinCluster = `findRelatedSkinCluster $sourceShape`;
+
+	string $jointList[] = `skinCluster -q -inf $sourceShape`;
+
+	string $targetShape;
+	$temp = `listRelatives -c -s $listSel[1]`;
+	if ( `objectType $listSel[1]` == "transform" ) {
+		$temp = `listRelatives -s $listSel[1]`;
+		$targetShape = $temp[0];
+	}
+	else if ( `objectType $listSel[1]` == "mesh" ) {
+		$targetShape = $listSel[1];
+	} else
+		error "Select a Source mesh with skin cluster";
+
+	$temp = `skinCluster -mi 1 -dr 4.5 -tsb $jointList $targetShape` ;
+	string $DesSkin = $temp[0];
+
+	copySkinWeights -sa "closestPoint" -ia "oneToOne" -ss $skinCluster -ds $DesSkin -nm;
+}
+
+
+
+
+//ctr 선택하고 ctr 상위에 constraint grp 생성.
+//IHaddConsGRP "";
+//locator에 연결 할 때는
+//IHaddConsGRP "loc";
+global proc IHaddConsGRP( string $type ){
+
+	string $sel[] = `ls -sl`;
+
+	string $tempArray[];
+
+	for ($cur in $sel){
+		string $consGrpName;
+		if (`gmatch $cur "*_crv"`)
+			$consGrpName = `substitute "_crv" $cur "_cons"`;
+		else
+			continue;
+
+		$tempArray = `listRelatives -p $cur`;
+		string $parentNode = $tempArray[0];
+
+		string $consGrp = `createNode "transform" -n $consGrpName`;
+		parent $consGrp $parentNode;
+
+		setAttr ($consGrp + ".t") 0 0 0;
+		setAttr ($consGrp + ".r") 0 0 0;
+		setAttr ($consGrp + ".s") 1 1 1;
+
+		parent $cur $consGrp;
+
+		if ($type == "loc"){
+
+			string $locName = `substitute "_crv" $cur "_loc"`;
+
+			string $loc[] = `spaceLocator -n $locName`;
+			string $locCon = `group -n ($locName + "_con") $loc[0]`;
+			string $locGrp = `group -n ($locName + "_zero") $locCon`;
+
+			parent $locGrp $parentNode;
+
+			setAttr ($locGrp + ".t") 0 0 0;
+			setAttr ($locGrp + ".r") 0 0 0;
+			setAttr ($locGrp + ".s") 1 1 1;
+
+			parentConstraint -mo $loc[0] $consGrp;
+
+			select -r $loc[0];
+		}
+		else{
+			select -r $cur;
+		}
+
+	}
+
+}
+
+global proc addConstraintAttr(){
+
+	string $sel[] = `ls -sl`;
+
+	for($cur in $sel){
+
+		string $prefix;
+		if (`gmatch $cur "*_ctrEnd_crv"`){
+			$prefix = `substitute "_ctrEnd_crv" $cur ""`;
+		}
+		else{
+			continue;
+		}
+
+		string $consList[] = `ls ($prefix + "_*_cons") ($prefix + "_*_zero")`;
+
+		for ($curCon in $consList){
+
+			string $constraintNode[] = `listRelatives -c -type "parentConstraint" -type "orientConstraint" -type "pointConstraint" $curCon`;
+			if (size($constraintNode) == 0)
+				continue;
+
+			//add attr to control
+			if (!`objExists ($cur + ".Constraint")`){
+				addAttr -ln "_constraint_" -nn "[    constraint   ]" -at "enum" -en ":"  $cur;
+                setAttr -e -channelBox true ($cur + "._constraint_");
+
+                addAttr -ln "Constraint" -k 1 -dv 1 -at "bool" $cur;
+                print ("//result :  add a attribute to " + $cur + ".Constraint" + "\n");
+			}
+
+			//connect constraint.
+			for ($constraint in $constraintNode)
+			{
+				if ( `objExists ($constraint + ".w0")`)
+				{
+					string $connect[] = `listConnections -s 1 -d 0 -p 1 ($constraint + ".w0")`;
+					if ( size($connect) > 0 )
+						disconnectAttr $connect[0] ($constraint + ".w0");
+					connectAttr -f ($cur + ".Constraint")($constraint + ".w0");
+				}
+				if ( `objExists ($constraint + ".w1")`)
+				{
+					string $connect[] = `listConnections -s 1 -d 0 -p 1 ($constraint + ".w1")`;
+					if ( size($connect) > 0 )
+						disconnectAttr $connect[0] ($constraint + ".w1");
+					connectAttr -f ($cur + ".Constraint")($constraint + ".w1");
+					if (`objExists ($constraint + ".interpType")`)
+					{
+						setAttr ($constraint + ".interpType") 2;
+					}
+					print ("//result : " + $curCon  + " connect to " + $cur + ".Constraint" + "\n");
+				}
+			}
+		}
+
+	}
+}
+
+
+//mirror SetDriven
+//mirror 할 driven object를 선택하고 실행.
+//현재 "_L" 과 "_R" tag가 사용된 컨트롤에만 사용가능.
+global proc IHmirrorSetDriven(){
+
+    string $targets[] = `ls -sl`;
+
+    for ($curTarget in $targets) {
+
+        //--find the driver object and channel from the driven object
+        string $driverObject[] = `setDrivenKeyframe -q -cd $curTarget `;
+
+        //---find the driven channels
+        string $drivenChannels[] = `setDrivenKeyframe -q -dn $curTarget `;
+
+        // get mirror Driver
+        string $mirDriver = `substitute "_L" $driverObject[0] "_R"`;
+
+        for ( $curChannel in $drivenChannels ) {
+           //get mirror Driven channel
+            string $mirDriven = `substitute "_L" $curChannel "_R"`;
+
+            //---find driver value from driverObject.channel
+            float $driverVal[] = `keyframe -q -fc $curChannel`;
+            //---find the driven value from drivenObject.channel,
+            float $drivenVal[] = `keyframe -q -vc $curChannel`;
+
+
+            for ( $i = 0 ;  $i <= size ($driverVal) ; $i++ ) {
+
+            	if (`gmatch $curChannel "*.translateX"` || `gmatch $curChannel "*.rotateY"` || `gmatch $curChannel "*.rotateZ"`){
+            		$drivenVal[$i] = -$drivenVal[$i];
+            	}
+                setDrivenKeyframe -itt linear -ott linear -dv $driverVal[$i] -v $drivenVal[$i] -currentDriver $mirDriver $mirDriven;
+
+            }
+
+
+        }
+    }
+}
+
+
+global proc IHdeleteConsGRP(){
+
+	string $sel[] = `ls -sl`;
+
+	for ($cur in $sel){
+		string $consGrpName;
+		string $zeroGrp;
+
+		if (`gmatch $cur "*_crv"`){
+			$consGrpName = `substitute "_crv" $cur "_cons"`;
+			$zeroGrp = `substitute "_crv" $cur "_zero"`;
+		}else
+			continue;
+
+      if (`objExists $consGrpName`){
+        parent $cur $zeroGrp;
+        delete $consGrpName;
+      }
+
+      string $locZeroName = `substitute "_crv" $cur "_loc_zerp"`;
+
+      if (`objExists $locZeroName`){
+        delete $locZeroName;
+      }
+
+	}
+
+}
+
+
+print "load IH_buildSpIkChain.mel\n";

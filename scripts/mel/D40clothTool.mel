@@ -1,0 +1,437 @@
+
+
+
+
+//-- b1clothToolNcloth
+global proc b1clothToolNcloth ( int $type){
+
+//type 0 : get List
+
+string $curNameSpace = `optionMenu -q -v b1clothToolNSmenu`;
+
+	if ($type == 0){
+
+		//get List
+		string $clothList[] = `ls -type "nCloth" ($curNameSpace + ":*")`;
+
+		textScrollList -e -ra b1clothToolClothTxList;
+		for ($curClothList in $clothList){		
+			string $temp[];        
+			$temp = `listConnections -s 1 -t "mesh" ($curClothList + ".inputMesh")`;
+			string $curShape = $temp[0];
+			textScrollList -e -a $curShape b1clothToolClothTxList;
+		}
+		
+		string $hairList[] = `ls -type "hairSystem" ($curNameSpace + ":*_nhairSystemShape")`;
+		
+		for ($curHair in $hairList){
+			textScrollList -e -a $curHair b1clothToolClothTxList;
+		}
+		
+	}
+
+	if ($type == 1){
+		
+
+		//simulation Range
+		int $startFrame = `textField -q -tx b1clothToolStartFrameFld`;
+		int $endFrame = `textField -q -tx b1clothToolEndFrameFld`;
+		
+		//selected ncloth
+		//string $nclothShape = `textScrollList -q -si b1clothToolClothTxList`;
+				
+		//simOrder check
+		//int $curSimOrder = `getAttr ($nclothShape + ".simOrder")`;
+		
+		//cc_cloth
+		string $ccCloth = ($curNameSpace + ":cc_cloth");
+		setAttr ($ccCloth + ".nclEnable") 1;
+		setAttr ($ccCloth + ".startFrame") $startFrame;
+		
+		
+		string $sel[] = `ls -sl`;
+		for ( $curSel in $sel ) {
+			string $temp[]; 
+			if ( `objectType $curSel` == "transform" ){
+				$temp = `listRelatives -s -c $curSel`;
+				$curSel = $temp[0];
+			}				
+			
+			if ( `objectType $curSel` == "hairSystem" )	{
+				$temp = `listConnections -s 1 -p 1 -d 0 ($curSel + ".active")`;
+			}
+			else {       
+				$temp = `listConnections -s 1 ($curSel + ".worldMesh[0]")`;
+				$temp = `listConnections -s 1 -p 1 -d 0 ($temp[0] + ".isDynamic")`;
+			}
+			
+			if ( `objExists $temp[0]` )	{
+				setAttr $temp[0] 1;
+				print ( "// set " + $temp[0] + " on.\n" );
+			}
+			
+		}
+		
+		
+		//make cache
+		//doCreateNclothCache 5 { "2", "1", "10", "OneFilePerFrame", "1", "","0","","0", "add", "0", "1", "1","0","1","mcx" } ;
+		doCreateNclothCache 1 { "0", $startFrame, $endFrame, "OneFilePerFrame", "1", "","1","","0", "replace", "1", "1", "1","0","1","mcx" } ;
+		// Description:
+		//	Create cache files on disk for the select ncloth object(s) according
+		//  to the specified flags described below.
+		//
+		// $version == 1:
+		//	$args[0] = time range mode:
+		//		time range mode = 0 : use $args[1] and $args[2] as start-end
+		//		time range mode = 1 : use render globals
+		//		time range mode = 2 : use timeline
+		//  $args[1] = start frame (if time range mode == 0)
+		//  $args[2] = end frame (if time range mode == 0)
+		//
+		// $version == 2:	
+		//  $args[3] = cache file distribution, either "OneFile" or "OneFilePerFrame"
+		//	$args[4] = 0/1, whether to refresh during caching
+		//  $args[5] = directory for cache files, if "", then use project data dir
+		//	$args[6] = 0/1, whether to create a cache per geometry
+		//	$args[7] = name of cache file. An empty string can be used to specify that an auto-generated name is acceptable.
+		//	$args[8] = 0/1, whether the specified cache name is to be used as a prefix
+		// $version == 3:
+		//  $args[9] = action to perform: "add", "replace", "merge" or "mergeDelete"
+		//  $args[10] = force save even if it overwrites existing files
+		//	$args[11] = simulation rate, the rate at which the cloth simulation is forced to run
+		//	$args[12] = sample mulitplier, the rate at which samples are written, as a multiple of simulation rate.
+		// $version == 4:
+		//	$args[13] = 0/1, whether modifications should be inherited from the cache about to be replaced.
+		//	$args[14] = 0/1, whether to store doubles as floats
+		// $version == 5:
+		//	$args[15] = cache format type: mcc or mcx.
+		//fin
+		setAttr ($ccCloth + ".nclEnable") 0;
+	}
+
+}
+//--/
+
+global proc b1setClothOn() {
+	string $sel[] = `textScrollList -q -si b1clothToolClothTxList`;
+	
+	for ( $curSel in $sel ) {
+			print $curSel;
+			string $temp[]; 
+			if ( `objectType $curSel` == "transform" ){
+				$temp = `listRelatives -s -c $curSel`;
+				$curSel = $temp[0];
+			}				
+			
+			if ( `objectType $curSel` == "hairSystem" )	{
+				$temp = `listConnections -s 1 -p 1 -d 0 ($curSel + ".active")`;
+			}
+			else {       
+				$temp = `listConnections -s 1 ($curSel + ".worldMesh[0]")`;
+				print $temp;
+				$temp = `listConnections -s 1 -p 1 -d 0 ($temp[0] + ".isDynamic")`;
+				print $temp;
+			}
+			
+			if ( `objExists $temp[0]` )	{
+				if (`getAttr $temp[0]`)
+					{ setAttr $temp[0] 0;print ( "// set " + $temp[0] + " off.\n" ); }
+				else
+					{ setAttr $temp[0] 1;print ( "// set " + $temp[0] + " on.\n" ); }	
+			}	
+		}
+}
+
+
+
+
+
+//-- b1clothToolFrameRange
+global proc b1clothToolFrameRange ( int $type){
+	//type  0 : frameRange로 부터 값을 받아 입력.
+	//		1 : minus startFrame
+	//		2 : add stFrame
+	//		3 : minus EndFrame
+	//		4 : add EndFrame
+
+	int $startFrame = `playbackOptions -q -min`;
+	int $endFrame = `playbackOptions -q -max`;
+	int $addAmountVal = `radioButtonGrp -q -sl b1clothToolFrameAddRadio`;
+	int $addAmount;
+	if ($addAmountVal == 1)
+		$addAmount = 1;
+	else if ($addAmountVal == 2)	
+		$addAmount = 10;
+	else if ($addAmountVal == 3)	
+		$addAmount = 50;	
+	
+	if ($type == 0 ){
+		textField -e -tx $startFrame b1clothToolStartFrameFld; 
+		textField -e -tx $endFrame b1clothToolEndFrameFld; 
+	}
+	
+	if ($type == 1 ){
+		int $getStFrame = `textField -q -tx b1clothToolStartFrameFld`; 
+		int $result = ($getStFrame - $addAmount);
+		textField -e -tx $result b1clothToolStartFrameFld;
+	}
+	if ($type == 2 ){
+		int $getStFrame = `textField -q -tx b1clothToolStartFrameFld`; 
+		int $result = ($getStFrame + $addAmount);
+		textField -e -tx $result b1clothToolStartFrameFld;
+	}
+	if ($type == 3 ){
+		int $getStFrame = `textField -q -tx b1clothToolEndFrameFld`; 
+		int $result = ($getStFrame - $addAmount);
+		textField -e -tx $result b1clothToolEndFrameFld;
+	}
+	if ($type == 4 ){
+		int $getStFrame = `textField -q -tx b1clothToolEndFrameFld`; 
+		int $result = ($getStFrame + $addAmount);
+		textField -e -tx $result b1clothToolEndFrameFld;
+	}
+	
+
+}
+//--/
+
+//-- b1clothToolSelectAll
+global proc b1clothToolSelectAll(){
+	
+	string $curNameSpace = `optionMenu -q -v b1clothToolNSmenu`;
+	string $ccList[] = `sets -q ($curNameSpace + ":ControlSet")`;
+	string $ccWithCons[];
+	int $i;
+	
+	for ($curCC in $ccList){
+	    	string $consList[] = `listRelatives -c  -typ "pointConstraint" -typ "orientConstraint" -typ "parentConstraint"  $curCC` ;
+	    	
+	    	if ( size($consList) > 0 ){
+	    	    $ccWithCons[$i] = $curCC;
+	    	    ++$i;	    	    
+	    	}
+	    	
+	    	
+	}
+	
+	if (size($ccWithCons) == 0 ){
+	    print "///no controls ard constrainted. /// \n";
+		print "/// select all controls. ///\n";
+	    select $ccList;
+	} else 	{
+		print "///following controls are constrainted. /// \n";
+	    print $ccWithCons;
+    	string $diff[] = stringArrayRemove($ccWithCons, $ccList);
+    	select $diff;
+		print "/// select all controls accept constrained controls. ///\n";
+	}
+
+}
+
+//--/
+
+//-- b1clothGoToBuildPose
+global proc b1clothGoToBuildPose (){
+
+string $nameSpace;
+string $controlSets[];
+$nameSpace= (`optionMenu -q -v b1clothToolNSmenu` + ":");
+$controlSets[0] = "ControlSet";
+	
+if ($nameSpace==":")
+	$nameSpace="";
+
+string $buildPoses[];
+$buildPoses[0] = "buildPose";
+
+string $tempString[],$buffer[];
+string $setAttrCmd,$cmd;
+
+for ($i=0;$i<size($buildPoses);$i++)
+	{
+	$setAttrCmd=`getAttr ($nameSpace+$buildPoses[$i]+".udAttr")`;
+	tokenize $setAttrCmd ";" $tempString;
+	for ($y=0;$y<size($tempString);$y++)
+		{
+		$cmd=$tempString[$y];
+		if ($nameSpace!="")
+			{
+			tokenize $cmd $buffer;
+			$cmd=$buffer[0]+" "+$nameSpace+$buffer[1]+" "+$buffer[2];
+			} 
+		
+		if (catchQuiet (`eval ($cmd)`)) warning ("Failed: "+$cmd+"\n");
+		}
+	}
+
+}
+//--/
+
+//-- b1clothTool
+global proc b1clothTool(){
+
+if (`window -exists b1clothToolWin`){
+		deleteUI b1clothToolWin;
+	}
+	
+window  -width 240 -height 300
+		-resizeToFitChildren true
+		-menuBar true
+		-maximizeButton true
+		-titleBar true
+		//-sizeable false
+		-menuBarVisible true
+		-title "b1 cloth tool"
+		b1clothToolWin;
+		
+		
+columnLayout  -adjustableColumn true -columnAlign "left" b1clothToolColA;
+	
+text -font "boldLabelFont" -l " - characters list with cloth -";
+
+separator -h 15;
+
+	gridLayout -numberOfColumns 1 -cellWidthHeight 150 25 b1clothToolColAa;;
+	
+	string $clothList[] = `ls "*:cc_cloth"`;
+	
+	optionMenu -label "namespace: " -w 30 -changeCommand "b1clothToolNcloth 0" b1clothToolNSmenu;
+     
+	if ( size($clothList) > 0){
+		for ($curClothCC in $clothList){
+			string $tokenTemp[];
+			tokenize $curClothCC ":" $tokenTemp;
+			menuItem -label $tokenTemp[0];
+		}
+	} else {
+		menuItem -label ":";
+	}
+	
+	
+	setParent b1clothToolColA;
+	
+separator -h 5;
+	
+	rowColumnLayout -nc 2 -cw 1 300	-cw 2 200  b1clothToolColAb;
+	
+	
+	columnLayout  -adjustableColumn true -columnAlign "center" b1clothToolColAba;
+	
+	text -l "-- Select Cc--";
+		rowColumnLayout -nc 2 -cw 1 130	-cw 2 130 -cat 1 left 5 -cat 2 left 15 b1clothToolColAbaa;
+		button -l "select cc_cloth" -w 130 -c "select (`optionMenu -q -v b1clothToolNSmenu` + \":cc_cloth\");";
+		button -l "select Sub" -w 130 -c "select (`optionMenu -q -v b1clothToolNSmenu` + \":Sub\");";	
+		setParent b1clothToolColAba;
+	
+	text -l "-- Lod Change --";
+	//lod02 //dynamics
+		rowColumnLayout -nc 2 -cw 1 130	-cw 2 130 -cat 1 left 5 -cat 2 left 15 b1clothToolColAbab;
+		button -l "extraControl on/off" -w 130 -c "string $onOff = (`optionMenu -q -v b1clothToolNSmenu` + \":Sub.extraControlVis\"); if (`getAttr $onOff`) {setAttr $onOff 0;} else {setAttr $onOff 1;}";	
+		button -l "ani <> ncloth" -w 130 -c "string $onOff = (`optionMenu -q -v b1clothToolNSmenu` + \":cc_cloth.nclothMeshOn\"); if (`getAttr $onOff`) {setAttr $onOff 0;} else {setAttr $onOff 1;}";	
+		setParent b1clothToolColAba;
+	
+	separator -h 15;
+	
+	text -l "-- Animation Frame Range --"; //frameRange from camera
+		rowColumnLayout -nc 3 -cw 1 100	-cw 2 50 -cw 3 100	
+						-cat 1 left 20 -cat 2 left 30 -cat 3 left 20
+						b1clothToolColAbac;
+		
+		string $camList[] = `ls "cam_*_*_main"`;
+		string $stFrameFromCam = "";
+		string $endFrameFromCam = "";
+		
+		if ( size($camList)>0 ){
+			string $tokenTemp[];
+			tokenize $camList[0] "_" $tokenTemp;
+			$stFrameFromCam = $tokenTemp[1];			
+			$endFrameFromCam = $tokenTemp[2];
+		
+		}
+							
+		textField -ed 0 -tx $stFrameFromCam  b1clothToolStFrmFromCamFld;
+		text -l "~";
+		textField -ed 0 -tx $endFrameFromCam  b1clothToolEndFrmFromCamFld; 
+		
+	setParent b1clothToolColAba;
+	
+	text -l "-- Simulation Frame Range --";
+		rowColumnLayout -nc 3 -cw 1 120	-cw 2 30 -cw 3 120	
+						b1clothToolColAbad;
+		
+			rowColumnLayout -nc 3 -cw 1 20	-cw 2 80 -cw 3 20 b1clothToolColAbaca;
+			button -l "-" -c "b1clothToolFrameRange 1";
+			textField b1clothToolStartFrameFld; 
+			button -l "+" -c "b1clothToolFrameRange 2";
+			setParent b1clothToolColAbad;
+			
+			text -l "~";
+			
+			rowColumnLayout -nc 3 -cw 1 20	-cw 2 80 -cw 3 20 b1clothToolColAbacb;
+			button -l "-" -c "b1clothToolFrameRange 3";
+			textField b1clothToolEndFrameFld; 
+			button -l "+" -c "b1clothToolFrameRange 4";
+			setParent b1clothToolColAbad;
+					
+		setParent b1clothToolColAba;
+		
+	radioButtonGrp -numberOfRadioButtons 3 -cw4 120 50 50 50
+					-label "frame add amount: " -labelArray3 "1" "10" "50" b1clothToolFrameAddRadio;
+	
+	// frame 집어 넣기.
+	b1clothToolFrameRange 0;
+	
+	text -l "-- Set FrameRnage --";
+	
+	rowColumnLayout -nc 2 -cw 1 130	-cw 2 130 -cat 1 left 5 -cat 2 left 15 b1clothToolColAbae;
+	button -l "as camera" -w 130 -c "playbackOptions -min (`textField -q -tx b1clothToolStFrmFromCamFld`) -max (`textField -q -tx b1clothToolEndFrmFromCamFld`)";
+	button -l "as dynamic " -w 130 -c "playbackOptions -min (`textField -q -tx b1clothToolStartFrameFld`) -max (`textField -q -tx b1clothToolEndFrameFld`)";	
+	setParent b1clothToolColAba;
+	
+	separator -h 15;	
+	
+	
+	rowColumnLayout -nc 3 -cw 1 90	-cw 2 90 -cw 3 90 -cat 1 left 5 -cat 2 left 10 -cat 3 left 15 b1clothToolColAbaf;
+	button -l "delete keys" -w 80 -c ("cutKey -cl -t \":\" -hi none -cp 0 -s 0 `ls -sl`");		
+	button -l "select all" -w 80 -c "b1clothToolSelectAll";	
+	button -l "pose reset" -w 80 -c "b1clothGoToBuildPose";	
+	//button -l "select unconstrainted Control" -w 130 ;
+	setParent b1clothToolColAba;
+	separator -h 15;	
+		
+	textScrollList  -allowMultiSelection 1 -h 100 -sc "select (`textScrollList -q -si b1clothToolClothTxList`);" -dcc "b1setClothOn" b1clothToolClothTxList;
+	popupMenu;
+            menuItem -label "delete cache" -c "deleteCacheFile 3 { \"keep\", \"\", \"nCloth\" } ;";
+	b1clothToolNcloth 0	;	
+	button -l "make Ncache" -c "b1clothToolNcloth 1";			
+	//순서대로 dynamic
+	
+	setParent b1clothToolColAb;
+	
+	formLayout b1clothToolColAbform;
+		
+		// create a channel box widget 
+		channelBox ch;
+		
+		// attach the form layout and the channel box
+		formLayout -e
+			-w 200
+			-h 400
+			-af ch"top" 0
+			-af ch "left" 0
+			-af ch "right" 0
+			-af ch "bottom" 0
+			b1clothToolColAbform;
+	
+	setParent b1clothToolColAb;
+	
+	setParent b1clothToolColA;
+	
+setParent ..;
+
+showWindow b1clothToolWin;								
+}								
+
+b1clothTool;
+
+//--/

@@ -1,0 +1,97 @@
+/*
+    Script:     js_setDrivenKeyLength
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+        
+    Descr:     Controls the length of a joint with an attribute called "length" 
+               
+
+    Required:   js_splitSelJoint.mel
+
+*/
+global proc js_setDrivenKeyLength ( string $type, string $childScale )
+{
+    string $objs[0];
+    string $joints[0];
+
+    $objs = `ls -sl -et transform`;
+    $joints = `ls -sl -et joint`;
+
+    if (size($joints) == 0)
+        error ("No joints selected. Exiting...");
+    if (size($objs) == 0)
+    {
+        // let's just add a length attribute to the current jiont
+        $objs[0] = $joints[0];
+    }
+    if ($type == "")
+    {
+        // no type specified, pop up an window to query
+        $type = `confirmDialog -m "Please decide how to hook up the length.." -b "scale" -b "translate" -db "translate"`;
+    }
+    if (($childScale == "") && ($type == "translate"))
+    {
+        // no child mode specified, pop up a window to query
+        $childScale = `confirmDialog -m "Would you like to scale any child geometry?" -b "yes" -b "no" -db "yes"`;
+    }
+    print ("// js_setDrivenKeyLength \"" + $type + "\" \""+$childScale+"\";"); 
+    $driver = $objs[0];
+
+    // check and see if there's a "length" attribute on $driver
+    if (!`attributeQuery -exists -node $driver "length"`)
+    {
+        addAttr -ln length -at double  -min 0 -dv 1 $driver;
+        setAttr -e -keyable true ($driver + ".length");
+    }   
+
+    // for each joint, create a setDrivenKeyframe on the stretch axis
+    source js_splitSelJoint;
+    
+    for ($joint in $joints)
+    {
+        $child = `listRelatives -f -type "joint" -c $joint`;
+        $axis = `js_getJointAxis $child[0]`;
+        if ($type == "scale")
+        {
+            $t = ("s" + $axis);
+            connectAttr ($driver + ".length") ($joint + "." + $t);
+        }
+        else
+        {
+            $t = ("t" + $axis);
+
+            // create the setDrivenKeyframe command
+            //$child = `listRelatives -f -c -type joint $joint`;
+            $v = `getAttr ($child[0] + "." + $t)`;
+
+            setDrivenKeyframe -cd ($driver + ".length") -dv 1 -v $v -itt "linear" -ott "linear" -at $t $child[0];
+            setDrivenKeyframe -cd ($driver + ".length") -dv 0 -v 0 -itt "linear" -ott "linear" -at $t $child[0];
+            setDrivenKeyframe -cd ($driver + ".length") -dv 1000 -v (1000*$v) -itt "linear" -ott "linear" -at $t $child[0];
+
+            if ($childScale == "yes")
+            {
+                // now we have to hook up the child geometry to the scale. The script will look at the first transform under the
+                // joint that is NOT the child joint.
+                string $transforms[0];
+                $transforms = `listRelatives -f -c -type "transform" $joint`;
+
+                // we have all the transforms, so let's find out hte first one which isn't a joint
+                $trans = "";
+                for ($item in $transforms)
+                {   
+                    if ((`nodeType $item` != "joint") && ($trans == ""))
+                    {
+                        $trans = $item;
+                    }
+                }   
+                if ($trans != "")
+                {
+                    connectAttr ($driver + ".length") ($trans + ".s"+$axis);
+                }
+            }
+        }
+    }
+
+    
+
+}

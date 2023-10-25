@@ -1,0 +1,66 @@
+// Skin and Hide Hair //
+
+global proc copyHairSkinCMD()
+{
+	// 컨트롤러 Line5_Bake_Con 선택 후에 헤어 mesh 선택.
+	string $selectList[] =`ls -sl`;
+	string $temp[];
+	tokenize $selectList[0] "_" $temp;
+	string $sourceMesh = ($temp[0] + "_hairSkinMesh");
+	if ( `objExists $sourceMesh` ) {
+		select -r $sourceMesh;
+		select -add $selectList[1];
+		skinCopyWithSkin;	
+	}
+    string $hairBlck = $temp[0] + "_Block";
+    select $hairBlck $selectList[1];
+    HideSelectedObjects;
+}
+
+
+// Make Circular Layout //
+// This script will position the selected objcets into circular shape.
+global proc makeCircularLayout(){
+	string $selObj[] = `ls -sl`;
+	vector $axis = <<0,0,1>>;
+	vector $pivot = <<0,10,1>>;
+	vector $posAdd = <<0,1,0>>;
+	float $angle = deg_to_rad(360/(size($selObj)));
+	for($i=0;$i<size($selObj);$i++){
+	   vector $nextPos = rot($posAdd,$axis,$angle*$i);
+	   xform -ws -t ($pivot.x+$nextPos.x) ($pivot.y+$nextPos.y) ($pivot.z+$nextPos.z) $selObj[$i];
+	}
+}
+
+global proc reducePoly(){
+	string $selList[] = `ls -sl`;
+	for ($sel in $selList){
+		select -cl;
+		select $sel;
+		polyReduce -ver 1 -trm 0 -p 50 -vct 0 -tct 0 -shp 0 -keepBorder 1 -keepMapBorder 1 -keepColorBorder 1 -keepFaceGroupBorder 1 -keepHardEdge 1 -keepCreaseEdge 1 -keepBorderWeight 0.5 -keepMapBorderWeight 0.5 -keepColorBorderWeight 0.5 -keepFaceGroupBorderWeight 0.5 -keepHardEdgeWeight 0.5 -keepCreaseEdgeWeight 0.5 -useVirtualSymmetry 0 -symmetryTolerance 0.01 -sx 0 -sy 1 -sz 0 -sw 0 -preserveTopology 1 -keepQuadsWeight 1 -vertexMapName "" -replaceOriginal 1 -cachingReduce 1 -ch 1;
+	}
+}
+
+
+// Sub controller expression
+if (Sub.geometryVis == 0) 
+	geoLayer.displayType = 0;
+else if (Sub.geometryVis == 1) 
+	geoLayer.displayType = 1;
+else 
+	geoLayer.displayType = 2;
+
+if (Sub.lodVis == 0)
+        lod01_GRP.visibility = 1;
+else
+        lod01_GRP.visibility = 0;
+
+if (Sub.lodVis == 1)
+        lod02_GRP.visibility = 1;
+else
+        lod02_GRP.visibility  = 0;
+
+if (Sub.lodVis == 2)
+        lod03_GRP.visibility = 1;
+else
+        lod03_GRP.visibility = 0;

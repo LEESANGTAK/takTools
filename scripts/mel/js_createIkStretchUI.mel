@@ -1,0 +1,133 @@
+/*
+    Script:     js_createIkStretchUI
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Creates an interface for the js_createIkStretch command
+
+    Requires:   js_createIkStretch
+                js_loadSelectedIntoButtonGrp
+
+*/
+global proc js_createIkStretchUI()
+{
+    // creates an interface for the js_createIkStretch command
+    $win = "js_createIkStretchWin";
+
+    if (`window -exists $win`)
+        deleteUI $win;
+    
+    window -title "Create Ik Stretch" $win;
+
+    $f=`formLayout -nd 100`;
+
+    $worldScaleNode = `textFieldButtonGrp -l "World Scale Object:" -cw1 80 -enable 1 -bl "Load Sel"`;
+    $worldScaleText = `text -enable 1 -l "World Scale Attribute:" -align "right" -w 128`;
+    $worldScaleAttrs = `textScrollList -enable 1 -ams 0  -nr 5`;
+
+    $solverOptions = `optionMenuGrp -cal 1 "right" -l "Ik Solver:"`;
+        menuItem -l "ikSCsolver";
+        menuItem -l "ikRPsolver";
+
+    setParent $f;
+    $scaleType = `optionMenuGrp -cal 1 "right" -l "Scale Method:"`;
+        menuItem -l "Translation";
+        menuItem -l "Scale";
+
+    setParent $f;
+
+    $goButton = `button -l "Apply" -c ("js_prepareCreateIkStretchCmd \"" + $worldScaleNode + "\" \"" + $worldScaleAttrs + "\" \""+$solverOptions+"\" \""+$scaleType+"\" \""+$win+"\"")`;
+    $cancelButton = `button -l "Cancel" -c ("deleteUI \"" + $win + "\"")`;
+
+    
+    formLayout -e
+        -ac $worldScaleNode top 10 $scaleType
+        -af $worldScaleNode left 5
+        -af $worldScaleNode right 5
+
+        -af $worldScaleText left 5
+        -ac $worldScaleText top 5 $worldScaleNode
+
+        -ac $worldScaleAttrs left 10 $worldScaleText
+        -ac $worldScaleAttrs top 5 $worldScaleNode
+        -af $worldScaleAttrs right 5
+
+        -af $solverOptions top 10 
+        -af $solverOptions left 5
+        -af $solverOptions right 5
+        
+        -ac $scaleType top 5 $solverOptions
+        -af $scaleType left 5
+        -af $scaleType right 5
+
+        -ac $goButton top 10 $worldScaleAttrs
+        -af $goButton left 5
+        -ap $goButton right 5 50
+
+        -ac $cancelButton top 10 $worldScaleAttrs
+        -af $cancelButton right 5
+        -ap $cancelButton left 5 50
+        $f;
+
+    textFieldButtonGrp -e
+        -bc ("js_loadSelectedIntoButtonGrp \"" + $worldScaleNode + "\";js_addAllAttrsToAttrTSL \""+$worldScaleNode+"\" \""+ $worldScaleAttrs + "\"")
+        -cc ("js_addAllAttrsToAttrTSL \""+$worldScaleNode+"\" \""+ $worldScaleAttrs + "\"")
+        $worldScaleNode;
+
+    showWindow $win;
+
+}
+global proc js_prepareCreateIkStretchCmd (string $worldScaleTFBG, string $worldScaleAttrsTSL, string $solverOptionsMG, string $scaleTypeMG, string $win)
+{
+    // get the items
+    string $worldScaleNode;
+    string $worldScaleAttr[0];
+    string $objAttr;
+    string $solver;
+    int $type;
+
+    $worldScaleNode = `textFieldButtonGrp -q -tx $worldScaleTFBG`;
+    $worldScaleAttr = `textScrollList -q -si $worldScaleAttrsTSL`;
+
+    $solver = `optionMenuGrp -q -v $solverOptionsMG`;
+    $type = `optionMenuGrp -q -sl $scaleTypeMG`;
+    $type = $type-1;
+
+    if (($worldScaleNode == "") || ($worldScaleAttr[0] == ""))
+        $objAttr = "";
+    else
+    {
+        // check and see if the worldScale object exists
+        if (`objExists $worldScaleNode`)
+        {
+            // check and see if the attribute exists
+            if (`attributeQuery -exists -node $worldScaleNode $worldScaleAttr[0]`)
+                $objAttr = ($worldScaleNode + "." + $worldScaleAttr[0]);
+        }
+
+    }
+
+    $cmd = ("js_createIkStretch \""+$objAttr + "\" \"" + $solver + "\" "+$type );
+    evalEcho $cmd;
+}
+global proc js_addAllAttrsToAttrTSL (string $tfbg, string $tsl)
+{
+    $object = `textFieldButtonGrp -q -tx $tfbg`;
+    
+    // remove all from textScrollList
+    textScrollList -e -ra $tsl;
+    
+    if (`objExists $object`)
+    {
+        // get the attributes
+        string $attrs[0];
+        $attrs = `listAttr -k $object`;
+
+        // add them
+        for ($at in $attrs)
+        {
+            textScrollList -e -a $at $tsl;
+        }
+    }
+}

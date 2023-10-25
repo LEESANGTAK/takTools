@@ -1,0 +1,1315 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+//Name - ikas_render_View_Bacth_Render                                                 ///
+//Autor - Irakli Kublashvili                                                           ///
+//Description  - This script renders image sequence through render view window.        ///
+//Web - http://www.Irakli-K.com                                                        ///
+//Mail - cyberirakli@yahoo.com                                                         ///
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                     ///
+//How to use : Put this script in maya's script directory                              ///
+//(e.gC:\Documents and Settings\user name\MyDocuments\maya\maya Version\scripts        ///
+//and start MAYA. Write in  Script Edtor :                                             ///
+//                                                                                     ///
+//                                                                                     ///
+//               source "ikas_renderViewBr.mel";                                       ///
+//               ikas_renderViewBr;                                                    ///
+//                                                                                     ///
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+    //Rendered image overwire procedure
+     // if images with the same name exists in current directory this peace of code will overwrite them
+
+  global proc setTimeLine()
+
+  {
+
+          float $initAlt = `textField -q -text t_StartF`;
+          float $finAlt = `textField -q -text t_EndF`;
+          playbackOptions -min $initAlt -max $finAlt ;
+
+  }
+
+
+       global proc imageOverWite()
+
+         {
+
+ global int $rvbr_imageFormat;
+ global string $rvbr_fPadding;
+
+                     float $initAlt = `textField -q -text t_StartF`;
+                     float $finAlt = `textField -q -text t_EndF`;
+                     $i=$initAlt;
+                     currentTime $initAlt;
+
+
+
+
+
+
+                 // current image/frame loop
+
+                    for($i=$initAlt; $i<=$finAlt; $i++)
+
+                     {
+
+
+ //get attr from render globals  - image format. value is integer but we'll convert them to string e.g. 9=jpg
+
+
+
+
+                        string $imgF= `optionMenuGrp -q -value omGrp `;
+
+                        string $overImageFormat;
+
+
+
+
+                        if ($imgF == "Alias PIX(als)") {
+                             $overImageFormat = "als";
+                             }
+
+                        if ($imgF == "AVI(avi)") {
+                             $overImageFormat = "avi";
+                        }
+
+                        if ($imgF == "Cineon(cin)") {
+                             $overImageFormat = "cin";
+                             }
+
+                          if ($imgF == "DDS(dds)") {
+                             $overImageFormat = "dds";
+                             }
+
+                               if ($imgF == "EPS(eps)") {
+                             $overImageFormat = "eps";
+                             }
+
+                               if ($imgF == "GIF(gif)") {
+                             $overImageFormat = "gif";
+                             }
+
+                               if ($imgF == "JPEG(jpg)") {
+                             $overImageFormat = "jpg";
+                             }
+
+                               if ($imgF == "Maya IFF(iff)") {
+                             $overImageFormat = "iff";
+                             }
+
+                               if ($imgF == "Maya 16 IFF(iff)") {
+                             $overImageFormat = "iff";
+                             }
+
+                               if ($imgF == "PSD(psd)") {
+                             $overImageFormat = "psd";
+                             }
+
+                               if ($imgF == "PSD Layered(psd)") {
+                             $overImageFormat = "psd";
+                             }
+
+                               if ($imgF == "PNG(png)") {
+                             $overImageFormat = "png";
+                             }
+
+                               if ($imgF == "Quantel(yuv)") {
+                             $overImageFormat = "yuv";
+                             }
+
+                               if ($imgF == "RLA(rla)") {
+                             $overImageFormat = "rla";
+                             }
+
+                               if ($imgF == "SGI(sgi)") {
+                             $overImageFormat = "sgi";
+                             }
+
+                               if ($imgF == "SGI 16(sgi)") {
+                             $overImageFormat = "sgi";
+                             }
+
+                               if ($imgF == "Softimage(pic)") {
+                             $overImageFormat = "pic";
+                             }
+
+                               if ($imgF == "Targa(tga)") {
+                             $overImageFormat = "tga";
+                             }
+
+                               if ($imgF == "TIFF(tif)") {
+                             $overImageFormat = "tif";
+                             }
+
+                               if ($imgF == "TIFF 16(tif)") {
+                             $overImageFormat = "tif";
+                             }
+
+                               if ($imgF == "Windows Bitmap(bmp)") {
+                             $overImageFormat = "bmp";
+                             }
+
+                               if ($imgF == "XPM(xpm)") {
+                             $overImageFormat = "xpm";
+                             }
+
+
+
+
+
+
+
+
+                    // getting all needed values
+                     string $imageName = `textField -q -text t_imagename`;
+                     string $rvbr_pathName = ` textFieldButtonGrp -q -text t_directory`;
+
+
+                     string $overImageName =  ($rvbr_pathName+"/"+$imageName+"."+$rvbr_fPadding+$i+"."+$overImageFormat);
+
+
+                     // check if $overImageName is not empty then delete it
+                      // this mean check if the the iamge exists.
+
+                      if($overImageName != ""){
+
+                    sysFile -delete $overImageName;
+    }
+  }
+}
+
+
+
+
+
+
+// main Proc(render)
+
+         global proc startRender()
+         {
+
+
+
+       global int $rvbr_imageFormat;
+       global string $rvbr_fPadding;
+       global string $camName;
+
+
+                     float $init = `textField -q -text t_StartF`;
+                     float $fin = `textField -q -text t_EndF`;
+                     $i=$init;
+                     currentTime $init;
+                     string $imageName = `textField -q -text t_imagename`;
+                     string $rvbr_pathName = ` textFieldButtonGrp -q -text t_directory`;
+
+
+                        // Progress window
+
+                          progressWindow
+
+                          -minValue $init
+                          -maxValue $fin
+                          -title "Rendering..."
+                          -progress 0
+                          -status "Render Frame: 0"
+                          -isInterruptable true;
+
+
+
+            for($i=$init; $i<=$fin; $i++)
+                  {
+
+                  //simple timer for remaining frames
+                  $cTime = `currentTime -q`;
+                  int $f_rest = ($fin - $cTime);
+
+// check if operation is cancelled by user and edit/refresh progress window
+
+  ////////////////
+
+ // Condition for frame padding
+
+  int  $Cond_fPadding  = `intSliderGrp -q -v fpSldr` ;
+
+
+
+
+                                        switch($Cond_fPadding)
+                                        {
+                                        case 1:
+
+
+
+                                            $rvbr_fPadding = "";
+                                            break;
+
+                                        case 2:
+
+                                             if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = 0;
+                                              }
+                                            else
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                               break;
+
+                                        case 3:
+
+                                            if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = "00";
+                                              }
+                                            else if ($cTime < 100)
+                                              {
+                                               $rvbr_fPadding = "0";
+                                              }
+                                             else
+
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                              break;
+
+                                        case 4:
+
+                                           if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = "000";
+                                              }
+                                            else if ($cTime < 100)
+                                              {
+                                               $rvbr_fPadding = "00";
+                                              }
+                                             else if ($cTime < 1000)
+                                              {
+                                               $rvbr_fPadding = "0";
+                                              }
+
+                                              else
+
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                              break;
+
+                                        case 5:
+
+                                         if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = "0000";
+                                              }
+                                            else if ($cTime < 100)
+                                              {
+                                               $rvbr_fPadding = "000";
+                                              }
+                                             else if ($cTime < 1000)
+                                              {
+                                               $rvbr_fPadding = "00";
+                                              }
+                                              else if ($cTime < 10000)
+                                              {
+                                               $rvbr_fPadding = "0";
+                                              }
+                                              else
+
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                              break;
+
+
+                                        case 6:
+
+                                            if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = "00000";
+                                              }
+                                            else if ($cTime < 100)
+                                              {
+                                               $rvbr_fPadding = "0000";
+                                              }
+                                             else if ($cTime < 1000)
+                                              {
+                                               $rvbr_fPadding = "000";
+                                              }
+                                              else if ($cTime < 10000)
+                                              {
+                                               $rvbr_fPadding = "00";
+                                              }
+                                              else if ($cTime < 100000)
+                                              {
+                                               $rvbr_fPadding = "0";
+                                              }
+                                              else
+
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                              break;
+
+
+                                        case 7:
+
+                                            if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = "000000";
+                                              }
+                                            else if ($cTime < 100)
+                                              {
+                                               $rvbr_fPadding = "00000";
+                                              }
+                                             else if ($cTime < 1000)
+                                              {
+                                               $rvbr_fPadding = "0000";
+                                              }
+                                              else if ($cTime < 10000)
+                                              {
+                                               $rvbr_fPadding = "000";
+                                              }
+                                              else if ($cTime < 100000)
+                                              {
+                                               $rvbr_fPadding = "00";
+                                              }
+                                              else if ($cTime < 1000000)
+                                              {
+                                               $rvbr_fPadding = "0";
+                                              }
+                                              else
+
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                              break;
+
+
+                                        case 8:
+
+                                           if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = "0000000";
+                                              }
+                                            else if ($cTime < 100)
+                                              {
+                                               $rvbr_fPadding = "000000";
+                                              }
+                                             else if ($cTime < 1000)
+                                              {
+                                               $rvbr_fPadding = "00000";
+                                              }
+                                              else if ($cTime < 10000)
+                                              {
+                                               $rvbr_fPadding = "0000";
+                                              }
+                                              else if ($cTime < 100000)
+                                              {
+                                               $rvbr_fPadding = "000";
+                                              }
+                                              else if ($cTime < 1000000)
+                                              {
+                                               $rvbr_fPadding = "00";
+                                              }
+                                              else if ($cTime < 10000000)
+                                              {
+                                               $rvbr_fPadding = "0";
+                                              }
+                                              else
+
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                              break;
+
+
+                                        case 9:
+
+                                            if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = "00000000";
+                                              }
+                                            else if ($cTime < 100)
+                                              {
+                                               $rvbr_fPadding = "0000000";
+                                              }
+                                             else if ($cTime < 1000)
+                                              {
+                                               $rvbr_fPadding = "000000";
+                                              }
+                                              else if ($cTime < 10000)
+                                              {
+                                               $rvbr_fPadding = "00000";
+                                              }
+                                              else if ($cTime < 100000)
+                                              {
+                                               $rvbr_fPadding = "0000";
+                                              }
+                                              else if ($cTime < 1000000)
+                                              {
+                                               $rvbr_fPadding = "000";
+                                              }
+                                              else if ($cTime < 10000000)
+                                              {
+                                               $rvbr_fPadding = "00";
+                                              }
+                                              else if ($cTime < 100000000)
+                                              {
+                                               $rvbr_fPadding = "0";
+                                              }
+                                              else
+
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                              break;
+
+                                        case 10:
+
+                                            if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = "000000000";
+                                              }
+                                            else if ($cTime < 100)
+                                              {
+                                               $rvbr_fPadding = "00000000";
+                                              }
+                                             else if ($cTime < 1000)
+                                              {
+                                               $rvbr_fPadding = "0000000";
+                                              }
+                                              else if ($cTime < 10000)
+                                              {
+                                               $rvbr_fPadding = "000000";
+                                              }
+                                              else if ($cTime < 100000)
+                                              {
+                                               $rvbr_fPadding = "00000";
+                                              }
+                                              else if ($cTime < 1000000)
+                                              {
+                                               $rvbr_fPadding = "0000";
+                                              }
+                                              else if ($cTime < 10000000)
+                                              {
+                                               $rvbr_fPadding = "000";
+                                              }
+                                              else if ($cTime < 100000000)
+                                              {
+                                               $rvbr_fPadding = "00";
+                                              }
+                                              else if ($cTime < 1000000000)
+                                              {
+                                               $rvbr_fPadding = "0";
+                                              }
+                                              else
+
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                              break;
+
+                                        case 11:
+
+                                           if  ($cTime < 10)
+                                              {
+                                             $rvbr_fPadding = "0000000000";
+                                              }
+                                            else if ($cTime < 100)
+                                              {
+                                               $rvbr_fPadding = "000000000";
+                                              }
+                                             else if ($cTime < 1000)
+                                              {
+                                               $rvbr_fPadding = "00000000";
+                                              }
+                                              else if ($cTime < 10000)
+                                              {
+                                               $rvbr_fPadding = "0000000";
+                                              }
+                                              else if ($cTime < 100000)
+                                              {
+                                               $rvbr_fPadding = "000000";
+                                              }
+                                              else if ($cTime < 1000000)
+                                              {
+                                               $rvbr_fPadding = "00000";
+                                              }
+                                              else if ($cTime < 10000000)
+                                              {
+                                               $rvbr_fPadding = "0000";
+                                              }
+                                              else if ($cTime < 100000000)
+                                              {
+                                               $rvbr_fPadding = "000";
+                                              }
+                                              else if ($cTime < 1000000000)
+                                              {
+                                               $rvbr_fPadding = "00";
+                                              }
+                                              else if ($cTime < 10000000000)
+                                              {
+                                               $rvbr_fPadding = "0";
+                                              }
+                                              else
+
+                                              {
+                                               $rvbr_fPadding = "";
+                                              }
+                                              break;
+
+
+
+                                          }
+
+  //////////////// Image format loop for Maya 2011
+
+
+
+
+
+
+
+                        string $getimageFormat;
+
+                       int $imageIndex = `optionMenuGrp -q -sl  omGrp` ;
+
+                        switch($imageIndex){
+
+                      case 1:
+
+                              $getimageFormat = "Alias PIX";
+                              break;
+
+                      case 2:
+
+                               $getimageFormat = "AVI";
+                               break;
+
+                      case 3:
+
+                               $getimageFormat = "Cineon";
+                               break;
+
+                      case 4:
+
+                               $getimageFormat = "DDS";
+                               break;
+
+
+                      case 5:
+
+                               $getimageFormat = "EPS";
+                               break;
+
+
+
+                      case 6:
+
+                               $getimageFormat = "GIF";
+                               break;
+
+
+                      case 7:
+
+                               $getimageFormat = "JPEG";
+                               break;
+
+
+                      case 8:
+
+                               $getimageFormat = "Maya IFF";
+                               break;
+
+
+                      case 9:
+
+                               $getimageFormat = "Maya 16 IFF";
+                               break;
+
+
+                      case 10:
+
+                               $getimageFormat = "PSD";
+                               break;
+
+
+                      case 11:
+
+                               $getimageFormat = "PSD Layered";
+                               break;
+
+
+                      case 12:
+
+                               $getimageFormat = "PNG";
+                               break;
+
+                      case 13:
+
+                               $getimageFormat = "Quantel";
+                               break;
+
+                      case 14:
+
+                               $getimageFormat = "RLA";
+                               break;
+
+                      case 15:
+
+                               $getimageFormat = "SGI";
+                               break;
+
+
+                      case 16:
+
+                               $getimageFormat = "SGI 16";
+                               break;
+
+
+
+                      case 17:
+
+
+                               $getimageFormat = "Softimage";
+                               break;
+
+                      case 18:
+
+                               $getimageFormat = "Targa";
+                               break;
+
+                      case 19:
+
+                               $getimageFormat = "TIFF";
+                               break;
+
+                      case 20:
+
+                               $getimageFormat = "TIFF 16";
+                               break;
+
+                     case 21:
+
+                               $getimageFormat = "Windows Bitmap";
+                               break;
+
+
+                     case 22:
+
+                               $getimageFormat = "XPM";
+                               break;
+
+
+
+                        }
+
+
+
+////////////////////////
+
+          if ( `progressWindow -query -isCancelled` ) break;
+
+          progressWindow -edit
+          -progress $i
+          -status ("Rendering Frame: "+$i+"/"+$fin+" ("+"Remaining:"+$f_rest+")");
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+/*Maya's global proc
+....   global proc renderWindowRenderCamera(string 	$renderMode,string 	$editor,string 	$camera)
+*/
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+                        renderWindowRenderCamera("render","renderView", $camName);
+                        getAttr defaultRenderGlobals.imfkey;
+                        setAttr defaultRenderGlobals.outf $rvbr_imageFormat;
+                        setAttr defaultRenderGlobals.imfkey -type "string" "";
+
+
+
+                      renderWindowSaveImageCallback "renderView" ($rvbr_pathName+"/"+$imageName+"."+$rvbr_fPadding+$i+"") $getimageFormat;
+                      playButtonStepForward;
+
+               }
+
+  //end of progress...
+    progressWindow -endProgress;
+   checkBox -edit -value 0 overWrchkBx;
+
+   }
+
+
+  //This procedure contains conditions to change render attributes with user introduced values
+
+              global proc  executCondProc()
+                     {
+                     //
+
+                     global int $rvbr_imageFormat;
+                     global string  $CamOptMenu;
+                     global string $camName;
+                     ///
+
+     int $imageIndex = `optionMenuGrp -q -sl  omGrp` ;
+
+
+
+     // Condition for option Menu(Cameras)
+                                   switch($imageIndex)
+                                {
+                                case 1:
+
+                                   $rvbr_imageFormat = ($imageIndex+5);
+                                   break;
+
+                                case 2:
+
+                                    $rvbr_imageFormat = ($imageIndex+21);
+                                     break;
+
+                                case 3:
+
+                                     $rvbr_imageFormat = ($imageIndex+8);
+                                     break;
+
+                                case 4:
+
+                                     $rvbr_imageFormat = ($imageIndex+31);
+                                     break;
+                                case 5:
+
+                                     $rvbr_imageFormat = ($imageIndex+4);
+                                     break;
+
+                                case 6:
+
+                                     $rvbr_imageFormat = ($imageIndex - 6);
+                                     break;
+
+                                case 7:
+
+                                     $rvbr_imageFormat = ($imageIndex+1);
+                                     break;
+
+                                case 8:
+
+                                     $rvbr_imageFormat = ($imageIndex - 1);
+                                     break;
+
+                                case 9:
+
+                                     $rvbr_imageFormat = ($imageIndex+1);
+                                     break;
+                               case 10:
+
+                                     $rvbr_imageFormat = ($imageIndex+21);
+                                     break;
+
+                               case 11:
+
+                                     $rvbr_imageFormat = ($imageIndex+25);
+                                     break;
+
+                               case 12:
+
+                                     $rvbr_imageFormat = ($imageIndex+20);
+                                     break;
+
+                               case 13:
+
+                                     $rvbr_imageFormat = ($imageIndex - 1);
+                                     break;
+
+                               case 14:
+
+                                     $rvbr_imageFormat = ($imageIndex- 12);
+                                     break;
+
+                               case 15:
+
+                                     $rvbr_imageFormat = ($imageIndex - 10);
+                                     break;
+
+                               case 16:
+
+                                     $rvbr_imageFormat = ($imageIndex - 3);
+                                     break;
+
+                               case 17:
+
+                                     $rvbr_imageFormat = ($imageIndex - 16);
+                                     break;
+
+                               case 18:
+
+                                     $rvbr_imageFormat = ($imageIndex+1);
+                                     break;
+
+                               case 19:
+
+                                     $rvbr_imageFormat = ($imageIndex - 16);
+                                     break;
+
+                               case 20:
+
+                                     $rvbr_imageFormat = ($imageIndex - 16);
+                                     break;
+
+                               case 21:
+
+                                     $rvbr_imageFormat = ($imageIndex - 1);
+                                     break;
+
+                               case 22:
+
+                                     $rvbr_imageFormat = ($imageIndex+41);
+                                     break;
+
+                                       }
+                                     //// end
+
+
+     //img resolution
+
+   int $customResWidth = `  textField -q -text  t_Width `;
+   int $customResHeight = `  textField -q -text  t_Height `;
+
+
+          int $imageRes = `optionMenuGrp -q -sl  omGrp2` ;
+
+           if ($customResWidth != 0)
+          {
+            setAttr defaultResolution.width $customResWidth;
+            setAttr defaultResolution.height $customResHeight;
+
+            }
+         else {
+          switch($imageRes)
+           {
+                                    case 1:
+
+                                    setAttr defaultResolution.width 320;
+                                    setAttr defaultResolution.height 240;
+                                    break;
+
+                                    case 2:
+
+                                    setAttr defaultResolution.width 640;
+                                    setAttr defaultResolution.height 480;
+                                    break;
+
+                                    case 3:
+
+                                    setAttr defaultResolution.width 720;
+                                    setAttr defaultResolution.height 576;
+                                    break;
+
+                                    case 4:
+
+                                    setAttr defaultResolution.width 720;
+                                    setAttr defaultResolution.height 486;
+                                    break;
+
+                                    case 5:
+
+                                    setAttr defaultResolution.width 1024;
+                                    setAttr defaultResolution.height 768;
+                                    break;
+
+                                    case 6:
+
+                                    setAttr defaultResolution.width 1280;
+                                    setAttr defaultResolution.height 1024;
+                                    break;
+
+                                    case 7:
+
+                                    setAttr defaultResolution.width 1280;
+                                    setAttr defaultResolution.height 720;
+                                    break;
+
+                                    case 8:
+
+                                    setAttr defaultResolution.width 1920;
+                                    setAttr defaultResolution.height 1080;
+                                    break;
+
+                                    case 9:
+
+                                    setAttr defaultResolution.width 646;
+                                    setAttr defaultResolution.height 485;
+                                    break;
+
+                                    case 10:
+
+                                    setAttr defaultResolution.width 768;
+                                    setAttr defaultResolution.height 576;
+                                    break;
+
+                                    case 11:
+
+                                    setAttr defaultResolution.width 780;
+                                    setAttr defaultResolution.height 576;
+                                    break;
+
+           }
+
+
+              }             /// end
+
+
+
+
+
+
+     //set all cameras renderable attribute to off
+
+    string $myCamListTemp[] = `ls -type camera`;
+
+          for($myCamTemp in $myCamListTemp)
+            {
+
+         setAttr     ($myCamTemp+".renderable") 0;
+
+            }
+
+
+
+
+         //query value from camera option menu and set renderabe to ON
+
+        string $camName =` optionMenuGrp -q -v $CamOptMenu`;
+        setAttr ($camName+".renderable") 1;
+
+     //query value from Alpha CheckBox and use conditin tu change it to on or off
+      int $alPhaChekBx1 = `checkBox -q -v chkBx`;
+
+         if($alPhaChekBx1 == 1)
+             {
+           setAttr  ($camName+".mask") 1;
+
+             }
+     else
+            {
+           setAttr  ($camName+".mask") 0;
+
+            }
+
+             //check wether overwrite checkBox is on or off
+                                $chkBxOverWriteExecutCondProc =` checkBox -q -value overWrchkBx`;
+                                if ($chkBxOverWriteExecutCondProc == 1)
+                                {
+                                 imageOverWite;
+                                }
+
+                      }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// sets user defined directory for store rendered images
+                        global proc setPath(string $vbr_name, string $fileType)
+
+                               {
+                                global string $rvbr_pathNameCont;
+                                $rvbr_pathNameCont = $vbr_name;
+
+                                //check wether overwrite checkBox is on or off
+                                $chkBxOverWriteSetPath =` checkBox -q -value overWrchkBx`;
+                                if ($chkBxOverWriteSetPath == 1)
+                                {
+                                 imageOverWite;
+                                }
+
+                               }
+
+
+                            global proc getPath() // Call dialog window
+
+                                {
+                                global string $rvbr_pathNameCont;
+                                fileBrowserDialog -m 4 -fc setPath -an "select path" ;
+
+                                textFieldButtonGrp -e -tx $rvbr_pathNameCont t_directory; // write queryed path to text filed
+
+                                //check wether overwrite checkBox is on or off
+                              $chkBxOverWriteGetPath =` checkBox -q -value overWrchkBx`;
+                                if ($chkBxOverWriteGetPath == 1)
+                                {
+                                 imageOverWite;
+                                }
+                                 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// custom resolution proc
+
+  global proc enableCres()
+
+                      {
+            // query value for anable custom resolution
+              int  $enableCheckBox = `checkBox -q -v enCustReschkBx`;
+
+                       if( $enableCheckBox!=0)
+                                                {
+                    textField -edit -en 1  t_Width;
+
+                   textField -edit -en 1 t_Height;
+                 }
+
+
+                   else
+                  {
+                    textField -edit -en 0 -text "" t_Width;
+
+                   textField -edit -en 0 -text "" t_Height;
+
+                   //Resolution enable resolution pressets
+                   executCondProc;
+         }
+        }
+
+
+
+//UI
+
+                            global proc ikas_renderViewBr()
+
+                            {
+
+                         //Call render view window
+                          RenderViewWindow;
+
+
+                   if (`window -exists rvbrWindow`) deleteUI rvbrWindow;
+
+                            string $currentLoc = ` workspace -q -dir`; //queryes current proj directory
+
+                                  window -title "ikas Render View Batch Render v.1.1" rvbrWindow;
+
+                                      columnLayout -adj false  -bgc 0.5 0.5 0.5;
+
+      $frameLO =` frameLayout -l "" -bs "in" -width 505 -height 480 -bgc 0.5 0.5 0.5`;
+      $frmLO   =`  formLayout -nd 100 -width 500 -height 280 -bgc 0.5 0.5 0.5 rvbrForm`;
+
+
+      separator -st "in" -width 500 -bgc 0.0 0.0 0.0 sep1;
+      separator -st "in" -width 500 -bgc 0.0 0.0 0.0 sep2;
+      separator -st "in" -width 500 -bgc 0.0 0.0 0.0 sep3;
+      separator -st "in" -width 500 -bgc 0.0 0.0 0.0 sep4;
+
+
+
+      $omGrp = `optionMenuGrp -label "               Image Format:" -cc executCondProc  -bgc 0.5 0.5 0.5 -p $frmLO  omGrp `;
+                              menuItem -l "Alias PIX(als)";
+                              menuItem -l "AVI(avi)";
+                              menuItem -l "Cineon(cin)";
+                              menuItem -l "DDS(dds)";
+                              menuItem -l "EPS(eps)";
+                              menuItem -l "GIF(gif) ";
+                              menuItem -l "JPEG(jpg)";
+                              menuItem -l "Maya IFF(iff) ";
+                              menuItem -l "Maya 16 IFF(iff)";
+                              menuItem -l "PSD(psd)";
+                              menuItem -l "PSD Layerd(psd)";
+                              menuItem -l "PNG(png)";
+                              menuItem -l "Quantel(yuv)";
+                              menuItem -l "RLA(rla)";
+                              menuItem -l "SGI(sgi) ";
+                              menuItem -l "SGI 16 (sgi)";
+                              menuItem -l "Softimage(pic)";
+                              menuItem -l "Targa(tga)";
+                              menuItem -l "TIFF(tif)";
+                              menuItem -l "TIFF 16(tif)";
+                              menuItem -l "Windows Bitmap(bmp)";
+                              menuItem -l "XPM(xpm)";
+
+     optionMenuGrp -edit -v "Maya IFF(iff) " $omGrp ;
+
+      $omGrp2 = `optionMenuGrp -label "               Image Resolution:" -cc executCondProc  -bgc 0.5 0.5 0.5 -p $frmLO  omGrp2 `;
+                              menuItem -l "320x240";
+                              menuItem -l "640x480";
+                              menuItem -l "Quantel PAL";
+                              menuItem -l "Quantel NTSC";
+                              menuItem -l "Full 1024";
+                              menuItem -l "Full 1280 ";
+                              menuItem -l "HD 720";
+                              menuItem -l "HD 1080";
+                              menuItem -l "NTSC 4d";
+                              menuItem -l "PAL 768";
+                              menuItem -l "PAL 780";
+
+
+   optionMenuGrp -edit -v "640x480" $omGrp2 ;
+
+
+
+      $rvbr_pathName =` textFieldButtonGrp  -bgc 0.5 0.5 0.5  -label "Directory:"  -buttonLabel  "Browse" -buttonCommand getPath -text ($currentLoc+"images"+"/") t_directory`;
+
+      text -label "Image Name:"  -bgc 0.5 0.5 0.5 textLBL;
+      textField -tx "Untitled" -width 240  -bgc 0.5 0.5 0.5  t_imagename;
+      text -label "Sart Frame"  -bgc 0.5 0.5 0.5 textStart;
+      textField -tx "0" -width 60  -bgc 0.5 0.5 0.5 -cc setTimeLine  t_StartF;
+      text -label "End Frame"  -bgc 0.5 0.5 0.5  textEnd;
+      textField -tx "100" -width 60 -cc setTimeLine t_EndF;
+
+
+
+
+
+      text -label "Custom Resolution:"  -bgc 0.5 0.5 0.5 textCustom;
+      text -label "Width:"  -bgc 0.5 0.5 0.5 textWidth;
+      textField -tx "" -width 60  -bgc 0.5 0.5 0.5 -en 0 -cc executCondProc  t_Width;
+      text -label "Height:"  -bgc 0.5 0.5 0.5 textHeight;
+      textField -tx "" -width 60 -en 0 -cc executCondProc t_Height;
+
+
+
+      $fPadding = `intSliderGrp -label "Frame padding:      " -field true
+      -minValue 1 -maxValue 10
+      -fieldMinValue -100 -fieldMaxValue 100
+      -value 1 -cc executCondProc -bgc 0.5 0.5 0.5  fpSldr`;
+
+
+       $chkBx =` checkBox -label "Render Alpha:" -onc executCondProc -ofc executCondProc -bgc 0.5 0.5 0.5 chkBx`;
+     $chkBxOverWrite =` checkBox -label "Overwrite image (beta NOT WORK )" -onc imageOverWite -bgc 0.5 0.5 0.5 overWrchkBx`;
+      $chkBx =` checkBox -label "Enable Custom Resolution" -onc enableCres -ofc enableCres -bgc 0.5 0.5 0.5 enCustReschkBx`;
+
+
+              global string  $CamOptMenu;
+
+   $CamOptMenu = `optionMenuGrp -label "                       Camera:" -columnWidth 2 80 -bgc 0.5 0.5 0.5 -cc executCondProc CamOptMenu`;
+
+    //loop for camera menu items
+
+
+             string $rvbr_camList[] = `ls -type camera`;
+             string $rvbr_camListTrans[] = `listRelatives -parent $rvbr_camList`;
+             string $r_camera;
+
+             for($r_camera in $rvbr_camListTrans)
+
+             {
+
+       menuItem -label $r_camera;
+
+             }
+
+
+
+      button -label "Render" -c  startRender -width 250 -height 40 -align "center"  -bgc 0.5 0.5 0.5 doRndBtn;
+      button -label "Close" -c "deleteUI rvbrWindow"  -width 250  -height 40 -align "center" -bgc 0.5 0.5 0.5 rvbrCBtn;
+
+
+
+         formLayout -edit
+
+
+
+
+
+                                  -attachForm sep1 "top" 10
+                                  -attachForm sep1 "left" 0
+
+
+
+
+                                  -attachForm t_directory "top" 15
+                                  -attachForm t_directory "left" 0
+
+
+
+                                 -attachForm textLBL "top" 50
+                                 -attachForm textLBL "left" 65
+                                 -attachForm  t_imagename "top" 50
+                                 -attachForm  t_imagename "left" 140
+                                 -attachForm  textStart "top" 80
+                                 -attachForm  textStart "left" 65
+                                 -attachForm  t_StartF "top" 80
+                                 -attachForm  t_StartF "left" 140
+                                 -attachForm  textEnd "top" 100
+                                 -attachForm  textEnd "left" 65
+                                 -attachForm  t_EndF "top" 100
+                                 -attachForm  t_EndF "left" 140
+
+                                  -attachForm sep1 "top" 125
+                                  -attachForm sep1 "left" 0
+
+
+                                 -attachForm  $omGrp "top" 135
+                                 -attachForm  $omGrp "left" 0
+
+                                 -attachForm  fpSldr "top" 165
+                                 -attachForm  fpSldr "left" 0
+
+                                 -attachForm chkBx "top" 240
+                                 -attachForm chkBx "left" 140
+
+
+                                 -attachForm sep3 "top" 200
+                                 -attachForm sep3 "left" 0
+
+                                 -attachForm CamOptMenu "top" 210
+                                 -attachForm CamOptMenu "left" 0
+
+                                  -attachForm $omGrp2 "top" 270
+                                  -attachForm $omGrp2 "left" 0
+
+
+                                  -attachForm enCustReschkBx "top" 300
+                                  -attachForm enCustReschkBx "left" 140
+
+
+                                  -attachForm textCustom "top" 315
+                                  -attachForm textCustom "left" 40
+
+                                  -attachForm textWidth "top" 337
+                                  -attachForm textWidth "left" 100
+
+                                  -attachForm t_Width "top" 335
+                                  -attachForm t_Width "left" 140
+
+                                  -attachForm textHeight "top" 363
+                                  -attachForm textHeight "left" 100
+
+                                  -attachForm t_Height "top" 360
+                                  -attachForm t_Height "left" 140
+
+
+
+
+
+                                  -attachForm overWrchkBx "top" 390
+                                  -attachForm overWrchkBx "left" 140
+
+
+                                 -attachForm sep4 "top" 410
+                                 -attachForm sep4 "left" 0
+
+
+
+
+
+
+                                 -attachForm doRndBtn "top" 420
+                                 -attachForm doRndBtn "left" 0
+                                 -attachForm rvbrCBtn "top" 420
+                                 -attachForm rvbrCBtn "left" 250
+
+
+
+                                rvbrForm;
+                                setParent  $frmLO;
+
+
+        showWindow rvbrWindow;
+
+     }
+
+ikas_renderViewBr;
+

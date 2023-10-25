@@ -1,0 +1,46 @@
+/*
+    Script:     js_selectFromRoot
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This proc will take the root given and find the object
+                named $object that has the same root as $root.
+
+    Returns:    $object string
+
+*/
+global proc string js_selectFromRoot ( string $root, string $object )
+{
+	// this procedure will take the root given, and find the object
+	// named $object that has the same root
+	//
+	
+	// Variables
+	//
+	string $return;
+	string $objects[0];
+	
+    // this is a quick hack to make sure $root contains
+    // a | before the name
+    //
+    $root = `rootOf $root`;
+
+	// get a list of all the objects that match $object
+	//
+	$objects = `ls -l $object`;
+	
+	for ($obj in $objects)
+	{
+		// check the root of $obj and see if it matches $root
+		//
+		$objRoot = `rootOf $obj`;
+		if ($objRoot == $root)
+		{
+			// we have a match!
+			$return = $obj;
+		}
+	}
+	return $return;
+}
+

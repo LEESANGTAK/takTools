@@ -1,0 +1,39 @@
+/*
+    Script:     js_replaceHash
+    Author:     Jason Schleifer
+    Web Site:   http://jonhandhisdog.com
+    
+    Descr:      Replaces ### in the given string with a number
+
+    Ex:         js_replaceHash "my_###_blah" 2;
+                // Result:  my_002_blah;
+
+
+*/
+global proc string js_replaceHash (string $string, int $number)
+{
+
+    string $result;
+    // we want to replace the #'s in the name with the $number.
+
+    string $substring = "#+";
+    $substring = `match $substring $string`;
+
+    // $substring is now the number of #'s
+    string $substringNum = substituteAllString($substring, "#", "0");
+    // now add the number at the end
+    string $numString = $number;
+
+    string $newString = ($substringNum + $numString);
+
+    // now strip away the start numbers so we only have the num left
+    int $fullSize =`size($newString)`;
+    int $numSize = `size($numString)`;
+    if ($numSize < size($substringNum))
+    {
+        $numSize = $numSize+1;
+        $numString = `substring $newString $numSize $fullSize`;
+    } 
+    $result = `substitute $substring $string $numString`;
+    return $result;
+}

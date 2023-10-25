@@ -1,0 +1,49 @@
+global proc motionPathAni() 
+{
+string $selObj[] = `ls -sl`;               
+string $selMesh = $selObj[0];
+string $selCurve = $selObj[1];
+
+select $selCurve;                              //move pivot of selected curve to the first cv position.
+string $curvInfoName = `arclen -ch 1`;
+float $zeroPointInfo[3] = `getAttr ($curvInfoName + ".controlPoints[0]")`;
+
+move $zeroPointInfo[0] $zeroPointInfo[1] $zeroPointInfo[2] ($selCurve + ".scalePivot") ($selCurve + ".rotatePivot");
+
+parentConstraint $selMesh $selCurve;                 //move curve to the selected object's pivot.
+string $findPtCns[] = `listRelatives -type parentConstraint $selCurve`;
+select $findPtCns; doDelete;
+
+string $pathName = `pathAnimation -fractionMode true -follow true -followAxis y -upAxis x -worldUpType "vector" -worldUpVector 0 1 0 -inverseUp true -c $selCurve $selMesh`;
+string $ffdName[] = `flow -divisions 2 20 2 -objectCentered 0 -localCompute 1 -localDivisions 4	4 4 $selMesh`;
+string $flowCont[] = `spaceLocator -p 0 0 0`;
+
+
+addAttr -ln "flow"  -at double  -min 0 -max 10 -k 1 $flowCont[0];                    //add attribute to the locator that control flow animation.
+cutKey -cl -t ":" -f ":" -at "u" $pathName;
+//CBdeleteConnection  ($pathName + ".u");
+//string $multiN = `shadingNode -asUtility multiplyDivide`;
+//connectAttr -f ($flowCont[0] + ".flow")  ($multiN + ".input1X");
+//setAttr ($multiN + ".input2X") 0.1;
+//connectAttr -f ($multiN + ".outputX")  ($pathName + ".uValue");
+connectAttr -f ($flowCont[0] + ".flow")  ($pathName + ".uValue");
+
+addAttr -ln "ffdTwistX"  -at double -k 1 $flowCont[0];
+connectAttr -f ($flowCont[0] + ".ffdTwistX") ($pathName + ".worldUpVectorX");
+
+addAttr -ln "ffdTwistZ"  -at double -k 1 $flowCont[0];
+connectAttr -f ($flowCont[0] + ".ffdTwistZ") ($pathName + ".worldUpVectorZ");
+
+addAttr -ln "ffdScalX"  -at double -k 1 $flowCont[0];
+float $ffdsX = `getAttr ($ffdName[3] + ".scaleX")`;
+setAttr ($flowCont[0] + ".ffdScalX") $ffdsX; 
+connectAttr -f ($flowCont[0] + ".ffdScalX") ($ffdName[3] + ".scaleX");
+
+addAttr -ln "ffdScalZ"  -at double -k 1 $flowCont[0];   
+float $ffdsZ = `getAttr ($ffdName[3] + ".scaleZ")`;
+setAttr ($flowCont[0] + ".ffdScalZ") $ffdsZ; 
+connectAttr -f ($flowCont[0] + ".ffdScalZ") ($ffdName[3] + ".scaleZ");
+
+//addAttr -ln "smoothness"  -at double -k 1 $flowCont[0];
+//connectAttr -f ($flowCont[0] + ".smoothness") ($ffdName[2] + "Shape.tDivisions");
+}

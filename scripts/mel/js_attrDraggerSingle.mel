@@ -1,0 +1,220 @@
+/*
+    Script:     js_attrDraggerSingle
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This script can be used to help remove the need for the channel box.  Simply put, it will allow
+                the user to hold down a hotkey and bring up a menu for the keyable attributes on the selected object.
+                When the pick the attribute, they can then use the middle mouse button to manipulate the
+                attribute just as if they had it selected in the Channel Box.
+
+                To set up the script for use, it's necessary to create a hotkey to toggle script on and off.  
+                To do that, you will need to set up a press and release command.
+
+                This is an example of setting the script to work with the "c" hotkey:
+
+                --------------------------------------------------------------------
+                // Create the nameCommands.  These will allow you to assign
+                // hotkeys to the script.
+                nameCommand  
+                    -ann "Attribute Dragger Context Press" 
+                    -c "source js_attrDraggerSingle;js_attrDraggerSingle;"
+                    js_attrDraggerPress;
+
+                nameCommand  
+                    -ann "Attribute Dragger Context Release" 
+                    -c "MarkingMenuPopDown"
+                    js_attrDraggerRelease;
+
+                // Assign the hotkeys
+                hotkey -k "c" -name "js_attrDraggerPress";
+                hotkey -k "c" -releaseName "js_attrDraggerRelease";
+                -------------------------------------------------------------------
+                    
+*/
+
+global proc js_attrDraggerSingle ()
+{
+    string $objs[0];
+
+    $objs = `ls -sl`;
+    $menu   =   "tempMM";
+    $ctx    =   "js_attrDraggerSingleContext";
+
+    if (!`objExists "unknown"`)
+    {
+        createNode "unknown" -n unknown;
+        addAttr -ln "tmp" -at "double" unknown;
+    }
+    if (`popupMenu -exists $menu`)
+    {
+        deleteUI $menu;
+    }
+
+    if (!`dragAttrContext -exists $ctx`)
+    {
+        dragAttrContext $ctx;
+    }
+   
+    // create the menu
+    js_attrDraggerSingleMenu;
+
+    select $objs;
+    js_dragAttrSelectionChanged;
+    js_dragAttrSingleScriptJobs ();    
+
+    
+}
+
+global proc js_attrDraggerSingleDel ()
+{
+    //$menu   =   "js_attrDraggerSingleMenu";
+    $menu   =   "tempMM";
+    //print "deleting menu";
+    if (`popupMenu -exists $menu`)
+    {
+        deleteUI $menu;
+    }
+
+
+}
+global proc js_dragAttrSingleScriptJobs ()
+{
+    // set up the scriptJobs for the dragAttrSingle
+    //
+    // figure out what object to select to based on the selection set changing
+    int $job = `scriptJob -kws -event "SelectionChanged" "js_dragAttrSelectionChanged" `;
+
+    // check and see if the scriptJob exists.. 
+    int $sj[0];
+    $sj = `js_findScriptJob "js_attrDraggerSingleContext"`;
+    if (size($sj) == 0)
+    {
+        scriptJob -event "ToolChanged" ("if (`currentCtx` != \"js_attrDraggerSingleContext\") { js_dragAttrScriptJobKill;}") -kws ;
+    }
+}
+
+global proc int[] js_findScriptJob (string $match)
+{
+    string $jobs[0];
+    string $job;
+    int $return[0];
+    int $count = 0;
+
+    $match = ("*"+$match+"*");
+    $jobs = `scriptJob -lj`;
+    for ($job in $jobs)
+    {
+        if (`gmatch $job $match`)
+        {
+            string $tmp[0];
+            $something = `tokenize $job ":" $tmp`;
+            $return[$count++] = $tmp[0];
+        }
+    }
+
+    return $return;
+}
+
+global proc js_dragAttrScriptJobKill ()
+{
+    // this will kill all the scriptJobs for js_dragAttrSelectionChanged
+    int $jobs[0];
+    int $job;
+
+    $jobs = `js_findScriptJob "js_dragAttrSelectionChanged"`;
+    for ($job in $jobs)
+    {
+        scriptJob -kill $job;
+    }
+}
+global proc js_dragAttrSelectionChanged ()
+{
+    string  $attrOptionVar  =   "js_dragAttrOptionVar";
+    string  $ctx            =   "js_attrDraggerSingleContext";
+    string  $attr;
+
+    // the selection changed, we need to apply the dragAttrContext to the selected object
+    if (`optionVar -exists $attrOptionVar`)
+    {
+        $attr = `optionVar -q $attrOptionVar`;
+    }
+       
+    string $objs[0];
+    $objs = `ls -sl`;
+
+    if (($attr != "") && ($objs[0] != "") && (`attributeQuery -exists -node $objs[0] $attr`))
+    {
+        dragAttrContext -e
+                        -connectTo ($objs[0] + "." + $attr)
+                        $ctx;
+        //print "hum\n";
+        setToolTo $ctx;
+    }
+    else
+    {
+        dragAttrContext -e
+                        -connectTo unknown.tmp
+                        $ctx;
+
+        setToolTo $ctx;
+    }
+}
+
+global proc js_attrDraggerSingleMenu ()
+{
+    //string  $menu           =   "js_attrDraggerSingleMenu";
+    string  $menu           =   "tempMM";
+    string  $attrOptionVar  =   "js_dragAttrOptionVar";
+    string  $keyableOptionVar  =   "js_AttrOptionVar";
+    int $cb=0;
+    if (`optionVar -exists $keyableOptionVar`)
+        $cb = `optionVar -q $keyableOptionVar`;
+
+    popupMenu  -b 1 -p viewPanes -aob true $menu;
+
+    string $objs[0];
+    string $attrs[0];
+
+    $objs = `ls -sl`;
+    if (size($objs) > 0)
+    {
+        if ($cb) 
+            $attrs = `listAttr -k $objs[0]`;
+        else
+            $attrs = `listAttr -ud -k $objs[0]`;
+    }
+    
+    for ($item in $attrs)
+    {
+        if (`getAttr -type ($objs[0] + "." + $item)` != "bool")
+            menuItem    -label $item 
+                        -c ("optionVar -sv \"" + $attrOptionVar +"\" \""+$item +"\";js_dragAttrSelectionChanged ");
+            menuItem    -optionBox true 
+                        -c ("setAttr \""+$objs[0] + "." + $item + "\" 0");
+    }
+    menuItem -d 1;
+    
+    menuItem -l "All Keyable" -checkBox $cb -c ("js_attrDragToggleCB " +$cb) ;
+    setParent -m ..;
+
+}
+
+global proc js_attrDragToggleCB (int $cb)
+{
+    string  $keyableOptionVar  =   "js_AttrOptionVar";
+    if ($cb == 1)
+        $cb = 0;
+    else
+        $cb = 1;
+
+    optionVar -iv $keyableOptionVar $cb;
+
+    // rebuild menu
+    if (`popupMenu -exists "tempMM"`)
+        deleteUI "tempMM" ;
+
+    js_attrDraggerSingleMenu;
+    
+}

@@ -1,0 +1,59 @@
+/*
+    Script:     js_connectBlendUI
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Creates an interface for js_connectBlend
+
+    Requires:   js_connectBlend
+
+*/
+global proc js_connectBlendUI ()
+{
+    // creates a quick UI for connecting the blend attribute
+   
+    $win = "js_connectBlendUI";
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -t "Connect Blend" $win;
+    columnLayout -adj true;
+
+        $tfg1 = `textFieldButtonGrp -l "Object 1 (blender=0):" -bl "Load Sel"`;
+        $tfg2 = `textFieldButtonGrp -l "Object 2 (blender=1):" -bl "Load Sel"`;
+        text -l "";
+        $tfg3 = `textFieldButtonGrp -l "Target Object:" -bl "Load Sel"`;
+        $tfg5 = `textFieldGrp -l "Attribute:"`;
+        text -l "";
+        $tfg4 = `textFieldGrp -l "Driver (optional):"`;
+        
+        button -l "Go" -c ("js_prepConnectBlend " + $tfg1 + " " + $tfg2 + " " + $tfg3 + " " + $tfg4 + " " + $tfg5);
+
+    textFieldButtonGrp -e -bc ("js_loadSelIntoTFBG " + $tfg1) $tfg1;
+    textFieldButtonGrp -e -bc ("js_loadSelIntoTFBG " + $tfg2) $tfg2;
+    textFieldButtonGrp -e -bc ("js_loadSelIntoTFBG " + $tfg3) $tfg3;
+    showWindow $win;
+
+}
+global proc js_loadSelIntoTFBG (string $tfbg)
+{
+    string $objs[0];
+    $objs = `ls -sl`;
+    if (size ($objs) > 0)
+    {
+        textFieldButtonGrp -e -tx $objs[0] $tfbg;
+    }
+}
+global proc js_prepConnectBlend (string $tfg1, string $tfg2, string $tfg3, string $tfg4, string $tfg5)
+{
+    // get the values
+    $obj1 = `textFieldButtonGrp -q -tx $tfg1`;
+    $obj2 = `textFieldButtonGrp -q -tx $tfg2`;
+    $target = `textFieldButtonGrp -q -tx $tfg3`;
+    $driver = `textFieldGrp -q -tx $tfg4`;
+    $attribute = `textFieldGrp -q -tx $tfg5`;
+
+    $cmd = ("js_connectBlend " + $obj1 + " " + $obj2 + " " + $target  + " \"" + $attribute + "\" \""+$driver + "\"");
+    evalEcho $cmd;
+}   

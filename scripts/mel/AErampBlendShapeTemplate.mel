@@ -1,0 +1,39 @@
+global proc AErampBlendShapeTemplate(string $nodeName)
+{
+    editorTemplate -beginScrollLayout;
+    
+        editorTemplate -beginLayout "Default Control" -collapse 0;
+            editorTemplate -addControl "envelope";
+            editorTemplate -addControl "center";
+            editorTemplate -addControl "range";
+        editorTemplate -endLayout;
+        
+        editorTemplate -beginLayout "Weight" -collapse 0;           
+            AEaddRampControl ($nodeName + ".weightCurveRamp");
+            editorTemplate -addControl "inverse" "inverseCurveRamp";
+        editorTemplate -endLayout;
+
+        editorTemplate -suppress "baseGeo";
+        editorTemplate -suppress "targetGeo";
+
+        AEdependNodeTemplate $nodeName;
+        editorTemplate -addExtraControls;
+    editorTemplate -endScrollLayout;
+}
+
+global proc inverseCurveRamp(string $nodeName)
+{
+    if (getAttr ($nodeName + ".inverse"))
+    {
+        string $attrList[] = `listAttr -m ($nodeName + ".weightCurveRamp")`;
+        for ($i=0; $i<size($attrList); $i++)
+        {
+            if (size(`match "Value" $attrList[$i]`))
+            {
+                float $val = `getAttr ($nodeName + "." + $attrList[$i])`;
+                setAttr ($nodeName + "." + $attrList[$i]) (1-$val);
+            }
+        }
+        setAttr ($nodeName + ".inverse") 0;
+    }
+}

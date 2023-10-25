@@ -1,0 +1,3 @@
+// Return UVLayout install directory
+global proc string uvlayout_home()
+{ return "C:/Program Files (x86)/headus UVLayout v2 Professional"; }

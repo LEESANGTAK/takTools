@@ -1,0 +1,38 @@
+/*
+    Script:     js_addWorldScaleToDistance
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This script will add a multiplyDivide node for the world scale and then plug plug it into the distance node
+*/    
+global proc string js_addWorldScaleToDistance (string $distanceNode, string $worldScale)
+{
+    global int $g_useExp;
+    global string $g_exp;
+    string $result;
+    string $break[0];
+    tokenize ($distanceNode, ".", $break);
+
+    //$parent = `listRelatives -p $break[0]`;
+
+   
+    if ($g_useExp)
+    {
+        $g_exp += ("// Adding world node Expression\n");
+        $g_exp += ("$dist_orig = " + $distanceNode + ";\n");
+        $g_exp += ("$dist_worldScale = $dist_orig/"+$worldScale + ";\n");
+    }
+    else
+    {
+        $multiplyDivide = `createNode multiplyDivide`;
+        $multiplyDivide = `rename $multiplyDivide ($break[0] + "_worldScale")`;
+
+        connectAttr ($distanceNode) ($multiplyDivide + ".input1X");
+        connectAttr ($worldScale) ($multiplyDivide + ".input2X");
+        setAttr ($multiplyDivide + ".operation") 2;
+
+        $result = ($multiplyDivide + ".outputX");
+    }
+    return $result;
+}

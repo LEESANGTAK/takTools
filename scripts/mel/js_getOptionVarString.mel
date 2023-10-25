@@ -1,0 +1,21 @@
+/*
+    Script:     js_getOptionVarString.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      checks to see if the optionVar exists.  If it does, it returns the value.
+*/
+global proc string js_getOptionVarString (string $default, string $optionVar)
+{
+    // check and see if the optionVar exists
+    string $return = $default;
+    if (!`optionVar -exists $optionVar`)
+    {
+        optionVar -sv $optionVar $default;
+    }
+    $return = `optionVar -q $optionVar`;
+
+    return $return;
+}
+

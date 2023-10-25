@@ -1,0 +1,306 @@
+/*
+    Script:     js_pivot.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      A series of mel pocedures used to modify pivots on objects
+
+    Proc:       js_pivot_create
+    Descr:      This procedure will create a pivot control on the currently selected objects.
+                it will actually create 2 pivots.. one which is hooked up to the pivot, and the other
+                that can be used to toggle the re-position of the pivot.
+
+    Proc:       js_pivot_createMov 
+                This proc will toggle the visibility of the mov pivot on, and then select it.  
+                That way the animator can grab it and move it to the right place.
+
+    Proc:       js_pivot_snap
+                Based on the selected object, this procedure will snap the object to the 
+                position of the new pivot.
+
+    Proc:       js_pivot_toggle (int $onOff)
+                This script will toggle the pivot on or off.  If the incoming value 
+                is -1, then it will just flip it.
+
+    Proc:       js_pivot_mov_toggle (int $onOff)
+                This script will toggle the pivotMov on or off.  If the incoming value is -1, 
+                then it will just flip it.
+*/
+global proc string[] js_pivot_create ()
+{
+    // This procedure will create a pivot control on the currently selected objects.
+    // it will actually create 2 pivots.. one which is hooked up to the pivot, and the other
+    // which can be used to toggle the re-position of the pivot.
+    //
+    // get the selected objects that the user has picked in the 3dView
+    string $objs[0];
+    string $pivotObjects[0];
+    int $pivotCount = 0;
+
+    $objs = `ls -sl`;
+
+    // for each item selected, we will check and see if a pivot is connected.
+    // if there isn't one, then we'll create one.  If there is, then we will 
+    // go on to the next object
+    for ($obj in $objs)
+    {
+        string $pivotObj;
+        $pivotObj = `js_pivot_get $obj "js_pivotObj"`;
+        if ($pivotObj == "")
+        {
+            // time to create a new pivot
+            // create a locator
+            string $locator[0];
+            $locator = `spaceLocator`;
+            $locator[0] = `rename $locator[0] ($obj + "_pivot_anim")`;
+
+            // get the position of the object
+            $pos = `xform -q -ws -rp $obj`;
+
+            // set the position of the locator
+            move -a -ws $pos[0] $pos[1] $pos[2] $locator[0];
+
+            // parent the locator under the $object
+            parent $locator[0] $obj;
+
+            // set the locator's rotation to 0
+            setAttr ($locator[0] + ".r") 0 0 0;
+
+            // create a new locator which will be used as the second pivot
+            $dup = `duplicate $locator[0]`;
+            $dupLoc = `rename $dup[0] ($obj + "_pivot_mov")`;
+            // scale the duplicated locator a bit smaller
+            scale .8 .8 .8 $dupLoc;
+
+            // connect the locator's translation to the objects rotatePivot
+            connectAttr -f ($locator[0] + ".t") ($obj + ".rotatePivot");
+
+            // set the locator's scale and rotate attributes locked and unkeyable
+            $attrs = {"rx", "ry", "rz", "sx", "sy", "sz"};
+            for ($at in $attrs)
+            {
+                setAttr -l 1 -k 0 ($locator[0] + "." + $at);
+                setAttr -l 1 -k 0 ($dupLoc + "." + $at);
+            }
+
+            // set the visibility unkeyable, but not locked
+            setAttr -k 0 ($locator[0] + ".v");
+            setAttr -k 0 ($dupLoc + ".v");
+        
+            hide $dupLoc;
+
+            // add an attribute called "js_pivot";
+            addAttr -ln "js_pivot" -at "message" $locator[0];
+            addAttr -ln "js_pivotMov" -at "message" $dupLoc;
+
+            addAttr -ln "js_pivotObj" -at "message" $obj;
+            addAttr -ln "js_pivotMovObj" -at "message" $obj;
+
+            connectAttr ($locator[0] + ".message") ($obj + ".js_pivotObj") ;
+            connectAttr ($dupLoc + ".message") ($obj + ".js_pivotMovObj") ;
+
+            $pivotObjects[$pivotCount++] = $locator[0];
+            $pivotObjects[$pivotCount++] = $dupLoc;
+        }
+    }
+
+    return $pivotObjects;
+}
+
+global proc js_pivot_createMov ()
+{
+    // this proc will toggle the visibility of the mov pivot on, and then select it.  That way the animator can grab it and move
+    // it to the right place.
+
+    // first get the selected objects
+    string $objs[0];
+    $objs = `ls -sl`;
+    string $selected[0];
+    int $count = 0;
+    for ($item in $objs)
+    {
+        $pivot = `js_pivot_get $item "js_pivotMovObj"`;
+        if ($pivot != "")
+        {
+            showHidden $pivot;
+            // get the position of the orig object
+            $truePiv = `js_pivot_get $item "js_pivotObj"`;
+            $t = `getAttr ($truePiv + ".t")`;
+            setAttr ($pivot + ".t") $t[0] $t[1] $t[2];
+            $selected[$count++] = $pivot;
+
+        }
+    }
+
+    select $selected;
+
+}
+global proc string js_pivot_getObj (string $sel)
+{
+    // based on the selected item, return the object
+    string $return;
+    
+    if (`attributeQuery -exists -node $sel "js_pivotObj"`)
+    {
+        $return = $sel;
+    }
+    else
+    {
+        // okay, we probably have one of the pivots selected..
+        if ((`attributeQuery -exists -node $sel "js_pivot"`) || (`attributeQuery -exists -node $sel "js_pivotMov"`))
+        {
+            $tmp = `listConnections -p true -d true ($sel + ".message")`;
+            string $item;
+            for ($item in $tmp)
+            {
+                // check each one and see if what's connected contains "js_pivotObj"
+                if (`gmatch $item "*js_pivot*"`)
+                {
+                    // okay, we've got a pivot selected, and we know that the item that we've just found will
+                    // have the connection to the object we want.
+                    // let's get rid of the attribute
+                    string $break[0];
+                    tokenize ($item, ".", $break);
+                    $return = $break[0];
+
+                }
+            }
+            
+        }
+    }
+    return $return;
+}
+global proc js_pivot_snap ()
+{
+    // Based on the selected object, this procedure will snap the object to the position of the new pivot.
+    //
+    // first get the objects
+    string $objs[0];
+    string $ob;
+    $objs = `ls -sl`;
+    for ($ob in $objs)
+    {
+        string $object;
+        string $pivot;
+        string $pivotMov;
+
+        $object = `js_pivot_getObj $ob`;
+        $pivot  = `js_pivot_get $ob "js_pivotObj"`;
+        $pivotMov  = `js_pivot_get $ob "js_pivotMovObj"`;
+
+        if (($object == "") || ($pivot == "") || ($pivotMov == ""))
+        {
+            error ($ob + " was not set up to handle pivot modification.\n");
+        }
+
+        // first, save a keyframe at the previous frame for the object, and the pivot
+        $frame = `currentTime -q`;
+        print ("Saving a key for " + $object + " and " + $pivot + " at frame " + ($frame-1) + "\n");
+        setKeyframe -t ($frame-1) -itt "linear" -ott "linear" $pivot; 
+        setKeyframe -t ($frame-1) $object; 
+
+        // now get the local translation of pivotMov
+        $trans = `getAttr ($pivotMov + ".t")`;
+
+        // get the world position
+        $world = `xform -q -ws -rp $pivotMov`;
+
+        // set the position of old pivot to be the same as the new pivot
+        setAttr ($pivot + ".t") $trans[0] $trans[1] $trans[2];
+
+        // now move the object
+        move -rpr $world[0] $world[1] $world[2] ($object);
+
+        // now save a keyframe
+        setKeyframe -t ($frame) -itt "linear" -ott "linear" $pivot; 
+        setKeyframe -t ($frame) $object;
+        select $object;
+
+    }
+    
+}
+
+global proc js_pivot_toggle (int $onOff)
+{
+    // this script will toggle the pivot on or off.  If the incoming value is -1, then it will just flip it
+    string $objs[0];
+    string $ob;
+    $objs = `ls -sl`;
+    for ($ob in $objs)
+    {
+        $pivot = `js_pivot_get $ob "js_pivotObj"`; 
+        if ($onOff == -1)
+        {
+            $onOff = (!`getAttr ($pivot + ".v")`); 
+        }
+        setAttr ($pivot + ".v") $onOff;
+    }
+}
+global proc js_pivot_mov_toggle (int $onOff)
+{
+    // this script will toggle the pivotMov on or off.  If the incoming value is -1, then it will just flip it
+    string $objs[0];
+    $objs = `ls -sl`;
+    for ($ob in $objs)
+    {
+        $pivot = `js_pivot_get $ob "js_pivotMovObj"`; 
+        if ($onOff == -1)
+        {
+            $onOff = (!`getAttr ($pivot + ".v")`); 
+        }
+        setAttr ($pivot + ".v") $onOff;
+    }
+}
+global proc string js_pivot_get (string $object, string $type)
+{
+    string $return;
+    string $tmp[0];
+    // we're going to grab the object's pivot, or the pivot move object.  If $type is "js_pivotObj", we'll
+    // grab the pivot.  If it's "js_pivotMovObj", we'll return the move pivot.
+    //
+   
+    // get the object
+    $object = `js_pivot_getObj $object`;
+
+    if ($object != "")
+    {
+        if (`attributeQuery -exists -node $object $type`)
+        {
+            // yep, this object has a pivot.  Let's get it
+            $tmp = `listConnections -type transform ($object + "." + $type)`;
+            $return = $tmp[0];
+        }
+    }
+    /*
+    else
+    {
+        // the object itself doesn't have a pivot, but we should see if the user has the pivot actually
+        // selected..
+        if ((`attributeQuery -exists -node $object "js_pivot"`) || (`attributeQuery -exists -node $object "js_pivotMov"`))
+        {
+            // hah.. they have a pivot selected!  let's see if we can return what the user actually wants based on type
+            string $tmp[0];
+            $tmp = `listConnections -p true -d true ($object + ".message")`;
+            string $item;
+            for ($item in $tmp)
+            {
+                // check each one and see if what's connected contains "js_pivotObj"
+                if (`gmatch $item "*js_pivot*"`)
+                {
+                    // okay, we've got a pivot selected, and we know that the item that we've just found will
+                    // have the connection to the object we want.
+                    // let's get rid of the attribute ,and then query for the correct type
+                    string $break[0];
+                    tokenize ($item, ".", $break);
+
+                    $tmp = `listConnections -type transform ($break[0] + "." + $type)`;
+                    $return = $tmp[0];
+
+                }
+            }
+        }
+    }
+    */
+    return $return;
+}

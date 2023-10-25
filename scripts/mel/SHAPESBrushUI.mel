@@ -1,0 +1,550 @@
+// ----------------------------------------------------------------------------------------------
+//
+// SHAPESBrushUI.mel
+//
+// settings window for the SHAPES brush
+//
+// Ingo Clemens
+// www.braverabbit.com
+//
+// copyright brave rabbit, Ingo Clemens 2014-2015
+//
+// brush version: 1.4
+//
+// ----------------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------------
+//
+// THE SOFTWARE PRODUCT IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR
+// IMPLIED, INCLUDING, BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+// PURPOSE AND NON-INFRINGEMENT OF THIRD-PARTY RIGHTS. THE ENTIRE RISK AS TO THE QUALITY AND
+// PERFORMANCE OF THE SOFTWARE PRODUCT IS WITH YOU.
+// NEITHER BRAVE RABBIT NOR ITS SUPPLIERS WARRANT THAT THE FUNCTIONS CONTAINED IN THE SOFTWARE
+// PRODUCT WILL MEET YOUR REQUIREMENTS OR THAT THE OPERATION OF THE SOFTWARE PRODUCT WILL BE
+// UNINTERRUPTED OR ERROR-FREE. BRAVE RABBIT IS NOT OBLIGATED TO PROVIDE ANY UPDATES TO THE
+// SOFTWARE.
+// IN NO EVENT SHALL THE AUTHOR OF THIS SOFTWARE PRODUCT BE LIABLE FOR ANY SPECIAL, CONSEQUENTIAL,
+// INCIDENTAL, DIRECT OR INDIRECT DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR
+// LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, FOR PERSONAL INJURY, LOSS OF BUSINESS
+// INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THIS
+// PRODUCT, EVEN IF THE AUTHOR OF THIS SOFTWARE PRODUCT IS AWARE OF THE POSSIBILITY OF SUCH
+// DAMAGES AND KNOWN DEFECTS, ANY CLAIM BY A THIRD PARTY AND EVEN IF THE REMEDY FAILS OF ITS
+// ESSENTIAL PURPOSE.
+//
+// ----------------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------------
+//
+// run by executing the following command:
+//
+// SHAPESBrushUI
+//
+// use the following command to allow painting freeze areas on a mesh with history
+// $gSHAPESBrushFreezeAllowHistory = 1
+//
+// ----------------------------------------------------------------------------------------------
+
+
+global proc sbUISetSymbolCheckBox( int $button, string $layout )
+{
+	string $items[] = `rowColumnLayout -q -ca $layout`;
+	stringArrayRemoveAtIndex(0, $items);
+	for ($i = 0; $i < size($items); $i ++)
+	{
+		if ($button == $i)
+			symbolCheckBox -e -v 1 $items[$i];
+		else
+			symbolCheckBox -e -v 0 $items[$i];
+	}
+	
+	// edit the context if the passed button is not related to freezing
+	if ($button < 4)
+	{
+		if ($layout == "sbCurveColumn")
+		{
+			SHAPESBrushContext -e -c $button SHAPESBrushContext1;
+			sbUISetSettings "-c" $button;
+		}
+		else
+		{
+			SHAPESBrushContext -e -t $button SHAPESBrushContext1;
+			sbUISetSettings "-t" $button;
+		}
+	}
+}
+
+global proc sbUISetDepth( int $value )
+{
+	string $win = "SHAPESBrushWin";
+	if (`window -ex "SHAPESDockWin"`)
+		$win = "SHAPESDockWin";
+	
+	int $depth = `SHAPESBrushContext -q -d SHAPESBrushContext1`;
+	$depth += $value;
+	if ($depth < 0)
+		$depth = 0;
+	if (`window -ex $win`)
+		intField -e -v $depth sbDepthField;
+	SHAPESBrushContext -e -d $depth SHAPESBrushContext1;
+	sbUISetSettings "-d" $depth;
+}
+
+global proc sbUISetPlaneAngle()
+{
+	float $angle = 30;
+	if (`optionVar -ex SHAPESBrushPlaneAngle`)
+		$angle = `optionVar -q SHAPESBrushPlaneAngle`;
+	
+	string $prompt = `promptDialog	-t "Plane Angle" 
+									-m "Set Plane Angle Threshold" 
+									-tx $angle
+									-b "OK" -b "Default" -b "Cancel" 
+									-db "Cancel" 
+									-cb "Cancel" 
+									-ds "Cancel"`;
+	if ($prompt == "OK")
+	{
+		$angle = `promptDialog -q -tx`;
+		optionVar -fv SHAPESBrushPlaneAngle $angle;
+	}
+	else if ($prompt == "Default")
+	{
+		optionVar -fv SHAPESBrushPlaneAngle 30;
+	}
+}
+
+global proc sbUIUsePlaneAngle()
+{
+	float $angle = 30;
+	if (!`sbUIGetUsePlaneState`)
+	{
+		if (`optionVar -ex SHAPESBrushPlaneAngle`)
+			$angle = `optionVar -q SHAPESBrushPlaneAngle`;
+	}
+	else
+		$angle = 0;
+	SHAPESBrushContext -e -pa $angle SHAPESBrushContext1;
+	sbUISetSettings "-pa" $angle;
+}
+
+global proc int sbUIGetUsePlaneState()
+{
+	int $usePlane = 0;
+	if (`SHAPESBrushContext -q -pa SHAPESBrushContext1` != 0)
+		$usePlane = 1;
+	return $usePlane;
+}
+
+global proc sbUIPaintFreeze()
+{
+	global string $gSHAPESBrushFreezeMesh;
+	global int $gSHAPESBrushFreezeAllowHistory;
+	
+	string $sel[] = `ls -sl -l`;
+	if (size($sel) == 0)
+	{
+		$gSHAPESBrushFreezeMesh = "";
+		return;
+	}
+	// if the selection is not empty do various checks
+	// this is relevant for initially flooding the colors with black
+	// in order to smooth the painted color
+	else
+	{
+		// if the previous mesh doesn't match the current selection
+		// reset the stored mesh name
+		if ($gSHAPESBrushFreezeMesh != $sel[0])
+		{
+			$gSHAPESBrushFreezeMesh = "";
+			$gSHAPESBrushFreezeAllowHistory = 0;
+		}
+		// if the names match it's still possible that the user created
+		// a new mesh with the same name but the new mesh probably doesn't
+		// have a color set assigned
+		// if there is no color set or a differently named set
+		// it must be a different mesh and the stored name
+		// can be reset
+		else if ($gSHAPESBrushFreezeMesh != "")
+		{
+			string $set[] = `polyColorSet -q -ccs $gSHAPESBrushFreezeMesh`;
+			if (size($set) == 0 || $set[0] != "SHAPESBrushFreezeSet")
+			{
+				$gSHAPESBrushFreezeMesh = "";
+				$gSHAPESBrushFreezeAllowHistory = 0;
+			}
+		}
+	}
+	
+	string $hist[] = `listHistory -gl 1 -pdo 1 -lf 1 -f 0 $sel[0]`;
+	if (size($hist) != 0 && $gSHAPESBrushFreezeAllowHistory == 0)
+	{
+		// release the marking menu in case it has been used
+		MarkingMenuPopDown;
+		
+		if (`optionVar -ex SHAPESIgnoreBrushHistoryWarning` && `optionVar -q SHAPESIgnoreBrushHistoryWarning`)
+		{
+			;
+		}
+		else
+		{
+			string $result = `confirmDialog	-t "The selected mesh has history" 
+											-m "Continuing will disable this warning for the current mesh and nodes will be added to the history." 
+											-b "Continue" 
+											-b "Cancel"
+											-db "Cancel" 
+											-cb "Cancel" 
+											-ds "Cancel"`;
+			if ($result == "Continue")
+				$gSHAPESBrushFreezeAllowHistory = 1;
+			else
+				return;
+		}
+	}
+	
+	PaintVertexColorTool;
+	
+	// flood everything black to set all vertices
+	// necessary in order to be able to smooth the colors
+	if ($gSHAPESBrushFreezeMesh == "")
+	{
+		artAttrPaintVertexCtx -e -colorRGBValue 0.0 0.0 0.0 `currentCtx`;
+		artAttrPaintVertexCtx -e -clear `currentCtx`;
+		
+		// rename the new color set
+		string $set[] = `polyColorSet -q -ccs $sel[0]`;
+		polyColorSet -e -rn -cs $set[0] -nc "SHAPESBrushFreezeSet" $sel[0];
+	}
+	
+	artAttrPaintVertexCtx -e -colorRGBValue 0.4 0.7 1.0 -selectedattroper "absolute" `currentCtx`;
+	sbUISetVertexColorDisplay $sel[0];
+	setArtAttrPaintSymmetry;
+	
+	$gSHAPESBrushFreezeMesh = $sel[0];
+}
+
+global proc sbUIEraseFreeze()
+{
+	global string $gSHAPESBrushFreezeMesh;
+	
+	PaintVertexColorTool;
+	
+	artAttrPaintVertexCtx -e -colorRGBValue 0.0 0.0 0.0 -selectedattroper "absolute" `currentCtx`;
+	sbUISetVertexColorDisplay $gSHAPESBrushFreezeMesh;
+	setArtAttrPaintSymmetry;
+}
+
+global proc sbUIDeleteFreeze()
+{
+	global string $gSHAPESBrushFreezeMesh;
+	
+	string $lastTool = `currentCtx`;
+	
+	// get the current color set and remove it from the mesh
+	string $set[] = `polyColorSet -q -ccs $gSHAPESBrushFreezeMesh`;
+	if (size($set) != 0)
+		polyColorSet -delete -colorSet $set[0] $gSHAPESBrushFreezeMesh;
+	setAttr ($gSHAPESBrushFreezeMesh + ".displayColors") 0;
+	
+	$gSHAPESBrushFreezeMesh = "";
+	
+	// activate the last tool
+	setToolTo $lastTool;
+}
+
+global proc setArtAttrPaintSymmetry()
+{
+	int $value = `SHAPESBrushContext -q -sym SHAPESBrushContext1`;
+	string $flags = "-reflection ";
+	if ($value == 1)
+	{
+		$flags += "0 ";
+	}
+	else
+	{
+		$flags += "1 -ra \"";
+		if ($value == 2)
+			$flags += "x";
+		else if ($value == 3)
+			$flags += "y";
+		else
+			$flags += "z";
+		$flags += "\" ";
+	}
+	string $cmd = "artAttrPaintVertexCtx -e " + $flags + "`currentCtx`";
+	eval($cmd);
+}
+
+global proc sbUISetVertexColorDisplay( string $obj )
+{
+	string $modelPanel = `sbUIGetCurrentModelPanel`;
+	if (`modelEditor -q -rnm $modelPanel` == "vp2Renderer")
+	{
+		setAttr ($obj + ".displayColorChannel") -type "string" "Ambient";
+		setAttr ($obj + ".materialBlend") 0;
+	}
+	else
+	{
+		setAttr ($obj + ".displayColorChannel") -type "string" "Specular";
+		setAttr ($obj + ".materialBlend") 5;
+	}
+}
+
+global proc string sbUIGetCurrentModelPanel()
+{
+	string $current = `getPanel -wf`;
+	if (`getPanel -to $current` == "modelPanel")
+		return $current;
+	
+	string $allPanels[] = `getPanel -vis`;
+	for ($p in $allPanels)
+	{
+		if (`getPanel -to $p` == "modelPanel")
+			return $p;
+	}
+}
+
+global proc sbUIGetSettings()
+{
+	// create the context in case the plugin was previously unloaded
+	if (!`contextInfo -ex SHAPESBrushContext1`)
+		SHAPESBrushToolCtx;
+	
+	sbUISetSymbolCheckBox( `SHAPESBrushContext -q -c SHAPESBrushContext1` ) sbCurveColumn;
+	optionMenuGrp -e -sl (`SHAPESBrushContext -q -sym SHAPESBrushContext1`) sbSymmetryOption;
+	optionMenuGrp -e -sl (`SHAPESBrushContext -q -f SHAPESBrushContext1` + 1) sbFalloffOption;
+	intField -e -v (`SHAPESBrushContext -q -d SHAPESBrushContext1`) sbDepthField;
+	symbolCheckBox -e -v (`SHAPESBrushContext -q -r SHAPESBrushContext1`) sbSmoothRelaxCheck;
+	symbolCheckBox -e -v (`sbUIGetUsePlaneState`) sbUsePlaneCheck;
+}
+
+global proc sbUISetSettings( string $flag, string $value )
+{
+	string $optionString = `optionVar -q SHAPESBrushSettings`;
+	string $data[];
+	tokenize $optionString " " $data;
+	for ($i = 0; $i < size($data); $i ++)
+	{
+		if ($flag == $data[$i])
+			$data[$i + 1] = $value;
+	}
+	$optionString = stringArrayToString($data, " ");
+	optionVar -sv SHAPESBrushSettings $optionString;
+}
+
+global proc sbUIAddBlendMeshSubmenu()
+{
+	menuItem -divider 1;
+	
+	menuItem -label "Blend Mesh" -sm 1;
+		
+		string $mesh = `optionVar -q SHAPESBrushBlendMesh`;
+		string $label = "None";
+		if ($mesh != "")
+			$label = $mesh;
+		
+		menuItem -label $label -en 0;
+		
+		setParent -m ..;
+}
+
+global proc sbUIsetSymmetryAxis( int $axis )
+{
+	if ($axis != 1)
+		optionVar -iv SHAPESBrushSymmetryAxis $axis;
+	sbUISetSettings "-sym" $axis;
+}
+
+global proc int sbUIgetSymmetryAxis( int $state )
+{
+	if (!`optionVar -ex SHAPESBrushSymmetryAxis`)
+		optionVar -iv SHAPESBrushSymmetryAxis 2;
+	if ($state == 0)
+		return 1;
+	else
+		return `optionVar -q SHAPESBrushSymmetryAxis`;
+}
+
+global proc sbUIBuildUI()
+{
+	rowColumnLayout -nc 7 -cw 1 68 sbBrushColumn;
+		text -l "Brush" -al "left";
+		symbolCheckBox 	-h 36 
+						-i "SHAPESBrush_grabSlide.png" 
+						-ann "Grab and Slide (use Shift to smooth and Ctrl to slide)" 
+						-cc "sbUISetSymbolCheckBox 0 sbBrushColumn; setToolTo SHAPESBrushContext1;";
+		symbolCheckBox 	-h 36 
+						-i "SHAPESBrush_grabPull.png" 
+						-ann "Grab and Pull (use Shift to smooth and Ctrl to pull/push)" 
+						-cc "sbUISetSymbolCheckBox 1 sbBrushColumn; setToolTo SHAPESBrushContext1;";
+		symbolCheckBox 	-h 36 
+						-i "SHAPESBrush_grabBlend.png" 
+						-ann "Grab and Blend (use Shift to smooth and Ctrl to blend to the secondary mesh)" 
+						-cc "sbUISetSymbolCheckBox 2 sbBrushColumn; setToolTo SHAPESBrushContext1;";
+		symbolCheckBox 	-h 36 
+						-i "SHAPESBrush_grabErase.png" 
+						-ann "Grab and Erase (use Shift to smooth and Ctrl to erase)" 
+						-cc "sbUISetSymbolCheckBox 3 sbBrushColumn; setToolTo SHAPESBrushContext1;";
+		// attach the popup menu to the erase brush button
+		popupMenu;
+		menuItem -l "Flood Erase" -c "SHAPESBrushContext -e -fc 2 SHAPESBrushContext1;";
+		menuItem -l "Flush Cache" -c "SHAPESBrushContext -e -fc 1 SHAPESBrushContext1;";
+		symbolCheckBox 	-h 36 
+						-i "SHAPESBrush_freezePaint.png" 
+						-ann "Paint Freeze to prevent areas being influenced by the brush action" 
+						-cc "sbUIPaintFreeze; sbUISetSymbolCheckBox 4 sbBrushColumn";
+		popupMenu;
+		menuItem -l "Invert Freeze" -cb (`SHAPESBrushContext -q -if SHAPESBrushContext1`) -c "SHAPESBrushContext -e -if #1 SHAPESBrushContext1; sbUISetSettings \"-if\" #1;" sbInvertFreezeCheck;
+		symbolCheckBox 	-h 36 
+						-i "SHAPESBrush_freezeErase.png" 
+						-ann "Erase Freeze to allow frozen areas to be influenced by the brush action" 
+						-cc "sbUIEraseFreeze; sbUISetSymbolCheckBox 5 sbBrushColumn";
+		// attach the popup menu to the erase freeze button
+		popupMenu;
+		menuItem -l "Un-Freeze" -c "sbUIDeleteFreeze";
+		
+		// need to find a good way to refresh the menu item
+		// until then it's disabled for the brush window and only accessed through the marking menu
+		//sbUIAddBlendMeshSubmenu;
+		
+	setParent ..;
+
+	rowColumnLayout -nc 7 -cw 1 68 -cw 2 35 -cw 3 35 -cw 4 35 -cw 5 35 -cw 6 35 -cw 7 35 sbCurveColumn;
+		text -l "Curve" -al "left";
+		symbolCheckBox 	-h 36 
+						-oni "SHAPESBrush_linear.png" 
+						-ofi "SHAPESBrush_linearOff.png" 
+						-ann "Linear falloff" 
+						-cc "sbUISetSymbolCheckBox 0 sbCurveColumn";
+		symbolCheckBox 	-h 36 
+						-oni "SHAPESBrush_soft.png" 
+						-ofi "SHAPESBrush_softOff.png" 
+						-ann "Soft falloff" 
+						-cc "sbUISetSymbolCheckBox 1 sbCurveColumn";
+		symbolCheckBox 	-h 36 
+						-oni "SHAPESBrush_wide.png" 
+						-ofi "SHAPESBrush_wideOff.png" 
+						-ann "Wide falloff" 
+						-cc "sbUISetSymbolCheckBox 2 sbCurveColumn";
+		symbolCheckBox 	-h 36 
+						-oni "SHAPESBrush_narrow.png" 
+						-ofi "SHAPESBrush_narrowOff.png" 
+						-ann "Narrow falloff" 
+						-cc "sbUISetSymbolCheckBox 3 sbCurveColumn";
+		symbolCheckBox 	-h 36 
+						-oni "SHAPESBrush_smooth1.png" 
+						-ofi "SHAPESBrush_smooth1Off.png" 
+						-ann "Smooth 1 falloff" 
+						-cc "sbUISetSymbolCheckBox 4 sbCurveColumn";
+		symbolCheckBox 	-h 36 
+						-oni "SHAPESBrush_smooth2.png" 
+						-ofi "SHAPESBrush_smooth2Off.png" 
+						-ann "Smooth 2 falloff" 
+						-cc "sbUISetSymbolCheckBox 5 sbCurveColumn";
+	setParent ..;
+
+	rowColumnLayout -nc 2 -cw 1 154 -cw 2 140;
+		optionMenuGrp 	-l "Symmetry" 
+						-cw2 65 50 
+						-cal 1 "left" 
+						-cc "SHAPESBrushContext -e -sym (`optionMenuGrp -q -sl sbSymmetryOption`) SHAPESBrushContext1; sbUIsetSymmetryAxis (`optionMenuGrp -q -sl sbSymmetryOption`)" sbSymmetryOption;
+		menuItem -l "None";
+		menuItem -l "X Axis";
+		menuItem -l "Y Axis";
+		menuItem -l "Z Axis";
+	
+		optionMenuGrp 	-l "Falloff" 
+						-cw2 40 50 
+						-cal 1 "left" 
+						-cc "SHAPESBrushContext -e -f (`optionMenuGrp -q -sl sbFalloffOption` - 1) SHAPESBrushContext1; sbUISetSettings \"-f\" (`optionMenuGrp -q -sl sbFalloffOption` - 1);" sbFalloffOption;
+		menuItem -l "Volume";
+		menuItem -l "Surface";
+	
+	setParent ..;
+	
+	rowColumnLayout -nc 4 -cw 1 68 -cw 2 30 -cw 3 35 -cw 4 160 -cat 2 "left" 0 -cat 3 "left" 5 -cat 4 "left" 21;
+		text -l "Options" -al "left";
+		symbolCheckBox 	-h 28 
+						-i "SHAPESBrush_relax.png" 
+						-ann "Preserves the volume of the shape when smoothing" 
+						-cc "SHAPESBrushContext -e -r (1 - `SHAPESBrushContext -q -r SHAPESBrushContext1`) SHAPESBrushContext1; sbUISetSettings \"-r\" (`SHAPESBrushContext -q -r SHAPESBrushContext1`);" 
+						sbSmoothRelaxCheck;
+		symbolCheckBox 	-h 28 
+						-i "SHAPESBrush_planeConstrain.png" 
+						-ann "Restricts the grab brush to a 2D plane depending on the view. Right-click to set the threshold angle" 
+						-cc "sbUIUsePlaneAngle" 
+						sbUsePlaneCheck;
+		// attach the popup menu to the plane check box
+		popupMenu;
+		menuItem -l "Set Plane Angle..." -c "sbUISetPlaneAngle";
+		
+		rowColumnLayout -nc 4 -cw 1 42 -cw 2 23 -cw 3 25 -cw 4 23;
+			text -l "Depth" -al "left";
+			button -l "-" -c "sbUISetDepth -1";
+			intField -v 0 sbDepthField;
+			button -l "+" -c "sbUISetDepth 1";
+		setParent ..;
+	
+	setParent ..;
+}
+
+global proc sbUIinitialize()
+{
+	global string $gSelect;
+	
+	if (!`pluginInfo -q -l SHAPESBrush_2015`)
+	{
+		loadPlugin SHAPESBrush_2015;
+	}
+		
+	if (`optionVar -ex SHAPESBrushContextName`)
+	{
+		$context = `optionVar -q SHAPESBrushContextName`;
+		
+		if (`currentCtx` == $context)
+			setToolTo $gSelect;
+		
+		if (`contextInfo -ex $context`)
+		{	
+			deleteUI $context;
+		}
+	}
+	// store the current context
+	string $ctx = `currentCtx`;
+	// create the context to read and edit the last used settings
+	SHAPESBrushToolCtx;
+	// restore the previous user context
+	// in care cases the context might not exist anymore
+	// enable the select tool in this case
+	if (`contextInfo -ex $ctx`)
+		setToolTo $ctx;
+	else
+		setToolTo $gSelect;
+}
+
+global proc SHAPESBrushUI()
+{
+	// load the plugin the create the context
+	sbUIinitialize;
+	
+	// only create a settings window if the SHAPES window is not open
+	if (`window -ex "SHAPESDockWin"` && `frameLayout -ex shpUI_brushFrame`)
+	{
+		deleteUI shpUI_brushFrame;
+	}
+	
+	string $win = "SHAPESBrushWin";
+	
+	if (`window -ex $win`)
+		deleteUI $win;
+	
+	window -t "SHAPES Brush" -w 308 -h 174 $win;
+	
+	frameLayout -l "Brush Settings" -li 3 -cll 1 -cl 0 -mw 5 -mh 5 shpUI_brushFrame;
+	sbUIBuildUI;
+	setParent ..;
+	
+	// get the last used settings
+	sbUIGetSettings;
+	
+	showWindow $win;
+}

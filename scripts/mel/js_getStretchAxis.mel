@@ -1,0 +1,32 @@
+/*
+    Script:     js_getStretchAxis.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Given the joint, returns the axis that the child joint is pointing down.
+
+*/
+
+global proc string[] js_getStretchAxis (string $joint)
+{
+    string $stretchAxis[3];
+    float $t[3];
+
+    $t = `getAttr ($joint + ".t")`;
+
+    if (($t[0] > $t[1]) && ($t[0] > $t[2]))
+    {
+        $stretchAxis = {"sx", "sy", "sz"};
+    }
+    else if (($t[1] > $t[0])  &&( $t[1] > $t[2]))
+    {
+        $stretchAxis = {"sy", "sx", "sz"};
+    }
+    else if (($t[2] > $t[0])  &&( $t[2] > $t[1]))
+    {
+        $stretchAxis = {"sz", "sx", "sy"};
+    }
+    return $stretchAxis;
+}
+

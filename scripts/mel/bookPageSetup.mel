@@ -1,0 +1,158 @@
+{
+string $selList[] = `ls -sl`;
+string $controller = $selList[0];
+string $left = $selList[1];
+string $middle = $selList[2];
+string $right = $selList[3];
+string $skin = $selList[4];
+
+pagesetup $controller $left $middle $right $skin;
+}
+
+global proc pagesetup(string $controller, string $left, string $middle,
+string $right, string $skin) {
+    // check if the attribtue is correct
+    if (!`attributeExists "page" $controller`) {
+        addAttr -ln "page"  -at double  -min -10 -max 10 -dv 0 $controller;
+        setAttr -e-keyable true ($controller+".page");
+    }
+    for ($i = 0; $i<`size $skin`; $i++) {
+        // create blendweights
+        string $rx = `createNode blendWeighted -n ($skin+"rx")`;
+        string $ry = `createNode blendWeighted -n ($skin+"ry")`;
+        string $rz = `createNode blendWeighted -n ($skin+"rz")`;
+        string $tx = `createNode blendWeighted -n ($skin+"tx")`;
+        string $ty = `createNode blendWeighted -n ($skin+"ty")`;
+        string $tz = `createNode blendWeighted -n ($skin+"tz")`;
+
+        // setup blendweights (must do this to work)
+        setAttr ($rx+".w[0]") 0;
+        setAttr ($ry+".w[0]") 0;
+        setAttr ($rz+".w[0]") 0;
+        setAttr ($tx+".w[0]") 0;
+        setAttr ($ty+".w[0]") 0;
+        setAttr ($tz+".w[0]") 0;
+        setAttr ($rx+".w[1]") 0;
+        setAttr ($ry+".w[1]") 0;
+        setAttr ($rz+".w[1]") 0;
+        setAttr ($tx+".w[1]") 0;
+        setAttr ($ty+".w[1]") 0;
+        setAttr ($tz+".w[1]") 0;
+        setAttr ($rx+".w[2]") 0;
+        setAttr ($ry+".w[2]") 0;
+        setAttr ($rz+".w[2]") 0;
+        setAttr ($tx+".w[2]") 0;
+        setAttr ($ty+".w[2]") 0;
+        setAttr ($tz+".w[2]") 0;
+
+        setAttr ($rx+".i[0]") 0;
+        setAttr ($ry+".i[0]") 0;
+        setAttr ($rz+".i[0]") 0;
+        setAttr ($tx+".i[0]") 0;
+        setAttr ($ty+".i[0]") 0;
+        setAttr ($tz+".i[0]") 0;
+        setAttr ($rx+".i[1]") 0;
+        setAttr ($ry+".i[1]") 0;
+        setAttr ($rz+".i[1]") 0;
+        setAttr ($tx+".i[1]") 0;
+        setAttr ($ty+".i[1]") 0;
+        setAttr ($tz+".i[1]") 0;
+        setAttr ($rx+".i[2]") 0;
+        setAttr ($ry+".i[2]") 0;
+        setAttr ($rz+".i[2]") 0;
+        setAttr ($tx+".i[2]") 0;
+        setAttr ($ty+".i[2]") 0;
+        setAttr ($tz+".i[2]") 0;
+
+        // connect target joints to blendweights
+        connectAttr ($left+".rx") ($rx+".i[0]");
+        connectAttr ($left+".ry") ($ry+".i[0]");
+        connectAttr ($left+".rz") ($rz+".i[0]");
+        connectAttr ($middle+".rx") ($rx+".i[1]");
+        connectAttr ($middle+".ry") ($ry+".i[1]");
+        connectAttr ($middle+".rz") ($rz+".i[1]");
+        connectAttr ($right+".rx") ($rx+".i[2]");
+        connectAttr ($right+".ry") ($ry+".i[2]");
+        connectAttr ($right+".rz") ($rz+".i[2]");
+
+        connectAttr ($left+".tx") ($tx+".i[0]");
+        connectAttr ($left+".ty") ($ty+".i[0]");
+        connectAttr ($left+".tz") ($tz+".i[0]");
+        connectAttr ($middle+".tx") ($tx+".i[1]");
+        connectAttr ($middle+".ty") ($ty+".i[1]");
+        connectAttr ($middle+".tz") ($tz+".i[1]");
+        connectAttr ($right+".tx") ($tx+".i[2]");
+        connectAttr ($right+".ty") ($ty+".i[2]");
+        connectAttr ($right+".tz") ($tz+".i[2]");
+
+        // connect blendweights to their respective connections
+        connectAttr ($rx+".o") ($skin+".rx");
+        connectAttr ($ry+".o") ($skin+".ry");
+        connectAttr ($rz+".o") ($skin+".rz");
+        connectAttr ($tx+".o") ($skin+".tx");
+        connectAttr ($ty+".o") ($skin+".ty");
+        connectAttr ($tz+".o") ($skin+".tz");
+
+        // set driven keys on blendweights
+
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 1 ($rx+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 1 ($ry+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 1 ($rz+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($rx+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($ry+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($rz+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($rx+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($ry+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($rz+".w[2]");
+
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($rx+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($ry+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($rz+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 1 ($rx+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 1 ($ry+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 1 ($rz+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($rx+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($ry+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($rz+".w[2]");
+
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($rx+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($ry+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($rz+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($rx+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($ry+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($rz+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 1 ($rx+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 1 ($ry+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 1 ($rz+".w[2]");
+
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 1 ($tx+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 1 ($ty+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 1 ($tz+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($tx+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($ty+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($tz+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($tx+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($ty+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv -10 -v 0 ($tz+".w[2]");
+
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($tx+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($ty+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($tz+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 1 ($tx+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 1 ($ty+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 1 ($tz+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($tx+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($ty+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 0 -v 0 ($tz+".w[2]");
+
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($tx+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($ty+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($tz+".w[0]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($tx+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($ty+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 0 ($tz+".w[1]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 1 ($tx+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 1 ($ty+".w[2]");
+        setDrivenKeyframe -itt "flat" -ott "flat" -cd ($controller+".page") -dv 10 -v 1 ($tz+".w[2]");
+    }
+}

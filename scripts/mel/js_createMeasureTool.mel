@@ -1,0 +1,45 @@
+/*
+    Script:     js_createMeasureTool
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Creates a measure tool at the location of the given items
+
+*/
+global proc string[] js_createMeasureTool (string $startJoint, string $endJoint)
+{
+    string $return[0];
+
+    float $startPos[0];
+    float $endPos[0];
+
+    $startPos = `xform -q -ws -rp $startJoint`;
+    $endPos = `xform -q -ws -rp $endJoint`;
+
+    // create the locators by hand4
+    $tmpLoc = `spaceLocator -name ($startJoint + "_distance_start")`;
+    $tmpLoc2 = `spaceLocator -name ($startJoint + "_distance_end")`;
+
+    move -a -ws $startPos[0] $startPos[1] $startPos[2] $tmpLoc[0];
+    move -a -ws $endPos[0] $endPos[1] $endPos[2] $tmpLoc2[0];
+   
+    $dimension = `createNode distanceDimShape `;
+    connectAttr ($tmpLoc[0] + ".worldPosition[0]") ($dimension + ".startPoint");
+    connectAttr ($tmpLoc2[0] + ".worldPosition[0]") ($dimension + ".endPoint");
+    //$dimension = `distanceDimension -sp $startPos[0] $startPos[1] $startPos[2] -ep $endPos[0] $endPos[1] $endPos[2]`;
+   
+    //select $dimension;
+    //$sp = `js_getAttachedObjects "startPoint"`;
+    //$ep = `js_getAttachedObjects "endPoint"`;
+
+    //$sp[0] = `rename $sp[0] ($startJoint + "_distance_start")`;
+    //$ep[0] = `rename $ep[0] ($startJoint + "_distance_end")`;
+    $parent = `listRelatives -f -p $dimension`;
+    $newName = `rename $parent[0] ($startJoint + "_distance")`;
+    
+    $return[0] = $newName;
+    $return[1] = $tmpLoc[0];
+    $return[2] = $tmpLoc2[0];
+    return $return;
+}

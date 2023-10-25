@@ -1,0 +1,101 @@
+//////////////////////////////////////////
+//Select meshes to transfer weight to, then shift-select the mesh with weights, then run this script
+
+string $userSel[] = `ls -sl`;
+
+if(`size($userSel)` > 1)
+{
+
+  select $userSel[((`size($userSel)`) - 1)];
+  string $cageMesh[] = `ls -sl`;
+
+  select $userSel;
+  select -tgl $cageMesh;
+  string $pieces[] = `ls -sl`;
+
+  //get inputs of weights in skin
+  string $theJoints[] = `skinCluster -q -wi $cageMesh`;
+
+  if(`size($theJoints)` > 0 && $cageMesh[0] != "")
+  {
+  
+    int $counter;
+    int $sizer = size($pieces);
+
+    for ($counter = 0; $counter < $sizer; $counter++)
+    {
+
+      ///////////////////////////////////////////////////////////////////////////////////////
+      //Determine if skinCluster exists on piece
+      string $skins[] ;
+      clear $skins ;
+
+	  string $hist[] = `listHistory -pdo 1 -il 2 $pieces[$counter]` ;
+	  string $h ;
+	  
+	  for ($h in $hist)
+	  {
+	      if (nodeType($h) == "skinCluster")
+	      {
+	          $skins[size($skins)] = $h ;
+	      }//end of if skinCluster type exists
+	  }//end of for loop through history
+
+
+      /////////////////////////////////////////////////////////////////////////////////////////
+      //If skinCluster Doesn't exist, add skinCluster
+      if(`size($skins)` == 0)
+      {
+    	  select $pieces[$counter] $theJoints;
+    	  newSkinCluster "-tsb -mi 10 -dr 10" ;
+      }//end of apply skinCluster if none found
+
+
+      //////////////////////////////////////////////////////////////////////////////////////////
+      //Add all influences from cageMesh
+      int $counterInf;
+      int $sizerInf = size($theJoints);
+      string $pieceJoints[] = `skinCluster -q -wi $pieces[$counter]`;
+
+      for ($counterInf = 0; $counterInf < $sizerInf; $counterInf++)
+      {
+    	  int $found = stringArrayContains($theJoints[$counterInf], $pieceJoints);
+    	  if($found == 0){skinCluster -e -ai $theJoints[$counterInf] $skins[0];}
+      }//end of for loop through adding all cageJoints
+
+
+      ///////////////////////////////////////////////////////////////////////////////////////////
+      //Remove extra joints that don't match those in cageMesh skinCluster
+      string $theJoints[] = `skinCluster -q -wi $cageMesh`;
+      string $pieceJoints[] = `skinCluster -q -wi $pieces[$counter]`;
+      string $diffJoints[] = stringArrayRemove($theJoints, $pieceJoints);
+
+      int $counterInf;
+      int $sizerInf = size($diffJoints);
+
+      if(`size($diffJoints)` > 0)
+      {
+    	  for ($counterInf = 0; $counterInf < $sizerInf; $counterInf++)
+    	  {
+    	      skinCluster -e -ri $diffJoints[$counterInf] $skins[0];
+    	  }//end of for loop through removing extra joints
+      }//end of if any joints are different
+
+
+      //////////////////////////////////////////////////////////////////////////////////////////
+      //Transfer the Weights
+      select $cageMesh $pieces[$counter];
+      copySkinWeights  -noMirror -surfaceAssociation closestPoint -influenceAssociation closestJoint -influenceAssociation oneToOne -influenceAssociation name -normalize;
+
+
+      //////////////////////////////////////////////////////////////////////////////////////////
+      //Finalize
+      print ("\nSkin Applied/Weights Transfered: " + ($counter + 1) + "/" + $sizer);
+
+    }//end of loop through pieces
+    
+    select $userSel;
+    
+  }//end of if there is a skinCluster to copy from
+
+}//end of if user has selected enough items

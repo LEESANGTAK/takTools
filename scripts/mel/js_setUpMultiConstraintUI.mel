@@ -1,0 +1,169 @@
+/*
+    Script:     js_setUpMultiConstraintUI
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+    
+    Descr:      This script will create the interface for js_setUpMultiConstraint.mel
+
+    Req:        js_setUpMultiConstraint.mel
+                js_laodSelectedIntoButtonGrp.mel
+    
+*/
+global proc js_setUpMultiConstraintUI ()
+{
+    source js_setUpMultiConstraint;
+
+    // this will generate an interface that will call the js_setUpMutiConstraint script
+    $win = "js_multiConstraintUI";
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -title "Set Up Multiple constraints" $win;
+
+    //$f = `formLayout -nd 100`;
+    
+    columnLayout -adj true;
+    $objtfbg = `textFieldButtonGrp -l "Object To Constrain:" -cw 1 150 -bl "Load Selected"`;
+    $f = `formLayout -nd 100`;
+        $t = `text -l "Target Objects:" -w 140 -align "right"`;
+        $tsl = `textScrollList -nr 5 -ams 1`;
+        $b1 = `button -l "+" -w 20 -c ("js_addSelToTSL \"" + $tsl + "\"")`;
+        $b2 = `button -l "-" -w 20 -c ("js_remSelFromTSL \"" + $tsl + "\"")`;
+        
+
+        formLayout -e 
+            -af $t top 0
+            -af $t left 0
+           
+            -af $b1 top 5
+            -af $b1 right 5
+            
+            -ac $b2 top 5 $b1
+            -af $b2 right 5
+
+            -af $tsl top 0
+            -ac $tsl left 8 $t
+            -ac $tsl right 5 $b1
+            -af $tsl bottom 0
+
+            
+            $f;
+    setParent ..;
+    $cbg  = `checkBoxGrp -v1 1 -v2 1 -l "Type of Constraint:" -cw 1 150 -ncb 2 -label1 "Point" -label2 "Orient"`;
+    $ctrltfbg = `textFieldButtonGrp -l "Control Object:" -cw 1 150 -bl "Load Selected"`;
+    $ctrlAttrtf = `textFieldGrp -cw 1 150 -l "Control Attribute:"`;
+    
+    $f2 = `formLayout -nd 100`;
+
+        $b3 =`button -l "Apply" -c ("js_createSetUpMultiConstraintCmd \"" + $objtfbg + "\" \"" + $tsl + "\" \"" + $cbg + "\" \"" + $ctrltfbg + "\" \"" + $ctrlAttrtf + "\"")`;
+        $b4 = `button -l "Close" -c ("deleteUI " + $win)`;
+
+        formLayout -e 
+            -af $b3 top 5
+            -af $b3 left 5
+            -ap $b3 right 0 50
+            -af $b3 bottom 5
+
+            -af $b4 top 5
+            -af $b4 right 5
+            -ap $b4 left 0 50
+            -af $b4 bottom 5
+            $f2;
+
+    textFieldButtonGrp -e 
+        -bc ("js_loadSelectedIntoButtonGrp \"" + $objtfbg + "\"")
+        $objtfbg;
+    textFieldButtonGrp -e 
+        -bc ("js_loadSelectedIntoButtonGrp \"" + $ctrltfbg + "\"")
+        $ctrltfbg;
+    showWindow $win;
+}
+global proc js_createSetUpMultiConstraintCmd (string $objtfbg, string $tsl, string $cbg, string $ctrltfbg, string $ctrlAttrtf)
+{
+    // get the results from the items passed
+    string $constObj;
+    string $itemsSelected[0];
+    string $targetObjs;
+    int $point;
+    int $orient;
+    string $controllerName;
+    string $controllerObj;
+    
+    $constObj = `textFieldButtonGrp -q -tx $objtfbg`;
+    $itemsSelected = `textScrollList -q -ai $tsl`;
+    $point = `checkBoxGrp -q -v1 $cbg`;
+    $orient = `checkBoxGrp -q -v2 $cbg`;
+    $controllerObj = `textFieldButtonGrp -q -tx $ctrltfbg`; 
+    $controllerName = `textFieldGrp -q -tx $ctrlAttrtf`; 
+
+    // now make sure they all have something selected
+    if (!`objExists $constObj`)
+        error ("Object to be constrained: " + $constObj + " doesn't exist..");
+
+    if (size($itemsSelected) == 0)
+        error ("No items specified as targets");
+
+    if (($point == 0) && ($orient == 0))
+    {
+        error ("Both point and orient constraints are set to 0.");
+    }
+
+    if (!`objExists $controllerObj`)
+    {
+        error ("Object controller doesn't exist..");
+    }
+    if (`attributeQuery -exists -node $controllerObj $controllerName`)
+    {
+        error ("Attribute: " + $controllerName+ " already exists on " + $controllerObj + ".. exiting.");
+    }
+
+    // get the proper method of passing the targetObjs
+    for ($item in $itemsSelected)
+    {
+        $targetObjs += ($item + ",");
+    }
+
+    $cmd = ("js_setUpMultiConstraint \""+$constObj+"\" \"" + $targetObjs + "\" " + $point + " " + $orient + " \"" + $controllerName + "\" \"" + $controllerObj + "\"");
+    evalEcho $cmd;
+}
+global proc js_remSelFromTSL (string $tsl)
+{
+    // remove the selected items from the tsl
+    string $sel[0];
+    $sel = `textScrollList -q -si $tsl`;
+    if (size($sel) > 0)
+    {
+        $cmd = ("textScrollList -e ");
+
+        for ($item in $sel)
+        {
+           $cmd += ("-ri " + $item);
+        }
+        $cmd += (" " + $tsl );
+        eval $cmd;
+    }
+}
+global proc js_addSelToTSL (string $tsl)
+{
+    // get the selected objects and add them to the textScrollList
+    string $objs[0];
+    $objs = `ls -sl`;
+    for ($ob in $objs)
+    {
+        // check and see if it's already in the tsl
+        string $currentObjs[0];
+        int $match = 0;
+        $currentObjs = `textScrollList -q -ai $tsl`;
+        string $cur;
+        for ($cur in $currentObjs)
+        {
+            if ($cur == $ob)
+            {
+                $match = 1;
+            }
+        }
+        if ($match == 0)
+            textScrollList -e -a $ob $tsl;
+    }
+}

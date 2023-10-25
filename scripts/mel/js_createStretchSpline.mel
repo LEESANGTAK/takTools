@@ -1,0 +1,123 @@
+/*
+    Script:     js_createStretchSpline.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Given the selected curve, it will tell the joints to stretch.  It's easiest to use with the
+                js_createStretchSplineUI.mel script
+
+    Inputs:     $curveObj           =>  The nurbs curve that will be stretched
+                $maintainVolume     =>  Whether or not to maintain volume on the joints
+                                        if this is on, then it will be made with
+                                        an expression, if not then we'll use nodes.
+      
+                $worldScale         =>  Whether or not to take worldScale into account
+      
+                $worldScaleObj      =>  The object that will be used for world scale
+      
+                $worldScaleAttr     =>  The attribute to be used for world scale
+
+    Req:        js_getStretchAxis.mel
+                js_createCurveControl.mel 
+*/
+global proc js_createStretchSpline (string $curveObj, int $volume, int $worldScale, string $worldScaleObj, string $worldScaleAttr)
+{
+	// based on the given curve, tell the joints to stretch
+
+	// create a curveInfo node
+	$node = `arclen -ch 1 $curveObj`;
+
+	// get the ikhandle
+	string $con[0];
+	string $shape[0];
+	$shape = `listRelatives -f -s $curveObj`;
+
+	$con = `listConnections -type ikHandle ($shape[0] + ".worldSpace[0]")`;
+	$ikHandle = $con[0];
+
+	// find out what joints are in the list 
+	string $joints[0];
+	$joints = `ikHandle -q -jl $ikHandle`;
+
+    // we need to figure out which direction the curve should be scaling.
+    // do to that, we'll look at the translate values of the second joint.  Whichever translate has the
+    // highest value, that'll be the first one and the other two axis will be the shrinking one
+    string $stretchAxis[3];
+    $stretchAxis = `js_getStretchAxis $joints[1]`;
+
+	// create a normalizedScale attr on the curveInfo node
+	addAttr -ln "normalizedScale" -at "double" $node;
+	$length = `getAttr ($node + ".arcLength")`;
+
+
+    //  create a NormalizedScale node to connect to everything.
+    $multDivide = `createNode multiplyDivide`;
+    $multDivide = `rename $multDivide ($curveObj+ "_normalizedScale")`;
+    
+    // set the multiplyDivide node to division
+    setAttr ($multDivide +".operation") 2;
+
+    connectAttr ($node + ".arcLength") ($multDivide + ".input1X");
+    setAttr ($multDivide + ".input2X") $length;
+
+    connectAttr ($multDivide + ".outputX") ($node + ".normalizedScale");
+   
+    // if worldscale is off, and volume deformation is off, we can just connect directly to the joints
+    if (($worldScale == 0) && ($volume == 0))
+    {
+        for ($joint in $joints)
+        {
+            print ("connecting to " + $joint + "." + $stretchAxis[0] + "\n");
+            connectAttr -f ($node + ".normalizedScale") ($joint + "." + $stretchAxis[0]);
+        }
+    }
+    else
+    {
+        // if $worldScale is on, but volume is off we can just add another multiply divide node
+        // and connect to that
+        if (($worldScale == 1) && ($volume == 0))
+        {
+            // create a multiplyDivide node
+            $md2 = `createNode multiplyDivide -n ($curveObj + "_worldScale")`;
+            setAttr ($md2 + ".operation") 2;
+            connectAttr ($node + ".normalizedScale") ($md2 + ".input1X");
+            connectAttr ($worldScaleObj + "." + $worldScaleAttr) ($md2 + ".input2X");
+            for ($joint in $joints)
+            {
+                connectAttr -f ($md2 + ".outputX") ($joint + "."+$stretchAxis[0]);
+            }
+        }
+        else
+        {
+            // also create an anim curve which we can use to connnect to the joints to help
+            // determine the scaling power in X and Z.  This will be attached to the curve itself
+            select $joints;
+            js_createCurveControl $curveObj "scalePower" "pow";
+
+            // start creating an expression
+            string $expr;
+
+            // for each joint, connect the scaleX to the normalizedScale
+            if ($worldScale)
+                $expr += ("$scale = " + $node + ".normalizedScale/"+$worldScaleObj+"."+$worldScaleAttr+";\n");
+            else
+                $expr += ("$scale = " + $node + ".normalizedScale;\n");
+
+            $expr += ("$sqrt = 1/sqrt($scale);\n");
+
+
+            $size = size($joints);
+            for ($x=0; $x < $size; $x++)
+            {
+                $item = $joints[$x];
+                // set a powPosition based on the number of joints which will be scaling, from 0 to 1
+                $expr = ($expr+$item + "." + $stretchAxis[0] + " = $scale;\n");
+                $expr = ($expr + $item + "." + $stretchAxis[1] + " = pow($sqrt,"+$item+".pow);\n");
+                $expr = ($expr + $item + "." + $stretchAxis[2] + " = pow($sqrt,"+$item+".pow);\n");
+            }	
+            expression -s $expr -n ($curveObj + "_expr");
+        }
+    }
+    select $curveObj;
+}

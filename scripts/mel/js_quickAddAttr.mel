@@ -1,0 +1,73 @@
+/*
+    Script:     js_quickAddAttr
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Will quickly add the $attr specified to the selected objects and make it a keyable double.
+                If nothing specified, it'll pop up a window with a textFieldGrp for the attribute name.
+
+
+*/
+global proc js_quickAddAttr ( string $attr )
+{
+
+    if ($attr == "")
+    {
+        js_createAddAttrWin;
+    }
+    else
+    {
+        js_quickAddAttrGo $attr;
+    }
+}
+
+global proc js_createAddAttrWin ()
+{
+    $win = "js_quickAddAttr";
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -t "Quick-Add Attribute" -w 200 -h 40 $win;
+    columnLayout -adj true -co "both" 10 ;
+    text -align "left" -l "Please Enter New Attribute:";
+    $t = `textField`;
+    textField -e -cc ("js_quickAddAttrPrep " + $t) $t;
+
+    showWindow $win;
+}
+
+global proc js_quickAddAttrPrep (string $t)
+{
+    string $attr = `textField -q -tx $t`;
+    $cmd = ("js_quickAddAttrGo \"" + $attr + "\"");
+    evalEcho $cmd;
+    textField -e -tx "" -ip 1 $t;
+    evalDeferred ("setFocus \""+$t+"\"");
+}
+global proc js_quickAddAttrGo (string $attr)
+{
+    // grab the selected objects
+    string $objs[0];
+    $objs = `ls -sl`;
+    string $attrs[0];
+    // now tokenize by spaces
+    tokenize ($attr, $attrs);
+
+   
+    for ($ob in $objs)
+    {
+        // split the attr into individual attributes
+        for ($at in $attrs)
+        {
+            if (!`attributeQuery -exists -node $ob $at`)
+            {
+                addAttr -ln $at -at double $ob;
+            }
+            if (!`getAttr -k ($ob + "." + $at)`)
+            {
+                setAttr -k 1 ($ob + "." + $at);
+            }
+        }
+    }
+}

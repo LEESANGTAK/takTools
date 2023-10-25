@@ -1,0 +1,804 @@
+// dynamic chain bake tool.
+// written by ilhobak.
+
+global proc IH_BakeHairChain()
+{
+
+	if (`window -ex "IHbakeHairChainWIn"`) 
+   {
+      deleteUI "IHbakeHairChainWIn";
+   }
+
+   window -width 300 -height 200
+	-resizeToFitChildren true
+	-menuBar true
+	-maximizeButton true
+	-titleBar true
+	/*-sizeable false*/
+	-menuBarVisible true
+	-title "bake hair chain tool"
+	"IHbakeHairChainWIn";
+
+
+	columnLayout;
+	separator -h 5 -w 490 -style "none";
+	//namespace.
+	string $NSlist[] = `ls "*:dyn_ctr_crv"`;	
+
+	optionMenu -label "   NameSpace: " -changeCommand "IH_dynamicGroupShow" IH_hairBakeNSmenu;	
+	menuItem -label ":";        
+	if ( size($NSlist) > 0) {
+			for ($curNS in $NSlist){
+				string $tokenTemp[];
+				tokenize $curNS ":" $tokenTemp;
+				menuItem -label ($tokenTemp[0] + ":");			
+			}
+	} 
+
+	separator -h 15 -w 490 -style "in";
+
+	rowLayout -nc 5 -cw 1 110 -cw 2 110 -cw 3 150 -cw 4 110 
+			-rat 2 "top" 0 -rat 4 "top" 0 -cat 1 "left" 5 ;
+
+		//1
+		columnLayout;
+			text -label "Dynamic Part : ";
+			separator -h 5 -w 105 -style "none";
+			textScrollList  -allowMultiSelection 1 -w 100 -h 140 -sc "IH_dynamicGroupSelect" IH_dynamicGroupList;
+			IH_dynamicGroupShow;
+			popupMenu -parent IH_dynamicGroupList;
+            menuItem - label "select nucleus" -c "IH_nucleusSelect"; 
+
+			button -label "select dynamic ctr " -w 100 -c "select -r (`optionMenu -q -v IH_hairBakeNSmenu`+ \"dyn_ctr_crv\");";				
+		setParent ..;
+
+		//2
+		columnLayout ;
+			
+			text -label "Dynamic Type : ";
+			separator -h 5 -w 105 -style "none";
+
+			optionMenu -w 100 -changeCommand "" IH_DynamicTypeMenu;					  
+				menuItem -label "nHair";  
+				//menuItem -label "off";   
+				menuItem -label "classicHair";
+
+			separator -h 10 -w 105 -style "double";
+
+			rowLayout -nc 2;
+			button -label "dynamic on" -w 70 -bgc 0.2 0.7 0.1 -c "IHDynamicOnOff 1";
+			button -label "off" -w 30 -bgc 0.1 0.5 0.2 -c "IHDynamicOnOff 0";
+			setParent ..;
+
+			separator -h 10 -w 105 -style "in";
+
+			text -label "Select Ctr : ";
+			separator -h 5 -w 105 -style "none";
+			
+			button -label " [ all chain members ]" - w 102 -bgc 0.1 0.1 0.5  -c "IHctrSelectAll";
+			separator -h 10 -w 105 -style "double";
+
+			rowLayout -nc 2;
+			button -label "< go up " - w 55 -bgc 0.1 0.3 0.6  -c "IHctrSelectUpDown \"up\" ";
+			button -label "down>" - w 45 -bgc 0.1 0.2 0.5  -c "IHctrSelectUpDown \"down\" ";
+			setParent ..;
+			separator -h 10 -w 105 -style "double";
+			button -label "[ group select ]" - w 102 -c "IH_selectSameLevel";
+			
+
+		setParent ..;
+
+
+		//3	
+		columnLayout;
+			text -label "Dynamic Chain List : ";
+			separator -h 5 -w 110 -style "none";
+			textScrollList  -allowMultiSelection 1 -w 140 -h 140 
+			-sc "IH_dynChainSelect \"one\" " 
+			IH_dynamicChainList;
+
+			popupMenu -parent IH_dynamicChainList;
+
+            menuItem - label "select hairSystem" -c "IHselectCurHairSystem \"hairSystem\" 0;"; 
+            menuItem - label "select Root" -c "IHCtrSelect \"Root\" "; 
+            //menuItem - label "ctr reset [0]" -c "IHCtrReset"; 
+            //menuItem - label "clear key" -c "";            
+
+            rowLayout -nc 3;
+			button -label "select all" - w 140 -c "IH_dynChainSelect \"all\" ";
+			
+			setParent ..;
+
+		setParent ..;
+
+		//5
+		columnLayout;
+			
+			text -label "Bake Type : ";
+
+			separator -h 5 -w 105 -style "none";
+			
+			optionMenu -changeCommand "" IH_BakeTypeMenu;
+				menuItem -label "controlBake";  
+				menuItem -label "jointBake"; 				
+
+			separator -h 10 -w 105 -style "double";
+
+			separator -h 10 -w 100 -style "none";
+			button -label "+bake dynamic" -w 105 -h 50 -bgc .5 .2 0.2 -c"IH_bakeHairDynamicCMD";
+
+			separator -h 10 -w 100 -style "none";
+
+			button -label "-remove bake key" -w 105  -bgc .7 .2 0.2 -c"IH_removeDynamicKey";
+
+			separator -h 10 -w 100 -style "none";
+
+			button -label "-reset Ctr position" -w 105  -bgc .4 .2 0.2 -c"IHCtrReset";
+
+		setParent ..;
+
+
+	setParent ..;
+
+
+	separator -h 15 -w 490 -style "in";
+
+	button -label "reload" -w 490 -c "IH_BakeHairChain";
+
+	setParent ..;
+
+	showWindow "IHbakeHairChainWIn";
+}
+
+
+global proc int IH_dynamicGroupShow()
+{
+
+
+	string $curNS = `optionMenu -q -v IH_hairBakeNSmenu`;
+
+	string $curDynCtr = ($curNS + "dyn_ctr_crv");
+
+	if (!`objExists $curDynCtr`){
+		textScrollList -e -ra IH_dynamicGroupList;
+		if (`textScrollList -ex IH_dynamicChainList`)
+			textScrollList -e -ra IH_dynamicChainList;
+		return 0;
+	}
+
+	string $listDynamicName[] = `listAttr -cb $curDynCtr`;
+
+	textScrollList -e -ra IH_dynamicGroupList;
+	if (`textScrollList -ex IH_dynamicChainList`)
+		textScrollList -e -ra IH_dynamicChainList;
+
+	for ($i = 0 ; $i <size($listDynamicName) ; $i++ ){
+		if ( $listDynamicName[$i] != "" && `gmatch $listDynamicName[$i] "_*_"`){			
+			string $curDynName = `substring $listDynamicName[$i] 2 (size($listDynamicName[$i])-1)`;		
+			int $i_dynamicType = `getAttr ($curDynCtr + "." + $curDynName + "_dynamic")`;
+			
+			string $font;
+			if ($i_dynamicType == 0)
+				$font = "plainLabelFont";
+			else if ($i_dynamicType == 1)		
+				$font = "boldLabelFont";
+			else if($i_dynamicType == 2)		
+				$font = "fixedWidthFont";
+
+			textScrollList -e -a $listDynamicName[$i] IH_dynamicGroupList;
+			textScrollList -e -lf ($i+1) $font IH_dynamicGroupList;	
+		}
+	}
+
+	select -r $curDynCtr;
+	return 1;	
+}
+
+
+global proc IH_dynamicGroupSelect()
+{
+
+	string $curNS = `optionMenu -q -v IH_hairBakeNSmenu`;
+	string $curDynCtr = ($curNS + "dyn_ctr_crv");	
+
+	string $groupList[] = `textScrollList -q -si IH_dynamicGroupList`;
+	print $groupList;
+	
+	textScrollList -e -ra IH_dynamicChainList;
+
+	for ($i = 0 ; $i < size($groupList) ; $i++ ){
+
+		string $curDyn = `substring $groupList[$i] 2 (size($groupList[$i])-1)`;
+		
+		string $listCtr[] = `listConnections -s 0 -d 1 ($curDynCtr + "." + $curDyn + "_startFrame")`;
+		//print $listCtr;
+			
+		for ($curCtr in $listCtr){
+			if ( `gmatch $curCtr "*_ctrEnd_crv"`){
+				if ( $curNS == ":"){
+					textScrollList -e -a $curCtr IH_dynamicChainList;
+					print ($curCtr + "\n");
+				}
+				else{
+					string $tokenTemp[];
+					tokenize $curCtr ":" $tokenTemp;
+					textScrollList -e -a $tokenTemp[1] IH_dynamicChainList;
+				}
+			}	
+		}
+		
+	}
+
+}
+
+global proc IH_dynChainSelect( string $type )
+{
+
+	string $curNS = `optionMenu -q -v IH_hairBakeNSmenu`;
+
+	string $list[];
+	string $selectList[];
+	if ($type == "one"){
+		$list = `textScrollList -q -si IH_dynamicChainList`;
+	} else if ($type == "all"){
+		$list = `textScrollList -q -ai IH_dynamicChainList`;
+	}
+
+	for ($i = 0 ;$i < size($list) ; $i++ ) {		
+		textScrollList -e -si $list[$i] IH_dynamicChainList;
+		$selectList[$i] = ($curNS + $list[$i]);
+	}
+	select -r $selectList;
+
+}
+
+global proc IH_nucleusSelect(){
+	
+	string $curNS = `optionMenu -q -v IH_hairBakeNSmenu`;
+	string $curDynCtr = ($curNS + "dyn_ctr_crv");	
+
+	string $groupList[] = `textScrollList -q -si IH_dynamicGroupList`;
+	string $nucleusList[];
+
+	for ($i = 0 ; $i < size($groupList) ; $i++ ){
+
+		string $curDyn = `substring $groupList[$i] 2 (size($groupList[$i])-1)`;
+		string $curNucleus = ($curNS + $curDyn + "_nucleus");
+
+		if (`objExists $curNucleus`){
+			$nucleusList[$i] = $curNucleus;
+		}else{
+			print ("//warning: " + $curNucleus + " is not exist.\n ");
+		}
+	}
+
+	select -r $nucleusList;
+} 
+
+
+//다이나믹 상태를 on 하고 startFrame을 현재 frameRange의 start로 맞춰 test 할 수 있다.
+global proc IHDynamicOnOff(int $on)
+{
+
+	string $curNS = `optionMenu -q -v IH_hairBakeNSmenu`;
+	string $curDynCtr = ($curNS + "dyn_ctr_crv");	
+	string $selectDyn[] = `textScrollList -q -si IH_dynamicGroupList`;
+	int $selectDynIndex[] = `textScrollList -q -sii IH_dynamicGroupList`;
+	int $Min = `playbackOptions -q -min`;
+	string $dynamicType = `optionMenu -q -v IH_DynamicTypeMenu`;
+
+	for ($i = 0 ; $i < size($selectDyn) ; $i++ ){
+
+
+		if ($selectDyn[$i] == ""){
+			error "please select item in Dynamic part list.";
+		}
+
+
+		if ($on){
+
+			if ($dynamicType == "off"){
+				error "please select dynamicType!!";
+			}
+
+			if(`objExists ($curDynCtr + "." + $selectDyn[$i])`){
+
+				string $curDyn = `substring $selectDyn[$i] 2 (size($selectDyn[$i])-1)`;
+
+				//setDynamicType
+				if ($dynamicType == "classicHair"){
+					setAttr ($curDynCtr + "." + $curDyn + "_dynamic") 1;
+					textScrollList -e -lf $selectDynIndex[$i] "boldLabelFont" IH_dynamicGroupList;			
+				}
+				else if ($dynamicType == "nHair"){
+					setAttr ($curDynCtr + "." + $curDyn + "_dynamic") 2;	
+					textScrollList -e -lf $selectDynIndex[$i] "fixedWidthFont" IH_dynamicGroupList;		
+				}	
+
+				//setStartFrame
+				setAttr ($curDynCtr + "." + $curDyn + "_startFrame") $Min;
+					
+			}	
+
+		}
+		//off
+		else {
+
+			if(`objExists ($curDynCtr + "." + $selectDyn[$i])`){
+
+				string $curDyn = `substring $selectDyn[$i] 2 (size($selectDyn[$i])-1)`;	
+
+				setAttr ($curDynCtr + "." + $curDyn + "_dynamic") 0;
+				setAttr ($curDynCtr + "." + $curDyn + "_startFrame") 100000;
+
+				textScrollList -e -lf $selectDynIndex[$i] "plainLabelFont" IH_dynamicGroupList;	
+			}	
+			//optionMenu -e -v "off" IH_DynamicTypeMenu;
+
+		}
+
+	}
+	select $curDynCtr;
+
+}
+
+// joint bake or ctr bake.
+global proc IH_bakeHairDynamicCMD()
+{
+	//select EndCtr
+	string $endCtrList[] = `ls -sl "*:*_ctrEnd_crv" "*_ctrEnd_crv"`;
+
+	if (size($endCtrList) < 1)
+		error "please select at least one ctrEnd_crv";
+
+	string $dynamicType = `optionMenu -q -v IH_DynamicTypeMenu`;
+	string $bakeType = `optionMenu -q -v IH_BakeTypeMenu`;
+
+	//setup DynamicType
+	if ($dynamicType == "off"){
+		error "please select dynamicType!!";
+	}
+
+	string $ctrList[];
+	string $bakeCtrList[];
+	string $bakeOutList[];
+	string $startFrames[];
+	string $jointList[];
+	int $i = 0;
+
+	for ($curCtr in $endCtrList){
+
+		if (!`objExists ($curCtr + ".dynamicType")`){
+			warning ( $curCtr + " does not have dynamics." );
+			continue;
+		}
+
+		string $prefix = `substitute "_ctrEnd_crv" $curCtr ""`;
+
+		string $curCtrList[] = `ls ($prefix + "_ctr*_crv")`;
+		appendStringArray($ctrList, $curCtrList, size($curCtrList));
+		//print $curCtrList;
+
+		string $curbakeOutList[] = `ls -type "joint" ($prefix + "_bakeOut*_jnt")`;
+		appendStringArray($bakeOutList, $curbakeOutList, size($curbakeOutList));
+
+		string $curJointList[] = `ls -type "joint" ($prefix + "_*_jnt")`;
+		appendStringArray($jointList, $curJointList, size($curJointList));
+
+		string $curBakeCtrList[] = `ls ($prefix + "_bake*_crv")`;
+		appendStringArray($bakeCtrList, $curBakeCtrList, size($curBakeCtrList));
+
+		string $temp[] = `listConnections -s 1 -d 0 -p 1 ($curCtr + ".startFrame")`;
+		$startFrames[$i++] = $temp[0];
+	}
+
+	$startFrames = stringArrayRemoveDuplicates($startFrames);
+
+	//set startFrame to startFrame.
+	int $Min = `playbackOptions -q -min`;
+	int $Max = `playbackOptions -q -max`;
+
+	for ($curStart in $startFrames){
+
+		setAttr $curStart $Min;
+		//set Dynamic 
+		string $dynamicAttr = `substitute "_startFrame" $curStart "_dynamic"`;
+		if ($dynamicType == "classicHair")
+			setAttr $dynamicAttr 1;
+		else if($dynamicType == "classicHair")
+			setAttr $dynamicAttr 2;	
+					
+	}
+
+	currentTime ($Min-1);
+
+
+	if ($bakeType == "controlBake"){
+
+		//clear Key.	
+		cutKey -clear -time ":" -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz"  $ctrList;
+
+		//match.
+		//zero match.
+		for ($curBakeCtr in $bakeCtrList){
+
+			string $curBakeZero = `substitute "_crv" $curBakeCtr "_zero"`;
+			string $matchZeroName = `substitute "_bake" $curBakeZero "_ctr"`;
+			float $zeroTr[] = `getAttr ($matchZeroName + ".t" )`;
+			float $zeroRot[] = `getAttr ($matchZeroName + ".r" )`;	
+			setAttr ($curBakeZero + ".t" ) $zeroTr[0] $zeroTr[1] $zeroTr[2]; 
+			setAttr ($curBakeZero + ".r" ) $zeroRot[0] $zeroRot[1] $zeroRot[2]; 
+
+		}
+		
+		//ctr match.
+		for ($curBakeCtr in $bakeCtrList){
+
+			string $matchName = `substitute "_bake" $curBakeCtr "_ctr"`;
+
+			string $const[]= `pointConstraint -o 0 0 0 -weight 1 $matchName $curBakeCtr`;
+			delete $const;
+		}
+
+
+		//pointConstraint
+		for ($curBakeOut in $bakeOutList){
+			print ($curBakeOut + "\n");
+			string $matchName = `substitute "_bakeOut" $curBakeOut "_bake"`;
+			$matchName = `substitute "_jnt" $matchName "_crv"`;
+
+			pointConstraint -mo -weight 1 $curBakeOut $matchName;
+		}
+
+		//bake
+		bakeResults -simulation true -t ( $Min + ":" + $Max ) -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false -removeBakedAttributeFromLayer false -bakeOnOverrideLayer false -controlPoints false -shape 0 $bakeCtrList;
+		
+		for ($curBakeCtr in $bakeCtrList){
+
+			string $matchName = `substitute "_bake" $curBakeCtr "_ctr"`;
+			
+			cutKey -time ":" -hierarchy none  -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz" $curBakeCtr;
+
+			pasteKey -option insert -copies 1 -connect 1 -timeOffset 0 -floatOffset 0 -valueOffset 0 $matchName;
+
+		}
+		
+		delete -cn $bakeCtrList;
+		
+		//constraint off
+		for ($curCtr in $endCtrList){
+			if (`objExists ($curCtr + ".Constraint")`){
+				setAttr ($curCtr + ".Constraint") 0;
+			}
+		}
+			
+	}
+	
+	else if ($bakeType == "jointBake"){
+
+		cutKey -clear -time ":" -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz"  $jointList;
+
+		//bake
+		bakeResults -simulation true -t ( $Min + ":" + $Max ) -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false 
+					-removeBakedAttributeFromLayer false -bakeOnOverrideLayer false -controlPoints false -shape 0 $jointList;
+
+		for ($curEndCtr in $endCtrList){
+			setAttr -channelBox 1 ($curEndCtr+ ".bakeType") 0;
+			setAttr -k 1 -channelBox 1  ($curEndCtr+ ".IkBlend") 0;			
+		}
+
+	}
+
+	//set startFrame 100000.
+	for ($curStart in $startFrames){
+		setAttr $curStart 100000;		
+		//set Dynamic off
+		string $dynamicAttr = `substitute "_startFrame" $curStart "_dynamic"`;
+		setAttr $dynamicAttr 0;
+	}
+
+}
+
+// 
+global proc IH_removeDynamicKey()
+{
+	//select EndCtr
+	string $endCtrList[] = `ls -sl "*:*_ctrEnd_crv" "*_ctrEnd_crv"`;
+
+	if (size($endCtrList) < 1)
+		error "please select at least one endCtr";
+
+	string $ctrList[];
+	string $jointList[];
+	string $startFrames[];
+	int $i = 0;
+
+	for ($curCtr in $endCtrList){
+
+		string $prefix = `substitute "_ctrEnd_crv" $curCtr ""`;
+
+		string $curCtrList[] = `ls ($prefix + "_ctr*_crv")`;
+		appendStringArray($ctrList, $curCtrList, size($curCtrList));	
+
+		string $curJointList[] = `ls -type "joint" ($prefix + "_*_jnt")`;
+		appendStringArray($jointList, $curJointList, size($curJointList));
+
+		string $temp[] = `listConnections -s 1 -d 0 -p 1 ($curCtr + ".startFrame")`;
+		$startFrames[$i++] = $temp[0];
+	}
+
+	$startFrames = stringArrayRemoveDuplicates($startFrames);
+
+	//clear joint Key.
+	cutKey -clear -time ":" $jointList;
+	//clear ctr Key	
+	cutKey -clear -time ":" -at "tx" -at "ty" -at "tz" -at "rx" -at "ry" -at "rz"  $ctrList;
+
+	//set bakeAttr off and IK blend 10.
+	for ($curEndCtr in $endCtrList){
+		setAttr -channelBox 0 ($curEndCtr+ ".bakeType") 0;
+		setAttr -k 0 -channelBox 0  ($curEndCtr+ ".IkBlend") 10;
+
+		//constraint on.
+		if (`objExists ($curEndCtr + ".Constraint")`){
+				setAttr ($curEndCtr + ".Constraint") 1;
+		}
+
+	}	
+
+	//set dynamic off startFrame 100000.	
+	for ($curStart in $startFrames){
+		setAttr $curStart 100000;		
+		//set Dynamic off
+		string $dynamicAttr = `substitute "_startFrame" $curStart "_dynamic"`;
+		setAttr $dynamicAttr 0;
+	}
+
+}
+
+global proc IHCtrReset()
+{
+
+	string $sel[] = `ls -sl`;
+
+	for ( $cur in $sel ){
+
+		string $prefix = `IHgetPrefix $cur`;
+		if ($prefix == "")
+			continue;
+
+		string $ctrList[] = `ls ($prefix + "_ctr*_crv")`;
+
+		$ctrList[size($ctrList)] = ($prefix + "_Root_crv");
+
+		for ($curCtr in $ctrList){
+
+			setAttr ($curCtr + ".t") 0 0 0;
+			setAttr ($curCtr + ".r") 0 0 0;
+
+		}
+
+	}
+
+}
+
+//get Prefix form select.
+global proc string IHgetPrefix( string $name ){
+
+	string $prefix = "";
+	if (`gmatch $name "*_ctrEnd_crv"`){
+		$prefix = `substitute "_ctrEnd_crv" $name ""`;
+	}
+	else if (`gmatch $name "*_ctr*_crv"`){
+
+		string $tokenTemp[] = stringToStringArray($name , "_" );
+		string $ctrName = ( "_" + $tokenTemp[size($tokenTemp)-2] + "_" + $tokenTemp[size($tokenTemp)-1] );
+		$prefix = `substitute $ctrName $name ""`;
+
+	}
+	else if (`gmatch $name "*_Root_crv"`){
+		$prefix = `substitute "_Root_crv" $name ""`;
+	}
+	else if (`gmatch $name "*_Block"`){
+		$prefix = `substitute "_Block" $name ""`;
+	}
+	else if (`gmatch $name "*_hairSystem"`){
+		$prefix = `substitute "_hairSystem" $name ""`;
+	}
+
+	return $prefix;
+}
+
+//collide
+global proc IHselectCurHairSystem( string $type , int $val){
+
+	string $sel[] = `ls -sl`;
+	string $hairSystem[];
+
+	for ($i = 0 ; $i < size($sel) ; $i++ )
+	{	
+		string $prefix = `IHgetPrefix $sel[$i]`;
+		if ($prefix == "")
+			continue;
+
+		if ($type == "hairSystem"){
+			$hairSystem[$i] = ($prefix + "_hairSystem");
+		}
+
+		else if ($type == "showCollide"){
+			setAttr ($prefix + "_hairSystem_GRP.v") $val;
+			setAttr ($prefix + "_hairSystemShape.solverDisplay") $val;
+			$hairSystem[$i] = ($prefix + "_hairSystem");
+		}
+
+		else if ($type == "selfCollision"){
+			setAttr ($prefix + "_hairSystemShape.selfCollide") $val;
+			$hairSystem[$i] = ($prefix + "_hairSystem");
+		}
+	}
+
+	select -r $hairSystem;
+
+}
+
+//select ctr
+global proc IHCtrSelect ( string $type ){
+
+	string $sel[] = `ls -sl`;
+
+	if ($type == "ctrEnd"){
+
+		string $endCtrList[];
+
+		for ( $i= 0 ; $i < size($sel) ; $i++ ){			
+			string $prefix = `IHgetPrefix $sel[$i]`;
+			if ($prefix == "")
+				continue;
+			$endCtrList[$i] = ($prefix + "_ctrEnd_crv");
+		}
+
+		select -r $endCtrList;
+	}
+
+	else if ( $type == "Root"){
+
+		string $rootCtrList[];
+
+		for ( $i= 0 ; $i < size($sel) ; $i++ ){
+			string $prefix = `IHgetPrefix $sel[$i]`;
+			if ($prefix == "")
+				continue;
+			$rootCtrList[$i] = ($prefix + "_Root_crv");
+		}
+
+		select -r $rootCtrList;
+
+	}	
+
+	else if ($type == "joint"){
+
+		string $jointList[];
+
+		for ( $i= 0 ; $i < size($sel) ; $i++ ){
+			string $prefix = `IHgetPrefix $sel[$i]`;
+			if ($prefix == "")
+				continue;
+			$jointList[$i] = ($prefix + "_*_jnt");
+		}
+
+		select -r $jointList;
+	}
+
+}
+
+//show
+global proc IHRootCtrShow ( string $type , int $val)
+{
+
+	string $sel[] = `ls -sl`;
+	string $RootList[];
+
+	for ( $i= 0 ; $i < size($sel) ; $i++ ){			
+		string $prefix = `IHgetPrefix $sel[$i]`;
+		if ($prefix == "")
+			continue;
+		$RootList[$i] = ($prefix + "_Root_crv");
+		setAttr ($RootList[$i] + "." + $type) $val;
+	}
+
+	select -r $sel;
+
+}
+
+
+global proc IHctrSelectUpDown( string $dir )
+{
+	string $sel[] = `ls -sl`;
+
+	string $targetCtrList[];
+
+	for ( $i= 0 ; $i < size($sel) ; $i++ ){
+
+		string $prefix = `IHgetPrefix $sel[$i]`;
+		if ($prefix == "")
+			continue;
+
+		string $curCtrList[] = `ls ($prefix + "_ctr*_crv")`;
+		$curCtrList = sort($curCtrList);
+
+
+		for ($j = 0 ; $j < size($curCtrList) ; $j ++ ){
+
+			if ( $sel[$i] == $curCtrList[$j] ){
+
+				if ($dir == "up"){
+					if ($j == 0)
+						$targetCtrList[$i] = $curCtrList[$j];
+					else 
+						$targetCtrList[$i] = $curCtrList[$j-1];
+				}
+				else if ($dir == "down"){
+					if ($j == size($curCtrList)-1 )			
+						$targetCtrList[$i] = $curCtrList[$j];
+					else 
+						$targetCtrList[$i] = $curCtrList[$j+1];		
+				}				
+				break;
+			}
+
+		}
+
+	}
+
+	select -r $targetCtrList;
+
+}
+global proc IHctrSelectAll()
+{
+	string $sel[] = `ls -sl`;
+
+	string $targetCtrList[];
+
+	for ( $i= 0 ; $i < size($sel) ; $i++ ){
+
+		string $prefix = `IHgetPrefix $sel[$i]`;
+		if ($prefix == "")
+			continue;
+
+		string $curCtrList[] = `ls ($prefix + "_ctr*_crv")`;
+		appendStringArray($targetCtrList, $curCtrList, size($curCtrList) );
+
+	}
+
+	select -r $targetCtrList;
+	
+}
+
+
+global proc IH_selectSameLevel(){
+
+    string $selCtr[] = `ls -sl -head 1`;
+    
+    //namespace 분리.
+    string $tokenTemp[] = stringToStringArray ($selCtr[0] , ":" );
+    string $nameSpace = ":";
+    if ( size($tokenTemp) == 2 )
+        $nameSpace = ($tokenTemp[0] + ":");
+    else if ( size($tokenTemp) > 2 )
+        error;
+         
+    string $curCtr = $tokenTemp[ size($tokenTemp)-1 ]; 
+        
+    //name분리.
+    $tokenTemp = stringToStringArray ($curCtr,  "_" );
+    //string $lastName = `substitute $tokenTemp[0] $curCtr ""`;
+    
+    string $num = `match "[0-9]+" $tokenTemp[0]`;
+    string $prefixA = `substitute $num $tokenTemp[0] ""`;
+    print ($prefixA + "\n");
+    
+    select -r ($nameSpace + $prefixA + "*_ctrEnd_crv");
+
+}
+
+

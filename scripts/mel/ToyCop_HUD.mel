@@ -1,0 +1,631 @@
+global proc b1HUD()
+{
+	b1HUDWin;
+}
+
+
+global proc b1HUDWin()
+{
+	if (`window -exists b1HUDWin`)
+	{
+		deleteUI b1HUDWin;
+	}
+	string $window = `window -title "ToyCop HUD" b1HUDWin`;
+		string $rootLayout = `columnLayout -adjustableColumn false -columnAttach left 0 -columnAlign right -columnWidth 100`;
+			string $projMenu = `optionMenuGrp -label "Project Name : "
+				-columnWidth2 100 200
+				-columnAttach2 right left
+				-cc "b1UpdHUD"
+				-visible 0
+			projNameMenu`;
+				menuItem -label "==Please Select Project==";
+		setParent $rootLayout;
+			separator -width 300 -visible 0;
+			string $shotField = `textFieldGrp -label "Shot Name : " 
+				-columnWidth2 100 200
+				-columnAttach2 right left
+				// -text (b1HUD_GetSceneInfo("shotName"))
+				-text ""
+				-visible 0
+			shotNameField`;
+			string $taskField = `textFieldGrp -label "Task : "
+				-columnWidth2 100 200
+				-columnAttach2 right left
+				// -text (b1HUD_GetSceneInfo("task"))
+				-text ""
+				-visible 0
+			taskField`;
+			string $versionField = `textFieldGrp -label "Version : "
+				-columnWidth2 100 200
+				-columnAttach2 right left
+				// -text (b1HUD_GetSceneInfo("version"))
+				-text ""
+				-visible 0
+			versionField`;
+			// separator -width 300;
+			// string $commentField = `textFieldGrp -label "Comment : "
+				// -columnWidth2 100 200
+				// -columnAttach2 right left
+				// -text "간단한 메모를 입력해주세요"
+				// -changeCommand "b1HUD_GetUserComment"
+			// commentField`;
+		string $buttonLayout = `rowLayout -numberOfColumns 2 -columnWidth2 100 100`;
+			button -label "Toggle HUD" -width 100 -command b1HUDToggle;
+			button -label "Cancel" -width 100 -command "deleteUI b1HUDWin";
+			
+			
+	string $currProj = `optionVar -q "currProj"`;
+	if( size($currProj) )
+	{
+		menuItem -label $currProj -parent ($projMenu + "|OptionMenu");
+	}
+	optionMenuGrp -edit -select 2 projNameMenu;
+	textFieldGrp -edit -text `b1HUD_GetSceneInfo "shotName"` shotNameField;
+	textFieldGrp -edit -text `b1HUD_GetSceneInfo "task"` taskField;
+	textFieldGrp -edit -text `b1HUD_GetSceneInfo "version"` versionField;
+	
+	window -e -w 50 -h 10 b1HUDWin;
+	showWindow b1HUDWin;
+}
+
+
+global proc b1UpdHUD()
+{
+	b1HUDToggle;
+	b1HUDToggle;
+}
+
+/*
+global proc b1HUD_SaveCommandPref()
+{
+	string $comment = `textFieldGrp -q -tx commentField`;
+	optionVar -sv "hudComment" $comment;
+	string $editCommand = "optionVar -q \"hudComment\" hudUserComment";
+	headsUpDisplay -edit -command $editCommand;
+}
+*/
+
+global proc string b1HUD_Pad( string $input, int $pad)
+{
+	int $length = `size($input)`;
+	string $prefix;
+	string $returnString;
+	int $i;
+	for ($i = $length; $i < $pad; $i ++)
+	{
+		$prefix = $prefix + "0";
+	}
+	$returnString = $prefix + $input;
+	return $returnString;
+}
+
+
+global proc string b1HUD_GetCurrProj()
+{
+	string $currProj;
+	if (`optionMenuGrp -exists projNameMenu`)
+	{
+		$currProj = `optionMenuGrp -q -value projNameMenu`;
+	}
+	else{
+		$currProj = `optionVar -q "currProj"`;
+	}
+	return $currProj;
+}
+
+global proc string b1HUD_GetSceneInfo(string $option)
+{
+	string $result;
+	string $currSceneName = `file -q -sceneName`;
+	string $separatedStrings[] = `stringToStringArray $currSceneName "/"`;
+	int $size = size($separatedStrings);
+	if ($size == 0)
+	{
+		$currSceneName = "untitled";
+	}
+	else
+	{
+		$currSceneName = $separatedStrings[$size - 1];
+	}
+	print "$currSceneName =\n";
+	print $currSceneName;
+	print "\n";
+	clear $separatedStrings;
+	$separatedStrings = `stringToStringArray $currSceneName "_"`;
+	print "$separatedStrings =\n";
+	print $separatedStrings;
+	print "\n";
+	string $shotName = ($separatedStrings[0] + "_" + $separatedStrings[1]);
+	string $taskTag = `toupper $separatedStrings[2]`;
+	string $version = $separatedStrings[4];
+	switch ($option)
+	{
+		case "shotName":
+			$result = $shotName;
+			break;
+		case "task":
+			$result = $taskTag;
+			break;
+		case "version":
+			$result = $version;
+			break;
+	}
+	return $result;
+}
+	
+global proc string b1HUD_GetCurrShot()
+{
+	string $currShot;
+	if(`textField -exists shotNameField`)
+	{
+		$currShot = `textFieldGrp -q -text shotNameField`;
+	}
+	else
+	{
+		string $filename = `file -q -sceneName`;
+		$filename = `basenameEx $filename`;
+		string $filenameSep[] = `stringToStringArray $filename "_"`;
+		$currShot = $filenameSep[0] + "_" + $filenameSep[1];
+	}
+	return $currShot;
+}
+
+global proc string b1HUD_GetCurrTask()
+{
+	string $currTask = "ANI";
+	return $currTask;
+}
+
+global proc string b1HUD_GetCurrVersion()
+{
+	string $currVersion;
+	if (`textFieldGrp -exists versionField`)
+	{
+		$currVersion = `textFieldGrp -q -text versionField`;
+	}
+	else
+	{
+		string $filename = `file -q -sceneName`;
+		$filename = `basenameEx $filename`;
+		string $filenameSep[] = `stringToStringArray $filename "_"`;
+		$currVersion = $filenameSep[4];
+	}
+	return $currVersion;
+}
+
+global proc string b1HUD_GetDateTime(string $tag)
+{
+	string $return;
+	if ($tag == "date")
+	{
+		$return = `about -cd`;
+	}
+	else
+	{
+		$return = `about -ct`;
+	}
+	return $return;
+}
+
+global proc string b1HUD_GetCurrCam()
+{
+	string $currPanel = `getPanel -wf`;
+	string $currCam = `modelPanel -q -cam $currPanel`;
+	return $currCam;
+}
+
+global proc string b1HUD_GetResInfo()
+{
+	string $resInfo[];
+	string $return;
+	$resInfo[0] = `getAttr defaultResolution.width`;
+	$resInfo[1] = `getAttr defaultResolution.height`;
+	$return = ($resInfo[0] + " X " + $resInfo[1]);
+	return $return;
+}
+
+global proc string b1HUD_GetFocalLength()
+{
+	string $return;
+	string $camName = `b1HUD_GetCurrCam`;
+	string $shapes[] = `listRelatives -fullPath -shapes $camName`;
+	string $focalLength = `getAttr ($shapes[0] + ".focalLength")`;
+	$return = ($focalLength + " mm");
+	return $return;
+}
+
+global proc string b1HUD_GetCurrFrame()
+{
+	string $currFrame = `currentTime -q`;
+	int $length = `size($currFrame)`;
+	string $prefix;
+	string $returnString;
+	int $i;
+	for ($i = $length; $i < 4; $i++)
+	{
+		$prefix = $prefix + "0";
+	}
+	$returnString = $prefix + $currFrame;
+	return $returnString;
+}
+
+global proc string b1HUD_GetStartEndFrame()
+{
+	string $startFrame = `playbackOptions -q -minTime`;
+	string $endFrame = `playbackOptions -q -maxTime`;
+	string $returnString = ($startFrame + " to " + $endFrame);
+	return $returnString;
+}
+
+global proc string b1HUD_GetFrameRate()
+{
+	string $unit = `currentUnit -q  -time`;
+	string $outString;
+	if ($unit == "film")
+		$outString = "24 FPS (Film)";
+	else if ($unit == "ntsc")
+		$outString = "30 FPS (NTSC)";
+	else if ($unit == "pal")
+		$outString = "25 FPS (PAL)";
+	else if ($unit == "show")
+		$outString = "48 FPS (Show)";
+	else if ($unit == "palf")
+		$outString = "50 FPS (PAL Field)";
+	else if ($unit == "ntscf")
+		$outString = "60 FPS (NTSC Field)";
+	else if ($unit == "game")
+		$outString = "15 FPS (Game)";
+		
+	return $outString;
+}
+
+global proc string b1HUD_GetTimeCode()
+{
+	int $currTime = (`currentTime -q` - 100);
+	int $fps;
+	string $unit = `currentUnit -q -fullName -time`;
+	switch ($unit)
+	{
+		case "game":
+			$fps = 15;
+			break;
+		case "film":
+		  $fps = 24;
+			break;
+		case "pal":
+			$fps = 25;
+			break;
+		case "ntsc":
+			$fps = 30;
+			break;
+		case "show":
+			$fps = 48;
+			break;
+		case "palf":
+			$fps = 50;
+			break;
+		case "ntscf":
+			$fps = 60;
+			break;
+	}
+	int $frame = $currTime % $fps;
+	int $currTime = ($currTime - $frame) / $fps;
+	int $hour = $currTime / 3600;
+	$currTime -= $hour * 3600;
+	int $minuite = $currTime / 60;
+	$currTime -= $minuite * 60;
+	$sec = $currTime;
+	string $returnString = (b1HUD_Pad($hour, 2) + ":" + b1HUD_Pad($minuite, 2) + ":" + b1HUD_Pad($sec, 2) + ":" + b1HUD_Pad($frame, 2));
+	return $returnString;
+}
+
+	
+global proc string b1HUD_GetUserComment()
+{
+	if(`textFieldGrp -exists commentField`)
+	{
+		string $commentString = `textFieldGrp -q -tx commentField`;
+		return $commentString;
+	}
+	else
+	return "";
+}
+
+
+
+global proc b1HUDToggle()
+{
+    string $list[] = `headsUpDisplay -listHeadsUpDisplays`;
+	string $current[];
+	int $size = `size($list)`;
+	int $i = 0;
+	for ($i; $i < $size; $i++)
+	{
+		string $checkCommand = ("headsUpDisplay -q -visible " + $list[$i]);
+		if (`eval $checkCommand`)
+		{
+			int $index = `size($current)`;
+			$current[$index] = $list[$i];
+		}
+	}
+	print "b1HUDToggle...currently active HUDs are\n";
+	print $current;
+	print "b1HUDToggle...end of print";
+	
+	// if (!`headsUpDisplay -exists hudProjName`)
+	// {
+	// 	headsUpDisplay
+	// 		-section 1
+	// 		-block 1
+	// 		-blockSize "small"
+	// 		-blockAlignment "left"
+	// 		-padding 0
+	// 		-labelWidth 70
+	// 		-dataWidth 100
+	// 		-dataAlignment "left"
+	// 		-label "Project :"
+	// 		-atr
+	// 		-command "b1HUD_GetCurrProj"
+	// 	hudProjName;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudProjName;
+
+	if (!`headsUpDisplay -exists hudShotName`)
+	{
+		headsUpDisplay
+			-section 9
+			-block 15
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 110
+			-dataWidth 150
+			-dataAlignment "left"
+			-label "Shot :"
+			-atr
+			-command "b1HUD_GetCurrShot"
+		hudShotName;
+	}
+	else
+		headsUpDisplay -rem hudShotName;
+		
+	// if (!`headsUpDisplay -exists hudTaskName`)
+	// {
+	// 	headsUpDisplay
+	// 		-section 1
+	// 		-block 3
+	// 		-blockSize "small"
+	// 		-blockAlignment "left"
+	// 		-padding -4
+	// 		-labelWidth 75
+	// 		-dataWidth 100
+	// 		-dataAlignment "left"
+	// 		-label "    Task :"
+	// 		-command "b1HUD_GetCurrTask"
+	// 		-atr
+	// 	hudTaskName;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudTaskName;
+		
+	// if (!`headsUpDisplay -exists hudVersionStamp`)
+	// {
+	// 	headsUpDisplay
+	// 		-section 1
+	// 		-block 4
+	// 		-blockSize "small"
+	// 		-blockAlignment "left"
+	// 		-padding -4
+	// 		-labelWidth 76
+	// 		-dataWidth 100
+	// 		-dataAlignment "left"
+	// 		-label "Version :"
+	// 		-command "b1HUD_GetCurrVersion"
+	// 		-atr
+	// 	hudVersionStamp;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudVersionStamp;
+
+	// if (!`headsUpDisplay -exists hudDateStamp`)
+	// {
+	// 	headsUpDisplay
+	// 		-section 3
+	// 		-block 1
+	// 		-blockSize "small"
+	// 		-blockAlignment "right"
+	// 		-padding 0
+	// 		-labelWidth 80
+	// 		-dataWidth 100
+	// 		-dataAlignment "left"
+	// 		-label "     Date :"
+	// 		-command "b1HUD_GetDateTime date"
+	// 		-atr
+	// 	hudDateStamp;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudDateStamp;
+		
+	// if (!`headsUpDisplay -exists hudTimeStamp`)
+	// {
+	// 	headsUpDisplay
+	// 		-section 3
+	// 		-block 2
+	// 		-blockSize "small"
+	// 		-blockAlignment "right"
+	// 		-padding 0	
+	// 		-labelWidth 80
+	// 		-dataWidth 100
+	// 		-dataAlignment "left"
+	// 		-label "     Time :"
+	// 		-command "b1HUD_GetDateTime time"
+	// 		-atr
+	// 	hudTimeStamp;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudTimeStamp;
+		
+	// if (!`headsUpDisplay -exists hudArtistName`)
+	// {
+	// 	headsUpDisplay
+	// 		-section 3
+	// 		-block 3
+	// 		-blockSize "small"
+	// 		-blockAlignment "right"
+	// 		-padding 1
+	// 		-labelWidth 80
+	// 		-dataWidth 100
+	// 		-dataAlignment "left"
+	// 		-label "    Artist :"
+	// 		-command "getenv userName"
+	// 		-atr
+	// 	hudArtistName;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudArtistName;
+		
+	// if (!`headsUpDisplay -exists hudCamName`)
+	// {
+	// 	headsUpDisplay 
+	// 		-section 6
+	// 		-block 4
+	// 		-blockSize "small"
+	// 		-blockAlignment "left"
+	// 		-padding -13
+	// 		-labelWidth 108
+	// 		-dataWidth 100
+	// 		-label "       Camera :"
+	// 		-command "b1HUD_GetCurrCam"
+	// 		-atr
+	// 	hudCamName;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudCamName;
+	
+	// if (!`headsUpDisplay -exists hudResInfo`)
+	// {
+	// 	headsUpDisplay
+	// 		-section 6
+	// 		-block 3
+	// 		-blockSize "small"
+	// 		-blockAlignment "left"
+	// 		-padding 0
+	// 		-labelWidth 95
+	// 		-dataWidth 100
+	// 		-label "Resolution :"
+	// 		-command "b1HUD_GetResInfo"
+	// 		-atr
+	// 	hudResInfo;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudResInfo;
+		
+	if (!`headsUpDisplay -exists hudFocalLength`)
+	{
+		headsUpDisplay
+			-section 9
+			-block 12
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding 0
+			-labelWidth 110
+			-dataWidth 150
+			-label "Focal Length :"
+			-command "b1HUD_GetFocalLength"
+			-atr
+		hudFocalLength;
+	}
+	else
+		headsUpDisplay -rem hudFocalLength;	
+		
+	if (!`headsUpDisplay -exists hudCurrFrame`)
+	{
+		headsUpDisplay
+			-section 9
+			-block 14
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding 0
+			-labelWidth 110
+			-dataWidth 150
+			-label "Frame :"
+			-command "b1HUD_GetCurrFrame"
+			-atr
+		hudCurrFrame;
+	}
+	else
+		headsUpDisplay -rem hudCurrFrame;
+	
+	// if (!`headsUpDisplay -exists hudTimeCode`)
+	// {
+	// 	headsUpDisplay
+	// 		-section 8
+	// 		-block 3
+	// 		-blockSize "small"
+	// 		-blockAlignment "right"
+	// 		-padding 0
+	// 		-labelWidth 89
+	// 		-dataWidth 100
+	// 		-label "TimeCode : "
+	// 		-command "b1HUD_GetTimeCode"
+	// 		-atr
+	// 	hudTimeCode;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudTimeCode;
+		
+	// if (!`headsUpDisplay -exists hudStartEndFrame`)
+	// {
+	// 	headsUpDisplay
+	// 		-section 8
+	// 		-block 2
+	// 		-blockSize "small"
+	// 		-blockAlignment "right"
+	// 		-padding 0
+	// 		-labelWidth 98
+	// 		-dataWidth 100
+	// 		-label "Start / End :"
+	// 		-command "b1HUD_GetStartEndFrame"
+	// 		-atr
+	// 	hudStartEndFrame;
+	// }
+	// else
+	// 	headsUpDisplay -rem hudStartEndFrame;
+		
+	if (!`headsUpDisplay -exists hudFrameRate`)
+	{
+		headsUpDisplay
+			-section 9
+			-block 13
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding 0
+			-labelWidth 110
+			-dataWidth 150
+			-label "FrameRate :"
+			-command "b1HUD_GetFrameRate"
+			-atr
+		hudFrameRate;
+	}
+	else
+		headsUpDisplay -rem hudFrameRate;
+		
+	// if (!`headsUpDisplay -exists hudUserComment`)
+	// {
+		// headsUpDisplay
+			// -section 7
+			// -block 5
+			// -blockSize "small"
+			// -blockAlignment "left"
+			// -padding -80
+			// -label "Comment : "
+			// -command "b1HUD_GetUserComment"
+			// -atr
+		// hudUserComment;
+	// }
+	// else
+		// headsUpDisplay -rem hudUserComment;
+}
+
+b1HUD();

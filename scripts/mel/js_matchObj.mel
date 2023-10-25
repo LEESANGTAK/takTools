@@ -1,0 +1,425 @@
+/*
+    Script:     js_matchObj
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This procedure will take the selected objects and match them to whatever object they're attached to.
+                it will look for the following attributes (each one is proceeded with match_)
+
+                obj             ->  message attribute to the object it will be matching
+    
+                const           ->  string attribute specifying whether it will use "t", "r", and/or "s".  It can be used like:
+                                    "t r s", or "t r", or "t".  Whatever ones are there will be what are used.
+    
+                attr_#_attr     ->  String of the attribute name that we'll be matching for, works in conjuncion with match_attr#_obj
+    
+                attr_#_obj      ->  message attribute to the object.attribute that match_attr# matches with.  The hash mark (#)
+                                    represents which attribute number.  You can have as many as possible.. match_attr1, match_attr2
+                                    etc.
+    
+                iterate_#_min   ->  all the iterate* attributes work with js_iterator.mel.  Min is a float representing the min number
+                                    to try for an iteration
+    
+                iterate_#_max   ->  float value represeing the max number to try for an iteration
+    
+                iterate_#_attr  ->  string attribute for the attribute that will be modified
+    
+                iterate_#_object->  message attribute for the object that we'll be querying the position of
+    
+                iterate_#_target->  message attribute for the target object that we'll be querying the position of
+    
+                iterate_#_iter  ->  int number of iterations
+    
+                pre_#_attr      ->  pre value for the attribute
+                post_#_attr     ->  post value for the attribute
+    
+    Requires:   js_iterator
+
+*/
+global proc js_matchObj ()
+{
+
+    string $objs[0];
+    $objs = `ls -sl`;
+   
+    string $obj;
+
+    // before doing anything, we have to duplicate all the matching objects and put the duplicates in world space
+    // then we'll match, then delete the duplicates.  this keeps previous matching objects from affecting new matching
+    // objects
+    string $matches[0];
+    for ($x = 0; $x < size($objs); $x++)
+    {
+        $obj = $objs[$x];
+        $match_obj = `js_getMatchObj $obj`;
+
+        if ($match_obj != "")
+        {
+            $dup = `duplicate -rr $match_obj`;
+            string $p[0];
+            $p = `listRelatives -f -p $dup[0]`;
+            if ($p[0] != "")
+                parent -w $dup[0];
+
+            $matches[$x] = $dup[0];
+        }
+    }
+    print ("// Setting PRE attributes..\n");
+    for ($x=0; $x < size($objs); $x++)
+    {
+        $obj = $objs[$x];
+        // now we're going to look for all the specific match attributes.
+        // PRE ATTRIBUTES
+        // 
+        // find all the pre attributes and set them to the defaults.
+        //
+        string $match_obj;
+        string $match_const;
+        string $match_attr[0];
+  
+        string $match_pre[0];
+        $match_pre = `js_getPrePostAttributes $obj "pre"`;
+        
+        string $item;
+        for ($item in $match_pre)
+        {
+            string $break[0];
+            tokenize ($item, ":", $break);
+            
+            // now reset the attributes
+            $cmd = ("setAttr " + $obj + "." + $break[0] +" " + $break[1]);
+            evalEcho $cmd;
+        }
+    }
+
+    for ($x=0; $x < size($objs); $x++)
+    {
+        
+        $obj = $objs[$x];
+        print ("// Matching " + $obj + "\n");
+        // MATCH POSITION
+        //
+        // match the object, if there's one to match to
+        //$match_obj = `js_getMatchObj $obj`;
+        $match_obj = $matches[$x];
+        $match_const = `js_getMatchConst $obj`;
+    
+        if (($match_obj != "") && ($match_const != ""))
+        {
+            print ("js_matchTheObj " + $obj + " " + $match_obj + " " + $match_const + "\n");
+            // okay, we're going to match what's available.
+            js_matchTheObj $obj $match_obj $match_const;
+            
+        }
+    }
+    if (size($matches) > 0)
+        delete $matches;
+
+    for ($x = 0; $x < size($objs); $x++)
+    {
+        print ("// Iteration attributes..\n");
+        $obj = $objs[$x];
+        string $match_iterate[0];
+        // ITERATIONS
+        //
+        // now we're going to go through our iteration attributes
+        $match_iterate = `js_getIterations $obj`;
+        if (size($match_iterate) > 0)
+        {
+            for ($iter in $match_iterate)
+            {
+                eval $iter;        
+            }
+        }
+
+        // ATTRIBUTES
+        //
+        // finally, we'll go through the attributes
+        //$match_attr = `js_getMatchAttributes $obj`;
+        //evalEcho $match_attr;
+
+    }
+
+    for ($x = 0; $x < size($objs); $x++)
+    {
+        print ("// Post attributes..\n");
+        $obj = $objs[$x];
+        // Post
+        string $match_obj;
+        string $match_const;
+        string $match_attr[0];
+  
+        string $match_pre[0];
+        $match_pre = `js_getPrePostAttributes $obj "post"`;
+        
+        string $item;
+        for ($item in $match_pre)
+        {
+            string $break[0];
+            tokenize ($item, ":", $break);
+            
+            // now reset the attributes
+            setAttr ($obj + "." + $break[0]) $break[1];
+        }
+    }
+
+    if (size($objs) > 0)
+        select $objs;
+
+}
+
+global proc string[] js_getMatchAttributes (string $obj)
+{
+    // this procedure involves searching for the attributes that match "attr_"
+    string $result[0];
+    string $attrAttrs[0];
+    $attrAttrs = `listAttr -string "match_attr*" -ud $obj`;
+   
+    // we have all the attrAttributes, now we just need to build the commands
+    string $attr[0];
+    string $objAttr[0];
+    
+    string $item;
+    for ($item in $attrAttrs)
+    {
+        string $break[0];
+        tokenize ($item, "_", $break);
+        
+        // break[2] is the iteration number, break[3] is the type
+        int $num = $break[1];
+        $num = $num-1;
+        switch ($break[3])
+        {
+            case "attr":
+                   $attr[$num] = `getAttr ($obj + "." + $item)`;
+                break;
+            case "obj":
+                string $con[0];
+                $con = `listConnections -p true ($obj + "." + $item)`;
+                $objAttr[$num] = $con[0];
+                break;
+        }
+    }
+    
+    // now we've got everything broken up.  get the size of $attr
+    $size = `size($attr)`;
+
+    // now go through the number of attrs to get the right command
+    for ($x = 0; $x < $size; $x++)
+    {
+        $result[$x] = ("js_copyAttr " +$obj + "." + $attr[$x] + " " + $objAttr[$x]); 
+    }
+    return $result;
+}
+
+global proc js_copyAttr (string $objAttr, string $targetObjAttr )
+{
+    // get the value of $targetObjAttr and apply it to $objAttr
+    $value = `getAttr $targetObjAttr`;
+    setAttr $objAttr $value;
+}
+global proc string[] js_getPrePostAttributes (string $obj, string $type)
+{
+    string $result[0];
+    int $count = 0;
+    string $preAttrs[0];
+    $preAttrs = `listAttr -string ("match_"+$type+"*") -ud $obj`;
+    string $attr;
+    for ($attr in $preAttrs)
+    {
+        string $break[0];
+        tokenize ($attr, "_", $break);
+
+        // $break[0] = match
+        // $break[1] = type
+        // $break[2] = #
+        // $break[3] = attribute
+        $attribute = $break[3];
+        $value = `getAttr ($obj + "." + $attr)`;
+
+        $result[$count++] = ($attribute + ":" + $value);
+    }
+    return $result;
+
+}
+global proc string[] js_getIterations (string $obj)
+{
+    // we'll search for iterations and build the js_iterate string
+    string $result[0];
+    string $itrAttrs[0];
+    $itrAttrs = `listAttr -string "match_iterate*" -ud $obj`;
+
+    // we have all the itrAttributes, now we just need to build the proper commands
+    string $min[0]; clear $min; 
+    string $max[0]; clear $max;
+    string $iter[0]; clear $iter;
+    string $object[0]; clear $object;
+    string $target[0]; clear $target;
+    string $attr[0]; clear $attr;
+
+    string $item;
+    for ($item in $itrAttrs)
+    {
+        string $break[0];
+        tokenize ($item, "_", $break);
+        
+        // break[2] is the iteration number, break[3] is the type
+        int $num = $break[2];
+        $num = $num-1;
+        switch ($break[3])
+        {
+            case "min":
+                   $min[$num] = `getAttr ($obj + "." + $item)`;
+                break;
+            case "max":
+                   $max[$num] = `getAttr ($obj + "." + $item)`;
+                break;
+            case "iter":
+                   $iter[$num] = `getAttr ($obj + "." + $item)`;
+                break;
+            case "attr":
+                   $attr[$num] = `getAttr ($obj + "." + $item)`;
+                break;
+            case "object":
+                string $con[0];
+                $con = `listConnections -p true ($obj + "." + $item)`;
+                $object[$num] = $con[0];
+                break;
+            case "target":
+                string $con[0];
+                $con = `listConnections -p true ($obj + "." + $item)`;
+                $target[$num] = $con[0];
+                break;
+            
+        }   
+    }
+
+    // now we've got everything broken up.  get the size of $min
+    $size = `size($min)`;
+
+    // now go through the number of iters to get the right command
+    for ($x = 0; $x < $size; $x++)
+    {
+        $result[$x] = ("js_iterator " + $min[$x] + " " + $max[$x] + " " + $obj + "."+$attr[$x] + " " + $object[$x] + " " + $target[$x] + " " + $iter[$x]);
+    }
+    return $result;
+}
+
+global proc js_matchTheObj (string $obj, string $match_obj, string $match_const)
+{
+    // first figure out what kind of matching we're going to be doing
+    int $trans = 0;
+    int $orient = 0;
+    int $scale = 0;
+
+    if (`gmatch $match_const "*t*"`)
+        $trans = 1;
+    if (`gmatch $match_const "*r*"`)
+        $orient = 1;
+    if (`gmatch $match_const "*s*"`)
+        $scale = 1;
+
+    if (($trans == 1) || ($orient == 1) || ($scale == 1))
+    {
+        string $pc[0], $oc[0], $sc[0];
+
+        // okay, we can match something
+        //
+        // first duplicate the object, we'll use this duplciate to get the correct placement
+        $dup = `duplicate -rr $obj`;
+
+        // unlock all attributes of $dup
+        $attrs = { "t", "tx", "ty", "tz", "r", "rx", "ry", "rz", "s", "sx", "sy", "sz" };
+        for ($at in $attrs)
+        {
+            setAttr -l 0 ($dup[0] + "." + $at);
+        }
+
+        // now constrain the duplicate to the match_object
+        select $match_obj $dup[0];
+
+        if ($trans)
+            $pc = `pointConstraint`;
+        if ($orient)
+            $oc = `orientConstraint`;
+        if ($scale)
+            $sc = `scaleConstraint`;
+       
+
+        // get the trans and rotate values
+       
+        if ($trans)
+        {
+            $t = `getAttr ($dup[0] + ".translate")`;
+            js_setAttr $obj "t" $t;
+            //setAttr ($obj + ".t") $t[0] $t[1] $t[2];
+        }
+        if ($orient)
+        {
+            $r = `getAttr ($dup[0] + ".rotate")`;
+            js_setAttr $obj "r" $r;
+            //setAttr ($obj + ".r") $r[0] $r[1] $r[2];
+        }
+       
+        if ($scale)
+        {
+            $s = `getAttr ($dup[0] + ".scale")`;
+            js_setAttr $obj "s" $s;
+            //setAttr ($obj + ".s") $s[0] $s[1] $s[2];
+        }
+       
+        if ($trans)
+            delete $pc;
+        if ($orient)
+            delete $oc;
+        if ($scale)
+            delete $sc;
+
+        // now delete the duplicate
+        delete $dup[0];
+
+    }
+}
+
+global proc js_setAttr (string $obj, string $at, float $values[] )
+{
+    // sets a series of attributes, but only if the attribute is unlocked
+    string $attrs[0];
+    $attrs[0] = ($at + "x");
+    $attrs[1] = ($at + "y");
+    $attrs[2] = ($at + "z");
+
+    for ($x = 0; $x <=2; $x++)
+    {
+        if (!`getAttr -l ($obj + "." + $attrs[$x])`)
+        {
+            setAttr ($obj + "." + $attrs[$x]) $values[$x];
+        }
+    }
+}
+global proc string js_getMatchConst (string $obj)
+{
+    // return the constraints
+    string $return;
+    if (`attributeQuery -exists -node $obj "match_const"`)
+    {
+        $return = `getAttr ($obj + ".match_const")`;
+    }
+    return $return;
+}
+global proc string js_getMatchObj (string $obj)
+{
+    // return the match object
+    string $return;
+    if (`attributeQuery -exists -node $obj "match_obj"`)
+    {
+        select $obj;
+        string $con[0];
+        $con = `js_getAttachedObjects "match_obj"`;
+        
+        $return = $con[0];
+    }
+    return $return;
+    
+}

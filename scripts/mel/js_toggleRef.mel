@@ -1,0 +1,49 @@
+/*
+    Script:     js_toggleRef
+    Version:    1.0
+	Author:	    jason schleifer
+    Website:    http://jonhandhisdog.com
+	Date:	    3/25/2006
+
+	Descr:	    Toggles the display mode from reference to normal on the selected or given objects
+	Input:	    $objects[0]: a string array of objects to change the mode.  If the array is blank,
+			    then it toggles the selected objects instead.
+*/
+global proc js_toggleRef ( string $objects[] )
+{
+
+	// check $objects[0] to see if it contains anything.  If not, then grab the selected items.
+	if (size($objects) == 0)
+		$objects = `ls -sl -type transform`;
+
+	if (size($objects) == 0)
+	{
+		error ("Nothing passed, and nothing selected.  Please select objects and call the script again.");
+
+	}
+	else
+	{
+		string $item;
+		for ($item in $objects)
+		{
+			// check and make sure Enable Overrides is on
+			setAttr ($item + ".overrideEnabled") 1;
+
+			// now check and see what the Display Type is.
+			int $displayType = `getAttr ($item + ".overrideDisplayType")`;
+			string $state = "NORMAL";
+			if ($displayType == 0)
+			{
+				$displayType = 2;
+				$state = "REFERENCE";
+			}
+			else
+			{
+				$displayType = 0;
+			}
+			
+			print ("Setting " + $item + " display state to: " + $state + "\n");
+			setAttr ($item + ".overrideDisplayType") $displayType;	
+		}
+	}
+}

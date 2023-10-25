@@ -1,0 +1,77 @@
+/*
+    Script:     js_createCurveControl.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This script will create a single curve which can be used to control 
+                the given attribute on the selected objects.
+                
+                For example, if you want to drive the ty attribute on 10 objects with 
+                a "height" curve on another object, you would select the 10 objects, 
+                and then enter:
+                  
+                js_createControlCurve controlObj height ty
+    
+                Note: make sure the given object and attribute exists
+
+*/
+global proc js_createCurveControl (string $controlObj, string $controlAttribute, string $destinationAttribute)
+{
+    if (!`objExists $controlObj`)
+    {
+        error ($controlObj + " does not exist.  Exiting..\n");
+    }
+    if (!`attributeQuery -node $controlObj -exists $controlAttribute`)
+    {
+        addAttr -ln $controlAttribute -at double $controlObj;
+        setAttr -k 1 ($controlObj + "." + $controlAttribute);
+    }
+
+    // find the selected objects
+    string $objs[0];
+    $objs = `ls -sl`;
+
+    if (size($objs) == 0)
+    {
+        error ("Nothing Selected.\n");
+    }
+    
+    // now that we have the objects, we can create the animation curve which will control the attribute
+
+    $numControls = size($objs);
+    $objAttr = ($controlObj + "." + $controlAttribute);
+    setKeyframe -at $controlAttribute -t 1 -v 0 $controlObj;
+    setKeyframe -at $controlAttribute -t  $numControls -v 0 $controlObj;
+
+    keyTangent -wt 1 -at $controlAttribute $controlObj;
+    keyTangent -weightLock off -at $controlAttribute $controlObj;
+
+    keyTangent -e -a -t 1 -outAngle 50 $objAttr;
+    keyTangent -e -a -t $numControls -inAngle -50 $objAttr;
+
+    // next, we'll create frameCache nodes for each object, and attach them to the object's attribute
+    for ($x = 0; $x < $numControls; $x++)
+    {
+        // create the frameCache node
+        $fc = `createNode frameCache`;
+        $fc = `rename $fc ($objs[$x] + "_frameCache")`;
+
+        // connect the attribute
+        connectAttr $objAttr ($fc + ".stream");
+
+        // set the frame
+        setAttr ($fc + ".vt") ($x+1);
+
+        // connect the output
+        // check and see if the destination attribute exists.  if not, create it
+        if (!`attributeQuery -exists -node $objs[$x] $destinationAttribute`)
+        {
+            addAttr -ln $destinationAttribute -at double $objs[$x];
+            setAttr -k 1 ($objs[$x] + "."+$destinationAttribute);
+        }
+        connectAttr -f ($fc + ".v") ($objs[$x] + "." + $destinationAttribute);
+    }
+
+    select $objAttr;
+}

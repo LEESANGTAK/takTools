@@ -1,0 +1,72 @@
+/*
+    Script:     js_snapObjectToConst
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+    
+    Descr:      Snaps the object to the new constraint.  Works as part of the js_setUpMultiConstraint scripts
+
+    
+*/
+
+global proc js_snapObjectToConst (string $object, string $attr, string $drivenObj, int $value)
+{
+        string $type = `getAttr ($object + ".type_" + $attr)`;
+        int $time = `currentTime -q`;
+        int $point = 0;
+        int $orient = 0;
+        if (`gmatch $type "*point*"`)
+            $point = 1;
+        if (`gmatch $type "*orient*"`)
+            $orient = 1;
+        
+
+        print ("point: " + $point + "\norient: " + $orient + "\n");
+        setKeyframe -t ($time-1) -at translate $drivenObj;
+        setKeyframe -t ($time-1) -at rotate $drivenObj;
+
+        setKeyframe -t ($time-1) -at $attr $object;
+
+	// switch to one frame earlier to duplicate the driven object
+	currentTime -e -update 1 ($time-1);
+
+        // get the parent of $object
+        //$parent = `listRelatives -f -p $drivenObj`;
+
+        // duplicate the object at it's current position twice.  Because we're switching spaces, and sometimes things
+        // can get funky.. we'll duplicate the object twice, unparent the second duplicate, constrain the two, then grab
+        // the value from the first duplicate.
+
+        $dup = `duplicate $drivenObj`;
+        $dup2 = `duplicate $drivenObj`;
+    
+        select $dup2[0] $dup[0];
+        pointConstraint;
+        orientConstraint;
+
+        // parent $dup to the world
+        parent -w $dup2[0];
+        $dup2 = `ls -sl`;
+
+        currentTime -e -update 1 ($time);
+
+	// switch the attribute
+        setAttr ($object + "." + $attr) ($value -1);
+
+	
+        // get the translation and rotation values
+        $t = `getAttr ($dup[0] + ".t")`;
+        $r = `getAttr ($dup[0] + ".r")`;
+
+        // set them on the other object
+        setAttr ($drivenObj + ".t") $t[0] $t[1] $t[2];
+        setAttr ($drivenObj + ".r") $r[0] $r[1] $r[2];
+
+        //delete dup and $dup2
+        delete $dup[0] $dup2[0];
+
+        // now set a keyframe on the object
+        setKeyframe -t ($time) -at translate $drivenObj;
+        setKeyframe -t ($time) -at rotate $drivenObj;
+        setKeyframe -t ($time) -at $attr $object;
+}

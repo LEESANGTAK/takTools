@@ -1,0 +1,515 @@
+/*
+    Script:     js_createIkStretch
+    Version:    1.1
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This procedure will take the selected joints and build an ikHandle between them
+                of the specified type.  If a worldScale attribute is specified, it will take
+                that into account with the scale.
+    
+                if $type == 1 then we'll do a scale based scaling
+                if $type == 0 then we'll do a translation based scale
+
+    Requires:   js_createMeasureTool
+                js_getStretchAxis
+                js_addNormalizeScale
+                js_addWorldScaleToDistance
+
+    Ver 1.1     Update: Nov 19, 2006
+                Modified to allow for the stretchy ik to work when translations on joints are
+                    negative.  This ensures that the script will work when used on "mirrored" joints.
+
+*/
+global proc js_createIkStretch (string $worldScale, string $solver, int $type)
+{
+    global int $g_useExp;
+    global string $g_exp;
+    
+    $g_useExp= 0; // whether or not to use expressions instead of nodes. Set to 0 if you want nodes.
+    
+
+    if ($solver == "")
+        $solver = "ikSCsolver";     // Default solver
+
+    string $joints[0];
+    string $elbow[0];
+
+    $joints = `ls -sl -type joint`;
+    $elbow = `ls -sl -et transform`;
+
+    if (size($joints) != 2)
+        error ("You need to select only two joints.");
+
+    // given the selected joints, we need to determine which is the ancestor and which is the 
+    // child
+    string $startJoint;
+    string $endJoint;
+
+    string $tmp1[0];
+    string $tmp2[0];
+    $tmp1 = `listRelatives -f -p $joints[0]`;
+    $tmp2 = `listRelatives -f -p $joints[1]`;
+
+    if (size($tmp1) == 0)
+    {
+        $startJoint = $joints[0];
+        $endJoint   = $joints[1];
+    }
+    if (size($tmp2) == 0)
+    {
+        $startJoint = $joints[1];
+        $endJoint   = $joints[0];
+    }
+
+    if ($startJoint == "")
+    {
+        // okay, now we've got to figure out what the paths are for the joints
+        // first check and see if the path for the first object contains the second 
+        // object in it.  If so, then we know the first object is the child 
+        string $string = ("*"+$joints[1]+"*");
+        if (`gmatch $tmp1[0] $string`)
+        {
+            $startJoint = $joints[1];
+            $endJoint = $joints[0];
+        }
+        else
+        {
+            $startJoint = $joints[0];
+            $endJoint = $joints[1];
+        }
+    }
+
+    if (($startJoint == "") || ($endJoint == ""))
+    {
+        error ("Something is wrong.. are these joints related at all?");
+    }
+
+    // Okay, we've got our start joint and our end joint.  Now, we just need
+    // to create an ikSolver
+    
+    $cmd = ("ikHandle -sj \"" + $startJoint + "\" -ee \""+ $endJoint + "\" -solver \"" + $solver + "\" -n \""+$startJoint + "_handle\"");
+
+    $handle = `evalEcho $cmd`;
+
+    $handle[1] = `rename $handle[1] ($startJoint + "_effector")`;
+
+    // check and see if it's an ikRPsolver, if so, connect the elbow
+    if ($solver == "ikRPsolver")
+    {
+        // check and see if $elbow[0] is anything
+        if (size($elbow) == 0)
+        {
+            // create an elbow locator at the position of the knee
+            $mid = `listRelatives -f -c -type "joint" $startJoint `;
+
+            $p = `xform -q -ws -rp $mid[0]`;
+            $loc = `spaceLocator`;
+            move -ws -a $p[0] $p[1] $p[2] $loc[0];
+            $elbow[0] = `rename $loc ($mid[0] + "_loc")`;
+        }
+        $cmd = ("poleVectorConstraint -weight 1 \""+$elbow[0]+"\" \""+ $handle[0]+"\"") ;
+        evalEcho $cmd;
+    }
+   
+    // now it's time to hook up the scale.  To do this, we're going to create a measure tool positioned 
+    // in the location of the two objects.  We won't parent it because that will be up to the
+    // rigger to figure out where the locators go
+    
+    string $measureItems[0];
+    $cmd = ("js_createMeasureTool \"" + $startJoint + "\" \"" + $endJoint + "\"");
+    $measureItems = `evalEcho $cmd`;
+    
+    // $measureItems[0] = distanceShape
+    // $measureItems[1] = start handle
+    // $measureItems[2] = end handle
+
+    $tmp = `listRelatives -f -s $measureItems[0]`;
+    $distanceShape = $tmp[0];
+    $startHandle = $measureItems[1];
+    $endHandle = $measureItems[2];
+
+    // parent the ikHandle to $endHandle
+    parent $handle[0] $endHandle;
+
+    // sweet, we've got ourselves a distance tool!  
+            
+    // get the axis that we're going to be stretching along
+    string $stretchAxis[3];
+    $stretchAxis = `js_getStretchAxis $endJoint`;
+    string $transAxis = `substitute "s" $stretchAxis[0] "t"`;
+
+    // how many joints are affected?  
+    string $jointList[0];
+    $jointList = `ikHandle -q -jl $handle[0]`;
+    float $maxDist = 0.0;
+    for ($joint in $jointList)
+    {
+        $child = `listRelatives -f -c -type joint $joint`;
+        float $curValue = 0.0;
+        $curValue = `getAttr ($child[0] + "." + $transAxis)`;
+        $maxDist = $maxDist + $curValue;
+
+    }
+    
+    // begin the expression
+    $g_exp = ("// " + $startJoint + " ik expression..\n");
+
+    if ($type == 1)
+    {
+        // Yar!  now we just have to hook the distance
+        // tool up to a multiplyDivide node to get the relative scale.  Too keep things simple, we'll add
+        // a relative scale attribute to the distanceShape itself.  
+        // okay, cool!  now it's just a matter of hooking up the stretch axis.  
+        if (size($jointList) == 1)
+        {
+            //if ($g_useExp == 0)
+            //{
+                $cmd = ("js_addNormalizeScale \"" +$distanceShape+ "\" \""+ $worldScale+"\" 1");
+                $result = `evalEcho  $cmd`;
+
+
+                // just connect the joint
+                if ($g_useExp)
+                {
+                    $g_exp += ($jointList[0] + "." + $stretchAxis[0] + "= " + $result +";\n");
+                    expression -s $g_exp;
+                }
+                else
+                {
+                    $cmd = ("connectAttr -f \""+$result + "\" \""+$jointList[0] + "."+$stretchAxis[0]+"\"");
+                    eval $cmd;
+                }
+            //}
+            //else
+            //{
+                // just create an expression
+                /*
+                $exp += ("// Distance\n");
+                $exp += ("$dist_orig = " + $distanceShape + ".distance;\n");
+                $dist = `getAttr ($distanceShape + ".distance")`;
+                $exp += ("$dist_norm = $dist_orig/" + $dist + ";\n");
+                
+                if ($worldScale != "")
+                {
+                    $exp += ("// World scale is involved\n");
+                    $exp += ("$dist_ws = $dist_norm/" + $worldScale + ";\n");
+                    $exp += ("\n$dist = $dist_ws;\n");
+                }
+                else
+                {
+                    $exp += ("\n$dist = $dist_norm;\n");
+                }
+                */
+            //}
+        }
+        else
+        {
+            // okay, the size of the joint list is greater than 1, so we need to connect to the scale
+            // with a series of setDrivenKeyframes
+            $cmd = ("js_addNormalizeScale \"" +$distanceShape+ "\" \""+ $worldScale+"\" 0");
+            $result = `evalEcho  $cmd`;
+
+
+            if ($g_useExp)
+            {
+                expression -s $g_exp;
+            }
+
+            for ($joint in $jointList)
+            {
+                setDrivenKeyframe -cd $result -dv 0 -attribute $stretchAxis[0] -itt "linear" -ott "linear" -v 1 $joint;
+                setDrivenKeyframe -cd $result -dv $maxDist -attribute $stretchAxis[0] -itt "linear" -ott "linear" -v 1 $joint;
+                setDrivenKeyframe -cd $result -dv ($maxDist *2) -attribute $stretchAxis[0] -itt "linear" -ott "linear" -v 2 $joint;
+                setDrivenKeyframe -cd $result -dv ($maxDist * 100) -attribute $stretchAxis[0] -itt "linear" -ott "linear" -v 100 $joint;
+
+            }
+        }
+
+
+
+    }
+    if ($type == 0)
+    {
+        // instead of using a normalized scale, we're just going to connect the distanceNode to the
+        // translation specified by the scale axis
+   
+        // check and see if there's a worldScale node.. if there is, we'll have to hook into that, otherwise.. poop!  it won't work!
+        $distance = ($distanceShape + ".distance");
+    
+        // we're going to be using translation, so in order to make sure it's going to work correctly we 
+        // need to allow for negative translations.. just in case the joint's lenght is driven by a negative
+        // value.
+        //
+        $neg = 1;
+        $curValue = `getAttr ($endJoint + "." + $transAxis)`;
+        if ($curValue < 0)
+        {
+            $neg = -1;
+        }
+        if ($worldScale != "")
+        {
+            // okay there's a world scale node.. so we need to take the $distanceShape.distance and divide it by the
+            // world scale.. that will give us the actual distance 
+            $distance = `js_addWorldScaleToDistance $distance $worldScale`;
+        }
+        if (size($jointList) == 1)
+        {
+            if ($g_useExp)
+            {
+                $g_exp += ($endJoint + "." + $transAxis + "= $dist_worldScale * " + $neg + ";\n");
+                expression -s $g_exp;
+            }
+            else
+            {
+                // just one joint
+                // check and see if $neg is -1.  If it is, then we need to connect to an inverse node first
+                if ($neg == -1)
+                {
+                    $inverse = `createNode multiplyDivide`;
+                    connectAttr ($distance) ($inverse + ".input1X");
+                    setAttr ($inverse + ".input2X") -1; 
+                    connectAttr -f ($inverse + ".outputX") ($endJoint + "." + $transAxis);
+                }
+                else
+                {
+                    $cmd = ("connectAttr -f \""+$distance+"\" \""+$endJoint + "."+$transAxis +"\"");
+                    eval $cmd;
+                }
+
+            }
+        }
+        else
+        {
+            // okay, the size of the joint list is greater than 1, so we need to connect to the translate
+            // with a series of setDrivenKeyframes
+            $currentDist = `getAttr ($distance)`;
+            for ($joint in $jointList)
+            {
+                // we need to know the current distance for the child joint
+                $child = `listRelatives -f -c -type joint $joint`;
+                print ("child: " + $child[0] + "\n");
+                float $curValue = 0.0;
+                $curValue = `getAttr ($child[0] + "." + $transAxis)`;
+
+                setDrivenKeyframe 
+                    -cd ($distance)
+                    -dv 0 
+                    -attribute $transAxis
+                    -itt "linear" 
+                    -ott "linear" 
+                    -v $curValue 
+                    $child;
+                setDrivenKeyframe 
+                    -cd ($distance)
+                    -dv ($maxDist * $neg) 
+                    -attribute $transAxis
+                    -itt "linear" 
+                    -ott "linear" 
+                    -v $curValue 
+                    $child;
+                setDrivenKeyframe 
+                    -cd ($distance)
+                    -dv ($maxDist * 2 * $neg) 
+                    -attribute $transAxis
+                    -itt "linear" 
+                    -ott "linear" 
+                    -v ($curValue *2) 
+                    $child;
+                setDrivenKeyframe 
+                    -cd ($distance)
+                    -dv ($maxDist * 100 * $neg) 
+                    -attribute $transAxis
+                    -itt "linear" 
+                    -ott "linear" 
+                    -v ($curValue *100) 
+                    $child;
+            }
+        }
+    }
+
+    // Cleanup
+    hide $distanceShape;
+
+    // add the ability for the joints to stretch to the elbow if they need to
+    $size = size($jointList);
+    if (($size == 2) && ($solver == "ikRPsolver") && ($elbow[0] != ""))
+    {
+        // we've got something like an arm or a knee.. let's go ahead and measure the distance between the pole vector and the
+        // two joints.  Then based on whatever the input is, we'll insert a blendTwoAttr node and give the animator the choice to
+        // stretch to the end position, or have the elbow/knee lock to the locator
+
+        // First we need to create two distanceDimension tools.  The first will be measuring the distance from the start locator
+        // to the elbow, then we'll create one from the elbow to the end locator.
+        $upperArmDistShape = `createNode distanceDimShape`; 
+        $lowerArmDistShape = `createNode distanceDimShape`;
+        
+        $p = `listRelatives -f -p $upperArmDistShape`;
+        $upperArmDist = `rename $p[0] ($jointList[1] + "_toElbowDist")`;
+
+        $p = `listRelatives -f -p $lowerArmDistShape`;
+        $lowerArmDist = `rename $p[0] ($jointList[1] + "_toEndDist")`;
+
+        $s = `listRelatives -f -s $upperArmDist`;
+        $upperArmDistShape = $s[0];
+
+        $s = `listRelatives -f -s $lowerArmDist`;
+        $lowerArmDistShape = $s[0];
+
+        // check and see if $elbow[0] is actually a locator.  if it is, then we're good to go.  If not, we need to create a locator and parent
+        // it under the ik control.
+        string $elbowLoc;
+        string $elbowShape[0];
+        $elbowShape = `listRelatives -f -s $elbow[0]`;
+        if ((`nodeType $elbowShape[0]`) == "locator")
+            $elbowLoc = $elbow[0];
+        else
+        {
+            $locator = `spaceLocator`;
+            $locator[0] = `rename $locator[0] ($elbow[0] + "_loc")`;
+            parent $locator[0] $elbow[0];
+            setAttr ($locator[0] + ".t") 0 0 0;
+            setAttr ($locator[0] + ".r") 0 0 0;
+            $elbowLoc = $locator[0];
+        }
+        // connect them to the locators
+        connectAttr ($startHandle + ".worldPosition[0]") ($upperArmDistShape + ".startPoint");
+        connectAttr ($elbowLoc + ".worldPosition[0]") ($upperArmDistShape + ".endPoint");
+        connectAttr ($elbowLoc + ".worldPosition[0]") ($lowerArmDistShape + ".startPoint");
+        connectAttr ($endHandle + ".worldPosition[0]") ($lowerArmDistShape + ".endPoint");
+
+       
+        string $joint1;
+        string $joint2;
+        
+        string $axis;
+
+        if ($type == 0)
+        {
+            // translation based
+            $child = `listRelatives -c -type joint $jointList[1]`;
+            $joint1 = $jointList[1];
+            $joint2 = $child[0];
+            $axis = $transAxis;
+        }
+        else
+        {
+            // scale based
+            $joint1 = $jointList[0];
+            $joint2 = $jointList[1];
+            $axis = $stretchAxis[0];
+        }
+
+        // fantasic, we now have the distance nodes.  Next, based on the distance nodes we'll need to figure out if we have
+        // to insert a worldScale
+        $upDist = ($upperArmDist + ".distance");
+        $lowDist = ($lowerArmDist + ".distance");
+
+        // if the type is of type scale, we need to create another multiplyDivide node where we measure the orig distance of the joint
+        // and the distance to the elbow.
+        if ($g_useExp)
+        {
+            if ($type == 1)
+            {
+                js_applyStretchToElbowExp $upDist $joint1 $transAxis "$up_origDist";
+                js_applyStretchToElbowExp $lowDist $joint2 $transAxis "$low_origDist";
+               
+                if ($worldScale != "")
+                {
+                    $upDist = `js_addWorldScaleToDistance "$up_origDist" $worldScale`;
+                    $lowDist = `js_addWorldScaleToDistance "$low_origDist" $worldScale`;
+
+                }
+            }
+            else if ($worldScale != "")
+            {
+                $upDist = `js_addWorldScaleToDistance $upDist $worldScale`;
+                $lowDist = `js_addWorldScaleToDistance $lowDist $worldScale`;
+            }
+        }
+        else
+        {
+            if ($type == 1)
+            {
+                $upDist = `js_applyStretchToElbow $upDist $joint1 $transAxis`;
+                $lowDist = `js_applyStretchToElbow $lowDist $joint2 $transAxis`;
+                
+            }
+            if ($worldScale != "")
+            {
+                $upDist = `js_addWorldScaleToDistance $upDist $worldScale`;
+                $lowDist = `js_addWorldScaleToDistance $lowDist $worldScale`;
+            }
+
+            // right, we've got our distance nodes now.. our goal is to add a few blend2Attr nodes and insert them between the joints 
+            // and the new distance nodes.
+            
+            // create a blendTwoAttr
+            string $firstBlendTwoAttr, $secondBlendTwoAttr;
+            $firstBlendTwoAttr = `createNode blendTwoAttr -n ($joint1 + "_elbowBlend")`;
+            $secondBlendTwoAttr = `createNode blendTwoAttr -n ($joint2 + "_elbowBlend")`;
+            
+            // find out what the joint is connected to 
+            string $curve1[0]; string $curve2[0];
+            $curve1 = `listConnections -p true -s true -d false ($joint1 + "." + $axis)`;
+            $curve2 = `listConnections -p true -s true -d false ($joint2 + "." + $axis)`;
+
+            // connect the blendTwoAttrs
+            connectAttr ($curve1[0] ) ($firstBlendTwoAttr + ".input[0]");
+            connectAttr ($curve2[0] ) ($secondBlendTwoAttr + ".input[0]");
+                
+            connectAttr $upDist ($firstBlendTwoAttr + ".input[1]");
+            connectAttr $lowDist ($secondBlendTwoAttr + ".input[1]");
+
+            connectAttr -f ($firstBlendTwoAttr + ".output") ($joint1 + "."+ $axis);
+            connectAttr -f ($secondBlendTwoAttr + ".output") ($joint2 + "."+ $axis);
+
+            addAttr -ln "stretch" -min 0 -max 1 -at "double" $elbow[0];
+            setAttr -e -k 1 ($elbow[0] + ".stretch");
+            
+            connectAttr -f ($firstBlendTwoAttr + ".attributesBlender") ($secondBlendTwoAttr + ".attributesBlender"); 
+            connectAttr -f ($elbow[0] + ".stretch") ($firstBlendTwoAttr + ".attributesBlender"); 
+
+            
+        }
+        hide $upperArmDist $lowerArmDist;
+
+    }
+    select $joints;
+
+}
+
+global proc string js_applyStretchToElbow (string $dist, string $joint, string $axis)
+{
+    string $return;
+    
+    // get the child of the joint
+    string $child[0];
+    $child = `listRelatives -f -c -type joint $joint`;
+
+    // get the value
+    $value = `getAttr ($child[0] + "."+$axis)`;
+
+    // create a multiplyDivide node
+    $multDivide = `createNode multiplyDivide -n ($joint + "_normalizedScale")`;
+    setAttr ($multDivide + ".operation") 2;
+
+    connectAttr ($dist) ($multDivide + ".input1X");
+    setAttr ($multDivide + ".input2X") $value;
+
+    $return = ($multDivide + ".outputX");
+    return $return;
+}
+global proc js_applyStretchToElbowExp (string $dist, string $joint, string $axis, string $name)
+{
+    global string $g_exp;
+
+    // get the child of the joint
+    string $child[0];
+    $child = `listRelatives -f -c -type joint $joint`;
+
+    // get the value
+    $value = `getAttr ($child[0] + "."+$axis)`;
+    
+    $g_exp += ($name + " = " + $dist + " / " + $value + ";\n");
+}

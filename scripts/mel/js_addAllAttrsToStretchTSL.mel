@@ -1,0 +1,35 @@
+/*
+    Script:     js_addAllAttrsToStretchTSL.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Given the text field button group and text scroll List, it will add the 
+                object's attributes to the textScrollList
+*/
+global proc js_addAllAttrsToStretchTSL (string $tfbg, string $tsl)
+{
+    $object = `textFieldButtonGrp -q -tx $tfbg`;
+    
+    // remove all from textScrollList
+    textScrollList -e -ra $tsl;
+    
+    if (`objExists $object`)
+    {
+        // get the attributes
+        string $attrs[0];
+        $attrs = `listAttr -k $object`;
+
+        // add them
+        for ($at in $attrs)
+        {
+            // check and see if there's an alias
+            string $alias;
+            $alias = `aliasAttr -q ($object +"."+$at)`;
+            if (size($alias) > 0)
+                $at = $alias;
+            textScrollList -e -a $at $tsl;
+        }
+    }
+}
+

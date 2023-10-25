@@ -1,0 +1,31 @@
+/*
+    Script:     js_copyPivot.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      copies the pivot from the first selected object  to the second selected object
+
+*/global proc js_copyPivot ()
+{
+    // copies the pivot from the first selected object to the second selected object
+    string $objs[0];
+    $objs = `ls -sl`;
+    if (size ($objs) < 2)
+    {
+        error ("Not enough objects selected.. exiting\n");
+    }
+    if (size($objs) > 2)
+    {
+        warning ("more than two objects selected.  Copying the pivot from the first object onto all the other objects..");
+    }
+    
+    float $pos[3];
+    $pos = `xform -q -ws -rp $objs[0]`;
+
+    for ($x = 1; $x < size($objs); $x++)
+    {
+        $cmd = ("xform -ws -piv "+$pos[0]+" "+ $pos[1]+" "+ $pos[2]+" \""+ $objs[$x]+ "\"");
+        evalEcho $cmd;
+    }
+}

@@ -1,0 +1,384 @@
+/*
+    Script:     js_setDrivenKeyAutoDriveUI.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Sets up a setDrivenKeyframe relationship automatically between two objects based on an influence
+                ratio.
+
+    Requires:   js_copySetDrivenKeyUI
+
+*/
+global proc js_setDrivenKeyAutoDriveUI ()
+{
+
+   $win = "js_setDrivenAutoKeyWin";
+
+   if (`window -exists $win`)
+       deleteUI $win;
+    
+    window -t "Create Auto Driven Key" $win;
+
+    columnLayout -adj true -co "both" 10;
+
+    $f = `formLayout -nd 100`;
+
+        $fr1 = `frameLayout -l "Driver..." -mw 5 -mh 5 -la "center" -cll 0`;
+        setParent $f;
+        $fr2 = `frameLayout -l "Driven..." -mw 5 -mh 5 -la "center" -cll 0`;
+        setParent $f;
+        $fr3 = `frameLayout -l "Influence..." -mw 5 -mh 5 -la "center" -cll 0`;
+        setParent $f;
+        $b1 = `button -l "Create"`;
+        $b2 = `button -l "Close" -c ("deleteUI " + $win)`;
+
+    formLayout -e
+        -af $fr1 top 5
+        -af $fr1 left 5
+        -af $fr1 right 5
+        
+        -ac $fr2 top 10 $fr1
+        -af $fr2 left 5
+        -af $fr2 right 5
+
+        -ac $fr3 top 10 $fr2
+        -af $fr3 left 5
+        -af $fr3 right 5
+
+        -af $b1 left 5
+        -af $b1 bottom 5
+        -ap $b1 right 5 50
+        -ac $b1 top 5 $fr3
+
+        -af $b2 right 5
+        -af $b2 bottom 5
+        -ap $b2 left 5 50
+        -ac $b2 top 5 $fr3
+
+        $f;
+
+    // DRIVER
+    setParent $fr1;
+        columnLayout -adj true -co "both" 5;
+        $f2 = `formLayout -nd 100`;
+        $t = `text -l "Please pick a Driver and an attribute.." -align "left"`;
+        $drtf = `textField`;
+        $driverMenu = `popupMenu foo`;
+        $drtsl = `textScrollList -ams 0 -nr 3 js_driverTSL`;
+        $newtext = `text -l "or.. enter a NEW attr:" -align "right"`;
+        $drat   = `textField`;
+        
+        formLayout -e
+            -af $t left 5
+            -af $t right 5
+            -af $t top 5
+
+            -af $drtf left 5
+            -ac $drtf top 5 $t
+            -ap $drtf right 5 50
+
+            -af $drtsl right 5
+            -ap $drtsl left 5 50
+            -ac $drtsl top 4 $t
+
+            -af $newtext left 5
+            -ac $newtext top  5 $drtsl
+            -ap $newtext right 5 50
+
+            -af $drat right 5
+            -ap $drat left 5 50
+            -ac $drat top  5 $drtsl
+            $f2;
+    
+    
+    // DRIVEN
+    setParent $fr2;
+        columnLayout -adj true -co "both" 5;
+        $f3 = `formLayout -nd 100`;
+        $t2 = `text -l "Please pick the object and attribute that will be driven.." -align "left"`;
+        $drtf2 = `textField`;
+        $drivenMenu = `popupMenu`;
+        $drtsl2 = `textScrollList -ams 0 -nr 3 js_drivenTSL`;
+        $newtext2 = `text -l "or.. enter a NEW attr:" -align "right"`;
+        $drat2   = `textField`;
+        
+        formLayout -e
+            -af $t2 left 5
+            -af $t2 right 5
+            -af $t2 top 5
+
+            -af $drtf2 left 5
+            -ac $drtf2 top 5 $t2
+            -ap $drtf2 right 5 50
+
+            -af $drtsl2 right 5
+            -ap $drtsl2 left 5 50
+            -ac $drtsl2 top 4 $t2
+
+            -af $newtext2 left 5
+            -ac $newtext2 top  5 $drtsl2
+            -ap $newtext2 right 5 50
+
+            -af $drat2 right 5
+            -ap $drat2 left 5 50
+            -ac $drat2 top  5 $drtsl2
+            $f3;
+    
+    
+    // Influence
+    setParent $fr3;
+        columnLayout -adj true -co "both" 5;
+        $f4 = `formLayout -nd 100`;
+        $t3 = `text -l "Please pick the amount of influence to be had." -align "left"`;
+        $ffg = `floatFieldGrp -label "Amount of Influence:" -v1 1 -extraLabel "x" -nf 1`;
+        
+        formLayout -e
+            -af $t3 left 5
+            -af $t3 right 5
+            -af $t3 top 5
+
+            -af $ffg left 5
+            -ac $ffg top 5 $t3
+            -ap $ffg right 5 50
+            $f4;
+    
+   
+    // CALLBACKS
+    textField -e
+        -cc ("js_loadTFObjAttrs \"" + $drtf + "\" \"" + $drtsl + "\"")
+        -ec ("js_loadTFObjAttrs \"" + $drtf + "\" \"" + $drtsl + "\"")
+        $drtf;
+
+    textField -e
+        -cc ("js_loadTFObjAttrs \"" + $drtf2 + "\" \"" + $drtsl2 + "\"")
+        -ec ("js_loadTFObjAttrs \"" + $drtf2 + "\" \"" + $drtsl2 + "\"")
+        $drtf2;
+  
+    
+    textField -e
+        -cc ("js_checkAttrAgainstTSL \"" + $drat + "\" \"" + $drtsl + "\"")
+        -ec ("js_checkAttrAgainstTSL \"" + $drat + "\" \"" + $drtsl + "\"")
+        $drat; 
+    textField -e
+        -cc ("js_checkAttrAgainstTSL \"" + $drat2 + "\" \"" + $drtsl2 + "\"")
+        -ec ("js_checkAttrAgainstTSL \"" + $drat2 + "\" \"" + $drtsl2 + "\"")
+        $drat2; 
+    
+    // load selected object
+    //
+    popupMenu -e
+        -pmc ("js_loadSelInPopupMenu " + $drtf + " " + $driverMenu +" " + $drtsl)
+        $driverMenu;
+
+    popupMenu -e
+        -pmc ("js_loadSelInPopupMenu " + $drtf2 + " " + $drivenMenu + " " + $drtsl2)
+        $drivenMenu;
+
+    button -e
+        -c ("js_setDrivenKeyAutoPrep " + $drtf + " " + $drtsl + " " + $drat + " " + $drtf2 + " " + $drtsl2 + " " + $drat2 + " " + $ffg )
+        $b1;
+
+    // store currently selected in tsl
+    textScrollList -e 
+        -sc ("js_storeSelectedTSL " + $drtsl)
+        $drtsl;
+
+    textScrollList -e 
+        -sc ("js_storeSelectedTSL " + $drtsl2)
+        $drtsl2;
+    // update interface
+    string $objs[0];
+    $objs = `ls -sl`; 
+    js_loadSelIntoTF $objs[0] $drtf; 
+    js_loadSelIntoTF $objs[1] $drtf2; 
+    js_loadTFObjAttrs $drtf $drtsl;
+    js_loadTFObjAttrs $drtf2 $drtsl2;
+    showWindow $win;
+}
+
+global proc js_loadSelInPopupMenu (string $tf, string $menu, string $tsl)
+{
+    // remove all items from the popup menu
+    popupMenu -e -dai $menu;
+    setParent -m $menu;
+
+    // this will pop up a window for the selected object showing the keyable attributes
+    string $objs[0];
+    $objs = `ls -sl`;
+    for ($ob in $objs)
+    {
+        menuItem -l $ob -c ("textField -e -tx \"" + $ob + "\" \"" + $tf + "\"; js_loadTFObjAttrs \"" + $tf + "\" \"" + $tsl + "\"");
+    }
+}
+global proc js_setDrivenKeyAutoPrep (string $tf, string $tsl, string $at, string $tf2, string $tsl2, string $at2, string $ffg)
+{
+    // first get everything
+    string $driver;
+    string $driverAttr;
+    string $driverNewAttr;
+    
+    string $driven;
+    string $drivenAttr;
+    string $drivenNewAttr;
+
+    float $inf;
+
+    $driver = `textField -q -tx $tf`;
+    $driven = `textField -q -tx $tf2`;
+
+    string $tmp[0];
+    $tmp = `textScrollList -q -si $tsl`;
+    $driverAttr = $tmp[0];
+    clear $tmp;
+    $tmp = `textScrollList -q -si $tsl2`;
+    $drivenAttr = $tmp[0];
+
+    $driverNewAttr = `textField -q -tx $at`;
+    $drivenNewAttr = `textField -q -tx $at2`;
+   
+    $inf = `floatFieldGrp -q -v1 $ffg`;
+
+    // now start to prepare the command
+
+    string $drAttr;
+    string $dvAttr;
+
+    if ($driverNewAttr != "")
+        $driverAttr = $driverNewAttr;
+
+    if ($drivenNewAttr != "")
+        $drivenAttr = $drivenNewAttr;
+
+    $drAttr = ($driver + "." + $driverAttr);
+    $dvAttr = ($driven + "." + $drivenAttr);
+    
+    $cmd = ("js_setDrivenkeyAutoDrive " + $drAttr + " " + $dvAttr + " 1 " + $inf);
+    evalEcho $cmd;
+}
+global proc js_loadSelIntoTF (string $obj, string $tf)
+{
+    textField -e -tx $obj $tf;
+
+}
+global proc js_setDrivenkeyAutoDrive (string $driver, string $driven, float $dr_inf, float $dv_inf)
+{
+
+    // takes the driver and driven, hooks up a setDrivenKey relationship based on the influence.
+    js_checkObjAttr $driver;
+    js_checkObjAttr $driven;
+
+    string $break[0];
+    tokenize ($driven, ".", $break);
+    
+    $mult = 10000;
+    setDrivenKeyframe -cd $driver -dv (-1 * $mult *$dr_inf) -at $break[1] -v (-1 * $mult * $dv_inf) -itt "linear" -ott "linear" $break[0];
+    setDrivenKeyframe -cd $driver -dv ($mult * $dr_inf) -at $break[1] -itt "linear" -ott "linear" -v ($mult * $dv_inf) $break[0];
+       
+    // now find the curve and set the infinity properly
+    source js_copySetDrivenKeyUI;
+    $curve = `js_copySetDrivenKey_getDrivenCurve $driver $driven`;
+    setAttr ($curve + ".preInfinity") 1;
+    setAttr ($curve + ".postInfinity") 1;
+}
+global proc js_checkObjAttr (string $objAttr)
+{
+    string $break[0];
+    tokenize ($objAttr, ".", $break);
+
+    if (size($break) != 2)
+    {
+        error ($objAttr + " isn't in the format object.attr.  Exiting..\n");
+    }
+    string $object = $break[0];
+    string $attr = $break[1];
+    if (!`objExists $object`)
+        error ($object + " does not exist.\n");
+
+    if (!`attributeQuery -exists -node $object $attr`)
+    {
+        // add the attribute
+        addAttr -ln $attr -at double $object;
+        setAttr -k true ($objAttr);
+    }
+}
+
+global proc js_storeSelectedTSL (string $tsl)
+{
+    global string $g_js_TFSelected[];
+    string $sel[0];
+    $sel = `textScrollList -q -si $tsl`;
+    int $index = 0;
+    if (`gmatch $tsl "*js_driverTSL"`)
+    {
+        $index = 0;
+    }
+    else if (`gmatch $tsl "*js_drivenTSL"`)
+    {
+        $index = 1;
+    }
+
+    $g_js_TFSelected[$index] = $sel[0];
+    
+}
+global proc js_loadTFObjAttrs (string $tf, string $tsl)
+{
+    
+    global string $g_js_TFSelected[];
+    
+    string $sel[0];
+    textScrollList -q -si $tsl;
+    int $index = 0;
+    if (`gmatch $tsl "*js_driverTSL*"`)
+    {
+        $index = 0;
+    }
+    if (`gmatch $tsl "*js_drivenTSL*"`)
+    {
+        $index = 1;
+    }
+
+    //$g_js_TFSelected[$index] = $sel[0];
+
+    // remove everything from the tsl
+    textScrollList -e -ra $tsl;
+
+    // now add the attributes
+    string $obj;
+    $obj = `textField -q -tx $tf`;
+    if ($obj != "")
+    {
+        if (`objExists $obj`)
+        {
+            string $attrs[0];
+            $attrs = `listAttr -k $obj`;
+            $count = 1;
+            $curCount = 1;
+            for ($at in $attrs)
+            {
+                textScrollList -e -a $at $tsl;
+                if ($at == $g_js_TFSelected[$index])
+                {
+                    textScrollList -e -si $at $tsl;
+                    $curCount = $count;
+                }
+                $count++;
+                textScrollList -e -sii $curCount $tsl;
+            }
+        }
+    }
+}
+
+global proc js_checkAttrAgainstTSL (string $tf, string $tsl)
+{
+    // check the input of $tf.  If it's not "", then disable tsl
+    $value = `textField -q -tx $tf`;
+    if ($value != "")
+    {
+        textScrollList -e -enable 0 $tsl;
+    }
+    else
+    {
+        textScrollList -e -enable 1 $tsl;
+    }
+}

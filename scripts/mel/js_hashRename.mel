@@ -1,0 +1,65 @@
+/*
+    Script:     js_hashRename
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      js_hashRename will rename the selected objects and will replace any # marks with numbers. 
+                For example, if given the command:
+                
+                js_hashRename "torso_####_control";
+
+                It will rename selected objects as torso_0001_control, torso_0002_control, etc.
+
+    Requires:   js_replaceHash.mel
+
+*/
+global proc string[] js_hashRename (string $newName)
+{
+    // this procedure will rename the selected objects with $newName, and it will replace the # with a count.  It will zero-pad with the
+    // number of hashes
+
+    string $objs[0];
+    int $count = 0;
+    string $return[0];
+
+    $objs = `ls -sl`;
+
+    if (size($objs) > 0)
+    {
+        // create a dummy node for keeping track of all the objects.  when we rename them, it may change the object's
+        // names, which could get confusing for maya.
+        $node = `createNode unknown`;
+        addAttr -ln "selObjects" -at message -multi -im 0;
+
+        for ($obj in $objs)
+        {
+            // connect the attributes
+            connectAttr -na ($obj + ".message") ($node + ".selObjects");
+        }
+        
+        $con = `listConnections ($node + ".selObjects")`;
+       
+        for ($x = 0; $x < size($con); $x++)
+        {
+            string $tmp[0];
+            $tmp = `listConnections ($node + ".selObjects["+$x+"]")`;
+            string $object = $tmp[0];
+      
+            // check the searchString for the #'s.  Based on the number of hashes, we'll replace them with the index number
+            $name = `js_replaceHash $newName ($x + 1)`;
+
+            // rename the object
+            $result = `rename $object $name`;
+            
+            print ("// Renamed: " + $object + " --> " + $result + "\n");
+        } 
+        $return = `listConnections ($node + ".selObjects")`;
+        delete $node;
+
+    }
+    if ((`size $return`) > 0)
+        select $return;
+    return $return;
+}
+

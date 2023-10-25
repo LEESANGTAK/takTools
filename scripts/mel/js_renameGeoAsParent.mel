@@ -1,0 +1,32 @@
+/*
+    Script:     js_renameGeoAsParent
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+    
+    Descr:      This script takes the selected geometry and renames it based on the parent's name,
+                but substitutes the "_joint" as "_geo"
+*/
+global proc js_renameGeoAsParent ()
+{
+
+    string $objs[0];
+
+    $objs = `ls -sl`;
+
+    for ($ob in $objs)
+    {
+        string $p[0];
+        $p = `listRelatives -f -p $ob`;
+        
+        string $break[0];
+        tokenize ($p[0], "|", $break);
+        $size = `size($break)`;
+        $size = $size-1;
+        string $name = $break[$size];
+
+        $newName = `substitute "_joint" $name "_geo"`;
+        $name = `rename $ob $newName`;
+        print ("Renamed " + $ob + " to " + $name + "\n");
+    }
+}

@@ -1,0 +1,173 @@
+// mopKnit.mel
+//
+// Author:  Paul "MoP" Greveson
+// Contact: paul@greveson.co.uk
+// Website: www.greveson.co.uk
+// Last updated: 9:50 PM 9/28/2008
+// Version: 1.1
+//
+// Inspired by Slide London's "SlideKnit" Max script - http://slidelondon.com/iv
+//
+// Make sure mopKnit.mel and mopKnitOptions.mel are in your Maya scripts folder.
+// Use the command "mopKnit" to launch the script with default options.
+// Use the command "mopKnitOptions" to show the options window.
+
+
+// Procedure to split a mesh along UV borders.
+proc splitMeshUVs ( string $obj ) {
+	string $uvBorder[];
+	string $edgeUVs[];
+	string $finalBorder[];
+	select -r ( $obj + ".map[*]" );
+	polySelectBorderShell 1;
+	$uvBorder = `polyListComponentConversion -te -in`;
+	$uvBorder = `ls -fl $uvBorder`;
+	string $edge;
+	for( $edge in $uvBorder ) {
+		$edgeUVs = `polyListComponentConversion -tuv $edge`;
+		$edgeUVs = `ls -fl $edgeUVs`;
+		if( `size $edgeUVs` > 2 ) {
+			$finalBorder[ size( $finalBorder ) ] = $edge;
+		}
+	}
+	string $cutVerts[] = `polyListComponentConversion -tv $finalBorder`;
+	polySplitVertex $cutVerts;
+}
+
+// Procedure to move a mesh's UVs to world space, multiplied by a scaling value.
+proc UVToMesh( string $obj, int $origin, string $facing, float $scale ) {
+	float $bounds[] = `polyEvaluate -b $obj`;
+	// If scale is 0, calculated scale factor from object area.
+	if ( $scale == 0 ) {
+		float $area[] = `polyEvaluate -a $obj`;
+		$scale = sqrt( $area[ 0 ] );
+	}
+	// If origin is 0, unfold will be placed next to object.
+	// If origin is 1, unfold will be placed at world center.
+	float $center[] = `xform -q -a -ws -rp $obj`;
+	if ( $origin == 1 ) {
+		$center = { 0, 0, 0 };
+		$bounds = { 0, 0, 0, 0, 0, 0 };
+		xform -a -ws -rp 0 0 0 $obj;
+	}
+	// Start transforming UVs, show a progress window.
+    int $numUVs[] = `polyEvaluate -uv $obj`;
+	progressWindow
+		-t "mopKnit"
+		-pr 0
+		-max $numUVs[ 0 ]
+		-st ( "Processing \"" + $obj + "\"..." )
+		-ii 0;
+    for ( $i = 0; $i < $numUVs[ 0 ]; $i++ ) {
+        float $uvPos[] = `polyEditUV -q ( $obj + ".map[" + $i + "]" )`;
+        string $geoVert[] = `polyListComponentConversion -fuv -tv ( $obj + ".map[" + $i + "]" )`;
+		if ( $facing == "X" || $facing == "x" ) {
+			xform -a -ws -t
+				$bounds[ 1 ] // Offset.
+				( ( ( $uvPos[ 1 ] - 0.5 ) * $scale ) + $center[ 1 ] ) // V -> Y
+				( ( ( 0.5 - $uvPos[ 0 ] ) * $scale ) + $center[ 2 ] ) // U -> Z, inverse
+				$geoVert;
+		}
+		else if ( $facing == "Y" || $facing == "y" ) {
+			xform -a -ws -t
+				( ( ( $uvPos[ 0 ] - 0.5 ) * $scale ) + $center[ 0 ] ) // U -> X
+				$bounds[ 3 ] // Offset.
+				( ( ( 0.5 - $uvPos[ 1 ] ) * $scale ) + $center[ 2 ] ) // V -> Z, inverse
+				$geoVert;
+		}
+		else {
+			xform -a -ws -t
+				( ( ( $uvPos[ 0 ] - 0.5 ) * $scale ) + $center[ 0 ] ) // U -> X
+				( ( ( $uvPos[ 1 ] - 0.5 ) * $scale ) + $center[ 1 ] ) // V -> Y
+				$bounds[ 5 ] // Offset.
+				$geoVert;
+		}
+		progressWindow -edit -progress $i;
+    }
+	progressWindow -endProgress;	
+}
+
+// Procedure to find if a node is a valid mesh.
+proc int findShapes( string $obj ) {
+	string $shapes[] = `listRelatives -f -s -ni $obj`;
+	int $found = 0;
+	string $shape;
+	for ( $shape in $shapes ) {
+		if ( `nodeType $shape` == "mesh" ) {
+			$found = 1;
+		}
+	}
+	return $found;
+}
+
+// Main procedure for taking an object and morphing it to its UV layout.
+global proc mopKnit() {
+	// Default options, use any stored option variables.
+	int $origin = 0;
+	string $facing = "Z";
+	int $autoScale = 1;
+	float $scale = 100.0;
+	if ( `optionVar -ex "mopKnitOrigin"` ) {
+		$origin = `optionVar -q "mopKnitOrigin"`;
+	}
+	if ( `optionVar -ex "mopKnitFacing"` ) {
+		$facing = `optionVar -q "mopKnitFacing"`;
+	}
+	if ( `optionVar -ex "mopKnitAutoScale"` ) {
+		$autoScale = `optionVar -q "mopKnitAutoScale"`;
+	}
+	if ( `optionVar -ex "mopKnitScale"` ) {
+		$scale = `optionVar -q "mopKnitScale"`;
+	}
+	if ( $autoScale == 1 ) {
+		$scale = 0;
+	}
+	
+	// Get the current tool, swap to Select to minimise warnings.
+	string $context = `currentCtx`;
+	global string $gSelect;
+	setToolTo $gSelect;
+	
+	// Check selections.
+	string $sel[] = `ls -sl -tr`;
+	if ( `size $sel` == 0 ) {
+		$sel = `ls -hl`;
+	}
+	if ( `size $sel` == 0 ) {
+		warning "Please select at least one object.";
+		return;
+	}
+	string $obj;
+	for ( $obj in $sel ) {
+		if ( !`findShapes $obj` ) {
+			warning ( "\"" + $obj + "\" is not a valid mesh." );
+		}
+		else {
+			// Make copy of mesh, split along UV borders.
+			string $dup[] = `duplicate -name "mopKnit_Source" $obj`;
+			string $knitMeshOrig = $dup[ 0 ];
+			delete -ch $knitMeshOrig;
+			splitMeshUVs $knitMeshOrig;
+			delete -ch $knitMeshOrig;
+			// Copy mesh again, unfold to UV layout.
+			$dup = `duplicate -name ( "mopKnit_" + $obj ) $knitMeshOrig`;
+			string $knitMesh = $dup[ 0 ];
+			UVToMesh $knitMesh $origin $facing $scale;
+			delete -ch $knitMesh;
+			// Connect the original shape up to the final transform.
+			string $knitMeshOrigShapes[] = `listRelatives -f -s -ni $knitMeshOrig`;
+			string $knitMeshShapes[] = `listRelatives -f -s -ni $knitMesh`;
+			parent -r -s $knitMeshOrigShapes[ 0 ] $knitMesh;
+			// Remove original transform, now empty.
+			delete $knitMeshOrig;
+			$knitMeshOrigShapes = `listRelatives -f -s -ni $knitMesh`;
+			$knitMeshOrigShapes = stringArrayRemove( $knitMeshShapes, $knitMeshOrigShapes );
+			// Create blendShape.
+			blendShape -name "mopKnit_blendShape" $knitMeshOrigShapes[ 0 ] $knitMeshShapes[ 0 ];
+			setAttr ( $knitMeshOrigShapes[ 0 ] + ".intermediateObject" ) 1;
+			showHidden $knitMesh;
+		}
+	}
+	select -r $sel;
+	setToolTo $context;
+}

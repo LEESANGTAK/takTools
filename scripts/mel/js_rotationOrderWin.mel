@@ -1,0 +1,139 @@
+/*
+    Script:     js_rotationOrderWin.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This procedure creates a window to quickly set the rotationOrder on the selected
+                objects.
+
+*/
+global proc js_rotationOrderWin ()
+{
+    // This procedure creates a window to quickly set the rotationOrder on the selected
+    // objects.
+    
+    $win = "js_rotOrderWin";
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -title "Rotation Order Window" $win;
+
+    $f = `formLayout -nd 100`;
+    optionMenuGrp -l "Rotation Order:" js_rotOrderOMG;
+    menuItem -l "xyz";
+    menuItem -l "yzx";
+    menuItem -l "zxy";
+    menuItem -l "xzy";
+    menuItem -l "yxz";
+    menuItem -l "zyx";
+    button -l "Set Rotation Orders" -c "js_rotationOrderPrepCmd" js_rotOrderB;
+
+    formLayout -e
+        -af js_rotOrderOMG top 5
+        -af js_rotOrderOMG left 5
+        -af js_rotOrderOMG right 5
+
+        -ac js_rotOrderB top 5 js_rotOrderOMG
+        -af js_rotOrderB left 5 
+        -af js_rotOrderB right 5 
+        -af js_rotOrderB bottom 5 
+        $f;
+
+    showWindow $win;
+}
+
+global proc js_rotationOrderPrepCmd ()
+{
+
+    // find out what the user picked from the optionMenuGrp
+    $item = `optionMenuGrp -q -sl js_rotOrderOMG`;
+    
+    $item = $item-1;
+    $rotOrder = `js_rotOrderConvertToString $item`;
+
+    $cmd = ("source js_rotationOrderWin; js_rotOrderSwitchItems \"" + $rotOrder + "\"");
+    print ("// Rotation order command to switch the rotation orders of the\n");
+    print ("// selected items to " + $rotOrder + "\n");
+    print ("//\n");
+    evalEcho $cmd;
+}
+
+global proc js_rotOrderSwitchItems (string $rotOrder)
+{
+    // get the selected objects
+    string $objs[0];
+    $objs = `ls -sl`;
+
+    if (size($objs) > 0)
+    {
+        // get the actual rotation order
+        int $ro = `js_rotOrderConvertToInt $rotOrder`;
+        print ("//\n");
+        print ("// Rotation Orders switched...\n");
+        print ("//\n");
+        for ($ob in $objs)
+        {   
+            $cmd = ("setAttr \"" + $ob + ".rotateOrder\" " + $ro);
+            evalEcho $cmd;
+        }   
+    }
+    else
+    {
+        error ("Nothing selected.");
+    }
+}
+global proc string js_rotOrderConvertToString (int $rotOrder)
+{
+    string $return = "";
+    switch ($rotOrder)
+    {
+        case  0:
+            $return = "xyz";
+            break;
+        case 1:
+            $return = "yzx";
+            break;
+        case 2:
+            $return = "zxy";
+            break;
+        case 3:
+            $return = "xzy";
+            break;
+        case 4:
+            $return = "yxz";
+            break;
+        case 5:
+            $return = "zyx";
+            break;
+    }
+
+    return $return;
+}
+global proc int js_rotOrderConvertToInt (string $rotOrder)
+{
+    int $return = 0;
+    switch ($rotOrder)
+    {
+        case "xyz":
+            $return = 0;
+            break;
+        case "yzx":
+            $return = 1;
+            break;
+        case "zxy":
+            $return = 2;
+            break;
+        case "xzy":
+            $return = 3;
+            break;
+        case "yxz":
+            $return = 4;
+            break;
+        case "zyx":
+            $return = 5;
+            break;
+    }
+
+    return $return;
+}

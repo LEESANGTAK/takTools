@@ -1,0 +1,243 @@
+/*
+    Script:     js_createTwistySegmentUI
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Creates an interface for js_createTwistySegment.mel
+
+    Requires:   js_getOptionVar
+                js_getOptionVarString
+                js_createTwistySegment
+                js_addAllAttrsToStretchTSL
+                js_loadSelectedIntoButtonGrp
+*/
+global proc js_createTwistySegmentUI ()
+{
+
+    $win = "js_createTwistySegmentWin";
+
+    if (`window -exists $win`)
+    {
+        deleteUI $win;
+    }
+
+    window -title "Create Twisty Segment Window" $win;
+
+    $mw = 10;
+    $f = `formLayout -nd 100`;
+
+    $prefixFR = `frameLayout -mw $mw -l "Segment Prefix"`;
+        columnLayout -adj true;
+        text -align "left" -l "Please enter the prefix for the entire structure.";
+        $prefixTFG = `textFieldGrp -l "Prefix:"`;
+    setParent $f;
+
+    $baseJointFR = `frameLayout -mw $mw -l "Base Joint"`;
+        columnLayout -adj true;
+        text -align "left" -l "Please enter the name of the joint that the twisty structure\nwill be based off.";
+        $jointTFBG = `textFieldButtonGrp -l "Joint:" -bl "Load Selected"`;
+    setParent $f;
+
+    $optionsFR  = `frameLayout -l "Options"`;
+        columnLayout -adj true;
+        $segISG = `intSliderGrp -l "Number of Segments:" -f true -min 2 -max 20`;
+        $geoCBG = `checkBoxGrp -l "Add Geometry:" -l1 "yes/no"`;
+        $volCBG = `checkBoxGrp -l "Preserve Volume:" -l1 "yes/no"`;
+    setParent $f;
+
+    $worldScaleFR = `frameLayout -l "World Scale"`;
+        columnLayout -adj true;
+        $worldScaleCBG = `checkBoxGrp -l "World Scale:" -l1 "yes/no"`;
+        $f2 = `formLayout -nd 100`;
+        $worldScaleNode = `textFieldButtonGrp -l "Node:" -cw1 80 -enable 0 -bl "Load Sel"`;
+        $worldScaleText = `text -enable 0 -l "Attribute:" -align "right" -w 128`;
+        $worldScaleAttrs = `textScrollList -enable 0 -ams 0  -nr 5`;
+
+        formLayout -e
+            -af $worldScaleNode top 10
+            -af $worldScaleNode left 5
+            -af $worldScaleNode right 5
+
+            -af $worldScaleText left 5
+            -ac $worldScaleText top 5 $worldScaleNode
+
+            -ac $worldScaleAttrs left 10 $worldScaleText
+            -ac $worldScaleAttrs top 5 $worldScaleNode
+            -af $worldScaleAttrs right 5
+            $f2;
+
+    setParent $f;
+
+    $b1 = `button -l "Go"`;
+    $cb = `button -l "Cancel" -c ("deleteUI " + $win)`;
+   
+    formLayout -e
+        -af $prefixFR top 5
+        -af $prefixFR left 5
+        -af $prefixFR right 5
+
+        -ac $baseJointFR top 5 $prefixFR
+        -af $baseJointFR left 5
+        -af $baseJointFR right 5
+
+        -ac $optionsFR top 5 $baseJointFR
+        -af $optionsFR left 5
+        -af $optionsFR right 5
+        
+        -ac $worldScaleFR top 5 $optionsFR
+        -af $worldScaleFR left 5
+        -af $worldScaleFR right 5
+
+        -ac $b1 top 10 $worldScaleFR 
+        -af $b1 left 5
+        -ap $b1 right 5 50
+        -af $b1 bottom 5
+        
+        -ac $cb top 10 $worldScaleFR 
+        -af $cb right 5
+        -ap $cb left 5 50
+        -af $cb bottom 5
+        $f;
+
+    js_createTwistySegmentCallbacks $prefixTFG $jointTFBG $segISG $geoCBG $volCBG $worldScaleCBG $f2 $worldScaleNode $worldScaleText $worldScaleAttrs $b1 $win;
+    js_createTwistySegmentPresets $prefixTFG $jointTFBG $segISG $geoCBG $volCBG $worldScaleCBG $f2 $worldScaleNode $worldScaleText $worldScaleAttrs;
+
+    showWindow $win;
+}
+
+global proc js_createTwistySegmentPresets ( string $prefixTFG, string  $jointTFBG, string  $segISG, string  $geoCBG, string  $volCBG, string  $worldScaleCBG, string  $f2, string  $worldScaleNode, string  $worldScaleText, string  $worldScaleAttrs)
+{
+    // see if a joint is selected, if so, then load it into joint
+    string $jointSel;
+    $objs = `ls -sl -type joint`;
+    if (size($objs) > 0)
+        textFieldButtonGrp -e -tx $objs[0] $jointTFBG;
+
+    // check the optionVars and see if they exist
+    $createGeo = 0;
+    $maintainVolume = 0;
+    $worldScale = 0;
+    $segments = 2;
+    string $worldScaleObj;
+    string $worldScaleAttr;
+
+    $createGeo = `js_getOptionVar $createGeo "js_stretchSplineCreateGeo"`;
+    $segments = `js_getOptionVar $segments "js_stretchSplineNumSegments"`;
+    $maintainVolume = `js_getOptionVar $maintainVolume "js_stretchSplineMantainVolume"`;
+    $worldScale = `js_getOptionVar $worldScale "js_stretchSplineWorldScale"`;
+    $worldScaleObj = `js_getOptionVarString $worldScaleObj "js_stretchSplineWorldScaleObj"`;
+    $worldScaleAttr = `js_getOptionVarString $worldScaleAttr "js_stretchSplineWorldScaleAttr"`;
+
+    checkBoxGrp -e -v1 $createGeo $geoCBG;
+    intSliderGrp -e -v $segments $segISG;
+    checkBoxGrp -e -v1 $maintainVolume $volCBG;
+    checkBoxGrp -e -v1 $worldScale $worldScaleCBG;
+    
+    if ($worldScale)
+    {
+        formLayout -e -enable 1 $f2;
+    }
+    if ($worldScaleObj != "")
+    {
+        if (`objExists $worldScaleObj`)
+        {
+            textFieldButtonGrp -e -text $worldScaleObj $worldScaleNode;
+            
+            js_addAllAttrsToStretchTSL $worldScaleNode $worldScaleAttrs;
+
+            if ($worldScaleAttr != "")
+            {
+                if (`attributeQuery -exists -node $worldScaleObj $worldScaleAttr`)
+                {
+                    textScrollList -e -si $worldScaleAttr $worldScaleAttrs;
+                }
+            }
+        }
+    }
+
+}
+global proc js_createTwistySegmentCallbacks ( string $prefixTFG, string  $jointTFBG, string  $segISG, string  $geoCBG, string  $volCBG, string  $worldScaleCBG, string  $f2, string  $worldScaleNode, string  $worldScaleText, string  $worldScaleAttrs, string $b1, string $win)
+{
+    // set up all the callbacks for each item, if they exist
+    textFieldButtonGrp -e
+        -bc ("js_loadSelectedIntoButtonGrp \"" + $jointTFBG + "\"")
+        $jointTFBG;
+
+    checkBoxGrp -e
+        -onc ("formLayout -e -enable 1 \"" + $f2 + "\"") 
+        -ofc ("formLayout -e -enable 0 \"" + $f2 + "\"") 
+        $worldScaleCBG;
+    
+    textFieldButtonGrp -e
+        -bc ("js_loadSelectedIntoButtonGrp \"" + $worldScaleNode + "\";js_addAllAttrsToStretchTSL \""+$worldScaleNode+"\" \""+ $worldScaleAttrs + "\"")
+        -cc ("js_addAllAttrsToStretchTSL \""+$worldScaleNode+"\" \""+ $worldScaleAttrs + "\"")
+        $worldScaleNode;
+
+    button -e
+        -c ("js_prepCreateTwistySegmentCmd \"" + $prefixTFG +"\" \"" + $jointTFBG +"\" \"" + $segISG +"\" \"" + $geoCBG +"\" \"" + $volCBG +"\" \"" + $worldScaleCBG +"\" \"" + $worldScaleNode +"\" \"" + $worldScaleText +"\" \"" + $worldScaleAttrs+"\" \"" + $win+"\"")
+        $b1;
+}
+
+global proc js_prepCreateTwistySegmentCmd ( string $prefixTFG, string  $jointTFBG, string  $segISG, string  $geoCBG, string  $volCBG, string  $worldScaleCBG, string  $worldScaleNode, string  $worldScaleText, string  $worldScaleAttrs, string $win)
+{
+    // get all the data.
+    string $prefix;
+    string $joint;
+    int $segments;
+    int $volume;
+    int $geo;
+    int $worldScale;
+    string $worldScaleObj;
+    string $worldScaleAttr[0];
+
+    $prefix = `textFieldGrp -q -tx $prefixTFG`;
+    $joint = `textFieldButtonGrp -q -tx $jointTFBG`;
+    $segments = `intSliderGrp -q -v $segISG`;
+    $volume = `checkBoxGrp -q -v1 $volCBG`;
+    $geo = `checkBoxGrp -q -v1 $geoCBG`;
+    $worldScale = `checkBoxGrp -q -v1 $worldScaleCBG`;
+    $worldScaleObj = `textFieldButtonGrp -q -tx $worldScaleNode`;
+    $worldScaleAttr = `textScrollList -q -si $worldScaleAttrs`;
+
+    // check and make sure everything is set correctly
+    if ($prefix == "")
+    {
+        error ("Nothing entered for Prefix");
+    }
+    if ($joint == "")
+    {
+        error ("Nothing entered for Joint");
+    }
+    if (!`objExists $joint`)
+    {
+        error ($joint + " does not exist.");
+    }
+
+    if ($worldScale)
+    {
+        // check on worldScaleObj
+        if (!`objExists $worldScaleObj`)
+        {
+            error ($worldScaleObj + " does not exist.");
+        }
+        if (!`attributeQuery -exists -node $worldScaleObj $worldScaleAttr[0]`)
+        {
+            error ($worldScaleAttr[0] + " does not exist as an attribute for " + $worldScaleObj);
+        }
+    }
+
+    // now set the optionVars
+    optionVar -iv "js_stretchSplineCreateGeo" $geo;
+    optionVar -iv "js_stretchSplineNumSegments" $segments;
+    optionVar -iv "js_stretchSplineMantainVolume" $volume ;
+    optionVar -iv "js_stretchSplineWorldScale" $worldScale;
+    optionVar -sv "js_stretchSplineWorldScaleObj" $worldScaleObj;
+    optionVar -sv "js_stretchSplineWorldScaleAttr" $worldScaleAttr;
+
+    $cmd = ("js_createTwistySegment \""+$prefix+"\" \""+$joint+"\" "+$segments+" "+$geo+" "+$volume+" "+$worldScale+" \""+$worldScaleObj+"\" \""+$worldScaleAttr[0]+"\" ");
+    evalEcho $cmd;
+
+    deleteUI $win;
+}
+

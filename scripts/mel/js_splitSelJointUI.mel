@@ -1,0 +1,68 @@
+/*
+    Script:     js_splitSelJointUI.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Interface to js_splitSelJoint.mel
+
+    Req:        js_splitSelJoint.mel
+                js_getOptionVar.mel
+
+*/
+global proc js_splitSelJointUI ()
+{
+    // Builds the interface for the splitSelJointUI
+
+    string $win  = "js_splitSelJointWin";
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -t "Split Selected Joints" $win;
+
+    $f = `formLayout -nd 100`;
+
+    $segments = `intSliderGrp -field true -l "Segments" -min 2 -max 1000`;
+    $b1 = `button -l "Okay"`;
+    $b2 = `button -l "Cancel"`;
+    formLayout -e
+
+        -af $segments top 5
+        -af $segments left 5
+        -af $segments right 5
+
+        -af $b1 left 5
+        -af $b1 bottom 5
+        -ap $b1 right 0 47
+
+        -af $b2 right 5
+        -af $b2 bottom 5
+        -ap $b2 left 0 52
+        $f;
+
+    // set up callbacks
+    button -e -c ("deleteUI \"" + $win + "\"") $b2;
+    button -e -c ("js_buildSplitJointCmd \"" + $segments + "\"") $b1;
+    // set up defaults
+    int $segmentOpt = 2;
+    
+    $segmentOpt = `js_getOptionVar $segmentOpt "js_splitSelSegments"`;
+
+    // now set the item
+    intSliderGrp -e -value $segmentOpt $segments;
+
+    showWindow $win;
+}
+
+global proc js_buildSplitJointCmd (string $segments)
+{
+    // get the values
+    $segmentVal = `intSliderGrp -q -value $segments`;
+
+    // set the optionVars
+    optionVar -iv "js_splitSelSegments" $segmentVal;
+
+    // build the command
+    $cmd = ("js_splitSelJoint " + $segmentVal);
+    evalEcho $cmd;
+}

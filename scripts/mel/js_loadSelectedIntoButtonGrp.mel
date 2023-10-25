@@ -1,0 +1,18 @@
+/*
+    Script:     js_loadSelectedIntoButtonGrp.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Loads the selected object into the specified buttonGrp
+*/
+global proc js_loadSelectedIntoButtonGrp (string $buttonGrp)
+{
+
+    string $objs[0];
+    $objs = `ls -sl`;
+    if (size($objs) > 0)
+    {
+        textFieldButtonGrp -e -tx $objs[0] $buttonGrp;
+    }
+}

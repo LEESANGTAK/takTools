@@ -1,0 +1,390 @@
+// Copyright (C) 2008 Rod Green
+// All rights reserved.
+//
+// Website: http://www.rodgreen.com
+
+// ---------- Global variables
+	global string $pointerObjString = "objectPointerMessage";
+
+// ---------- Utility procedures
+	global proc string padInt(int $inputInt, int $length)
+	{
+		if($length < 1) return "";
+		string $returnString = $inputInt;
+		for($i = size($returnString); $i < $length; $i++) $returnString = ("0" + $returnString);
+		return $returnString;
+	}
+
+	global proc string[] getSelection()
+	{
+		return (ls("-selection", "-long", "-flatten"));
+	}
+
+	global proc string renameLong(string $object, string $newName)
+	{
+		return longNameOf(rename($object, $newName));
+	}
+
+
+	global proc string newTransform(string $name)
+	{
+		string $transformObj = createNode("-skipSelect", "-name", $name, "transform");
+		refresh; // This is needed to finalize the createNode operation to stop the proc from becoming out of sync
+		return $transformObj;
+	}
+
+	global proc cleanStringArray(string $inputStringArray[])
+	{
+		string $cleanArray[] = {};
+		for($eachItem in $inputStringArray)
+		{
+			if($eachItem != "") $cleanArray[size($cleanArray)] = $eachItem;
+		}
+
+		$inputStringArray = $cleanArray;
+	}
+
+	global proc string niceNameOf(string $inputObj)
+	{
+		return(match("[^|]*$",$inputObj));
+	}
+
+	global proc string cullTrailingInts(string $inputString)
+	{
+		int $intCount = size(match("[0-9]*$", $inputString));
+
+		return (substring($inputString, 1, size($inputString) - $intCount ));
+
+	}
+
+	global proc string adjustString( string $baseString, string $prefix, string $suffix, string $find, string $replace)
+	{
+		if($find == "") return ($prefix + $baseString + $suffix);
+		return ($prefix + substituteAllString($baseString, $find, $replace) + $suffix);
+	}
+
+
+	global proc string[] filterObjectsByTypes(string $objects[], string $types[], int $evalShapeChildren)
+	{
+		string $returnObjects[] = {};
+		if(size($objects) == 0 || size($types) == 0) return $objects;
+		for($eachObj in $objects)
+		{
+			int $matches = 0;
+			for($eachType in $types)
+			{
+				$eachType = strip($eachType);
+				if(objectType("-isAType", $eachType, $eachObj))
+				{
+					$matches = 1;
+					break;
+				}
+				// This loop will be called if the evaluate shape children option is true
+				// This way we're able to distinguish a transforms 'shape' type and process as needed
+				if($evalShapeChildren)
+				{
+					string $shapeChildren[] = listRelatives("-fullPath", "-shapes", $eachObj);
+					
+					for($eachShape in $shapeChildren)
+					{
+						
+						if(objectType("-isAType", $eachType, $eachShape))
+						{
+							$matches = 1;
+							break;
+						}						 
+					}
+				}
+			}
+			if(!$matches) $returnObjects[size($returnObjects)] = $eachObj;
+		}
+		return $returnObjects;
+	}
+
+// ---------- Utility procedures (Object Pointer System)
+
+	global proc int attrSize( string $baseObject, string $attributeName)
+	{
+		return getAttr("-size", ($baseObject + "." + $attributeName));
+	}
+
+	global proc string createObjectPointer()
+	{
+		global string $pointerObjString;
+		string $groupObj = newTransform("__objPointer__");
+		addAttr -ln $pointerObjString  -multi -at "message" $groupObj;
+		return $groupObj;
+	}
+
+	global proc addObjectsToPointer(string $objects[], string $pointer)
+	{
+		if (size($objects) == 0 || $pointer == "") return;
+		global string $pointerObjString;
+
+		for($i = 0; $i < size($objects); $i++)
+		{
+			connectAttr -f ($objects[$i] + ".message") ($pointer + "." + $pointerObjString + "[" + $i + "]");
+		}
+	}
+
+	global proc string getObjectFromPointer(string $pointer, int $index)
+	{
+		global string $pointerObjString;
+		$pointer = longNameOf($pointer);
+		string $returnObject = "";
+		if (!attributeExists($pointerObjString, $pointer)) return $returnObject; // Attribute doesn't exist so return nothing
+		string $listConnectionsResult[] = listConnections("-shapes", 1, "-connections", 1,
+									($pointer + "."+ $pointerObjString + "[" + $index + "]"));
+		return longNameOf($listConnectionsResult[1]);
+	}
+
+	global proc string[] getObjectsFromPointer(string $pointer)
+	{
+		global string $pointerObjString;
+		$pointer = longNameOf($pointer);
+			string $returnObjects[] = {};
+			if (!attributeExists($pointerObjString, $pointer)) return $returnObjects; // Attribute doesn't exist so return nothing
+			int $attrSize = attrSize($pointer, $pointerObjString);
+
+			// Scan attribute for all connected objects
+			for($i = 0; $i < $attrSize; $i++)
+			{
+				string $listConnectionsResult[] = listConnections("-connections", 1,
+											($pointer + "."+ $pointerObjString + "[" + $i + "]"));
+			
+				if ($listConnectionsResult[0] != "") // Skip blank entries
+				{
+					$returnObjects[size($returnObjects)] = longNameOf($listConnectionsResult[1]);
+				}
+			}
+
+			return $returnObjects;
+	}
+
+
+// ---------- Core procedures
+
+	global proc string[] renameObjects(	string $objects[], string $newName, string $prefix, string $suffix,
+						string $find, string $replace, string $typeMask, int $customOffsetIndex, int $padding, int $cullTrailingInts)
+	{
+		
+		string $filterTypes[] = {};
+		tokenize($typeMask, ",; :/\\|.-", $filterTypes);
+		cleanStringArray($filterTypes);
+		
+		string $filteredObjects[] = $objects;
+
+		$filteredObjects = filterObjectsByTypes($filteredObjects, {"shape"}, 0);
+
+		$filteredObjects = filterObjectsByTypes($filteredObjects, $filterTypes, 1);
+
+		string $pointerObj = createObjectPointer();
+		addObjectsToPointer($filteredObjects, $pointerObj);
+		string $newNames[] = {};
+		string $originalNames[] = {};
+
+
+
+		for($i = 0; $i < size($filteredObjects); $i++)
+		{
+
+			// Set object names to "__tempName__"
+			$originalNames[$i] = niceNameOf($filteredObjects[$i]);
+			renameLong(getObjectFromPointer($pointerObj, $i), "__tempName__");
+
+			
+			// Establish base name
+			string $baseString = $originalNames[$i];
+			if($cullTrailingInts) $baseString = cullTrailingInts($baseString);
+			if($newName != "") $baseString = $newName;
+			int $offsetIndex = $customOffsetIndex;
+
+
+			int $maxLoopCount = size(ls());
+
+
+			// Generate new name from options
+			// If padding is used then loop over name until a unique name is found
+			// $maxLoopCount is used to detect a Infinate loop
+			string $eachName = (adjustString($baseString, $prefix, $suffix, $find, $replace) 
+						+ padInt($offsetIndex + $i, $padding));
+			while(objExists($eachName) && $padding > 0)
+			{
+				$offsetIndex++;
+				if ($offsetIndex > $maxLoopCount)
+				{
+					print ("Attempting to Undo..\n");
+					undo();
+					delete $pointerObj;
+					warning "Renamed failed! - Infinite loop detected!";
+					return {};
+				}
+				$eachName = (adjustString($baseString, $prefix, $suffix, $find, $replace)
+						+ padInt(($offsetIndex + $i), $padding));
+			}
+
+			$newNames[$i] = $eachName;
+		}
+
+
+		// Finally exectue the rename operations
+		for($i = 0; $i < size($filteredObjects); $i++)
+		{
+			string $objectToRename = getObjectFromPointer($pointerObj, $i);
+			renameLong($objectToRename, $newNames[$i]);
+		}
+
+
+
+		string $renamedObjects[] = getObjectsFromPointer($pointerObj);
+		
+
+		delete $pointerObj;
+
+		print ("// ----------- Rename details\n");
+
+		for($i = 0; $i < size($filteredObjects); $i++)
+		{
+			print ("\t" + $filteredObjects[$i] + "\n\t\t-> " + $renamedObjects[$i] + "\n\n");
+		}
+
+		print ("// ----------- Success! Renamed " + size($renamedObjects) + " Objects\n");
+
+		return $renamedObjects;
+
+	}
+
+// ---------- UI procedures
+
+	global proc renameObjectsUI()
+	{
+
+
+		global string $renameObjectsWindow;
+		if (window("-exists", $renameObjectsWindow)) deleteUI -window $renameObjectsWindow;
+		$renameObjectsWindow = window(
+						"-widthHeight", 306, 281,
+						"-resizeToFitChildren", 1,
+						"-sizeable", 1,
+						"-title", "Rename Objects Advanced",
+						"renameObjectsWindow");
+		
+			columnLayout;
+
+					rowColumnLayout -width 308 -numberOfRows 10;
+
+									
+						string $prefixCtrl = textFieldGrp(
+										"-label", "Prefix",
+										"-ann", "Prefix to final object names",
+										"-cw", 1, 90,
+										"-cw", 2, 208,
+										"-text", "");
+
+						string $newNameCtrl = textFieldGrp(
+										"-label", "New Name",
+										"-ann", "Override existing names with this string",
+										"-cw", 1, 90,
+										"-cw", 2, 208,
+										"-text", "");
+
+						string $suffixCtrl = textFieldGrp(
+										"-label", "Suffix",
+										"-ann", "Suffix to final object names",
+										"-cw", 1, 90,
+										"-cw", 2, 208,
+										"-text", "");
+						string $findCtrl = textFieldGrp(
+										"-label", "Find",
+										"-ann", "String to search for an replace",
+										"-cw", 1, 90,
+										"-cw", 2, 208,
+										"-text", "");
+						string $replaceCtrl = textFieldGrp(
+										"-label", "Replace",
+										"-ann", "What to replace the 'found' string with",
+										"-cw", 1, 90,
+										"-cw", 2, 208,
+										"-text", "");
+						string $typeMaskCtrl = textFieldGrp(
+										"-label", "Exclude Types",
+										"-ann", "Enter types of objects to exclude seperated by commas: i.e. camera, locator",
+										"-cw", 1, 90,
+										"-cw", 2, 208,
+										"-text", "");
+						string $indexOffsetCtrl = intFieldGrp(
+										"-numberOfFields", 1,
+										"-label", "Index Offset",
+										"-ann", "Where to start the index count from",
+										"-cw", 1, 90,
+										"-cw", 2, 30,
+										"-value1", 0);										
+						string $paddingCtrl = intFieldGrp(
+										"-numberOfFields", 1,
+										"-label", "Padding",
+										"-ann", "How much to pad integer suffix. 0 relies on Maya's default incrementing",
+										"-cw", 1, 90,
+										"-cw", 2, 30,
+										"-value1", 0);
+						string $cullIntsCtrl = checkBoxGrp(
+										"-numberOfCheckBoxes", 1,
+										"-cw", 1, 90,
+										"-value1", 0,
+										"-ann", "Delete trailing integers at the end of objects before renaming",
+										"-label", "Clean Ints");
+
+
+					setParent..;
+
+
+
+					rowColumnLayout -numberOfColumns 2
+					-columnWidth 1 150
+					-columnWidth 2 150;
+
+						
+						
+						button -l "Cancel" -c "deleteUI -window $renameObjectsWindow;";
+						button -l "Defaults" -c "renameObjectsUI();"
+							-ann "Reset settings to defaults";
+					setParent..;
+
+					rowColumnLayout -numberOfColumns 1
+					-columnWidth 1 300;
+
+						button -l "Apply (Selection)"	-c (	"renameObjects("
+											+	"getSelection(),"
+											+	"(\"\" + textFieldGrp(\"-q\", \"-text\", \"" + $newNameCtrl +"\")), "
+											+	"(\"\" + textFieldGrp(\"-q\", \"-text\", \"" + $prefixCtrl +"\")), "
+											+	"(\"\" + textFieldGrp(\"-q\", \"-text\", \"" + $suffixCtrl +"\")), "
+											+	"(\"\" + textFieldGrp(\"-q\", \"-text\", \"" + $findCtrl +"\")), "
+											+	"(\"\" + textFieldGrp(\"-q\", \"-text\", \"" + $replaceCtrl +"\")), "
+											+	"(\"\" + textFieldGrp(\"-q\", \"-text\", \"" + $typeMaskCtrl +"\")), "
+											+	"(intFieldGrp(\"-q\", \"-value1\", \"" + $indexOffsetCtrl + "\")), "
+											+	"(intFieldGrp(\"-q\", \"-value1\", \"" + $paddingCtrl + "\")), "
+											+	"(checkBoxGrp(\"-q\", \"-value1\", \"" + $cullIntsCtrl  + "\"))"
+											+");")
+											-ann	"Do rename!";
+
+					setParent..;
+					string $form = formLayout("-numberOfDivisions", 100);
+					string $website = text(
+								"-width", 300,
+								"-enable", false,
+								"-font", "smallFixedWidthFont",
+								"-bgc", 0.1, 0.2, 0.3,
+								"-align", "center",
+								"-label", "www.rodgreen.com");
+
+					formLayout -edit
+					    -attachForm     $website     "top"    -4
+					$form;
+
+		showWindow $renameObjectsWindow;
+
+	}
+
+
+// ---------- Entry
+
+	renameObjectsUI();

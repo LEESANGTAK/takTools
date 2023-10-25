@@ -1,0 +1,523 @@
+// ----------------------------------------------------------------------------------------------
+//
+// SHAPESBrushBuildMM.mel
+//
+// marking menu for the SHAPES brush
+//
+// Ingo Clemens
+// www.braverabbit.com
+//
+// copyright brave rabbit, Ingo Clemens 2014-2015
+//
+// brush version: 1.4
+//
+// ----------------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------------
+//
+// THE SOFTWARE PRODUCT IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR
+// IMPLIED, INCLUDING, BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+// PURPOSE AND NON-INFRINGEMENT OF THIRD-PARTY RIGHTS. THE ENTIRE RISK AS TO THE QUALITY AND
+// PERFORMANCE OF THE SOFTWARE PRODUCT IS WITH YOU.
+// NEITHER BRAVE RABBIT NOR ITS SUPPLIERS WARRANT THAT THE FUNCTIONS CONTAINED IN THE SOFTWARE
+// PRODUCT WILL MEET YOUR REQUIREMENTS OR THAT THE OPERATION OF THE SOFTWARE PRODUCT WILL BE
+// UNINTERRUPTED OR ERROR-FREE. BRAVE RABBIT IS NOT OBLIGATED TO PROVIDE ANY UPDATES TO THE
+// SOFTWARE.
+// IN NO EVENT SHALL THE AUTHOR OF THIS SOFTWARE PRODUCT BE LIABLE FOR ANY SPECIAL, CONSEQUENTIAL,
+// INCIDENTAL, DIRECT OR INDIRECT DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR
+// LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, FOR PERSONAL INJURY, LOSS OF BUSINESS
+// INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE THIS
+// PRODUCT, EVEN IF THE AUTHOR OF THIS SOFTWARE PRODUCT IS AWARE OF THE POSSIBILITY OF SUCH
+// DAMAGES AND KNOWN DEFECTS, ANY CLAIM BY A THIRD PARTY AND EVEN IF THE REMEDY FAILS OF ITS
+// ESSENTIAL PURPOSE.
+//
+// ----------------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------------
+//
+// assign the marking menu to a hotkey by executing the following command:
+//
+// source SHAPESBrushBuildMM;
+// SHAPESBrush_setupMM;
+//
+// ----------------------------------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------------------------------
+//
+// setup the marking menu
+//
+//----------------------------------------------------------------------------------------------
+
+global proc string SHAPESBrushGetMayaVersion()
+{
+	string $versionString = `about -p`;
+	if (!`gmatch "*Preview*" $versionString`)
+	{
+		$versionString = substituteAllString($versionString, "-", " ");
+		string $items[];
+		tokenize $versionString " " $items;
+		return $items[1];
+	}
+	return -1;
+}
+
+global proc SHAPESBrush_setupMM()
+{
+	string $win = "SHAPESBrushHotkeyWindow";
+	if (`window -ex $win`)
+		deleteUI $win;
+	
+	window -t "" -w 186 -h 117 $win;
+	
+	if (`windowPref -ex $win`)
+		windowPref -e -w 186 -h 117 $win;
+	
+	int $state = 0;
+	int $version = `SHAPESBrushGetMayaVersion`;
+	if ($version >= 2016)
+		$state = 1;
+	
+	rowColumnLayout;
+		separator -st "none" -h 10;
+		text -l "Enter the hotkey\nfor the marking menu" -al "center";
+		SHAPESBrushCreateHotkeySetOption;
+		separator -st "none" -h 10;
+		textFieldGrp -l "Key" -cw2 30 100 -ct2 "right" "left" -co2 0 5 sbMMHotkeyField;
+		rowLayout -nc 3;
+			checkBoxGrp -l "Shift" -cw2 30 20 -ct2 "right" "left" -co2 0 5 -m $state sbMMShiftCheck;
+			checkBoxGrp -l "Ctrl" -cw2 30 20 -ct2 "right" "left" -co2 0 5 sbMMCtrlCheck;
+			checkBoxGrp -l "Alt" -cw2 25 20 -ct2 "right" "left" -co2 0 5 sbMMAltCheck;
+		setParent ..;
+		separator -st "none" -h 10;
+		rowLayout -nc 2;
+			button -l "OK" -w 100 -c ("SHAPESBrushCreateMMHotkey " + $win);
+			button -l "Cancel" -w 100 -c ("deleteUI " + $win);
+		setParent ..;
+	setParent ..;
+	
+	showWindow $win;
+}
+
+global proc SHAPESBrushCreateHotkeySetOption()
+{
+	int $version = `SHAPESBrushGetMayaVersion`;
+	if ($version == -1 || $version < 2016)
+		return;
+	
+	string $keySets[] = `hotkeySet -q -hsa`;
+	int $default = -1;
+	for ($i = 0; $i < size($keySets); $i ++)
+	{
+		if ($keySets[$i] == "Maya_Default")
+			$default = $i;
+	}
+	if ($default != -1)
+		stringArrayRemoveAtIndex($default, $keySets);
+	
+	separator -st "none" -h 10;
+	optionMenuGrp -l "Set" -cw2 30 100 -ct2 "right" "left" -co2 0 5 sbMMHotkeySetOption;
+	menuItem -l "Create New";
+	for ($ks in $keySets)
+		menuItem -l $ks;
+}
+
+global proc SHAPESBrushCreateMMHotkey( string $win )
+{
+	int $version = `SHAPESBrushGetMayaVersion`;
+	if ($version >= 2016)
+	{
+		string $keySet = `optionMenuGrp -q -v sbMMHotkeySetOption`;
+		if ($keySet == "Create New")
+		{
+			if (`hotkeySet -q -ex "Maya_Default_SHAPES"`)
+				hotkeySet -e -del "Maya_Default_SHAPES";
+			hotkeySet -cu "Maya_Default_SHAPES";
+		}
+		else
+		{
+			hotkeySet -e -cu $keySet;
+		}
+	}
+	
+	string $key = `textFieldGrp -q -tx sbMMHotkeyField`;
+	int $shiftMod = `checkBoxGrp -q -v1 sbMMShiftCheck`;
+	int $ctrlMod = `checkBoxGrp -q -v1 sbMMCtrlCheck`;
+	int $altMod = `checkBoxGrp -q -v1 sbMMAltCheck`;
+	
+	if (`runTimeCommand -q -ex SHAPESBrushMMCommand`)
+		runTimeCommand -e -del SHAPESBrushMMCommand;
+	if (`runTimeCommand -q -ex SHAPESBrushMMPopDownCommand`)
+		runTimeCommand -e -del SHAPESBrushMMPopDownCommand;
+	
+	runTimeCommand	-annotation "Open the SHAPES Brush marking menu"
+					-category "User"
+					-command ("SHAPESBrushDefaultTool; SHAPESBrushBuildMM;")
+					SHAPESBrushMMCommand;
+
+	runTimeCommand	-annotation "Close the SHAPES Brush marking menu"
+					-category "User"
+					-command ("MarkingMenuPopDown")
+					SHAPESBrushMMPopDownCommand;
+	
+	nameCommand -ann "SHAPESBrushMM" -c ("SHAPESBrushMMCommand") SHAPESBrushMM_NameCommand;
+	nameCommand -ann "SHAPESBrushMMPopDown" -c ("SHAPESBrushMMPopDownCommand") SHAPESBrushMMPopDown_NameCommand;
+	
+	string $cmd = "hotkey -k \"" + $key + "\"";
+	if ($shiftMod == 1 && $version >= 2016)
+		$cmd += " -sht";
+	if ($ctrlMod == 1)
+		$cmd += " -ctl";
+	if ($altMod == 1)
+		$cmd += " -alt";
+	string $cmdRelease = $cmd + " -releaseName (\"SHAPESBrushMMPopDown_NameCommand\")";
+	$cmd += " -name (\"SHAPESBrushMM_NameCommand\")";
+	eval($cmd);
+	eval($cmdRelease);
+	
+	SHAPESBrushGetMMHotkey 1;
+	
+	deleteUI $win;
+}
+
+global proc SHAPESBrushDeleteMMHotkey()
+{
+	if (`runTimeCommand -ex "SHAPESBrushMMCommand"`)
+	{
+		int $ids = `assignCommand -q -num`;
+		for ($i = 1; $i < $ids; $i ++)
+		{
+			string $cmd = `assignCommand -q -c $i`;
+			if (`gmatch $cmd "SHAPESBrushMM*"`)
+			{
+				string $keyArray[] = `assignCommand -q -keyArray $i`;
+				string $hotkey = $keyArray[0];
+				hotkey -keyShortcut $keyArray[0] -name "";
+				hotkey -keyShortcut $keyArray[0] -releaseName "";
+			}
+			
+			$cmd = `assignCommand -q -n $i`;
+			if (`gmatch $cmd "SHAPESBrushMM*"`)
+			{
+				assignCommand -e -d $i;
+			}
+		}
+		runTimeCommand -e -del SHAPESBrushMMCommand;
+		runTimeCommand -e -del SHAPESBrushMMPopDownCommand;
+		
+		optionVar -rm SHAPESBrushHotkey;
+	}
+}
+
+global proc string SHAPESBrushGetMMHotkey( int $forceUpdate )
+{
+	if (!`runTimeCommand -q -ex SHAPESBrushMMCommand`)
+		return "";
+	
+	if (`optionVar -ex SHAPESBrushHotkey` && $forceUpdate == 0)
+	{
+		if (`optionVar -q SHAPESBrushHotkey` != "" && `optionVar -q SHAPESBrushHotkey` != "NONE")
+			return `optionVar -q SHAPESBrushHotkey`;
+	}
+	
+	string $key[];
+	int $count = `assignCommand -q -num`;
+	for ($c = 1; $c <= $count; $c ++)
+	{
+		string $name = `assignCommand -q -n $c`;
+		if ($name == "SHAPESBrushMM_NameCommand")
+		{
+			$key = `assignCommand -q -k $c`;
+			optionVar -sv SHAPESBrushHotkey $key[0];
+		}
+	}
+	return $key[0];
+}
+
+global proc string SHAPESBrushBuildMenuCmd()
+{
+	string $key = `SHAPESBrushGetMMHotkey 0`;
+	if ($key == "")
+		return $key;
+	
+	string $cmd = "popupMenu -mm 1 -b 1 ";
+	
+	if (`gmatch $key "*Shift*"`)
+		$cmd += "-sh 1 ";
+	if (`gmatch $key "*Ctrl*"`)
+		$cmd += "-ctl 1 ";
+	if (`gmatch $key "*Alt*"`)
+		$cmd += "-alt 1 ";
+	
+	$cmd += "-aob 1 -p viewPanes tempMM";
+	
+	return $cmd;
+}
+
+global proc SHAPESBrushDefaultTool()
+{
+	string $win = "SHAPESBrushWin";
+	if (`window -ex "SHAPESDockWin"`)
+		$win = "SHAPESDockWin";
+	else if (`dockControl -ex "SHAPESDock"`)
+		$win = "SHAPESDock";
+	
+	SHAPESBrushCreateContext;
+	setToolTo SHAPESBrushContext1;
+	
+	if (`window -ex $win` || `dockControl -ex $win`)
+		sbUISetSymbolCheckBox 0 sbBrushColumn;
+	else
+		SHAPESBrushContext -e -t 0 SHAPESBrushContext1;
+}
+
+global proc SHAPESBrushCreateContext()
+{
+	if (!`contextInfo -ex SHAPESBrushContext1`)
+	{
+		source SHAPESBrushUI;
+		sbUIinitialize;
+	}
+}
+
+//----------------------------------------------------------------------------------------------
+//
+// build the marking menu
+//
+//----------------------------------------------------------------------------------------------
+
+global proc SHAPESBrushBuildMM()
+{
+	int $val;
+	string $win = "SHAPESBrushWin";
+	if (`window -ex "SHAPESDockWin"`)
+		$win = "SHAPESDockWin";
+	
+	SHAPESBrushCreateContext;
+	
+	string $cmd = `SHAPESBrushBuildMenuCmd`;
+	if ($cmd == "")
+		error "Error reading the SHAPES Brush marking menu hotkey. Please re-assign the hotkey.";
+	
+	eval($cmd);
+
+	menuItem
+	-label "Grab and Slide"
+	-command ("setToolTo SHAPESBrushContext1; if (`window -ex " + $win + "`) { sbUISetSymbolCheckBox 0 sbBrushColumn; } else { SHAPESBrushContext -e -t 0 SHAPESBrushContext1; }")
+	-radialPosition "W";
+
+	menuItem
+	-label "Grab and Pull"
+	-command ("setToolTo SHAPESBrushContext1; if (`window -ex " + $win + "`) { sbUISetSymbolCheckBox 1 sbBrushColumn; } else { SHAPESBrushContext -e -t 1 SHAPESBrushContext1; }")
+	-radialPosition "NW";
+	
+	menuItem
+	-label "Grab and Blend"
+	-command ("setToolTo SHAPESBrushContext1; if (`window -ex " + $win + "`) { sbUISetSymbolCheckBox 2 sbBrushColumn; } else { SHAPESBrushContext -e -t 2 SHAPESBrushContext1; }")
+	-radialPosition "NE";
+	
+	menuItem
+	-label "Grab and Erase"
+	-command ("setToolTo SHAPESBrushContext1; if (`window -ex " + $win + "`) { sbUISetSymbolCheckBox 3 sbBrushColumn; } else { SHAPESBrushContext -e -t 3 SHAPESBrushContext1; }")
+	-radialPosition "E";
+	
+	menuItem
+	-label "Paint Freeze"
+	-command ("sbUIPaintFreeze; if (`window -ex " + $win + "`) { sbUISetSymbolCheckBox 4 sbBrushColumn; }")
+	-radialPosition "SW";
+	
+	menuItem
+	-label "Erase Freeze"
+	-command ("sbUIEraseFreeze; if (`window -ex " + $win + "`) { sbUISetSymbolCheckBox 5 sbBrushColumn; }")
+	-radialPosition "SE";
+	
+	menuItem
+	-label "Relax"
+	-command ("SHAPESBrushContext -e -r #1 SHAPESBrushContext1; if (`window -ex " + $win + "`) symbolCheckBox -e -v #1 sbSmoothRelaxCheck;")
+	-cb `SHAPESBrushContext -q -r SHAPESBrushContext1`
+	-radialPosition "N";
+	
+	menuItem
+	-label "Invert Freeze"
+	-command ("SHAPESBrushContext -e -if #1 SHAPESBrushContext1; if (`window -ex " + $win + "`) menuItem -e -cb #1 sbInvertFreezeCheck;")
+	-cb `SHAPESBrushContext -q -if SHAPESBrushContext1`
+	-radialPosition "S";
+	
+	//
+	// lower gestural menu
+	//
+	
+	menuItem
+	-label "Un-Freeze"
+	-command "sbUIDeleteFreeze";
+	
+	menuItem -divider 1;
+	
+	$val = `SHAPESBrushContext -q -sym SHAPESBrushContext1`;
+	int $axisList[] = {0, 0, 0, 0};
+	$axisList[$val - 1] = 1;
+	
+	int $active = 1;
+	if ($axisList[0] == 1)
+		$active = 0;
+	
+	menuItem
+	-label "Symmetry" 
+	-cb $active
+	-c ("SHAPESBrushContext -e -sym (`sbUIgetSymmetryAxis #1`) SHAPESBrushContext1; if (`window -ex " + $win + "`) optionMenuGrp -e -sl (`sbUIgetSymmetryAxis #1`) sbSymmetryOption;");
+		
+	menuItem
+	-label "Axis"
+	-en $active
+	-sm 1;
+		
+		radioMenuItemCollection;
+		
+		menuItem
+		-label "X Axis"
+		-rb $axisList[1]
+		-c ("SHAPESBrushContext -e -sym 2 SHAPESBrushContext1; if (`window -ex " + $win + "`) optionMenuGrp -e -sl 2 sbSymmetryOption; sbUIsetSymmetryAxis 2");
+		
+		menuItem
+		-label "Y Axis"
+		-rb $axisList[2]
+		-c ("SHAPESBrushContext -e -sym 3 SHAPESBrushContext1; if (`window -ex " + $win + "`) optionMenuGrp -e -sl 3 sbSymmetryOption; sbUIsetSymmetryAxis 3");
+		
+		menuItem
+		-label "Z Axis"
+		-rb $axisList[3]
+		-c ("SHAPESBrushContext -e -sym 4 SHAPESBrushContext1; if (`window -ex " + $win + "`) optionMenuGrp -e -sl 4 sbSymmetryOption; sbUIsetSymmetryAxis 4");
+	
+		setParent -m ..;
+	
+	menuItem
+	-label "Use Plane"
+	-command ("{sbUIUsePlaneAngle; if (`window -ex " + $win + "`) symbolCheckBox -e -v (1 - " + (`sbUIGetUsePlaneState`) + ") sbUsePlaneCheck;}")
+	-cb (`sbUIGetUsePlaneState`);
+	
+	menuItem -divider 1;
+	
+	menuItem
+	-label "Increase Depth"
+	-command "sbUISetDepth 1";
+	
+	menuItem
+	-label "Decrease Depth"
+	-command "sbUISetDepth -1";
+	
+	menuItem
+	-label ("Depth: " + `SHAPESBrushContext -q -d SHAPESBrushContext1`)
+	-en 0;
+	
+	menuItem -divider 1;
+	
+	menuItem
+	-label "Surface Falloff"
+	-command ("{int $val = `SHAPESBrushContext -q -f SHAPESBrushContext1`; SHAPESBrushContext -e -f (1 - $val) SHAPESBrushContext1; if (`window -ex " + $win + "`) optionMenuGrp -e -sl ((1 - $val) + 1) sbFalloffOption;}")
+	-cb `SHAPESBrushContext -q -f SHAPESBrushContext1`;
+	
+	menuItem
+	-label "Curve"
+	-sm 1;
+		
+		$val = `SHAPESBrushContext -q -c SHAPESBrushContext1`;
+		int $valueList[] = {0, 0, 0, 0, 0, 0};
+		$valueList[$val] = 1;
+		
+		radioMenuItemCollection;
+		
+		menuItem
+		-label "Linear"
+		-rb $valueList[0]
+		-c ("if (`window -ex " + $win + "`) sbUISetSymbolCheckBox 0 sbCurveColumn; else SHAPESBrushContext -e -c 0 SHAPESBrushContext1");
+		
+		menuItem
+		-label "Soft"
+		-rb $valueList[1]
+		-c ("if (`window -ex " + $win + "`) sbUISetSymbolCheckBox 1 sbCurveColumn; else SHAPESBrushContext -e -c 1 SHAPESBrushContext1");
+		
+		menuItem
+		-label "Wide"
+		-rb $valueList[2]
+		-c ("if (`window -ex " + $win + "`) sbUISetSymbolCheckBox 2 sbCurveColumn; else SHAPESBrushContext -e -c 2 SHAPESBrushContext1");
+		
+		menuItem
+		-label "Narrow"
+		-rb $valueList[3]
+		-c ("if (`window -ex " + $win + "`) sbUISetSymbolCheckBox 3 sbCurveColumn; else SHAPESBrushContext -e -c 3 SHAPESBrushContext1");
+		
+		menuItem
+		-label "Smooth 1"
+		-rb $valueList[4]
+		-c ("if (`window -ex " + $win + "`) sbUISetSymbolCheckBox 4 sbCurveColumn; else SHAPESBrushContext -e -c 4 SHAPESBrushContext1");
+		
+		menuItem
+		-label "Smooth 2"
+		-rb $valueList[5]
+		-c ("if (`window -ex " + $win + "`) sbUISetSymbolCheckBox 5 sbCurveColumn; else SHAPESBrushContext -e -c 5 SHAPESBrushContext1");
+		
+		setParent -m ..;
+	
+	menuItem -divider 1;
+	
+	menuItem
+	-label "Settings"
+	-sm 1;
+	
+	menuItem
+	-label "Flood Erase"
+	-command ("SHAPESBrushContext -e -fc 2 SHAPESBrushContext1;");
+	
+	menuItem
+	-label "Flush Cache"
+	-command ("SHAPESBrushContext -e -fc 1 SHAPESBrushContext1;");
+	
+	menuItem -divider 1;
+	
+	int $displayWireframe = 1;
+	string $wireString = "none";
+	if (`displayPref -q -wsa` == "none")
+	{
+		$displayWireframe = 0;
+		$wireString = "full";
+	}
+	
+	menuItem
+	-label "Show Wireframe"
+	-command ("displayPref -wsa \"" + $wireString + "\"")
+	-cb $displayWireframe;
+	
+	menuItem
+	-label "Show Brush Circle"
+	-command ("{int $val = `SHAPESBrushContext -q -dc SHAPESBrushContext1`; SHAPESBrushContext -e -dc (1 - $val) SHAPESBrushContext1;}")
+	-cb `SHAPESBrushContext -q -dc SHAPESBrushContext1`;
+	
+	menuItem
+	-label "Ignore History Warning"
+	-command ("optionVar -iv SHAPESIgnoreBrushHistoryWarning #1")
+	-cb `optionVar -q SHAPESIgnoreBrushHistoryWarning`;
+	
+	menuItem
+	-label "Set Plane Angle..."
+	-command ("sbUISetPlaneAngle");
+	
+	menuItem
+	-label "Step Size"
+	-sm 1;
+	
+		menuItem
+		-label "Fine"
+		-command ("SHAPESBrushContext -e -sst 0.01 SHAPESBrushContext1;");
+	
+		menuItem
+		-label "Coarse"
+		-command ("SHAPESBrushContext -e -sst 0.1 SHAPESBrushContext1;");
+	
+		setParent -m ..;
+	
+	sbUIAddBlendMeshSubmenu;
+	
+	setParent -m ..;
+	
+	setParent -m ..;
+}

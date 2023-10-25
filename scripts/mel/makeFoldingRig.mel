@@ -1,0 +1,552 @@
+//make folding rig
+//step by Step
+
+
+//tools
+global proc MFRmakeCenterLoc()//1.make locators
+{	
+	string $temp[] = `ls -sl`;
+	global string $gMove;
+	setToolTo $gMove;
+	float $moveManip[]  = `manipMoveContext -q -position Move`;
+	spaceLocator -p $moveManip[0] $moveManip[1] $moveManip[2];
+	CenterPivot;
+	select $temp;
+}
+
+global proc matchPosition(string $a , string $b)
+{	
+	string $ptCsObj[] = `parentConstraint $b $a`;
+
+	string $findPtCns[] = `listRelatives -type parentConstraint $a`;
+
+	select $findPtCns; doDelete;
+}
+
+global proc int getCVnum(string $curve){
+
+	int $numSpans = `getAttr ( $curve + ".spans" )`;
+	int $degree   = `getAttr ( $curve + ".degree" )`;
+	int $form     = `getAttr ( $curve + ".form" )`;
+
+	int $numCVs   = $numSpans + $degree;
+
+	// Adjust for periodic curve:
+	if ( $form == 2 ) $numCVs -= $degree;
+	
+	return $numCVs;
+}
+
+
+global proc MFRmatchCCshape()
+{
+	string $selection[] = `ls -sl`;
+	int $CVnum = `getCVnum $selection[0]`;
+	
+	for ($i =1 ; $i < size($selection) ; $i++ )
+	{
+	
+		if ( $CVnum == `getCVnum $selection[$i]`)
+		{
+			for ($j = 0 ; $j < $CVnum ; $j++ )
+			{
+				float $CVposition[] = `xform -q -t ($selection[0] + ".cv[" + $j + "]")`;
+				
+				xform -t $CVposition[0]	$CVposition[1]	$CVposition[2] ($selection[$i] + ".cv[" + $j + "]");		
+			
+			}
+		}
+		else
+			print "curves are not matching.\n";
+	}	
+}
+
+global proc MFRmakeCurve(int $type)
+{	
+	string $curve;
+	
+	//position
+	global string $gMove;
+	setToolTo $gMove;
+	float $moveManip[]  = `manipMoveContext -q -position Move`;
+	
+	if ($type == 1)	{	// circle.		
+		string $temp[] = `circle -n "sampleCurve" -c 0 0 0 -nr 0 1 0 -sw 360 -r 1 -d 3 -ut 0 -tol 10 -s 8 -ch 0`;
+		$curve = $temp[0];
+	}	
+	
+	else if ($type == 2) // squareCurve.	
+		$curve = `curve -n "sampleCurve" -d 1 -p 1 0 1 -p 1 0 -1 -p -1 0 -1 -p -1 0 1 -p 1 0 1 -k 0 -k 1 -k 2 -k 3 -k 4` ;	
+	
+	else if ($type == 3) // boxCurve.
+		$curve = `curve -n "sampleCurve" -d 1 -p 0.5 -0.5 0.5 -p 0.5 0.5 0.5 -p -0.5 0.5 0.5 -p -0.5 -0.5 0.5 -p 0.5 -0.5 0.5 -p 0.5 -0.5 -0.5 -p 0.5 0.5 -0.5 -p -0.5 0.5 -0.5 -p -0.5 -0.5 -0.5 -p -0.5 -0.5 0.5 -p -0.5 0.5 0.5 -p -0.5 0.5 -0.5 -p -0.5 -0.5 -0.5 -p 0.5 -0.5 -0.5 -p 0.5 0.5 -0.5 -p 0.5 0.5 0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15` ;
+	
+	setAttr ($curve + ".t") $moveManip[0] $moveManip[1] $moveManip[2];
+	//print $moveManip;	
+}
+
+global proc MFRchangeColorCrv()
+{
+	int $index = `colorIndexSliderGrp -q -v MFRcolorSliderG`;	
+	print $index;
+	string $sel[] = `ls -sl`;
+	for ($curSel in $sel)
+	{
+		string $type = `objectType $curSel`;
+		string $curveShape;		
+		if ( $type == "transform" )
+		{
+			string $temp[] = `listRelatives -c -s -type "nurbsCurve" $sel[0]`;
+			$curveShape = $temp[0];
+			setAttr ($curveShape + ".overrideEnabled") 1;
+			setAttr ($curveShape + ".overrideColor") $index ;			
+		}	
+		else if ( $type == "nurbsCurve" )
+		{
+			$curveShape = $curSel;			
+			setAttr ($curveShape + ".overrideEnabled") 1;
+			setAttr ($curveShape + ".overrideColor") $index ;
+		}
+		
+	}	
+
+}
+
+global proc MFRcutFaceTool(int $divideNum ,	int $hingeNum ,	float $offsetHinge , int $loc)
+{	
+	string $selMesh[] = `ls -sl`;
+	
+	float $BBsize[] = `getMultipleBB $selMesh`;	
+	
+	float $yMax = $BBsize[4];
+	float $yMin = $BBsize[1];
+	float $height = $yMax - $yMin;
+	
+	float $xPosition = $BBsize[0] + (($BBsize[3] - $BBsize[0])/2);
+	float $zPosition = $BBsize[2] + (($BBsize[5] - $BBsize[2])/2);
+	
+	string $locList[];
+	int $l=0;
+	string $temp[];
+	
+	if ($loc) {
+		$temp = `spaceLocator -p $xPosition $yMin $zPosition`;
+		$locList[$l++] = $temp[0];
+		CenterPivot;	
+	}	
+	
+	for ( $i = 1 ; $i <= ($divideNum*$hingeNum) ; $i++ ) {
+		float $cutHeight = $yMin + ( ($height / ($divideNum + 1)) * ((($i-1)/$hingeNum)+1) ) ;
+		
+		
+		if ($i%$hingeNum == 1)
+			$cutHeight = $cutHeight - $offsetHinge;
+		else if ($i%$hingeNum == 0)
+			$cutHeight = $cutHeight + $offsetHinge;
+		
+		for ( $curMesh in $selMesh ) {	
+			string $curPolyCut[] = `polyCut  -ws 1  -cd "Y" -ch 1 $curMesh`;	
+			setAttr ($curPolyCut[0]+ ".cutPlaneCenterY") $cutHeight;			
+		}
+		
+		if ($loc) {
+			$temp = `spaceLocator -p $xPosition $cutHeight $zPosition`;
+			$locList[$l++] = $temp[0];
+			CenterPivot;	
+		}
+		
+	}
+	
+	if ($loc) {
+		$temp = `spaceLocator -p $xPosition $yMax $zPosition`;
+		$locList[$l] = $temp[0];
+		CenterPivot;
+		select $locList;
+		MFRaddLoc MFRlocatorListTsl;
+	}
+
+	//UI에 적용.
+	
+	select $selMesh;
+	MFRgetSelection MFRmeshTxg;	
+
+}
+
+global proc float[] getMultipleBB ( string $skinList[] ) {
+	
+	float $bounds[];
+
+	float $skinMinBoundsX[];
+	float $skinMinBoundsY[];
+	float $skinMinBoundsZ[];
+	float $skinMaxBoundsX[];
+	float $skinMaxBoundsY[];
+	float $skinMaxBoundsZ[];
+
+	for( $skin in $skinList ) {
+
+	$skinMinBoundsX[( `size $skinMinBoundsX` )] = `getAttr ( $skin + ".boundingBoxMinX" )`;
+
+	$skinMinBoundsY[( `size $skinMinBoundsY` )] = `getAttr ( $skin + ".boundingBoxMinY" )`;
+
+	$skinMinBoundsZ[( `size $skinMinBoundsZ` )] = `getAttr ( $skin + ".boundingBoxMinZ" )`;
+
+	$skinMaxBoundsX[( `size $skinMaxBoundsX` )] = `getAttr ( $skin + ".boundingBoxMaxX" )`;
+
+	$skinMaxBoundsY[( `size $skinMaxBoundsY` )] = `getAttr ( $skin + ".boundingBoxMaxY" )`;
+
+	$skinMaxBoundsZ[( `size $skinMaxBoundsZ` )] = `getAttr ( $skin + ".boundingBoxMaxZ" )`;
+
+	}
+
+
+	$skinMinBoundsX = `sort $skinMinBoundsX`;
+
+	$skinMinBoundsY = `sort $skinMinBoundsY`;
+
+	$skinMinBoundsZ = `sort $skinMinBoundsZ`;
+
+	$skinMaxBoundsX = `sort $skinMaxBoundsX`;
+
+	$skinMaxBoundsY = `sort $skinMaxBoundsY`;
+
+	$skinMaxBoundsZ = `sort $skinMaxBoundsZ`;
+
+
+
+	$bounds[0] = $skinMinBoundsX[0];
+
+	$bounds[1] = $skinMinBoundsY[0];
+
+	$bounds[2] = $skinMinBoundsZ[0];
+
+	$bounds[3] = $skinMaxBoundsX[( `size $skinMaxBoundsX` - 1 )];
+
+	$bounds[4] = $skinMaxBoundsY[( `size $skinMaxBoundsY` - 1 )];
+
+	$bounds[5] = $skinMaxBoundsZ[( `size $skinMaxBoundsZ` - 1 )];
+
+	return $bounds;
+
+}
+
+
+
+
+
+// 툴사용 순서
+//1.먼저 locator로 joint가 생길 위치를 표시한다.
+
+//2.locator 위치에 joint 생성.
+
+global proc MFRmakeJoint(){
+	
+	
+	string $mesh = `textFieldButtonGrp -q -text MFRmeshTxg`;
+	if ( size($mesh) == 0 )
+	error "please add mesh or control name\n";	
+
+	string $array[] = stringToStringArray($mesh, " ");	
+	
+	string $locatorList[] = `textScrollList -q -ai MFRlocatorListTsl`;
+	if ( size($locatorList) == 0 )
+	error "no locator added in the list\n";		
+	
+	string $jointList[];
+	
+	
+	
+	for ( $i = 0 ; $i < size($locatorList) ; $i++ ) 
+	{
+		if ($i == 0)
+		{
+			select -cl;
+			textScrollList -e -ra MFRjointListTsl;
+		}	
+			
+		float $curPosition[] = `xform -ws -q -scalePivot $locatorList[$i]`;		
+		//print ($curPosition[0] + ","+ $curPosition[1] + ","+  $curPosition[2]+"\n");
+		$jointList[$i] = `joint -n ("bn_" + $array[0] + "_" + $i) -p $curPosition[0] $curPosition[1] $curPosition[2]`;
+		textScrollList -e -a $jointList[$i] MFRjointListTsl;		
+	}
+	
+	print $jointList;
+	
+}
+
+//controller 생성.
+global proc MFRmakeCC()
+{
+
+//makeController
+	string $sampleCC = `textFieldButtonGrp -q -text MFRCCTxg`;
+	string $curveList[];
+	string $extraCCList[];
+	string $temp[];
+	
+	string $jointList[] = `textScrollList -q -ai MFRjointListTsl`;	
+	
+	textScrollList -e -ra MFRCCListTsl;	
+	
+	for ($i=0 ; $i < size($jointList)-1 ; ++$i ) 
+	{
+	    
+	    string $curCCName = `substitute "bn_" $jointList[$i] ""`;	
+		string $curCC[] = `duplicate -n ("cc_" + $curCCName) $sampleCC `;
+		if ($i != 0)
+		{
+			$temp = `parent $curCC[0] $curveList[$i-1]`;
+			$curveList[$i] = $temp[0];
+		} 
+		
+		//match position
+		matchPosition $curCC[0] $jointList[$i];
+		parentConstraint $curCC[0] $jointList[$i];		
+		
+		//group
+		string $extraGrp[] = `duplicate -po -n ("cc_extra_" + $curCCName) $curCC[0] `;
+		string $offsetGrp[] = `duplicate -po -n ("cc_offset_" + $curCCName) $curCC[0] `;
+		$temp = `parent $curCC[0] $extraGrp[0]`;
+		parent $extraGrp[0] $offsetGrp[0];
+		$extraCCList[$i] = $extraGrp[0];
+		$curveList[$i] = $temp[0];
+		
+		textScrollList -e -a $curveList[$i] MFRCCListTsl;		
+				
+	}
+	
+}
+
+global proc makeCCGroup(){
+
+//컨트롤러 (cc_*)을 선택하고 실행.
+//extra_grp와 offset_grp 만든다.
+
+	string $listCC[] = `ls -sl`;
+
+	for ($curCC in $listCC){
+	    
+	    string $curCCName = `substitute "cc_" $curCC ""`;
+
+		//group
+		string $extraGrp[] = `duplicate -po -n ("cc_extra_" + $curCCName) $curCC `;
+		string $offsetGrp[] = `duplicate -po -n ("cc_offset_" + $curCCName) $curCC `;
+		parent $curCC $extraGrp[0];
+		parent $extraGrp[0] $offsetGrp[0];
+		
+	}
+}
+
+global proc MFRmakeFold()
+{
+	string $CCList[] = `textScrollList -q -ai MFRCCListTsl`;
+	string $extraList[] = `listRelatives -p $CCList`;
+	
+	string $foldCurve = `textFieldButtonGrp -q -text MFRFoldTxg`;
+	
+	if ( !`objExists $foldCurve` )
+		$foldCurve = $CCList[0];	
+	
+	//get option
+	int $foldDir = `radioButtonGrp -q -sl MFRfoldDirRbg`;
+	int $foldstep = `radioButtonGrp -q -sl MFRfoldStepRbg`;
+	int $FirstFoldDir = `radioButtonGrp -q -sl MFRfirstFoldDirRbg`;
+	
+	if ( $foldDir == 0 && $foldstep == 0 && $FirstFoldDir == 0 )
+		error "select option first\n";
+	
+	string $fd ;
+	int $fs, $ffd;	
+	if ($foldDir == 1) $fd = ".rotateX"; else if ($foldDir == 2) $fd = ".rotateY"; else if ($foldDir == 3) $fd = ".rotateZ";
+	if ($foldstep == 1) $fs = 2; else if ($foldstep == 2) $fs = 3;
+	if ($FirstFoldDir == 1) $ffd = -1; else if ($FirstFoldDir == 2) $ffd = 1;
+	
+	//add fold Attr
+	addAttr -ln "fold" -at double  -min 0 -max 10 -dv 0 -keyable true $foldCurve;
+	
+	for ($i = 0 ; $i < size($extraList) ; $i++)
+	{
+		int $rot;
+		if ( $i == 0 )
+			$rot = ($ffd * 90);
+		else if ( (($i-1)/$fs)%2 == 0 ) 
+			$rot =  $ffd * ( 180/$fs ) * -1;
+		else
+			$rot = $ffd * ( 180/$fs );
+		
+		setDrivenKeyframe -itt linear -ott linear -dv 0 -v 0 -currentDriver ($foldCurve + ".fold") ($extraList[$i] + $fd);
+		setDrivenKeyframe -itt linear -ott linear -dv 10 -v $rot -currentDriver ($foldCurve + ".fold") ($extraList[$i] + $fd);
+		
+	
+	}
+
+	
+}
+
+global proc MFRmakeskin()
+{
+	string $mesh = `textFieldButtonGrp -q -text MFRmeshTxg`;
+	if ( size($mesh) == 0 )
+	error "please add mesh or control name\n";
+	string $jointList[] = `textScrollList -q -ai MFRjointListTsl`;
+	if ( size($jointList) == 0 )
+	error "no joint connected.\n";
+	
+	string $array[] = stringToStringArray($mesh, " ");
+	
+	for ($curMesh in $array) {
+		skinCluster -n ("skinCluster_" + $curMesh) -mi 1 -dr 4.5 -tsb $jointList $curMesh ;
+	}
+	
+}
+
+
+//UI관련
+global proc MFRgetSelection(string $UI)
+{
+	string $sel[] = `ls -sl`;
+	
+	string $selections = stringArrayToString($sel, " ");	
+	
+	textFieldButtonGrp -e -text $selections $UI;
+}
+global proc MFRaddLoc(string $UI)
+{
+	string $sel[] = `ls -sl`;	
+	textScrollList -e -ra $UI;	
+	for ( $curLoc in $sel )
+		textScrollList -e -a $curLoc $UI;	
+}
+
+
+//UI
+global proc makeFoldingRig() //MFR
+{
+	if(`window -exists b1MakeFoldingRigWin`)
+		deleteUI b1MakeFoldingRigWin;
+	
+	window  -width 500 -height 250
+		-resizeToFitChildren 0
+		-menuBar true
+		-maximizeButton true
+		-titleBar true
+		-sizeable 1
+		-menuBarVisible true
+		-title "makeFoldingRig"
+		b1MakeFoldingRigWin;
+	
+	columnLayout MFRcolA;
+
+	//mesh to skin
+	textFieldButtonGrp  -label "mesh to rig:" -text "" -cw3 80 250 100 -cat 1 right 10 	
+	-buttonLabel " select " -bc ("MFRgetSelection MFRmeshTxg") MFRmeshTxg;
+	
+	
+	
+	rowColumnLayout -nc 2 -cw 1 165 -cw 2 300 
+						-cat 1 right 10 -cat 2 left 15 
+						MFRrowcolAa;
+	
+	columnLayout MFRcolAaa;
+	//locator등록.
+	separator -style "in" -h 10;  
+	text -l "1. add locator ";				
+	textScrollList -numberOfRows 4 -allowMultiSelection true
+						-w 150 -h 247 -sc "" MFRlocatorListTsl;
+	button -l "+ add locator" -w 150 -c "MFRaddLoc MFRlocatorListTsl";		
+
+	setParent MFRrowcolAa ;
+	
+	columnLayout MFRcolAab;
+	separator -style "in" -h 10;  
+	//make joint
+	text -l "2. make joint chain ";	
+	button -l "make joint" -w 150 -c "MFRmakeJoint";
+	textScrollList -numberOfRows 4 -allowMultiSelection true -vis 0
+						-w 150 -h 100 -sc "" MFRjointListTsl;					
+			
+						
+	separator -style "in" -h 10; 
+	//sample controller 등록.
+	text -l "3. select sample curve ";		
+	textFieldButtonGrp  -label "curve:" -text "" -cw3 50 120 100 -cat 1 right 10 	
+	-buttonLabel " select " -bc ("MFRgetSelection MFRCCTxg") MFRCCTxg;	
+	textFieldButtonGrp  -label "fold:" -text "" -cw3 50 120 100 -cat 1 right 10 	
+	-buttonLabel " select " -bc ("MFRgetSelection MFRFoldTxg") MFRFoldTxg;	
+	
+	separator -style "in" -h 10; 
+	//make controller
+	text -l "4. make control rig ";	
+	button -l "make controller" -w 150 -c "MFRmakeCC";
+	textScrollList -numberOfRows 4 -allowMultiSelection true -vis 0
+						-w 150 -h 100 -sc "" MFRCCListTsl;	
+	
+	//folding option.
+	separator -style "in" -h 10; 	
+	text -l "5. make folding rig ";
+	radioButtonGrp -numberOfRadioButtons 3 -cw4 120 50 50 50 -sl 1
+    -label "folding direction : " -labelArray3 "X" "Y" "Z" MFRfoldDirRbg;
+	radioButtonGrp -numberOfRadioButtons 2 -cw3 120 50 50 -sl 1
+    -label "folding step : " -labelArray2 "2" "3" MFRfoldStepRbg;
+	radioButtonGrp -numberOfRadioButtons 2 -cw3 120 50 50 -sl 1
+    -label "first folding direction : " -labelArray2 "-" "+" MFRfirstFoldDirRbg;
+	
+	button -l "make folding" -w 150 -c "MFRmakeFold";
+	
+	//skin.
+	separator -style "in" -h 10; 	
+	text -l "5. skin ";
+	button -l "smooth bind" -w 150 -c "MFRmakeskin";
+	
+			
+	setParent MFRrowcolAa ;	
+		
+	setParent MFRcolA ;
+	
+	//tools	
+	separator -style "in" -h 10;  
+	
+	rowLayout -nc 5 -cw 1 110 -cw 2 40 -cw 3 40 -cw 4 100 MFRrowColAb;
+	button -l "cutPoly" -w 100 
+			-c "MFRcutFaceTool `intField -q -v MFRcutDevide` `intField -q -v MFRcutHinge` `floatField -q -v MFRcutoffset` `checkBox -q -v MFRlocCB`";
+	intField -minValue -10 -maxValue 10 -value 3 -ann "how many cut" MFRcutDevide;
+	intField -minValue 2 -maxValue 4 -value 2 -s 1 -ann "hinge number" MFRcutHinge;
+	floatField -minValue -1.0 -maxValue 1.0 -value .02 -ann "offset of hinge" MFRcutoffset;
+	columnLayout -adjustableColumn true;
+    checkBox -label "create locator" -v 1 MFRlocCB;
+	setParent MFRcolA ;
+	
+	
+	
+	rowColumnLayout -nc 2 -cw 1 300 -cw 2 100 MFRrowColAc;
+	
+	optionMenuGrp -l "curve type:" -cw2 80 120 MFRmakeCurveOmg;
+		menuItem -label "circle";
+		menuItem -label "ractangle";
+		menuItem -label "cube";
+		
+	button -l "makeCurve" -w 100 -c "MFRmakeCurve `optionMenuGrp -q -sl MFRmakeCurveOmg`;";	
+		
+	setParent MFRcolA ;
+	
+	rowColumnLayout -nc 3 -cw 1 200 -cw 2 200 -cw 3 200 MFRrowColAd;
+	
+	//center locator 생성.
+	iconTextButton -style "iconAndTextHorizontal"
+		-image1 "cone.png" -label "create center locator" -c "MFRmakeCenterLoc" ;
+	iconTextButton -style "iconAndTextHorizontal"
+		-image1 "cone.png" -label "match curve shape" -c "MFRmatchCCshape" ;	
+	iconTextButton -style "iconAndTextHorizontal"
+		-image1 "cone.png" -label "match cc group" -c "makeCCGroup" ;
+	
+	
+	
+	
+	setParent MFRcolA ;
+	
+	setParent .. ;
+	showWindow b1MakeFoldingRigWin;
+	
+}
+
+makeFoldingRig;

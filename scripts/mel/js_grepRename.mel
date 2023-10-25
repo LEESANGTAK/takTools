@@ -1,0 +1,75 @@
+/*
+    Script:     js_grepRename
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      replaces $searchString on the selected objects with $replaceString
+                if $dup == 1, then it will duplicate the objects first, then select their children,
+                then rename those.
+
+*/
+global proc js_grepRename ( string $searchString, string $replaceString, int $dup)
+{
+
+
+    string $objs[0];
+    $objs = `ls -sl`;
+  
+    if (size($objs) > 0)
+    {
+        // create a dummy node for keeping track of all the objects.  when we rename them, it may change the object's
+        // names, which could get confusing for maya.
+        $node = `createNode unknown`;
+        addAttr -ln "selObjects" -at message -multi -im 0;
+
+        if ($dup == 1)
+        {
+            // duplicate the objects
+            $duplicated = `duplicate -rr $objs`;
+
+            string $newObj[0];
+            // the $duplicated objects are the original ones.  We want to rename those the same as the orig, except with the new names.
+            for ($x = 0; $x < size($duplicated); $x++)
+            {
+                $newName = `substitute $searchString $objs[$x] $replaceString`;
+                $newObj[$x] = `rename $duplicated[$x] $newName`;
+
+            }
+
+            // now we gotta get all the children of the duplicated object and pass those through
+            $objs = `listRelatives -f -ad $newObj`;
+        }
+
+        for ($obj in $objs)
+        {
+            // connect the attributes
+            connectAttr -na ($obj + ".message") ($node + ".selObjects");
+        }
+
+        $con = `listConnections ($node + ".selObjects")`;
+       
+        for ($x = 0; $x < size($con); $x++)
+        {
+            string $tmp[0];
+            string $tmp2[0];
+            $tmp = `listConnections ($node + ".selObjects["+$x+"]")`;
+            tokenize ($tmp[0], "|", $tmp2);
+            string $shortName = $tmp2[(size($tmp2)-1)];
+            string $object = $tmp[0];
+        
+            // replace the $searchString with $replaceString in $shortName
+            $newName = `substitute $searchString $shortName $replaceString`;
+
+            // rename the object
+            $result = `rename $object $newName`;
+            
+            print ("// Renamed: " + $object + " --> " + $result + "\n");
+        } 
+        $objs = `listConnections ($node + ".selObjects")`;
+        delete $node;
+
+        //if (size($objs) > 0)
+            //select $objs;
+    }
+}

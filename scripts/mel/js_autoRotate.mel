@@ -1,0 +1,256 @@
+/*
+    Script:     js_autoRotate
+    Version:    1.0
+    Author:     jason schleifer
+    Website:    http://jonhandhisdog.com
+    
+    Descr:      This script will auto-rotate the selected object based on it's movement for the selected frame range.
+                It works by using hte diameter of the object.  If the object you want to rotate doesn't contain the actual 
+                diameter of hte item that will be rotating (for example, you rotate a nurbs curve that controls the rotating object,
+                you can use the procedure: js_connectRotateObj $target $dest to copy the diameter.
+
+	Exec:       Run the script by selecting the object, then hilighting the frames you want the auto-rotate to occur for in the 
+                timeline, and typing:
+                js_autoRotate;
+
+
+*/
+
+global proc js_autoRotate ()
+{
+	string $objs[0];
+	string $range;
+	float $curPosX;
+	float $curPosZ;
+	float $prevPosX;
+	float $prevPosZ;
+	float $pi = 3.1415927;
+	int $startFrame;
+	int $endFrame; 
+	float $diameter;
+	string $tmpBreak[0];
+	global string $gPlayBackSlider;
+
+	// get the selected objects
+	$objs = `ls -sl -type transform`;
+
+	// get the frame range
+	$range = `timeControl -q -range $gPlayBackSlider`;
+	// remove the quotes
+	$size = size($range);
+	$range = substring ($range, 2, ($size-1));	
+	tokenize ($range, ":", $tmpBreak);
+	$startFrame = $tmpBreak[0];
+	$endFrame = $tmpBreak[1];
+			
+	// check and make sure autoKeyframe is off
+	int $state = `autoKeyframe -q -state`;
+	autoKeyframe -state off;
+
+	currentTime -e $startFrame; 
+	refresh ;
+	for ($ob in $objs)
+	{
+			// find the diameter of the object		
+            // let's check and see if there's a diameterObject.  If so, then THAT'S where we're going to get our diameter from,
+            // not from the object itself.
+            if (`attributeQuery -exists -node $ob "diameterObj"`)
+            {
+                // this object is looking at another one for it's diameter.  we'll find the diameter of THAT object
+                $connected = `listConnections ($ob + ".diameterObj")`;
+                $diameter = `js_findDiameter $connected[0]`;
+            }
+			// first check and see if a diameter attribute has been given.  If not, then we'll need to check the bounding box.
+			//if (`attributeQuery -exists -node $ob "diameter"`)
+			//{
+				//$diameter = `getAttr ($ob + ".diameter")`;
+			//}
+			else
+			{
+				// this will be done based on the bounding box.  However, if the object is a nurbs object, the bounding box
+				// may not be accurate, so we'll need to convert it to a polygon temporarily to get the diameter.
+
+				$diameter = `js_findDiameter  $ob `;	
+			}
+
+			// add prevX and prevZ
+			if (!`attributeQuery -exists -node $ob "prevPoseX"`)
+			{
+				addAttr -at "double" -ln "prevPoseX" $ob;
+			}
+		
+			if (!`attributeQuery -exists -node $ob "prevPoseZ"`)
+			{
+				addAttr -at "double" -ln "prevPoseZ" $ob;
+			}
+
+			// add prevRot
+			if (!`attributeQuery -exists -node $ob "prevRot"`)
+			{
+				addAttr -at "double3" -ln "prevRot" $ob;		
+				addAttr -at double -ln "prevRotX" -parent "prevRot" $ob;
+				addAttr -at double -ln "prevRotY" -parent "prevRot" $ob;
+				addAttr -at double -ln "prevRotZ" -parent "prevRot" $ob;
+			}
+
+			$rot = `getAttr ($ob + ".r")`;
+			setAttr ($ob + ".prevRot") $rot[0] $rot[1] $rot[2];
+
+			$t = `getAttr ($ob + ".t")`;
+			setAttr ($ob + ".prevPoseX") $t[0];
+			setAttr ($ob + ".prevPoseZ") $t[2];
+	}
+
+	for ($x = $startFrame; $x <= $endFrame; $x++)
+	{
+		currentTime -e $x;
+		
+		for ($ob in $objs)		
+		{
+	
+			if (`attributeQuery -exists -node $ob "diameterObj"`)
+            {
+                $connected = `listConnections ($ob + ".diameterObj")`;
+                $diameter = `js_findDiameter $connected[0]`;
+            }
+            else
+            {
+                $diameter = `js_findDiameter  $ob `;	
+            }
+			//$diameter = `getAttr ($ob + ".diameter")`;
+
+			// now that we have the diameter, we want to store the current position, then cycle through all the keys
+			// in the range and rotate the object based on the amount of translation.
+			
+			$curPoseX = `getAttr ($ob + ".tx")`;
+			$curPoseZ = `getAttr ($ob + ".tz")`;	
+
+			$prevPoseX = `getAttr ($ob + ".prevPoseX")`;
+			$prevPoseZ = `getAttr ($ob + ".prevPoseZ")`;
+			
+			setAttr ($ob + ".prevPoseX") $curPoseX;	
+			setAttr ($ob + ".prevPoseZ") $curPoseZ;	
+
+			float $prevRot[0];
+			$prevRot = `getAttr ($ob + ".prevRot")`;	
+				
+			setAttr ($ob + ".r") $prevRot[0] $prevRot[1] $prevRot[2];
+				
+				// get the distance it's traveled in X and Y
+				float $x = $curPoseX - $prevPoseX;
+				float $z = $curPoseZ - $prevPoseZ;
+
+				//$rz = $pi * $x * $diameter * $pi * -1;
+				//$rx = $pi * $z * $diameter * $pi ;
+				
+				//rotate -ws -r $rx 0 $rz $ob;
+
+				float $d = sqrt($x * $x + $z*$z);
+				
+				if( $d > 0.00001 ){
+						$x /= $d;
+						$z /= $d;
+						float $piD = $pi * $diameter;
+						float $xrot = 360.0 * $d/$piD;
+						float $yrot =  rad_to_deg( atan2( $x, $z ));
+				
+				// rotate the object
+				  rotate -ws -r 0 (-$yrot) 0 $ob;
+				  rotate -ws -r ($xrot) 0 0 $ob;
+				  rotate -ws -r 0 ($yrot) 0 $ob;
+
+				// set the previous position
+				setKeyframe -at "rotate" $ob;	
+
+				$prevRot = `getAttr ($ob + ".r")`;
+				setAttr ($ob + ".prevRot") $prevRot[0] $prevRot[1] $prevRot[2];
+				}
+			}
+	}
+	// return autoKeyframe to it's previous state
+	autoKeyframe -state $state;
+
+	// now we need to filter the rotation curves on the objects
+	js_filterCurves $objs $startFrame $endFrame;
+
+	select $objs;
+}
+
+global proc js_filterCurves (string $objs[], int $startFrame, int $endFrame)
+{
+	string $curves[0];
+	int $curveCount = 0;
+	string $tmpCon[0];
+	for ($item in $objs)
+	{
+		// find the animtion curves
+		$tmpCon = `listConnections -p false -s true -d false ($item + ".rx")`;
+		$curves[$curveCount++] = $tmpCon[0];
+		$tmpCon = `listConnections -p false -s true -d false ($item + ".ry")`;
+		$curves[$curveCount++] = $tmpCon[0];
+		$tmpCon = `listConnections -p false -s true -d false ($item + ".rz")`;
+		$curves[$curveCount++] = $tmpCon[0];
+	}	
+	
+	select $curves;
+	filterCurve -startTime $startFrame -endTime $endFrame;
+}
+
+global proc float js_findDiameter (string $target)
+{
+	// check and see if the shape of the item selected is a nurbs or poly object
+	$shape = `listRelatives -f -s $target`;
+	float $min;
+	float $max;
+	float $diameter;
+
+	if (`nodeType $shape[0]` == "nurbsSurface")
+	{
+		// we will have to convert the object to a polygon so we can get the acurate bounding box
+		$convert = ` nurbsToPoly -mnd 1  -ch 1 -f 1 -pt 0 -pc 200 -chr 0.9 -ft 0.01 -mel 0.001 -d 0.1 -ut 1 -un 3 -vt 1 -vn 3 -uch 0 -ucr 0 -cht 0.2 -es 0 -ntr 0 -mrt 0 -uss 1 $target`;
+		
+		$min = `getAttr ($convert[0] + ".boundingBoxMinX")`;
+		$max = `getAttr ($convert[0] + ".boundingBoxMaxX")`;
+
+		delete $convert;
+	}
+	else
+	{
+		$min = `getAttr ($target + ".boundingBoxMinX")`;
+		$max = `getAttr ($target + ".boundingBoxMaxX")`;
+	}
+
+	$diameter = $max - $min;
+	
+	return $diameter;
+}
+
+global proc js_connectRotateObj (string $target, string $dest)
+{
+	if (!`attributeQuery -exists -node $dest "diameterObj"`)
+		addAttr -ln "diameterObj" -at message $dest;
+
+	connectAttr -f ($target + ".message") ($dest + ".diameterObj") ;
+
+}
+global proc js_connectRotateObjSel ()
+{
+    // looks at the currently selected objects and makes the connection for you.
+    // the first object should be the control, or destination..
+    // the second object should be the geo or target.
+    string $objs[0];
+    $objs = `ls -sl`;
+    if (size($objs) <=1)
+    {
+        error ("Not enough objects are selected.  You need 2 objects.\n");
+    }
+    else
+    {
+        $control = $objs[0];
+        $geo = $objs[1];
+
+        $cmd = ("source js_autoRotate;js_connectRotateObj \"" + $geo + "\" \"" + $control + "\"");
+        evalEcho $cmd;
+    }
+
+}

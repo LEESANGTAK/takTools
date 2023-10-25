@@ -1,0 +1,191 @@
+// mopKnitOptions.mel
+//
+// Author:  Paul "MoP" Greveson
+// Contact: paul@greveson.co.uk
+// Website: www.greveson.co.uk
+// Last updated: 9:06 PM 9/28/2008
+// Version: 1.1
+//
+// Inspired by Slide London's "SlideKnit" Max script - http://slidelondon.com/iv
+//
+// Make sure mopKnit.mel and mopKnitOptions.mel are in your Maya scripts folder.
+// Use the command "mopKnit" to launch the script with default options.
+// Use the command "mopKnitOptions" to show the options window.
+
+
+// Procedure to pop open an options window for the mopKnit procedure.
+global proc mopKnitOptions() {
+	if ( `window -q -ex mopKnitOptionsWnd` ) {
+		deleteUI -wnd mopKnitOptionsWnd;
+	}
+	
+	// Default options, use any stored option variables.
+	int $origin = 0;
+	string $facing = "Z";
+	int $autoScale = 1;
+	float $scale = 100.0;
+	if ( `optionVar -ex "mopKnitOrigin"` ) {
+		$origin = `optionVar -q "mopKnitOrigin"`;
+	}
+	if ( `optionVar -ex "mopKnitFacing"` ) {
+		$facing = `optionVar -q "mopKnitFacing"`;
+	}
+	if ( `optionVar -ex "mopKnitAutoScale"` ) {
+		$autoScale = `optionVar -q "mopKnitAutoScale"`;
+	}
+	if ( `optionVar -ex "mopKnitScale"` ) {
+		$scale = `optionVar -q "mopKnitScale"`;
+	}
+	
+	// Create the window.
+	window -s 1 -t "mopKnit Options" mopKnitOptionsWnd;
+	formLayout -parent mopKnitOptionsWnd mopKnitOptionsForm;
+	
+	// Create the decription frame.
+	frameLayout -label "Description" -la "center" -li 5 -bs "etchedIn" -parent mopKnitOptionsForm mopKnitDescriptionFrame;
+	formLayout -parent mopKnitDescriptionFrame mopKnitDescriptionForm;
+	text -label "Creates a new object with a blendShape to the UV layout." mopKnitDescriptionText;
+	
+	formLayout -edit
+		-af mopKnitDescriptionText    "top"    3
+		-af mopKnitDescriptionText    "left"   15
+		-af mopKnitDescriptionText    "bottom" 3
+		mopKnitDescriptionForm;
+	
+	// Create the settings frame.
+	frameLayout -label "Settings" -la "center" -li 5 -bs "etchedIn" -parent mopKnitOptionsForm mopKnitSettingsFrame;
+	formLayout -parent mopKnitSettingsFrame mopKnitSettingsForm;
+	
+	// Get which radio buttons we should select.
+	int $originRadio = 1;
+	if ( $origin == 1 ) {
+		$originRadio = 2;
+	}
+	
+	int $facingRadio = 1;
+	if ( $facing == "Y" ) {
+		$facingRadio = 2;
+	}
+	else if ( $facing == "Z" ) {
+		$facingRadio = 3;
+	}
+	
+	radioButtonGrp
+		-nrb 2
+		-vr
+		-l "Origin:"
+		-la2 "Object" "World"
+		-sl $originRadio
+		-on1 "optionVar -iv \"mopKnitOrigin\" 0"
+		-on2 "optionVar -iv \"mopKnitOrigin\" 1"
+		-parent mopKnitSettingsForm
+		mopKnitOriginRadio;
+	radioButtonGrp
+		-nrb 3
+		-vr
+		-l "Layout facing:"
+		-la3 "X" "Y" "Z"
+		-sl $facingRadio
+		-on1 "optionVar -sv \"mopKnitFacing\" \"X\""
+		-on2 "optionVar -sv \"mopKnitFacing\" \"Y\""
+		-on3 "optionVar -sv \"mopKnitFacing\" \"Z\""
+		-parent mopKnitSettingsForm
+		mopKnitFacingRadio;
+	text -l "Scale:" -parent mopKnitSettingsForm mopKnitScaleText;
+	checkBox
+		-v $autoScale
+		-l "Auto-detect"
+		-onc "floatField -e -en 0 mopKnitScaleField; floatSlider -e -en 0 mopKnitScaleSlider; optionVar -iv \"mopKnitAutoScale\" 1"
+		-ofc "floatField -e -en 1 mopKnitScaleField; floatSlider -e -en 1 mopKnitScaleSlider; optionVar -iv \"mopKnitAutoScale\" 0"
+		-parent mopKnitSettingsForm
+		mopKnitScaleChk;
+	floatField
+		-pre 1
+		-min 1.0
+		-max 500.0
+		-v $scale
+		-s 0.1
+		-cc "float $val = `floatField -q -v mopKnitScaleField`; floatSlider -e -v $val mopKnitScaleSlider; optionVar -fv \"mopKnitScale\" $val"
+		-dc "float $val = `floatField -q -v mopKnitScaleField`; floatSlider -e -v $val mopKnitScaleSlider; optionVar -fv \"mopKnitScale\" $val"
+		-parent mopKnitSettingsForm
+		mopKnitScaleField;
+	floatSlider
+		-min 1.0
+		-max 500.0
+		-v $scale
+		-s 0.1
+		-dc "float $val = `floatSlider -q -v mopKnitScaleSlider`; floatField -e -v $val mopKnitScaleField; optionVar -fv \"mopKnitScale\" $val"
+		-parent mopKnitSettingsForm
+		mopKnitScaleSlider;
+		
+	// Disable float field & slider if "Auto-detect" is checked.
+	if ( $autoScale == 1 ) {
+		floatField -e -en 0 mopKnitScaleField;
+		floatSlider -e -en 0 mopKnitScaleSlider;
+	}
+	
+	formLayout -edit
+		-af mopKnitOriginRadio    "top"    5
+		-af mopKnitOriginRadio    "left"   5
+		-ac mopKnitFacingRadio    "top"    5  mopKnitOriginRadio
+		-af mopKnitFacingRadio    "left"   5
+		-ac mopKnitScaleText      "top"    5  mopKnitFacingRadio
+		-af mopKnitScaleText      "left"   105
+		-ac mopKnitScaleChk       "top"    6  mopKnitFacingRadio
+		-ac mopKnitScaleChk       "left"   9  mopKnitScaleText
+		-ac mopKnitScaleField     "top"    3  mopKnitScaleText
+		-ac mopKnitScaleField     "left"   8  mopKnitScaleText
+		-af mopKnitScaleField     "bottom" 5
+		-ac mopKnitScaleSlider    "top"    4  mopKnitScaleText
+		-ac mopKnitScaleSlider    "left"   0  mopKnitScaleField
+		mopKnitSettingsForm;
+		
+	// Action buttons.
+	formLayout -parent mopKnitOptionsForm mopKnitButtonsForm;
+	button
+		-label "mopKnit" 
+		-h 26
+		-c "evalDeferred( \"deleteUI -wnd mopKnitOptionsWnd\" ); evalDeferred( \"mopKnit\" )"
+		-parent mopKnitButtonsForm
+		mopKnitKnitBtn;
+	button
+		-label "Apply"
+		-h 26
+		-c ( "mopKnit" )
+		-parent mopKnitButtonsForm
+		mopKnitApplyBtn;
+	button
+		-label "Close"
+		-h 26
+		-c "evalDeferred( \"deleteUI -wnd mopKnitOptionsWnd\" )"
+		-parent mopKnitButtonsForm
+		mopKnitCloseBtn;
+	
+	formLayout -edit
+		-af mopKnitKnitBtn         "left"   5
+		-af mopKnitKnitBtn         "bottom" 5
+		-ap mopKnitKnitBtn         "right"  2   33
+		-ap mopKnitApplyBtn        "left"   2   33
+		-af mopKnitApplyBtn        "bottom" 5
+		-ap mopKnitApplyBtn        "right"  2   67
+		-ap mopKnitCloseBtn        "left"   2   67
+		-af mopKnitCloseBtn        "right"  5
+		-af mopKnitCloseBtn        "bottom" 5
+		mopKnitButtonsForm;
+		
+	// Lay out the main window form.
+	formLayout -edit
+		-af mopKnitDescriptionFrame   "top"	   5
+		-af mopKnitDescriptionFrame   "left"   5
+		-af mopKnitDescriptionFrame   "right"  5
+		-ac mopKnitSettingsFrame      "top"	   5   mopKnitDescriptionFrame
+		-af mopKnitSettingsFrame      "left"   5
+		-af mopKnitSettingsFrame      "right"  5
+		-af mopKnitButtonsForm        "left"   0
+		-af mopKnitButtonsForm        "bottom" 0
+		-af mopKnitButtonsForm        "right"  0
+		mopKnitOptionsForm;
+	
+	// Show the window.
+	showWindow mopKnitOptionsWnd;
+}

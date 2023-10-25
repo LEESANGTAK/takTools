@@ -1,0 +1,1219 @@
+
+//-- headupDisplay
+//-- /hud Source
+global proc string b1HUD_Pad( string $input, int $pad)
+{
+	int $length = `size($input)`;
+	string $prefix;
+	string $returnString;
+	int $i;
+	for ($i = $length; $i < $pad; $i ++)
+	{
+		$prefix = $prefix + "0";
+	}
+	$returnString = $prefix + $input;
+	return $returnString;
+}
+
+
+global proc string b1HUD_GetCurrProj()
+{
+	string $currProj = `optionVar -q "currProj"`;
+	return $currProj;
+}
+
+global proc string b1HUD_GetSceneInfo( string $type )
+{
+	string $returnString;
+	string $currSceneName = `file -q -sceneName`;
+	string $separatedStrings[] = `stringToStringArray $currSceneName "/"`;
+	int $size = size($separatedStrings);
+	if ($size == 0)
+		$currSceneName = "untitled";
+	else
+		$currSceneName = $separatedStrings[$size - 1];
+		
+	clear $separatedStrings;
+	$separatedStrings = `stringToStringArray $currSceneName "_"`;
+	//shotName
+	if ( $type == "shot" )
+	$returnString = ($separatedStrings[0] + "_" + $separatedStrings[1]);
+	//task
+	if ( $type == "task" ) 
+	$returnString = `toupper $separatedStrings[2]`;
+	if( $type == "layer" )
+	$returnString = $separatedStrings[3];
+	//ver
+	if ( $type == "ver" )
+	$returnString = $separatedStrings[4];	
+	return $returnString;
+}
+
+global proc string b1HUD_GetDateTime(string $tag)
+{
+	string $return;
+	if ($tag == "date")
+	{
+		$return = `about -cd`;
+	}
+	else
+	{
+		$return = `about -ct`;
+	}
+	return $return;
+}
+
+global proc string b1HUD_GetCurrCam()
+{
+	string $currPanel = `getPanel -wf`;
+	string $currCam = `modelPanel -q -cam $currPanel`;
+	return $currCam;
+}
+
+global proc string b1HUD_GetResInfo()
+{
+	string $resInfo[];
+	string $return;
+	$resInfo[0] = `getAttr defaultResolution.width`;
+	$resInfo[1] = `getAttr defaultResolution.height`;
+	$return = ($resInfo[0] + " X " + $resInfo[1]);
+	return $return;
+}
+
+global proc string b1HUD_GetFocalLength()
+{
+	string $return;
+	string $camName = `b1HUD_GetCurrCam`;
+	string $shapes[] = `listRelatives -fullPath -shapes $camName`;
+	string $focalLength = `getAttr ($shapes[0] + ".focalLength")`;
+	$return = ($focalLength + " mm");
+	return $return;
+}
+
+global proc string b1HUD_GetCurrFrame()
+{
+	string $currFrame = `currentTime -q`;
+	int $length = `size($currFrame)`;
+	string $prefix;
+	string $returnString;
+	int $i;
+	for ($i = $length; $i < 4; $i++)
+	{
+		$prefix = $prefix + "0";
+	}
+	$returnString = $prefix + $currFrame;
+	return $returnString;
+}
+
+global proc string b1HUD_GetStartEndFrame()
+{
+	string $startFrame = `playbackOptions -q -minTime`;
+	string $endFrame = `playbackOptions -q -maxTime`;
+	string $returnString = ($startFrame + " to " + $endFrame);
+	return $returnString;
+}
+
+global proc string b1HUD_GetFrameRate()
+{
+	string $unit = `currentUnit -q  -time`;
+	string $outString;
+	if ($unit == "film")
+		$outString = "24 FPS (Film)";
+	else if ($unit == "ntsc")
+		$outString = "30 FPS (NTSC)";
+	else if ($unit == "pal")
+		$outString = "25 FPS (PAL)";
+	else if ($unit == "show")
+		$outString = "48 FPS (Show)";
+	else if ($unit == "palf")
+		$outString = "50 FPS (PAL Field)";
+	else if ($unit == "ntscf")
+		$outString = "60 FPS (NTSC Field)";
+	else if ($unit == "game")
+		$outString = "15 FPS (Game)";
+		
+	return $outString;
+}
+
+global proc string b1HUD_GetTimeCode()
+{
+	int $currTime = (`currentTime -q` - 100);
+	int $fps;
+	string $unit = `currentUnit -q -fullName -time`;
+	switch ($unit)
+	{
+		case "game":
+			$fps = 15;
+			break;
+		case "film":
+		  $fps = 24;
+			break;
+		case "pal":
+			$fps = 25;
+			break;
+		case "ntsc":
+			$fps = 30;
+			break;
+		case "show":
+			$fps = 48;
+			break;
+		case "palf":
+			$fps = 50;
+			break;
+		case "ntscf":
+			$fps = 60;
+			break;
+	}
+	int $frame = $currTime % $fps;
+	int $currTime = ($currTime - $frame) / $fps;
+	int $hour = $currTime / 3600;
+	$currTime -= $hour * 3600;
+	int $minuite = $currTime / 60;
+	$currTime -= $minuite * 60;
+	$sec = $currTime;
+	string $returnString = (b1HUD_Pad($hour, 2) + ":" + b1HUD_Pad($minuite, 2) + ":" + b1HUD_Pad($sec, 2) + ":" + b1HUD_Pad($frame, 2));
+	return $returnString;
+}
+//--/
+
+//-- b1HUDToggle
+global proc b1HUDToggle()
+{
+    string $list[] = `headsUpDisplay -listHeadsUpDisplays`;
+	string $current[];
+	int $size = `size($list)`;
+	int $i = 0;
+	for ($i; $i < $size; $i++)
+	{
+		string $checkCommand = ("headsUpDisplay -q -visible " + $list[$i]);
+		if (`eval $checkCommand`)
+		{
+			int $index = `size($current)`;
+			$current[$index] = $list[$i];
+		}
+	}
+	print "b1HUDToggle...currently active HUDs are\n";
+	print $current;
+	print "b1HUDToggle...end of print";
+	
+	if (!`headsUpDisplay -exists hudProjName`)
+	{
+		headsUpDisplay
+			-section 1
+			-block 1
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding 0
+			-labelWidth 70
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "Project :"
+			-atr
+			-command "b1HUD_GetCurrProj"
+		hudProjName;
+	}
+	else
+		headsUpDisplay -rem hudProjName;
+
+	if (!`headsUpDisplay -exists hudShotName`)
+	{
+		headsUpDisplay
+			-section 1
+			-block 2
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -3
+			-labelWidth 73
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "    Shot :"
+			-atr
+			-command "b1HUD_GetSceneInfo shot"
+		hudShotName;
+	}
+	else
+		headsUpDisplay -rem hudShotName;
+		
+	if (!`headsUpDisplay -exists hudTaskName`)
+	{
+		headsUpDisplay
+			-section 1
+			-block 3
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -4
+			-labelWidth 75
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "    Task :"
+			-command "b1HUD_GetSceneInfo task"
+			-atr
+		hudTaskName;
+	}
+	else
+		headsUpDisplay -rem hudTaskName;
+		
+	if( !`headsUpDisplay -exists hudLayerStamp` )
+	{
+		headsUpDisplay
+			-section 1
+			-block 4
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -4
+			-labelWidth 75
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "   Layer :"
+			-command "b1HUD_GetSceneInfo layer"
+			-atr
+		hudLayerStamp;	
+	}
+	else
+		headsUpDisplay -rem hudLayerStamp;
+		
+	if (!`headsUpDisplay -exists hudVersionStamp`)
+	{
+		headsUpDisplay
+			-section 1
+			-block 5
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -4
+			-labelWidth 76
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "Version! :"
+			-command "b1HUD_GetSceneInfo ver"
+			-atr
+		hudVersionStamp;
+	}
+	else
+		headsUpDisplay -rem hudVersionStamp;
+
+	if (!`headsUpDisplay -exists hudDateStamp`)
+	{
+		headsUpDisplay
+			-section 3
+			-block 1
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 80
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "     Date :"
+			-command "b1HUD_GetDateTime date"
+			-atr
+		hudDateStamp;
+	}
+	else
+		headsUpDisplay -rem hudDateStamp;
+		
+	if (!`headsUpDisplay -exists hudTimeStamp`)
+	{
+		headsUpDisplay
+			-section 3
+			-block 2
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0	
+			-labelWidth 80
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "     Time :"
+			-command "b1HUD_GetDateTime time"
+			-atr
+		hudTimeStamp;
+	}
+	else
+		headsUpDisplay -rem hudTimeStamp;
+		
+	if (!`headsUpDisplay -exists hudArtistName`)
+	{
+		headsUpDisplay
+			-section 3
+			-block 3
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 1
+			-labelWidth 80
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "    Artist :"
+			-command "getenv userName"
+			-atr
+		hudArtistName;
+	}
+	else
+		headsUpDisplay -rem hudArtistName;
+		
+	if (!`headsUpDisplay -exists hudCamName`)
+	{
+		headsUpDisplay 
+			-section 6
+			-block 4
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -13
+			-labelWidth 108
+			-dataWidth 100
+			-label "       Camera :"
+			-command "b1HUD_GetCurrCam"
+			-atr
+		hudCamName;
+	}
+	else
+		headsUpDisplay -rem hudCamName;
+	
+	if (!`headsUpDisplay -exists hudResInfo`)
+	{
+		headsUpDisplay
+			-section 6
+			-block 3
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding 0
+			-labelWidth 95
+			-dataWidth 100
+			-label "Resolution :"
+			-command "b1HUD_GetResInfo"
+			-atr
+		hudResInfo;
+	}
+	else
+		headsUpDisplay -rem hudResInfo;
+		
+	if (!`headsUpDisplay -exists hudFocalLength`)
+	{
+		headsUpDisplay
+			-section 6
+			-block 2
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -15
+			-labelWidth 110
+			-dataWidth 100
+			-label "Focal Length :"
+			-command "b1HUD_GetFocalLength"
+			-atr
+		hudFocalLength;
+	}
+	else
+		headsUpDisplay -rem hudFocalLength;	
+		
+	if (!`headsUpDisplay -exists hudCurrFrame`)
+	{
+		headsUpDisplay
+			-section 8
+			-block 4
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 90
+			-dataWidth 100
+			-label "     Frame :"
+			-command "b1HUD_GetCurrFrame"
+			-atr
+		hudCurrFrame;
+	}
+	else
+		headsUpDisplay -rem hudCurrFrame;
+	
+	if (!`headsUpDisplay -exists hudTimeCode`)
+	{
+		headsUpDisplay
+			-section 8
+			-block 3
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 89
+			-dataWidth 100
+			-label "TimeCode : "
+			-command "b1HUD_GetTimeCode"
+			-atr
+		hudTimeCode;
+	}
+	else
+		headsUpDisplay -rem hudTimeCode;
+		
+	if (!`headsUpDisplay -exists hudStartEndFrame`)
+	{
+		headsUpDisplay
+			-section 8
+			-block 2
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 98
+			-dataWidth 100
+			-label "Start / End :"
+			-command "b1HUD_GetStartEndFrame"
+			-atr
+		hudStartEndFrame;
+	}
+	else
+		headsUpDisplay -rem hudStartEndFrame;
+		
+	if (!`headsUpDisplay -exists hudFrameRate`)
+	{
+		headsUpDisplay
+			-section 8
+			-block 1
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 95
+			-dataWidth 100
+			-label "FrameRate :"
+			-command "b1HUD_GetFrameRate"
+			-atr
+		hudFrameRate;
+	}
+	else
+		headsUpDisplay -rem hudFrameRate;
+	
+}
+//--/
+
+//-- b1HUDStart
+global proc b1HUDStart()
+{   
+	
+	if (!`headsUpDisplay -exists hudProjName`)
+	{
+		headsUpDisplay -rp 1 1;
+		headsUpDisplay
+			-section 1
+			-block 1
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding 0
+			-labelWidth 70
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "Project :"
+			-atr
+			-command "b1HUD_GetCurrProj"
+		hudProjName;
+	}
+
+	if (!`headsUpDisplay -exists hudShotName`)
+	{
+		headsUpDisplay -rp 1 2;
+		headsUpDisplay
+			-section 1
+			-block 2
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -3
+			-labelWidth 73
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "    Shot :"
+			-atr
+			-command "b1HUD_GetSceneInfo shot"
+		hudShotName;
+	}
+		
+	if (!`headsUpDisplay -exists hudTaskName`)
+	{
+		headsUpDisplay -rp 1 3;
+		headsUpDisplay
+			-section 1
+			-block 3
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -4
+			-labelWidth 75
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "    Task :"
+			-command "b1HUD_GetSceneInfo task"
+			-atr
+		hudTaskName;
+	}
+		
+	if( !`headsUpDisplay -exists hudLayerStamp` )
+	{
+		headsUpDisplay
+			-section 1
+			-block 4
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -4
+			-labelWidth 75
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "   Layer :"
+			-command "b1HUD_GetSceneInfo layer"
+			-atr
+		hudLayerStamp;	
+	}
+		
+	if (!`headsUpDisplay -exists hudVersionStamp`)
+	{
+		headsUpDisplay
+			-section 1
+			-block 5
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -4
+			-labelWidth 76
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "Version! :"
+			-command "b1HUD_GetSceneInfo ver"
+			-atr
+		hudVersionStamp;
+	}
+
+	if (!`headsUpDisplay -exists hudDateStamp`)
+	{
+		headsUpDisplay -rp 3 1;
+		headsUpDisplay
+			-section 3
+			-block 1
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 80
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "     Date :"
+			-command "b1HUD_GetDateTime date"
+			-atr
+		hudDateStamp;
+	}
+		
+	if (!`headsUpDisplay -exists hudTimeStamp`)
+	{
+		headsUpDisplay -rp 3 2;
+		headsUpDisplay
+			-section 3
+			-block 2
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0	
+			-labelWidth 80
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "     Time :"
+			-command "b1HUD_GetDateTime time"
+			-atr
+		hudTimeStamp;
+	}
+		
+	if (!`headsUpDisplay -exists hudArtistName`)
+	{
+		headsUpDisplay -rp 3 3;
+		headsUpDisplay
+			-section 3
+			-block 3
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 1
+			-labelWidth 80
+			-dataWidth 100
+			-dataAlignment "left"
+			-label "    Artist :"
+			-command "getenv userName"
+			-atr
+		hudArtistName;
+	}
+		
+	if (!`headsUpDisplay -exists hudCamName`)
+	{	
+		headsUpDisplay -rp 6 4;
+		headsUpDisplay 
+			-section 6
+			-block 4
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -13
+			-labelWidth 108
+			-dataWidth 100
+			-label "       Camera :"
+			-command "b1HUD_GetCurrCam"
+			-atr
+		hudCamName;
+	}
+	
+	if (!`headsUpDisplay -exists hudResInfo`)
+	{
+		headsUpDisplay -rp 6 3;
+		headsUpDisplay
+			-section 6
+			-block 3
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding 0
+			-labelWidth 95
+			-dataWidth 100
+			-label "Resolution :"
+			-command "b1HUD_GetResInfo"
+			-atr
+		hudResInfo;
+	}
+		
+	if (!`headsUpDisplay -exists hudFocalLength`)
+	{
+		headsUpDisplay -rp 6 2;
+		headsUpDisplay
+			-section 6
+			-block 2
+			-blockSize "small"
+			-blockAlignment "left"
+			-padding -15
+			-labelWidth 110
+			-dataWidth 100
+			-label "Focal Length :"
+			-command "b1HUD_GetFocalLength"
+			-atr
+		hudFocalLength;
+	}
+		
+	if (!`headsUpDisplay -exists hudCurrFrame`)
+	{
+		headsUpDisplay -rp 8 4;
+		headsUpDisplay
+			-section 8
+			-block 4
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 90
+			-dataWidth 100
+			-label "     Frame :"
+			-command "b1HUD_GetCurrFrame"
+			-atr
+		hudCurrFrame;
+	}
+	
+	if (!`headsUpDisplay -exists hudTimeCode`)
+	{
+		headsUpDisplay -rp 8 3;
+		headsUpDisplay
+			-section 8
+			-block 3
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 89
+			-dataWidth 100
+			-label "TimeCode : "
+			-command "b1HUD_GetTimeCode"
+			-atr
+		hudTimeCode;
+	}
+		
+	if (!`headsUpDisplay -exists hudStartEndFrame`)
+	{
+		headsUpDisplay -rp 8 2;
+		headsUpDisplay
+			-section 8
+			-block 2
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 98
+			-dataWidth 100
+			-label "Start / End :"
+			-command "b1HUD_GetStartEndFrame"
+			-atr
+		hudStartEndFrame;
+	}
+		
+	if (!`headsUpDisplay -exists hudFrameRate`)
+	{
+		headsUpDisplay -rp 8 1;
+		headsUpDisplay
+			-section 8
+			-block 1
+			-blockSize "small"
+			-blockAlignment "right"
+			-padding 0
+			-labelWidth 95
+			-dataWidth 100
+			-label "FrameRate :"
+			-command "b1HUD_GetFrameRate"
+			-atr
+		hudFrameRate;
+	}
+}
+//--/
+
+//-- b1HUDEnd
+global proc b1HUDEnd()
+{
+   
+	
+	if (`headsUpDisplay -exists hudProjName`)
+		headsUpDisplay -rem hudProjName;
+
+	if (`headsUpDisplay -exists hudShotName`)
+		headsUpDisplay -rem hudShotName;
+		
+	if (`headsUpDisplay -exists hudTaskName`)
+		headsUpDisplay -rem hudTaskName;
+	
+	if ( `headsUpDisplay -exists hudLayerStamp` )
+		headsUpDisplay -rem hudLayerStamp;
+		
+	if (`headsUpDisplay -exists hudVersionStamp`)
+		headsUpDisplay -rem hudVersionStamp;
+
+	if (`headsUpDisplay -exists hudDateStamp`)
+		headsUpDisplay -rem hudDateStamp;
+		
+	if (`headsUpDisplay -exists hudTimeStamp`)
+		headsUpDisplay -rem hudTimeStamp;
+		
+	if (`headsUpDisplay -exists hudArtistName`)
+		headsUpDisplay -rem hudArtistName;
+		
+	if (`headsUpDisplay -exists hudCamName`)
+		headsUpDisplay -rem hudCamName;
+	
+	if (`headsUpDisplay -exists hudResInfo`)
+		headsUpDisplay -rem hudResInfo;
+		
+	if (`headsUpDisplay -exists hudFocalLength`)
+		headsUpDisplay -rem hudFocalLength;	
+		
+	if (`headsUpDisplay -exists hudCurrFrame`)
+		headsUpDisplay -rem hudCurrFrame;
+	
+	if (`headsUpDisplay -exists hudTimeCode`)
+		headsUpDisplay -rem hudTimeCode;
+		
+	if (`headsUpDisplay -exists hudStartEndFrame`)
+		headsUpDisplay -rem hudStartEndFrame;
+		
+	if (`headsUpDisplay -exists hudFrameRate`)
+		headsUpDisplay -rem hudFrameRate;
+}
+//--/
+
+//--/
+
+
+//-- PBMdeleleteTempFiles
+global proc PBMdeleleteTempFiles(){
+	string $tmpDir = `internalVar -userTmpDir`;
+	string $fileList[] = `getFileList -folder $tmpDir -filespec "*_PBM*.*.*"`;	
+	string $confirmResult = `confirmDialog -title "Confirm" -message "tempfile을 삭제합니다.계속 진행하시겠습니까?"
+						-button "Yes" -button "No" -defaultButton "Yes"
+						-cancelButton "No" -dismissString "No"`;
+	
+	if ( $confirmResult == "Yes" ){	
+	
+		int $amount = 0;
+
+		progressWindow
+		 -title "delete temp files"
+		 -progress $amount
+		 -status "delete: 0%"
+		 -isInterruptable true;
+
+		for ( $i =0 ;  $i < size($fileList) ; ++$i){
+
+		 // Check if the dialog has been cancelled
+		 if ( `progressWindow -query -isCancelled` ) break;
+
+		 // Check if end condition has been reached
+		 // if ( `progressWindow -query -progress` >= 100 ) break;
+		 
+		 sysFile -delete ($tmpDir + $fileList[$i]);
+		 print ($fileList[$i] + "을 지웠습니다.\n");
+		 $amount = $i * (100 / size($fileList));
+		 
+		 progressWindow -edit
+			 -progress $amount
+			 -status ("delete: "+$amount+"%");
+			 
+		}
+
+		progressWindow -endProgress;
+		print ( "//result: " +  size($fileList) + "개의 tempFile을 삭제하였습니다.\n");		
+	}	 
+	
+}
+//--/
+
+//-- PBMopenExplorer
+global proc PBMopenExplorer(){
+
+	if ( `checkBox -q -v PBMtargetDirCbx` )
+		system ("explorer /select,\"" + toNativePath(`textFieldButtonGrp -q -text PBMtartgetDirTxg`) + "\"");	
+	else
+		system ("explorer /select,\"" + toNativePath(`file -q -location`) + "\"");
+		
+}
+//--/
+
+//-- playblastCMD 
+global proc string playblastCMD(){
+
+//make palyblast MOV with pdplayer.
+//당연 pdplayer가 설치 되어 있어야 됩니다.-32bit 버전만 됩니다.
+
+
+//////error check///////
+
+//pdplayer 경로.
+string $getPdpEXE = `textFieldButtonGrp -q -text makePBMpdplayerTxg`;
+if (!`filetest -f $getPdpEXE`)
+	error "pdplayer가 기본경로에 없습니다.";
+
+//unknown file의 경우 error
+string $currentFullDir = `file -q -loc`;
+if ($currentFullDir == "unknown" )
+	error "unknown file. save file first";
+
+///////getInfo//////
+
+//frameRange - default는 current timeSlider 
+int $stFrame = `textField -q -tx PBMstartFrameTxFld`;
+int $endFrame = `textField -q -tx PBMendFrameTxFld`;
+
+//unit
+string $unit = `currentUnit -q -time`;
+	string $fps;
+	if ($unit == "film")
+		$fps = "24";
+	else if ($unit == "ntsc")
+		$fps = "30";
+	else if ($unit == "pal")
+		$fps = "25";
+	else if ($unit == "show")
+		$fps = "48";
+	else if ($unit == "palf")
+		$fps = "50";
+	else if ($unit == "ntscf")
+		$fps = "60";
+	else if ($unit == "game")
+		$fps = "15";
+	else 
+		$fps = "30";
+
+//renderSize
+int $renderWidth = `getAttr "defaultResolution.width"`;
+int $renderHeight = `getAttr "defaultResolution.height"`;
+
+
+//stores the current render image format and changes it to png (quicktime doesn't know iff)
+int $renderFormat = `getAttr defaultRenderGlobals.imageFormat`;
+setAttr "defaultRenderGlobals.imageFormat" 7;
+
+
+//fileName - esc로 취소되면 파일이름이 return되지 않기 때문에
+string $tmpDir = `internalVar -userTmpDir`;
+
+string $buffer[];
+tokenize $currentFullDir "/." $buffer;
+string $curSceneBaseName = $buffer[size($buffer) - 2];
+string $fileName = $curSceneBaseName + "_PBM";
+string $fileList[] = `getFileList -folder $tmpDir -filespec ($fileName + ".*.iff")`;
+
+for ($i = 1 ; size($fileList) != 0 ; ++$i){  
+	if ($i > 99)
+		PBMdeleleteTempFiles;		
+    $fileName = ($curSceneBaseName + "_PBM" + $i);
+	clear $fileList;
+	$fileList = `getFileList -folder $tmpDir -filespec ($fileName + ".*.iff")`;	
+} 
+
+
+//scale
+float $scaleVal = `floatSliderGrp -q -value PBMscaleFloatSlider`;
+int $scale = $scaleVal * 100;
+
+//HUD ON
+int $getHudVal = `checkBox -q -v makePBMhudCbx`;
+
+if ($getHudVal == 1)
+	b1HUDStart;
+	
+//playblast (option - offScreen) 
+string $playblast;
+if (`checkBox -q -v PBMoffScreenCbx`){
+$playblast =`playblast -st $stFrame -et $endFrame -f ($tmpDir + $fileName) -format image -sequenceTime 0 -offScreen
+					-clearCache 0 -viewer 0 -showOrnaments 1 -percent $scale -widthHeight $renderWidth $renderHeight`;
+} else {				
+$playblast =`playblast -st $stFrame -et $endFrame -f ($tmpDir + $fileName) -format image -sequenceTime 0 
+					-clearCache 0 -viewer 0 -showOrnaments 1 -percent $scale -widthHeight $renderWidth $renderHeight`;				
+}				
+
+//HUD Off					
+if ($getHudVal == 1)					
+	b1HUDEnd;					
+
+//imageformat을 default로 다시 복구.	
+setAttr defaultRenderGlobals.imageFormat $renderFormat;	
+		
+//esc로 취소 됬을때 					
+if ($playblast == "")
+	$playblast = ($tmpDir + $fileName + ".####.iff");
+	
+//slash backslash business
+string $fBlastResult = `fromNativePath $playblast`;
+
+//targetFile name( 기본값은 파일이름 + _p01.mov)
+string $currentDir = `dirname ($currentFullDir)`;  //dir 경로
+string $currentFileName = basenameEx($currentFullDir);  // file 명
+
+if ( `checkBox -q -v PBMtargetDirCbx` )
+	$currentDir = `textFieldButtonGrp -q -text PBMtartgetDirTxg`;
+
+string $targetFile = ($currentDir + "/" + $currentFileName + "_p01.mov");
+
+//version 
+string $si;
+for ($i = 2 ; `filetest -f $targetFile` ; ++$i){
+	if ($i<10)
+	   $si = ("0" + $i);		   
+	else
+	   $si = $i;   
+	$targetFile = ($currentDir + "/" + $currentFileName + "_p" + $si + ".mov");
+}   
+
+
+//pdplayerCMD
+
+system ("start \""+ $getPdpEXE +"\" \"" +$fBlastResult + "\" --fps=" + $fps + " --mask_size=" + ($renderWidth*$scale/100) + "," + ($renderHeight*$scale/100) +" --save_mask_as_sequence=\"" + $targetFile + "\",avc1,best --layer_replace_with_image=" + $targetFile);
+
+//save optionVar
+optionVar 
+-sv "makePBMpdpExeOv" $getPdpEXE 
+-iv "makePBMhudValOv" $getHudVal
+-sv "PBMcustomDirString" $currentDir;
+
+//deleteUI b1makePlayblastMov;
+
+print "///convert playblast to quicktime movie is completed.///\n";
+print ("//result: " + $targetFile + "\n");
+
+return $targetFile;
+
+}
+//--/
+
+//-- PBMsaveSetting
+global proc PBMsaveSetting ( string $type ){
+
+
+string $pdpEXE = "C:/Program Files (x86)/Pdplayer/pdplayer.exe";
+int $offScrVal = 0 ;
+float $scaleVal = 1.0;
+int $customPath = 0;
+string $customDir = "";
+int $hudVal = 1;
+
+if ($type == "save"){
+	$pdpEXE = `textFieldButtonGrp -q -text makePBMpdplayerTxg`;
+	$offScrVal = `checkBox -q -v PBMoffScreenCbx`;
+	$scaleVal = `floatSliderGrp -q -value PBMscaleFloatSlider`;
+	$customPath = `checkBox -q -v PBMtargetDirCbx`;
+	$customDir = `textFieldButtonGrp -q -text PBMtartgetDirTxg`;
+	$hudVal = `checkBox -q -v makePBMhudCbx`;
+} 
+
+if ($type == "reset"){
+	textFieldButtonGrp -e -text $pdpEXE makePBMpdplayerTxg;
+	checkBox -e -v $offScrVal PBMoffScreenCbx;
+	floatSliderGrp -e -value $scaleVal PBMscaleFloatSlider;
+	checkBox -e -v $customPath PBMtargetDirCbx;
+	textFieldButtonGrp -e -ed 0 -eb 0 -text $customDir PBMtartgetDirTxg;	
+	checkBox -e -v $hudVal makePBMhudCbx;
+}
+
+optionVar 
+-sv "makePBMpdpExeOv" $pdpEXE 
+-iv "PBMoffScreenVal" $offScrVal
+-fv "PBMscaleVal" $scaleVal
+-iv "PBMcustomPathVal" $customPath
+-sv "PBMcustomDirString" $customDir
+-iv "makePBMhudValOv" $hudVal;
+
+}
+//--/
+
+
+//-- UI - makePlayblastMov 
+global proc makePlayblastMov(){
+	if(`window -exists b1makePlayblastMov`)
+		deleteUI b1makePlayblastMov;
+	
+	window  -width 410 -height 300
+		-resizeToFitChildren true
+		-menuBar true
+		-maximizeButton true
+		-titleBar true
+		//-sizeable 0
+		-menuBarVisible true
+		-title "b1 make quickTime playblast with Pdplayer"
+		b1makePlayblastMov;
+	
+	menu -label "Edit" -tearOff true;
+		menuItem -label "save settings" -c "PBMsaveSetting \"save\"";
+		menuItem -label "reset settings" -c "PBMsaveSetting \"reset\"";
+	
+	//menu -label "help" -tearOff true;
+	//	menuItem -label "help" -c ("confirmDialog -message \"" + $help + "\";");
+	//	menuItem -label "about" -c ("confirmDialog -message \"" + $about + "\";");
+	
+	string $makePBMcolA = `columnLayout makePBMcolA`;
+	//text -font "boldLabelFont" -label " Quicktime playblast with Pdplayer  - beta ";
+	
+	separator -st "in" -h 5;	
+	button -l " << start quickTime playblast >> " -w 400 -bgc .5 .7 .8 -c "playblastCMD" ;
+	separator -st "in" -h 5;
+	
+	//frameRange	
+	rowColumnLayout -nc 5 -cw 1 80 -cw 2 82	-cw 3 30 -cw 4 90 -cw 5 110	 
+						-cat 1 right 10 -cat 2 left 2 -cat 3 left 15 -cat 4 left 10 -cat 5 left 10
+						PBMframeRangeRowCol;
+						
+	text -l "FrameRange:";							
+	textField -tx `playbackOptions -q -min` PBMstartFrameTxFld;
+	text -l "~";
+	textField -tx `playbackOptions -q -max` PBMendFrameTxFld; 
+	
+	button -l " << reload " -w 100 -c ("textField -e -tx `playbackOptions -q -min` PBMstartFrameTxFld;textField -e -tx `playbackOptions -q -max` PBMendFrameTxFld;") ;
+	separator -style "none" -h 5;  	
+	setParent $makePBMcolA;
+	
+	//options
+	string $makePBMscrLay = `frameLayout    -collapsable true  -w 400
+											-collapse 1  
+											-enable 1
+											-label " options "
+											-borderStyle "in"`;	
+											
+											
+	//pdplayer
+	string $pdpEXE = "C:/Program Files (x86)/Pdplayer/pdplayer.exe";
+	
+	if (`optionVar -exists "makePBMpdpExeOv"`)
+		$pdpEXE = `optionVar -q "makePBMpdpExeOv"`;
+	
+	separator -st "in" -h 5;
+		
+	textFieldButtonGrp  -label "Pdplayer:" -text "" -cw3 80 250 100 -cat 1 right 10 	
+	-buttonLabel " Browse.. " -bc ("textFieldButtonGrp -e -text `fileDialog2 -fileMode 1 -fileFilter \"pdplayer.exe(pdplayer.exe)\" -dialogStyle 1` makePBMpdplayerTxg;") makePBMpdplayerTxg;
+	
+	if (`filetest -f $pdpEXE`)
+		textFieldButtonGrp  -e -text $pdpEXE -eb 1 -bgc .5 .7 .8 makePBMpdplayerTxg;
+	else 
+		textFieldButtonGrp  -e -text "find pdplayer.exe" -eb 1 -bgc 1 .8 .8 makePBMpdplayerTxg;
+	
+	
+	separator -st "in" -h 10;
+		
+	//offScreen
+	rowColumnLayout -nc 2 -cw 1 80 -cw 2 82
+					-cat 1 right 10 -cat 2 left 2 
+					PBMoffScreenRowCol;
+	
+	int $offScrVal = 0 ;	
+	
+	if (`optionVar -exists "PBMoffScreenVal"`)
+		$offScrVal = `optionVar -q "PBMoffScreenVal"`;
+						
+	text -l "OffScreen:";							
+	checkBox -l "" -v $offScrVal PBMoffScreenCbx;
+	
+	setParent $makePBMscrLay;
+	
+	//text -l "                  - modelPanel이 rendersize보다 작을떄 사용합니다." -vis 0 pbmHelpOffscreen01;
+	
+	
+	
+	//scale
+	
+	float $scaleVal = 1.0;
+	
+	if (`optionVar -exists "PBMscaleVal"`)
+		$scaleVal = `optionVar -q "PBMscaleVal"`;
+		
+	floatSliderGrp -label "Scale:" -field true
+    -minValue 0 -maxValue 1.00 -s 0.001 
+	-cw 1 80 -cw 2 80 -cw 3 200
+	-cat 1 right 10  
+    -value $scaleVal PBMscaleFloatSlider;
+	
+	separator -style "in" -h 10;  
+	
+	//custom target dir
+	int $customPath = 0;	
+	if (`optionVar -exists "PBMcustomPathVal"`)
+		$customPath = `optionVar -q "PBMcustomPathVal"`;
+	string $customDir = "";
+	if (`optionVar -exists "PBMcustomDirString"`)
+		$customDir = `optionVar -q "PBMcustomDirString"`;
+		
+	checkBox -l "use custom path to save" -v $customPath
+	-onc ("textFieldButtonGrp -e -ed 1 -eb 1 PBMtartgetDirTxg;optionVar -iv PBMcustomPathVal 1;")
+	-ofc ("textFieldButtonGrp -e -ed 0 -eb 0 PBMtartgetDirTxg;optionVar -iv PBMcustomPathVal 0;")
+	PBMtargetDirCbx;
+	
+	textFieldButtonGrp  -label "save path:" -text $customDir -cw3 80 250 100 -cat 1 right 10 	
+	-buttonLabel " Browse.. " -bc ("textFieldButtonGrp -e -text `fileDialog2 -fileMode 3 -dialogStyle 1` PBMtartgetDirTxg;")  PBMtartgetDirTxg;
+	
+	//text -l "                  - default는 maya file path 입니다."  -vis 0 pbmHelpCustomPath;
+	
+	if (`checkBox -q -v PBMtargetDirCbx`)
+		textFieldButtonGrp -e -ed 1 -eb 1 PBMtartgetDirTxg;
+	else 
+		textFieldButtonGrp -e -ed 0 -eb 0 PBMtartgetDirTxg;
+	
+	separator -style "in" -h 10;  
+	
+	//hud enable
+	int $hudVal = 1;
+	
+	if (`optionVar -exists "makePBMhudValOv"`)
+		$hudVal = `optionVar -q "makePBMhudValOv"`;
+			
+	checkBox -l "Head Up Display" -v $hudVal makePBMhudCbx;
+	//text -l "                  - headUpdisplay가 자동으로 켜집니다."  -vis 0 pbmHelpHUD;
+	
+	separator -style "in" -h 10;  
+	
+	
+	
+	//help	
+	//text -l "script 기능."  -vis 0 pbmHelpScript01;
+	//text -l "파일이름과 같은 mov파일을 만들어줍니다."  -vis 0 pbmHelpScript02;
+	//text -l "같은 파일이름이 있을경우 뒤에 버전을 붙여 생성합니다."  -vis 0 pbmHelpScript03;
+		
+	setParent $makePBMcolA;
+	
+	//cmd
+	
+	
+	separator -style "in" -h 5; 
+	
+	rowLayout -numberOfColumns 4
+    -columnWidth4 100 100 100 100;
+	
+	button -l "deselect all" -w 95 -c "select -cl" ;
+	
+	button -l "delete temp files" -w 95 -c "PBMdeleleteTempFiles" ;
+	
+	button -l "help on/off" -w 95 -en 0 -c "" ;
+	
+	button -l "open Explorer" -w 95 -c PBMopenExplorer;
+		
+	setParent $makePBMcolA;
+	
+	separator -st "in" -h 10;
+	
+	setParent .. ;
+	showWindow b1makePlayblastMov;
+	
+}
+//--/
+

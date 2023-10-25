@@ -1,0 +1,377 @@
+//*************************************************************************************************************
+// Title:		jh_wheelRigger.mel
+// Author:		J�rn-Harald Paulsen
+// Created:		July 20, 2012
+// Last Update:		July 23, 2012
+// Description:         Utility to rig wheels with lattice and joints.
+//*************************************************************************************************************
+// MAIN WINDOW
+//*************************************************************************************************************
+global proc jh_wheelRigger()
+{
+  //Close window if it already exists
+  if (`window -q -ex jh_wheelRigger`) deleteUI jh_wheelRigger;
+  
+  //Main Window 
+  window -topEdge 30 -title "Wheelrigger"
+  -mxb false -s true -rtf false -mb false -mbv false -w 412 -h 268 jh_wheelRigger;
+
+  //Window content
+  columnLayout -adjustableColumn true;
+  text -label "\nMake sure your wheel is pointing in Z, so if it were to roll" -fn boldLabelFont;
+  text -label "it would roll forward in positive Z. Also make sure that your" -fn boldLabelFont;
+  text -label "wheel-geo is grouped, and has it's pivot in the center." -fn boldLabelFont;
+  separator -w 240 -h 40;
+  text -label "Enter the prefix for the wheel (example: car_l_front_):";
+  textField prefixField;
+  separator -w 240 -h 40;
+  button -label "Load the wheel-geo group" -c jh_loadWheelGeo;
+  textField -en 0 wheelGeoField;
+  separator -w 240 -h 40;
+  button -label "Rig the wheel" -c jh_rigWheel;
+  separator -w 240 -h 40;
+  window -e -w 412 -h 268 jh_wheelRigger;
+  showWindow jh_wheelRigger;
+}
+
+global proc jh_loadWheelGeo()
+{
+  //Get the selected object
+  string $selObj[] = `ls -sl`;
+  //Add it to the textField
+  textField -e -text $selObj[0] wheelGeoField;
+}
+
+
+global proc jh_rigWheel()
+{
+  //Get the group with the wheel
+  string $wheelGeo = `textField -q -text wheelGeoField`;
+  //Get the prefix
+  string $prefix = `textField -q -text prefixField`;
+//*************************************************************************************************************
+// CREATE THE GROUPS NEEDED
+//*************************************************************************************************************
+  string $wheelGrp    = `group -em -n ($prefix + "wheel_grp")`;
+  string $wheelGeoGrp = `group -em -n ($prefix + "wheel_geo_grp")`;
+  string $clusterGrp  = `group -em -n ($prefix + "wheel_cluster_grp")`;
+  string $latticeGrp  = `group -em -n ($prefix + "wheel_lattice_grp")`;
+  string $controlGrp  = `group -em -n ($prefix + "wheel_ctrl_grp")`;
+//*************************************************************************************************************
+// CREATE/POSITION THE CONTACT-CONTROLLER
+//*************************************************************************************************************
+  //Get the boundingBox of the wheel
+  float $boundingBox[] = `xform -q -bb $wheelGeo`;
+  //Create a contact-controller
+  string $contactCtrl = `curve -d 1 -p -1 0 -4 -p 1 0 -4 -p 1 0 -3 -p -1 0 -3 -p -1 0 -2 -p 1 0 -2 -p 1 0 -1 -p -1 0 -1 -p -1 0 0 -p 1 0 0 -p 1 0 1 -p -1 0 1 -p -1 0 2 -p 1 0 2 -p 1 0 3 -p -1 0 3 -p -1 0 4 -p 1 0 4 -p 1 0 3 -p -1 0 3 -p -1 0 2 -p 1 0 2 -p 1 0 1 -p -1 0 1 -p -1 0 0 -p 1 0 0 -p 1 0 -1 -p -1 0 -1 -p -1 0 -2 -p 1 0 -2 -p 1 0 -3 -p -1 0 -3 -p -1 0 -4 -p 0 0 -4 -p 0 0 4`;
+  //Create a lattice for the control
+  string $ctrlLattice[] = `lattice  -divisions 2 2 2 -objectCentered true  -ldv 2 2 2 $contactCtrl`;
+  //Position the control with the lattice
+  move -a -ws $boundingBox[3] $boundingBox[1] $boundingBox[2] ($ctrlLattice[1] + ".pt[1][0:1][0]");
+  move -a -ws $boundingBox[0] $boundingBox[1] $boundingBox[2] ($ctrlLattice[1] + ".pt[0][0:1][0]");
+  move -a -ws $boundingBox[3] $boundingBox[1] $boundingBox[5] ($ctrlLattice[1] + ".pt[1][0:1][1]");
+  move -a -ws $boundingBox[0] $boundingBox[1] $boundingBox[5] ($ctrlLattice[1] + ".pt[0][0:1][1]");
+  //Delete history and center pivot of the controller
+  delete -ch $contactCtrl;
+  xform -cp $contactCtrl;
+  //Create and position the group for the contact-controller
+  string $contactCtrlGrp = `group -em -n ($prefix + "wheel_contact_ctrl_grp")`;
+  delete `pointConstraint $contactCtrl $contactCtrlGrp`;
+  //Parent the controller to the group and freeze the transforms
+  parent $contactCtrl $contactCtrlGrp;
+  makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 $contactCtrlGrp; 
+//*************************************************************************************************************
+// CREATE THE LATTICE AND SET UP THE CLUSTERS
+//*************************************************************************************************************
+  //Create a lattice on the wheel
+  string $wheelLattice[] = `lattice -divisions 5 5 5 -objectCentered true -ldv 5 5 5 $wheelGeo`;
+  //Set the lattice to affect outside of the boundingBox
+  setAttr ($wheelLattice[0] + ".outsideLattice") 1;
+  //Position the lattice-group to the lattice
+  delete `pointConstraint $wheelLattice[1] $latticeGrp`;
+  //Parent it to it's respective group
+  parent $wheelLattice[1] $wheelLattice[2] $latticeGrp;
+  //Create a cluster for the contact of the wheel
+  string $contactCls[] = `cluster -n ($prefix + "wheel_contact_cluster") ($wheelLattice[1] + ".pt[0:4][0:1][0:4]")`;
+  percent -v 0.25 $contactCls[0] ($wheelLattice[1] + ".pt[0:4][1][0:4]");
+  //Create a clusters for the extra control of the wheel
+  string $upFrontCls[] = `cluster -n ($prefix + "wheel_1_cluster") ($wheelLattice[1] + ".pt[0:4][3:4][3:4]")`;
+  percent -v 0.5 $upFrontCls[0] ($wheelLattice[1] + ".pt[0:4][3:4][3]") ($wheelLattice[1] + ".pt[0:4][3][4]");
+  string $sideFrontCls[] = `cluster -n ($prefix + "wheel_2_cluster") ($wheelLattice[1] + ".pt[0:4][1:3][4]")`;
+  percent -v 0.5 $sideFrontCls[0] ($wheelLattice[1] + ".pt[0:4][3][4]") ($wheelLattice[1] + ".pt[0:4][1][4]");
+  string $lowFrontCls[] = `cluster -n ($prefix + "wheel_3_cluster") ($wheelLattice[1] + ".pt[0:4][0:1][3:4]")`;
+  percent -v 0.5 $lowFrontCls[0] ($wheelLattice[1] + ".pt[0:4][0:1][3]") ($wheelLattice[1] + ".pt[0:4][1][4]");
+  string $lowMidCls[] = `cluster -n ($prefix + "wheel_4_cluster") ($wheelLattice[1] + ".pt[0:4][0][1:3]")`;
+  percent -v 0.5 $lowMidCls[0] ($wheelLattice[1] + ".pt[0:4][0][1]") ($wheelLattice[1] + ".pt[0:4][0][3]");
+  string $lowBackCls[] = `cluster -n ($prefix + "wheel_5_cluster") ($wheelLattice[1] + ".pt[0:4][0:1][0:1]")`;
+  percent -v 0.5 $lowBackCls[0] ($wheelLattice[1] + ".pt[0:4][1][0:1]") ($wheelLattice[1] + ".pt[0:4][0][1]");
+  string $sideBackCls[] = `cluster -n ($prefix + "wheel_6_cluster") ($wheelLattice[1] + ".pt[0:4][1:3][0]")`;
+  percent -v 0.5 $sideBackCls[0] ($wheelLattice[1] + ".pt[0:4][1][0]") ($wheelLattice[1] + ".pt[0:4][3][0]");
+  string $upBackCls[] = `cluster -n ($prefix + "wheel_7_cluster") ($wheelLattice[1] + ".pt[0:4][3:4][0:1]")`;
+  percent -v 0.5 $upBackCls[0] ($wheelLattice[1] + ".pt[0:4][3][0]") ($wheelLattice[1] + ".pt[0:4][3:4][1]");
+  string $upMidCls[] = `cluster -n ($prefix + "wheel_8_cluster") ($wheelLattice[1] + ".pt[0:4][4][1:3]")`;
+  percent -v 0.5 $upMidCls[0] ($wheelLattice[1] + ".pt[0:4][4][1]") ($wheelLattice[1] + ".pt[0:4][4][3]");
+  //Parent the clusters to the cluster-group
+  parent $contactCls[1] $upFrontCls[1] $sideFrontCls[1] $lowFrontCls[1] $lowMidCls[1] $lowBackCls[1] $sideBackCls[1] $upBackCls[1] $upMidCls[1] $clusterGrp;
+//*************************************************************************************************************
+// CREATE/POSITION AND CONNECT THE EXTRA WHEEL-CONTROLLERS
+//*************************************************************************************************************
+  //Create string-arrays to store the joints and controllers in
+  string $ctrlGrp[];
+  string $ctrl[];
+  string $clsGrp[];
+  //Get the radius of the wheel
+  float $wheelRadius = `abs(($boundingBox[2] - $boundingBox[5]) / 2)`;
+  //Create a nurbs-circle as reference for positioning the controllers
+  string $ctrlCircle[] = `circle -c 0 0 0 -nr 1 0 0 -sw 360 -r $wheelRadius -d 3 -ut 0 -s 32 -ch 0`;
+  //Get the shape of the curve
+  string $ctrlCircleShape[] = `listRelatives -s $ctrlCircle[0]`;
+  //Position the circle at the wheel
+  delete `pointConstraint $wheelGeo $ctrlCircle[0]`;
+  //Create and position a group for the circle
+  string $ctrlCircleGrp = `group -em -n ($prefix + "wheel_ctrlCurve_crv_grp")`;
+  delete `pointConstraint $ctrlCircle[0] $ctrlCircleGrp`;
+  //Parent the circle to the group
+  parent $ctrlCircle[0] $ctrlCircleGrp;
+
+  //Create a variable to define the U-value of the curve for where to place the joints
+  float $uVal = 1.000000 / 8;
+  float $incrementVar = $uVal;
+
+  //For each joint
+  for($a = 0; $a < 8; $a++)
+  {
+    //Create a motionPath-node
+    string $mpNode = `shadingNode -asUtility motionPath -n ($prefix + "wheel_" + ($a + 1) + "_mPath")`;
+    //Create a controller and a group
+    string $mpCtrl[] = `circle -c 0 0 0 -nr 1 0 0 -sw 360 -r ($wheelRadius / 6) -d 3 -ut 0 -s 8 -ch 0 -n ($prefix + "wheel_" + ($a + 1) + "_ctrl")`;
+    string $mpCtrlGrp = `group -n ($prefix + "wheel_" + ($a + 1) + "_ctrl_grp") $mpCtrl[0]`;
+    //Connect the ctrl to the curve through the motionPath-node
+    connectAttr -f ($ctrlCircleShape[0] + ".worldSpace[0]") ($mpNode + ".geometryPath");
+    connectAttr -f ($mpNode + ".allCoordinates") ($mpCtrlGrp + ".translate");
+    connectAttr -f ($mpNode + ".rotate") ($mpCtrlGrp + ".rotate");
+    //Position the ctrl at it's correct U-value along the curve
+    setAttr ($mpNode + ".fractionMode") 1;
+    setAttr ($mpNode + ".uValue") $uVal;
+    setAttr ($mpNode + ".worldUpType") 1;
+    setAttr ($mpNode + ".frontAxis") 2;
+    setAttr ($mpNode + ".upAxis") 1;
+    setAttr ($mpNode + ".inverseUp") 1;
+    connectAttr ($ctrlCircle[0] + ".worldMatrix[0]") ($mpNode + ".worldUpMatrix");
+    //Add the objects into the pre-defined arrays
+    $ctrlGrp[$a] = $mpCtrlGrp;
+    $ctrl[$a] = $mpCtrl[0];
+    //Add the object to it's respective groups
+    parent $ctrlGrp[$a] $controlGrp;
+
+    //Create groups for the cluster
+    string $tmpGrp1 = `group -em -n ($prefix + "wheel_" + ($a + 1) + "_cluster_offset_grp")`;
+    string $tmpGrp2 = `group -em -n ($prefix + "wheel_" + ($a + 1) + "_cluster_grp")`;
+    string $tmpGrp3 = `group -em -n ($prefix + "wheel_" + ($a + 1) + "_cluster_norm_grp")`;
+    //Parent the clusterGrp to the offsetGrp
+    parent $tmpGrp2 $tmpGrp1;
+    //Position and orient the group to the controller
+    delete `pointConstraint $ctrl[$a] $tmpGrp1`;
+    delete `orientConstraint $ctrl[$a] $tmpGrp1`;
+    //Place the cluster in the group
+    parent $tmpGrp1 $clusterGrp;
+    parent $tmpGrp3 $tmpGrp2;
+    parent ($prefix + "wheel_" + ($a + 1) + "_clusterHandle") $tmpGrp3;
+    
+    //Connect the controller to the cluster-group
+    connectAttr -f ($ctrl[$a] + ".translate") ($tmpGrp2 + ".translate");
+    connectAttr -f ($ctrl[$a] + ".rotate") ($tmpGrp2 + ".rotate");
+    connectAttr -f ($ctrl[$a] + ".scale") ($tmpGrp2 + ".scale");
+
+    //Increment the $uVal-variable
+    $uVal += $incrementVar;
+  }
+//*************************************************************************************************************
+// CREATE/POSITION THE MAIN WHEEL-CONTROLLERS
+//*************************************************************************************************************
+  //Create a the controller for the wheel rotation/position
+  string $rotCtrl[] = `circle -c 0 0 0 -nr 1 0 0 -sw 360 -r ($wheelRadius / 1.7) -d 3 -ut 0 -s 32 -ch 0`;
+  string $minRotCtrl[] = `circle -c 0 0 0 -nr 1 0 0 -sw 360 -r ($wheelRadius / 6) -d 3 -ut 0 -s 32 -ch 0`;
+  string $posCtrl[] = `circle -c 0 0 0 -nr 1 0 0 -sw 360 -r ($wheelRadius / 1.2) -d 3 -ut 0 -s 32 -ch 0`;
+  string $minPosCtrl[] = `circle -c 0 0 0 -nr 1 0 0 -sw 360 -r ($wheelRadius / 1.5) -d 3 -ut 0 -s 32 -ch 0`;
+  //Shape the rotation-controllers
+  scale -r 0.5 0.5 0.5 ($rotCtrl[0] + ".cv[1]") ($rotCtrl[0] + ".cv[9]") ($rotCtrl[0] + ".cv[17]") ($rotCtrl[0] + ".cv[25]");
+  scale -r 0.3 0.3 0.3 ($minRotCtrl[0] + ".cv[1]") ($minRotCtrl[0] + ".cv[9]") ($minRotCtrl[0] + ".cv[17]") ($minRotCtrl[0] + ".cv[25]");
+  //Shape the position-controller
+  for($a=1; $a < 32; $a=$a + 2) scale -r -p 0cm 0cm 0cm 0.85 0.85 0.85 ($posCtrl[0] + ".cv[" + $a + "]");
+  //Create groups for the controllers
+  string $rotCtrlGrp = `group -em -n ($prefix + "wheel_rotate_ctrl_grp")`;
+  string $posCtrlGrp = `group -em -n ($prefix + "wheel_position_ctrl_grp")`;
+  //Parent the controllers to their groups
+  parent $rotCtrl[0] $rotCtrlGrp;
+  parent $posCtrl[0] $posCtrlGrp;
+  parent $minPosCtrl[0] $posCtrl[0];
+  parent $minRotCtrl[0] $rotCtrl[0];
+  //Position the control-groups
+  delete `pointConstraint $wheelGeo $rotCtrlGrp`;
+  delete `orientConstraint $wheelGeo $rotCtrlGrp`;
+  delete `pointConstraint $wheelGeo $posCtrlGrp`;
+  delete `orientConstraint $wheelGeo $posCtrlGrp`;
+  //Get the worldSpace position of the rotate-group
+  float $wheelPivot[] = `xform -q -ws -t $rotCtrlGrp`;
+  //Find the position of where to offset the controllers
+  float $offsetCtrl = ($boundingBox[3] / 10);
+  //Offset the controllers
+  setAttr ($rotCtrlGrp + ".tx") ($boundingBox[3] + $offsetCtrl);
+  setAttr ($posCtrlGrp + ".tx") ($boundingBox[3] + $offsetCtrl);
+  //Freeze the transforms of the controllers
+  makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 $rotCtrlGrp $posCtrlGrp;
+  //Set the pivot of the controllers to the center of the wheel
+  move -a $wheelPivot[0] $wheelPivot[1] $wheelPivot[2] ($rotCtrlGrp + ".scalePivot") ($rotCtrlGrp + ".rotatePivot");
+  move -a $wheelPivot[0] $wheelPivot[1] $wheelPivot[2] ($rotCtrl[0] + ".scalePivot") ($rotCtrl[0] + ".rotatePivot");
+  move -a $wheelPivot[0] $wheelPivot[1] $wheelPivot[2] ($posCtrlGrp + ".scalePivot") ($posCtrlGrp + ".rotatePivot");
+  move -a $wheelPivot[0] $wheelPivot[1] $wheelPivot[2] ($posCtrl[0] + ".scalePivot") ($posCtrl[0] + ".rotatePivot");
+  move -a $wheelPivot[0] $wheelPivot[1] $wheelPivot[2] ($minPosCtrl[0] + ".scalePivot") ($minPosCtrl[0] + ".rotatePivot");
+  //Set the rotation order of the objects and controllers
+  setAttr ($ctrlCircle[0] + ".rotateOrder") 3;
+  setAttr ($wheelGeo + ".rotateOrder") 3;
+  setAttr ($wheelLattice[1] + ".rotateOrder") 3;
+  setAttr ($wheelLattice[2] + ".rotateOrder") 3;
+  setAttr ($rotCtrlGrp + ".rotateOrder") 3;
+  setAttr ($posCtrlGrp + ".rotateOrder") 3;
+  setAttr ($rotCtrl[0] + ".rotateOrder") 3;
+  setAttr ($posCtrl[0] + ".rotateOrder") 3;
+  setAttr ($minPosCtrl[0] + ".rotateOrder") 3;
+  setAttr ($minRotCtrl[0] + ".rotateOrder") 3;
+//*************************************************************************************************************
+// RIG THE MAIN WHEEL-CONTROLLERS
+//*************************************************************************************************************
+  //Create a plusMinAvgNode so that we can sum the rotate-group and the rotate-controllers values to the wheel
+  string $rotAvgPma = `shadingNode -asUtility plusMinusAverage -n ($prefix + "wheel_rotate_sum_pma")`;
+  //Connect the rotate-group and the rotate-controller to the plusMinAvgNode
+  connectAttr -f ($rotCtrlGrp + ".rotate") ($rotAvgPma + ".input3D[0]");
+  connectAttr -f ($rotCtrl[0] + ".rotate") ($rotAvgPma + ".input3D[1]");
+  connectAttr -f ($minRotCtrl[0] + ".rotate") ($rotAvgPma + ".input3D[2]");
+  //Connect the output of the plusMinAvgNode to the rotate of the wheel components
+  connectAttr -f ($rotAvgPma + ".output3Dx") ($wheelGeo + ".rotateX");
+
+  //Orient-Constraint the main position-controller to the lattice
+  orientConstraint -mo $posCtrl[0] $ctrlLattice[1];
+  //Point/Scale-Constraint the minPosCtrl to the lattice
+  pointConstraint -mo $minPosCtrl[0] $ctrlLattice[1];
+  scaleConstraint -mo $minPosCtrl[0] $ctrlLattice[1];
+  //Parent/Scale-Constraint the minPosCtrl to the extra control-curve
+  parentConstraint -mo $minPosCtrl[0] $ctrlCircle[0];
+  scaleConstraint -mo $minPosCtrl[0] $ctrlCircle[0];
+  //Parent/Scale-Constraint the minPosCtrl to the group of the rotation-controllers
+  parentConstraint -mo $minPosCtrl[0] $rotCtrlGrp;
+  scaleConstraint -mo $minPosCtrl[0] $rotCtrlGrp;
+  //Scale-Constraint the posCtrl to the group of the extra-controllers
+  for($each in $ctrlGrp) scaleConstraint -mo $posCtrl[0] $each;
+//*************************************************************************************************************
+// RIG THE CONTACT-CONTROLLER
+//*************************************************************************************************************
+  //Move the pivot of the contact-cluster
+  float $contactPivot[] = `xform -q -piv $contactCtrl`;
+  move -a $contactPivot[0] $contactPivot[1] $contactPivot[2] ($contactCls[1] + ".scalePivot") ($contactCls[1] + ".rotatePivot");
+
+  //Create a multiplyDivideNode so that we can subtract the micro-pos-controller from the contact-controller
+  string $posSubMpd = `shadingNode -asUtility multiplyDivide -n ($prefix + "wheel_contact_pos_subtract_mpd")`;
+  connectAttr -f ($minPosCtrl[0] + ".translate") ($posSubMpd + ".input1");
+  setAttr ($posSubMpd + ".input2") -1 -1 -1;
+
+  //Create a plusMinAvgNode so that we can sum all of the components to the contact-cluster
+  string $contactClsPosAvgPma = `shadingNode -asUtility plusMinusAverage -n ($prefix + "wheel_contact_cls_pos_sum_pma")`;
+  connectAttr -f ($contactCtrl + ".translate") ($contactClsPosAvgPma + ".input3D[0]");
+  connectAttr -f ($posSubMpd + ".output") ($contactClsPosAvgPma + ".input3D[1]");
+  //Connect the output of the plusMinAvgNode to the translate of the contact-cluster
+  connectAttr -f ($contactClsPosAvgPma + ".output3D") ($contactCls[1] + ".translate");
+  //Connect the contact-controller to the contact-cluster
+  connectAttr -f ($contactCtrl + ".rotate") ($contactCls[1] + ".rotate");
+  connectAttr -f ($contactCtrl + ".scale") ($contactCls[1] + ".scale");
+
+  //Parent the contact-ctrl group to the main position controller
+  parent $contactCtrlGrp $posCtrl[0];
+//*************************************************************************************************************
+// SET THE CONTROL COLOURS
+//*************************************************************************************************************
+  //Get the shape of the controllers
+  string $contactCtrlShape[] = `listRelatives -s $contactCtrl`;
+  string $rotCtrlShape[]     = `listRelatives -s $rotCtrl[0]`;
+  string $posCtrlShape[]     = `listRelatives -s $posCtrl[0]`;
+  string $minRotCtrlShape[]  = `listRelatives -s $minRotCtrl[0]`;
+  string $minPosCtrlShape[]  = `listRelatives -s $minPosCtrl[0]`;
+  //Turn on overrideEnable of the controllers
+  setAttr ($contactCtrlShape[0] + ".overrideEnabled") 1;
+  setAttr ($rotCtrlShape[0] + ".overrideEnabled") 1;
+  setAttr ($posCtrlShape[0] + ".overrideEnabled") 1;
+  setAttr ($minRotCtrlShape[0] + ".overrideEnabled") 1;
+  setAttr ($minPosCtrlShape[0] + ".overrideEnabled") 1;
+  //Set the color of the controllers
+  setAttr ($contactCtrlShape[0] + ".overrideColor") 4;
+  setAttr ($rotCtrlShape[0] + ".overrideColor") 31;
+  setAttr ($posCtrlShape[0] + ".overrideColor") 19;
+  setAttr ($minRotCtrlShape[0] + ".overrideColor") 9;
+  setAttr ($minPosCtrlShape[0] + ".overrideColor") 17;
+  //For each of the extra controllers
+  for($each in $ctrl)
+  {
+    //Get the shape of the current control
+    string $extraCtrl[] = `listRelatives -s $each`;
+    //Turn on overrideEnable of the current controller
+    setAttr ($each + ".overrideEnabled") 1;
+    //Set the color of the current controller
+    setAttr ($each + ".overrideColor") 6;
+  }
+//*************************************************************************************************************
+// CLEANUP
+//*************************************************************************************************************
+  //Rename the objects
+  $wheelGeo = `rename $wheelGeo ($prefix + "wheel_geo")`;
+  $contactCtrl = `rename $contactCtrl ($prefix + "wheel_contact_ctrl")`;
+  $ctrlCircle[0] = `rename $ctrlCircle[0] ($prefix + "wheel_ctrlCurve_crv")`;
+  $rotCtrl[0] = `rename $rotCtrl[0] ($prefix + "wheel_rotate_ctrl")`;
+  $posCtrl[0] = `rename $posCtrl[0] ($prefix + "wheel_position_ctrl")`;
+  $minRotCtrl[0] = `rename $minRotCtrl[0] ($prefix + "wheel_micro_rotate_ctrl")`;
+  $minPosCtrl[0] = `rename $minPosCtrl[0] ($prefix + "wheel_micro_position_ctrl")`;
+  $wheelLattice[0] = `rename $wheelLattice[0] ($wheelGeo + "_latticeShape")`;
+  $wheelLattice[1] = `rename $wheelLattice[1] ($wheelGeo + "_lattice")`;
+  $wheelLattice[2] = `rename $wheelLattice[2] ($wheelGeo + "_lattice_base")`;
+
+  //Set the pivot to the center of the wheel of the main groups
+  move -a $wheelPivot[0] $wheelPivot[1] $wheelPivot[2] ($wheelGrp + ".scalePivot") ($wheelGrp + ".rotatePivot");
+  move -a $wheelPivot[0] $wheelPivot[1] $wheelPivot[2] ($controlGrp + ".scalePivot") ($controlGrp + ".rotatePivot");
+  move -a $wheelPivot[0] $wheelPivot[1] $wheelPivot[2] ($clusterGrp + ".scalePivot") ($clusterGrp + ".rotatePivot");
+  move -a $wheelPivot[0] $wheelPivot[1] $wheelPivot[2] ($wheelGeoGrp + ".scalePivot") ($wheelGeoGrp + ".rotatePivot");
+
+  //Clean the hierarchy
+  parent $wheelGeo $wheelGeoGrp;
+  parent $rotCtrlGrp $posCtrlGrp $ctrlCircleGrp $clusterGrp $latticeGrp $controlGrp $wheelGeoGrp $wheelGrp;
+
+  //Turn of inherit transform so that scaling works
+  setAttr ($controlGrp + ".inheritsTransform") 0;
+  setAttr ($clusterGrp + ".inheritsTransform") 0;
+  setAttr ($latticeGrp + ".inheritsTransform") 0;
+  setAttr ($wheelGeoGrp + ".inheritsTransform") 0;
+  setAttr ($ctrlCircleGrp + ".inheritsTransform") 0;
+
+  //Hide objects/groups we don't need to see
+  setAttr ($clusterGrp + ".visibility") 0;
+  setAttr ($latticeGrp + ".visibility") 0;
+  setAttr ($ctrlCircleGrp + ".visibility") 0;
+
+  //Lock attributes that shouln't be used
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($minPosCtrl[0] + ".rotate");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($minPosCtrl[0] + ".scale");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($rotCtrl[0] + ".translate");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($rotCtrl[0] + ".scale");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($rotCtrl[0] + ".rotateY");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($rotCtrl[0] + ".rotateZ");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($minRotCtrl[0] + ".translate");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($minRotCtrl[0] + ".scale");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($minRotCtrl[0] + ".rotateY");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($minRotCtrl[0] + ".rotateZ");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($clusterGrp + ".translate");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($clusterGrp + ".rotate");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($clusterGrp + ".scale");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($latticeGrp + ".translate");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($latticeGrp + ".rotate");
+  setAttr -lock 1 -keyable 0 -channelBox 0 ($latticeGrp + ".scale");
+}
+
+jh_wheelRigger;

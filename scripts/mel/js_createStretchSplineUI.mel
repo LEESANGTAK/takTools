@@ -1,0 +1,234 @@
+/*
+    Script:     js_createStretchSplineUI.mel
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      UI for the js_createStretchSpline.mel script
+
+    Req:        js_createStretchSpline.mel
+                js_loadSelectedIntoButtonGrp.mel
+                js_addAllAttrsToStretchTSL.mel
+                js_getOptionVar.mel
+                js_getOptionVarString.mel
+*/
+global proc js_createStretchSplineUI ()
+{
+    // this proc will build a ui to call the js_createStretchSpline command
+    //
+    // it will get the following items:
+    //
+    //  $nurbsCurve         =>  The nurbs curve that will be stretched
+    //
+    //  $maintainVolume     =>  Whether or not to maintain volume on the joints
+    //                          if this is on, then it will be made with
+    //                          an expression, if not then we'll use nodes.
+    //  
+    //  $worldScale         =>  Whether or not to take worldScale into account
+    //  
+    //  $worldScaleObj      =>  The object that will be used for world scale
+    //  
+    //  $worldScaleAttr     =>  The attribute to be used for world scale
+    //
+
+    string $win = "js_createStretchSplineWin";
+
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -title "js Create Stretchy Spline" $win;
+
+
+    // layout
+    columnLayout -adj true;
+    $f = `formLayout -nd 100`;
+
+    $curve = `textFieldButtonGrp -l "Nurbs Curve:" -cw1 100 -bl "Load Sel"`;
+    
+    $volumeCB = `checkBoxGrp -l "Maintain Volume:" -cw1 100 -label1 "On/Off"`;
+
+    $worldScaleFL = `frameLayout -cll true -l "World Scale Options" -labelAlign "top" -borderStyle "etchedIn"`;
+        $f2 = `formLayout -nd 100`;
+        
+        $worldScaleCB = `checkBoxGrp -l "World Scale:" -cw1 80  -label1 "On/Off"`;
+        $worldScaleNode = `textFieldButtonGrp -l "Node:" -cw1 80 -enable 0 -bl "Load Sel"`;
+        $worldScaleText = `text -enable 0 -l "Attribute:" -align "right" -w 128`;
+        $worldScaleAttrs = `textScrollList -enable 0 -ams 0  -nr 5`;
+
+        formLayout -e
+            -af $worldScaleCB top 5
+            -af $worldScaleCB left 5
+            -af $worldScaleCB right 5
+
+            -ac $worldScaleNode top 10 $worldScaleCB
+            -af $worldScaleNode left 5
+            -af $worldScaleNode right 5
+
+            -af $worldScaleText left 5
+            -ac $worldScaleText top 5 $worldScaleNode
+
+            -ac $worldScaleAttrs left 10 $worldScaleText
+            -ac $worldScaleAttrs top 5 $worldScaleNode
+            -af $worldScaleAttrs right 5
+            $f2;
+
+        setParent $f;
+
+    $goButton = `button -l "Apply" -c ("js_prepareCreateStretchSplineCmd \"" + $curve + "\" \""+$volumeCB + "\" \"" + $worldScaleCB + "\" \"" + $worldScaleNode + "\" \"" + $worldScaleAttrs + "\" \""+$win+"\"")`;
+    $cancelButton = `button -l "Cancel" -c ("deleteUI \"" + $win + "\"")`;
+
+    formLayout -e
+        
+        -af $curve left 5
+        -af $curve right 5
+        -af $curve top 5
+
+        -af $volumeCB left 5
+        -af $volumeCB right 5
+        -ac $volumeCB top 10 $curve
+
+        -af $goButton left 5
+        -ap $goButton right 5 50
+        -af $goButton bottom 5
+        -af $cancelButton right 5
+        -ap $cancelButton left 5 50
+        -af $cancelButton bottom 5
+
+        -af $worldScaleFL left 5
+        -af $worldScaleFL right 5
+        -ac $worldScaleFL top 5 $volumeCB
+        -ac $worldScaleFL bottom 5 $goButton
+        $f;
+
+
+    // callbacks
+    textFieldButtonGrp -e
+        -bc ("js_loadSelectedIntoButtonGrp \"" + $curve + "\"")
+        $curve;
+    textFieldButtonGrp -e
+        -bc ("js_loadSelectedIntoButtonGrp \"" + $worldScaleNode + "\";js_addAllAttrsToStretchTSL \""+$worldScaleNode+"\" \""+ $worldScaleAttrs + "\"")
+        -cc ("js_addAllAttrsToStretchTSL \""+$worldScaleNode+"\" \""+ $worldScaleAttrs + "\"")
+        $worldScaleNode;
+
+    checkBoxGrp -e
+        -onc ("textFieldButtonGrp -e -enable 1 \"" + $worldScaleNode + "\"; textScrollList -e -enable 1 \""+ $worldScaleAttrs + "\"; text -e -enable 1 \""+$worldScaleText + "\"")
+        -ofc ("textFieldButtonGrp -e -enable 0 \"" + $worldScaleNode + "\"; textScrollList -e -enable 0 \""+ $worldScaleAttrs + "\"; text -e -enable 0 \""+$worldScaleText + "\"")
+        $worldScaleCB;
+
+    js_loadCreateStretchSplinePresets $curve $volumeCB $worldScaleCB $worldScaleNode $worldScaleAttrs $worldScaleText;
+    showWindow $win;
+}
+
+global proc js_prepareCreateStretchSplineCmd (string $curve, string $volumeCB, string $worldScaleCB, string $worldScaleNode, string $worldScaleAttrs, string $win)
+{
+    string $curveItem;
+    int $volume;
+    int $worldScale;
+    string $worldScaleObj;
+    string $worldScaleAttr[0];
+
+    // get the items
+    $curveObj = `textFieldButtonGrp -q -text $curve`;
+    $volume = `checkBoxGrp -q -v1 $volumeCB`;
+    $worldScale = `checkBoxGrp -q -v1 $worldScaleCB`;
+    $worldScaleObj = `textFieldButtonGrp -q -text $worldScaleNode`;
+    $worldScaleAttr = `textScrollList -q -si $worldScaleAttrs`;
+
+    // check and see if everything is there
+    if (!`objExists $curveObj`)
+    {
+        error ("Curve: " + $curveObj + " doesn't exist.  Exiting..\n");
+    }
+
+    if ($worldScale)
+    {
+        if (!`objExists $worldScaleObj`)
+            error ("World Scale Object: " + $worldScaleObj + " doesn't exist.  Exiting..\n");
+
+        if ($worldScaleAttr[0] == "")
+        {
+            error ("No attribute selected for the world scale.  Exiting..\n");
+        }
+    }
+
+    // okay, everything is pretty much set.
+
+    $cmd = ("js_createStretchSpline \""+$curveObj + "\" "+$volume + " " + $worldScale + " \""+$worldScaleObj + "\" \""+$worldScaleAttr[0] + "\"");
+    evalEcho ($cmd + "\n");
+
+    optionVar -iv "js_stretchSplineMantainVolume" $volume ;
+    optionVar -iv "js_stretchSplineWorldScale" $worldScale;
+    optionVar -sv "js_stretchSplineWorldScaleObj" $worldScaleObj;
+    optionVar -sv "js_stretchSplineWorldScaleAttr" $worldScaleAttr;
+   
+    deleteUI $win;
+}
+global proc js_loadCreateStretchSplinePresets (string $curve, string $volumeCB, string $worldScaleCB, string $worldScaleNode, string $worldScaleAttrs, string $worldScaleText)
+{
+    // see if a curve is selected, if so, then load it into curve
+    string $curveSel;
+    $curveSel = `js_getSelectedCurve`;
+
+    // check the optionVars and see if they exist
+    $maintainVolume = 0;
+    $worldScale = 0;
+    string $worldScaleObj;
+    string $worldScaleAttr;
+
+    $maintainVolume = `js_getOptionVar $maintainVolume "js_stretchSplineMantainVolume"`;
+    $worldScale = `js_getOptionVar $worldScale "js_stretchSplineWorldScale"`;
+    $worldScaleObj = `js_getOptionVarString $worldScaleObj "js_stretchSplineWorldScaleObj"`;
+    $worldScaleAttr = `js_getOptionVarString $worldScaleAttr "js_stretchSplineWorldScaleAttr"`;
+   
+    // Set the defaults
+    if ($curveSel != "")
+    {
+        textFieldButtonGrp -e -text $curveSel $curve;
+    }
+
+    checkBoxGrp -e -v1 $maintainVolume $volumeCB;
+    checkBoxGrp -e -v1 $worldScale $worldScaleCB;
+
+    if ($worldScale)
+    {
+        textFieldButtonGrp -e -enable 1 $worldScaleNode;
+        text -e -enable 1 $worldScaleText;
+        textScrollList -e -enable 1 $worldScaleAttrs;
+    }
+    if ($worldScaleObj != "")
+    {
+        if (`objExists $worldScaleObj`)
+        {
+            textFieldButtonGrp -e -text $worldScaleObj $worldScaleNode;
+            
+            js_addAllAttrsToStretchTSL $worldScaleNode $worldScaleAttrs;
+
+            if ($worldScaleAttr != "")
+            {
+                if (`attributeQuery -exists -node $worldScaleObj $worldScaleAttr`)
+                {
+                    textScrollList -e -si $worldScaleAttr $worldScaleAttrs;
+                }
+            }
+        }
+    }
+    
+}
+
+global proc string js_getSelectedCurve ()
+{
+    string $objs[0];
+    string $return;
+    $objs =  `ls -sl -type transform`;
+
+    for ($ob in $objs)
+    {
+        // get the shape node
+        string $shape[0];
+        $shape = `listRelatives -f -s $ob`;
+        if ((`nodeType $shape[0]` == "nurbsCurve") && ($return == ""))
+            $return = $ob;
+
+    }
+    return $return;
+}

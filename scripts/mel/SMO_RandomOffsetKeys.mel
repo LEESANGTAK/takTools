@@ -1,0 +1,191 @@
+//------------------------------------------------------------------------------//
+//        Script:        SMO_RandomOffsetKeys.mel
+//
+//        Version:       1.1.1
+//
+//        Author:        Steven Olver
+//                       stevenolver@gmail.com    
+//
+//        Date:          11th April 2011
+//
+//        Description:   Offsets animation keys of selected objects by a randomly
+//                       selected number between user input limits. Each object is
+//                       evaluated individually and a new random value generated for
+//                       each object. Time range can also specified to offset keys
+//                       only withing that range. Incremental offset allows additional
+//                       frames to be offset for each object in order of selection.
+//                       Exponential offset creates and exponent on the incremental
+//                       amount creating an ever increasing number of frames
+//                       incrementally offset for each object. 1 is the default exponent
+//                       and should not be changed to 0, as this will yield no affect to
+//                       keyframes.
+//
+//        Installation:  Place SMO_RandomOffsetKeys.mel and SMO_RandomOffsetKeysShelfButton.mel
+//                       in your Documents\maya\2011-x64\scripts folder. Load the
+//                       SMO_RandomOffsetKeysShelfButton.mel into script editor, select
+//                       the text and middle mouse drag it to your shelf.
+//
+//        Usage:         Select objects you'd like to randomly offset the animation. Input
+//                       the minimum and maximum values and press OK to offset the keys. If
+//                       you wish to only offset keys in a specific time range, check the time
+//                       range checkbox and input the time range values and press OK. Use the
+//                       incremental offset to add additional frame offsets per object in order
+//                       of selection. Use the exponential offset to add an exponent to the 
+//                       incremental offset to create a multiplier effect on the offset frames
+//                       for each object in order of selection. 1 is the default and it should
+//                       not be changed to 0.
+//
+//                       (C) Copyright Steven Olver 2011
+//
+//------------------------------------------------------------------------------//
+
+global proc SMO_RandomOffsetKeys()
+{
+    //Delete and define window
+    if ( `window -exists SMO_RandomOffsetKeysWindow` )
+        {
+            deleteUI SMO_RandomOffsetKeysWindow;
+        }
+    
+    
+        window -t "SMO_RandomOffsetKeys" -wh 270 170 SMO_RandomOffsetKeysWindow;
+    
+    
+        
+        //Define layout elements
+        formLayout SMO_RandomOffsetKeys_Form;
+        
+        text -l "Offset Values" OffsetValues;        
+        
+        text -l "Minimum" TextMinimum;
+        text -l "Maximum" TextMaximum;
+        
+        text -l "Frame Range" TextFrameRange;        
+        text -l "Start" TextFrameStart;
+        text -l "End" TextFrameEnd;
+        
+        text -l "Additional Offset" TextAdditionalOffset;        
+        text -l "Incremental" TextIncremental;
+        text -l "Exponential" TextExponential;
+        
+        checkBox -l "" FrameRangeCheckBox; 
+                         
+        intField -w 70 OffsetMin;
+        intField -w 70 OffsetMax;
+        
+        intField -w 70 Incremental;
+        floatField -w 70 -v 1.00 Exponential;
+        
+        intField -w 70 FrameStart;
+        intField -w 70 FrameEnd;
+        button -l "OK" -command "SMO_RandomOffsetKeysExecute" OKButton;
+    
+            formLayout -edit
+            
+            -af OffsetValues "top" 32
+            -af OffsetValues "left" 10
+            
+            -af TextMinimum "top" 10
+            -af TextMinimum "left" 125
+            
+            -af TextMaximum "top" 10
+            -af TextMaximum "left" 202
+            
+            -af OffsetMin "top" 30
+            -af OffsetMin "left" 110
+            
+            -af OffsetMax "top" 30
+            -ac OffsetMax "left" 10 OffsetMin
+            
+            -af TextFrameRange "top" 72
+            -af TextFrameRange "left" 10
+            
+            -af FrameRangeCheckBox "top" 73
+            -ac FrameRangeCheckBox "left" 10 TextFrameRange
+            
+            -af TextFrameStart "top" 55
+            -af TextFrameStart "left" 130
+            
+            -af TextFrameEnd "top" 55
+            -af TextFrameEnd "left" 215
+            
+            -af FrameStart "top" 70
+            -af FrameStart "left" 110
+            
+            -af FrameEnd "top" 70
+            -ac FrameEnd "left" 10 FrameStart
+            
+            -af TextAdditionalOffset "top" 113
+            -af TextAdditionalOffset "left" 10
+                        
+            -af TextIncremental "top" 95
+            -af TextIncremental "left" 115
+            
+            -af Incremental "top" 110
+            -af Incremental "left" 110
+            
+            -af TextExponential "top" 95
+            -af TextExponential "left" 197
+            
+            -af Exponential "top" 110
+            -ac Exponential "left" 10 Incremental
+            
+            -ac OKButton "top" 10 TextAdditionalOffset
+            -af OKButton "left" 10
+            SMO_RandomOffsetKeys_Form;
+    
+                showWindow SMO_RandomOffsetKeysWindow;
+}
+
+
+//Main Proc, queries the intfields and generates a random number for each object
+//then relatively moves all keyframes found by that value. If the checkbox is ticked
+//it only moves the keyframes for the specified time range.
+
+global proc SMO_RandomOffsetKeysExecute()
+{
+    int $Minimum = `intField -q -v OffsetMin`;
+    int $Maximum = `intField -q -v OffsetMax`;
+    
+    int $FrameRangeCheckBox = `checkBox -q -v FrameRangeCheckBox`;
+    
+    int $FrameStart = `intField -q -v FrameStart`;
+    int $FrameEnd = `intField -q -v FrameEnd`;
+    
+    int $inputIncremental = `intField -q -v Incremental`;
+    float $inputExponential = `floatField -q -v Exponential`;
+    int $incremExponEq = ($inputIncremental*-1);
+    
+    
+    switch($FrameRangeCheckBox)
+    {
+    case 0:
+        
+        string $selected[] = `ls -sl`;
+
+            for ($objects in $selected)
+            {
+                $incremExponEq = ($incremExponEq+$inputIncremental);                
+                float $randomOffsetValue = (rand ($Minimum, $Maximum)+(pow($incremExponEq,$inputExponential)));
+                keyframe -edit -relative -timeChange $randomOffsetValue $objects;
+                print "Exectuted - All keyframes on selected objects have been offset"; 
+            }
+    
+    break;
+    
+    case 1:
+          string $selected[] = `ls -sl`;
+            
+            for ($objects in $selected)
+            {
+                $incremExponEq = ($incremExponEq+$inputIncremental);
+                float $randomOffsetValue = (rand ($Minimum, $Maximum)+(pow($incremExponEq,$inputExponential)));
+                keyframe -time ($FrameStart+":"+$FrameEnd) -edit -relative -timeChange $randomOffsetValue $objects;
+                print "Exectuted - All keyframes within frame selection on selected objects have been offset"; 
+            }       
+        break;
+    }
+}
+    
+
+//END   

@@ -1,0 +1,53 @@
+/*
+    Script:     js_addHalfJoint
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Takes the selected joints and then looks at the distance ot the child joint and creates
+                a new duplicate joint halfway along
+
+
+*/
+global proc string[] js_addHalfJoint ()
+{
+
+    string $result[0];
+    string $objs[0];
+    $objs = `ls -sl -type joint`;
+
+    int $count = 0;
+
+    for ($ob in $objs)
+    {
+        // get a child that's a joint
+        string $children[0];
+        $children = `listRelatives -f -c -type joint $ob`;
+        if (size($children) > 0)
+        {
+            // take the first joint and duplicate it
+            $dup = `duplicate -rr $children[0]`;
+
+            // delete the children of the duplicate
+            string $child[0];
+            $child = `listRelatives -f -c $dup[0]`;
+            if (size($child) > 0)
+            {
+                delete $child;
+            }
+
+            // rename the joint
+            string $newName;
+            $newName = `rename $dup[0] ($ob + "_halfChild")`;
+            
+            // position it
+            $t = `getAttr ($newName + ".t")`;
+            setAttr ($newName + ".tx") ($t[0]/2);
+            setAttr ($newName + ".ty") ($t[1]/2);
+            setAttr ($newName + ".tz") ($t[2]/2);
+            $result[$count++] = $newName;
+        }   
+    }
+    select $result;
+    return $result;
+}

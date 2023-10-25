@@ -1,0 +1,14 @@
+global proc xRayObj()
+{
+    string $selection[] = `ls -sl`;  
+    
+    for ($cur in $selection){
+        
+        int $result[] = `displaySurface -q -x $cur `;
+        if ( $result[0] )
+            displaySurface -x 0 $cur ;
+        else
+            displaySurface -x 1 $cur ;
+            
+    }    
+}

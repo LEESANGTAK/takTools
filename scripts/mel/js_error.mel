@@ -1,0 +1,14 @@
+/*
+    Script:     js_error
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Given a message string, this proc will
+                produce a confirmDialog and an error message.
+*/
+global proc js_error (string $msg)
+{
+    confirmDialog -t "Oops!" -m $msg;
+    error $msg;
+}

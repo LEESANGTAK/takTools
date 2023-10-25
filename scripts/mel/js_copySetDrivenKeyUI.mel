@@ -1,0 +1,756 @@
+/*
+    Script:     js_copySetDrivenKeyUI.mel
+    Version:    1.1
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      This script will copy the setDrivenKeyframes from one series of objects to another series of objects.
+
+    Ver 1.1:    11/26/2006
+                Added a tab for Mirroring setDrivenKeys simply by taking the selected object and specifying a replace string. 
+                For example, replacing "l_" with "r_" will mirror the drivers for the selected object to it's mirror.
+                
+
+*/
+global proc js_copySetDrivenKeyUI ()
+{
+    string $win = ("js_copySetDrivenKeyUI");
+
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -t "Copy Set Driven Keys" $win;
+
+    $tf = `formLayout -nd 100`;
+    $tabs = `tabLayout -innerMarginWidth 5 -innerMarginHeight 5`;
+
+    formLayout -e
+        -af $tabs top 0
+        -af $tabs right 0
+        -af $tabs left 0
+        -af $tabs bottom 0
+        $tf;
+
+    setParent $tabs;
+
+    $f = `formLayout -nd 100`;
+
+        $fr1 = `frameLayout -l "Copy Set Driven Key From..." -mw 5 -mh 5 -la "center" -cll 0`;
+        setParent $f;
+        $fr2 = `frameLayout -l "Copy Set Driven Key To..." -mw 5 -mh 5 -la "center" -cll 0`;
+        setParent $f;
+        $b1 = `button -l "Copy"`;
+        $b2 = `button -l "Close" -c ("deleteUI " + $win)`;
+
+        
+        setParent $fr1;
+            columnLayout -adj true;
+            $f2 = `formLayout -nd 100`;
+                $ofr = `frameLayout -l "From: Objects" -mw 5 -mh 5 -la "center" -cll 0`;
+                setParent $f2;
+                $dfr = `frameLayout -l "Pick a Driver" -mw 5 -mh 5 -la "center" -cll 0`;
+            
+            formLayout -e
+                -af $ofr top 5
+                -af $ofr left 5
+                -af $ofr bottom 5
+                -ap $ofr right 5 50
+
+                -af $dfr top 5
+                -af $dfr right 5
+                -af $dfr bottom 5
+                -ap $dfr left 5 50
+                $f2;
+        setParent $fr2;
+            columnLayout -adj true;
+            $f3 = `formLayout -nd 100`;
+                $ofr2 = `frameLayout -l "To: Objects" -mw 5 -mh 5 -la "center" -cll 0`;
+                setParent $f3;
+                $ndfr = `frameLayout -l "Using Driver" -mw 5 -mh 5 -la "center" -cll 0`;
+            
+            formLayout -e
+                -af $ofr2 top 5
+                -af $ofr2 left 5
+                -af $ofr2 bottom 5
+                -ap $ofr2 right 5 50
+
+                -af $ndfr top 5
+                -af $ndfr right 5
+                -af $ndfr bottom 5
+                -ap $ndfr left 5 50
+                $f3;
+    formLayout -e
+        -af $fr1 top 5
+        -af $fr1 left 5
+        -af $fr1 right 5
+        
+        -ac $fr2 top 10 $fr1
+        -af $fr2 left 5
+        -af $fr2 right 5
+        -ac $fr2 bottom 5 $b1
+
+        -af $b1 left 5
+        -af $b1 bottom 5
+        -ap $b1 right 5 50
+
+        -af $b2 right 5
+        -af $b2 bottom 5
+        -ap $b2 left 5 50
+
+        $f;
+
+
+    // build the objects textScrollList area
+    //
+    setParent $ofr;
+    
+        $of = `formLayout -nd 100`;
+            $otsl = `textScrollList -nr 10 -ams true`;
+            $ob = `button -l "Load Sel"`;
+            $obUp = `button -l "Add"`;
+            $obDown = `button -l "Del"`;
+
+        formLayout -e 
+            -af $otsl top 0
+            -af $otsl left 0
+            -af $otsl right 0
+            -ac $otsl bottom 2 $ob
+
+            -af $ob left 0
+            -af $ob bottom 0
+            -ap $ob right 1 33
+
+            -ap $obUp left 1 33
+            -af $obUp bottom 0
+            -ap $obUp right 1 66
+
+            -ap $obDown left 1 66
+            -af $obDown bottom 0
+            -af $obDown right 0
+
+            $of;
+    // build the driven by textScrollList
+    setParent $dfr;
+        $df2 = `formLayout -nd 100`;
+            $drtsl = `textScrollList -nr 10 -ams 0`;
+            $driverPopup = `popupMenu`;
+
+        formLayout -e
+            -af $drtsl top 0
+            -af $drtsl left 0
+            -af $drtsl right 0
+            -af $drtsl bottom 0
+            $df2;
+
+    // build the other objeccts textScrollArea
+    setParent $ofr2;
+    
+        $of2 = `formLayout -nd 100`;
+            $otsl2 = `textScrollList -nr 10 -ams true`;
+            $ob2 = `button -l "Load Sel"`;
+            $obUp2 = `button -l "Add"`;
+            $obDown2 = `button -l "Del"`;
+
+        formLayout -e 
+            -af $otsl2 top 0
+            -af $otsl2 left 0
+            -af $otsl2 right 0
+            -ac $otsl2 bottom 2 $ob2
+
+            -af $ob2 left 0
+            -af $ob2 bottom 0
+            -ap $ob2 right 1 33
+
+            -ap $obUp2 left 1 33
+            -af $obUp2 bottom 0
+            -ap $obUp2 right 1 66
+
+            -ap $obDown2 left 1 66
+            -af $obDown2 bottom 0
+            -af $obDown2 right 0
+
+            $of2;
+
+    // build the user driver section
+    setParent $ndfr;
+        $ndf = `formLayout -nd 100`;
+            $t = `text -align "left" -l "Please select object that will be the new driver and click with the Right Mouse Button to bring up a list of attributes."`;
+            $drtfg = `textFieldGrp -l "Driver:" -cw 1 60`;
+            $p = `popupMenu`;
+        
+            //$ndb = `button -l "Pick Driver"`;
+            
+        formLayout -e
+            -af $t top 0
+            -af $t left 0
+            -af $t right 0
+
+            -af $drtfg left 0
+            -ac $drtfg top 10 $t
+            -af $drtfg right 0
+
+            //-af $ndb left 60
+            //-ac $ndb top 5 $drtfg
+            //-af $ndb right 0
+            $ndf;
+
+    // CALLBACKS
+    //
+   
+    // textScrollList selections
+        textScrollList -e 
+            -sc ("js_copySetDrivenKey_selTsl " + $otsl)
+            $otsl;
+        
+        textScrollList -e 
+            -sc ("js_copySetDrivenKey_selTsl " + $otsl2)
+            $otsl2;
+
+    // popup menu
+        popupMenu -e
+            -pmc ("js_copySetDrivenKey_buildDriverPopupMenu " + $driverPopup + " " + $drtsl + " "  +$otsl )
+            $driverPopup;
+    // Load Selected button
+        button -e
+            -c ("js_copySetDrivenKey_loadSelInTSL " +$otsl + " \"rep\";js_copySetDrivenKey_loadDrivers "+$otsl+" "+ $drtsl)
+            $ob;
+        button -e
+            -c ("js_copySetDrivenKey_loadSelInTSL " +$otsl + " \"add\";js_copySetDrivenKey_loadDrivers "+$otsl+" "+ $drtsl)
+            $obUp;
+        button -e
+            -c ("js_copySetDrivenKey_DelSelInTSL " +$otsl + ";  js_copySetDrivenKey_loadDrivers "+$otsl+" "+ $drtsl) 
+            $obDown;
+
+        button -e
+            -c ("js_copySetDrivenKey_loadSelInTSL " +$otsl2 + " \"rep\"")
+            $ob2;
+        button -e
+            -c ("js_copySetDrivenKey_loadSelInTSL " +$otsl2 + " \"add\"")
+            $obUp2;
+        button -e
+            -c ("js_copySetDrivenKey_DelSelInTSL " +$otsl2 )
+            $obDown2;
+
+    // load new driver
+    //
+    popupMenu -e
+        -pmc ("js_copySetDrivenKey_loadNewDriver " + $drtfg + " " + $p)
+        $p;
+
+    // copy button
+    $copyButtonCmd = ("js_copySetDrivenKey_PrepareCommand ");
+    $copyButtonCmd += ($otsl + " ");
+    $copyButtonCmd += ($drtsl + " ");
+    $copyButtonCmd += ($otsl2 + " ");
+    $copyButtonCmd += ($drtfg );
+
+    button -e
+        -c $copyButtonCmd
+        $b1; 
+
+
+    // end callbacks
+    //
+
+    setParent $tabs;
+    
+    $col = `columnLayout -adj true`;
+
+    $searchTextGrp = `textFieldGrp -l "Search For:"`;
+    $replaceTextGrp = `textFieldGrp -l "Replace With:"`;
+    $button = `button   -l "Go" 
+                        -c ("js_prepMirrorSetDrivenKey \"" + $searchTextGrp + "\" \"" + $replaceTextGrp + "\"")`;
+
+    tabLayout -e -tl $f "Copy SDK" -tl $col "Mirror SDK" $tabs;
+
+    // update the interface
+    js_copySetDrivenKey_loadSelInTSL $otsl "rep";
+    js_copySetDrivenKey_loadDrivers $otsl $drtsl; 
+    showWindow $win;
+}
+
+global proc js_copySetDrivenKey_loadDrivers (string $tsl, string $drtsl)
+{
+    // this proc will look at the objects in $tsl.  If there are any objects in there, it will check what setDrivenKeys
+    // are on the object.  If there are some, then it will show the list in $drtsl
+    string $objsInTsl[0];
+    $objsInTsl = `textScrollList -q -ai $tsl`;
+
+    textScrollList -e -ra $drtsl;
+    if (size($objsInTsl) > 0)
+    {
+        // check and see if there are any driven keys on the objects
+        // we'll us an arrayIntersector to find only the driven keys that are common to all the objects
+        string $myIntersector = `stringArrayIntersector`;
+
+        for ($ob in $objsInTsl)
+        {
+            string $driven[0];
+            $driven = `setDrivenKeyframe -q -dr $ob`;
+
+            // add it to the intersector
+            if (size($driven) > 0)
+            {
+                stringArrayIntersector -e -intersect $driven $myIntersector;
+            }
+        }
+        // okay, we now have the list, so let's get it
+        string $drivers[0];
+        $drivers = `stringArrayIntersector -q $myIntersector`;
+        
+        // delete the intersector
+        deleteUI $myIntersector;
+       
+        if (size($drivers) > 0)
+        {
+            textScrollList -e -enable 1 $drtsl;
+            for ($dr in $drivers)
+            {
+                textScrollList -e -a $dr $drtsl;
+            }
+        }
+        else
+        {
+            textScrollList -e -enable 0 $drtsl;
+        }
+    }
+    else
+    {
+        textScrollList -e -enable 0 $drtsl;
+    }
+}
+global proc js_copySetDrivenKey_loadSelInTSL (string $tsl, string $type)
+{
+    // loads the selected objects into the specified text scroll list
+    string $objs[0];
+    string $objsInTsl[0];
+    $objsInTsl = `textScrollList -q -ai $tsl`;
+    
+    $objs = `ls -sl`;
+     
+    // remove the items in the tsl
+    if ($type == "rep")
+        textScrollList -e -ra $tsl;
+    for ($ob in $objs)
+    {
+        // check and see if $ob is in the textScrollList already
+        $match = 0;
+        for ($in in $objsInTsl)
+        {
+            if ($ob == $in)
+                $match = 1;
+        }
+        if ($match == 0)
+            textScrollList -e -a $ob $tsl;
+    }
+}
+global proc js_copySetDrivenKey_selTsl (string $tsl)
+{
+    // select the items that are hilighted in the $tsl
+    string $sel[0];
+    $sel = `textScrollList -q -si $tsl`;
+    if (size($sel) > 0)
+    {
+        select $sel;
+    }
+
+}
+global proc js_copySetDrivenKey_DelSelInTSL (string $tsl)
+{
+    // simply removes the selected item from the test scroll list
+    string $sel[0];
+    $sel = `textScrollList -q -si $tsl`;
+    if (size($sel) > 0)
+    {
+        for ($item in $sel)
+        {
+            textScrollList -e -ri $item $tsl;
+        }
+    }
+}
+
+global proc js_copySetDrivenKey_buildDriverPopupMenu (string $driverPopup, string $drtsl, string $otsl)
+{
+    // first delete the popup
+    popupMenu -e -dai $driverPopup;
+
+    setParent -m $driverPopup;
+
+    // now find out what driver is selected
+    string $driver[0];
+    $driver = `textScrollList -q -si $drtsl`;
+    if (size($driver) > 0)
+    {
+        // now find out what items are in the list
+        string $driven[0];
+        $driven = `js_getDrivenObjects $driver[0]`;
+        for ($drivenObj in $driven)
+        {
+            $cmd = ("select \"" + $drivenObj + "\";");
+            $cmd +=("js_copySetDrivenKey_loadSelInTSL " +$otsl + " \"add\";");
+            $cmd += ("js_copySetDrivenKey_loadDrivers "+$otsl+" "+ $drtsl + ";");
+            $cmd += ("textScrollList -e -si \""+$driver[0]+"\" \""+$drtsl+"\"");
+
+            menuItem -l $drivenObj -c $cmd;
+        }
+    }
+}
+global proc js_copySetDrivenKey_loadNewDriver ( string $tfg, string $popupMenu)
+{
+    // this will pop up a window for the selected object showing the keyable attributes
+    string $objs[0];
+    $objs = `ls -sl`;
+    string $objToFind;
+    $objToFind = `textFieldGrp -q -tx $tfg`;
+    
+    // remove all items from the popup menu
+    popupMenu -e -dai $popupMenu;
+    if (size($objs) > 0)
+    {
+        // okay, we have an object.
+        $objToFind = $objs[0];        
+    }
+    if ($objToFind != "")
+    {
+        if (`objExists $objToFind`)
+        {
+            string $attrs[0];
+            $attrs = `listAttr -k $objToFind`;
+
+            // we'll find the keyable attributes for the object
+            setParent -m $popupMenu;
+            
+            for ($at in $attrs)
+            {
+                menuItem -l $at -c ("textFieldGrp -e -tx \"" + $objToFind + "." + $at + "\" " + $tfg);
+            }
+            
+        }
+    }
+}
+global proc js_setDrivenKey_addDriverToTFG (string $tsl, string $tfg, string $ob, string $win)
+{
+    string $sel[0];
+    $sel = `textScrollList -q -si $tsl`;
+
+    textFieldGrp -e -tx ($ob + "." + $sel[0]) $tfg;
+
+    deleteUI $win;
+}
+
+global proc js_copySetDrivenKey_PrepareCommand ( string $otsl, string $drtsl, string $totsl, string $drtfg)
+{
+    string $objs[0];
+    $objs = `ls -sl`;
+    // get the information
+    string $fromObjects[0];
+    string $toObjects[0];
+    string $fromDriver;
+    string $newDriver;
+
+    $fromObjects = `textScrollList -q -ai $otsl`;
+    $toObjects = `textScrollList -q -ai $totsl`;
+
+    // get the from driver
+    string $tmp[0];
+    $tmp = `textScrollList -q -si $drtsl`;
+    $fromDriver = $tmp[0];
+
+    $newDriver = `textFieldGrp -q -tx $drtfg`;
+
+    // check everything
+    if (size($fromObjects) == 0)
+        error ("You don't have any objects added to From: Objects. Exiting..");
+    if (size($toObjects) == 0)
+        error ("You don't have any objects added to To: Objects. Exiting..");
+    if ($fromDriver == "")
+        error ("You must select a driver to copy values from. Exiting..");
+    if ($newDriver == "")
+        error ("You must select a driver to copy values to. Exiting..");
+    if (!`gmatch $newDriver "*.*"`)
+        error ("New Driver must be in the form of object.attribute.  Exiting..");
+    if (!`objExists $newDriver`)
+        error ("New Driver " + $newDriver + " doesn't exist.  Exiting..");
+
+    if ((`size($fromObjects)`) != (`size($toObjects)`))
+        error ("The from objects and to objects lists aren't equal.  They need to be the same number of items. Exiting..");
+
+    // okay, we've got everything!
+
+    // now for each object, find out what attributes are being controlled by setDrivenKeys.  Then for the attributes
+    // being controlled, find out what's controlling them.  Finally, if they're being controlled by the driver specified
+    // we're in business!
+    print ("Copying Set Driven Keys...\n");
+    for ($x = 0; $x < size($fromObjects); $x++) 
+    {
+        $obj = $fromObjects[$x];
+        $toObj = $toObjects[$x];
+        
+        $cmd = ("js_copySetDrivenKeyGo " + $fromDriver + " " + $newDriver + " " + $obj + " " + $toObj);
+        evalEcho $cmd;
+    }
+
+    select $objs;
+}
+
+global proc string[] js_getDrivenObjects (string $driver)
+{
+    // given a driver, get a list of all the driven objects
+    string $return[0];
+    int $count = 0;
+    // first get a list of all the curves coming out of the driver
+    string $curves[0];
+    if (`objExists $driver `)
+    {
+        $curves = `listConnections -d true -s false -type "animCurve" $driver`;
+
+        // now for each curve, get the history forward until we find a node that's a transform
+        for ($curve in $curves)
+        {
+            string $history[0];
+            $history = `listHistory -future 1 $curve`;
+            for ($item in $history)
+            {
+                // we need to find something that's not an animation curve or unitConversion node
+                $badTypes = {"animCurve", "animCurveUA","unitConversion", "blendWeighted"};
+                $isGood = 1;
+                for ($bad in $badTypes)
+                {
+                    if (`objectType -isType $bad $item`)
+                        $isGood = 0;
+                }
+
+                if ($isGood)
+                    $return[$count++] = $item;
+
+            }
+        }
+
+        // remove duplicates from $return
+        $return = stringArrayRemoveDuplicates($return);
+        $return = `sort ($return)`;
+    }
+    return $return;
+}
+global proc js_copySetDrivenKeyGo (string $fromDriver, string $newDriver, string $obj, string $toObj)
+{
+    string $attrsBeingDriven[0];
+    $attrsBeingDriven = `setDrivenKeyframe -q -dn $obj`;
+
+    for ($at in $attrsBeingDriven)
+    {
+        // get the driver controlling it
+        string $drivers[0];
+        $drivers = `setDrivenKeyframe -q -dr $at`;
+        
+        for ($driver in $drivers)
+        {
+            if ($driver == $fromDriver)
+            {
+                // sweet!  
+                // $driver is driving $at
+
+                // get the anim curve
+                $curve = `js_copySetDrivenKey_getDrivenCurve $driver $at`;
+                // get all the indexes of the anim curve
+                int $keyCount = `keyframe -q -keyframeCount $curve`;
+
+                // now we get to iterate through and do the setDrivenKeyframe command!
+                // first set the driver and the new driver to zero
+                setAttr ($driver) 0;
+                setAttr ($newDriver) 0;
+                
+                select $obj;
+
+                // split apart $at
+                string $break[0];
+                tokenize ($at, ".", $break);
+                $attribute = $break[1];
+
+                setAttr ($driver) 0;
+                setAttr ($newDriver) 0;
+
+                for ($x = 0; $x < $keyCount; $x++)
+                {
+                    float $driverValue[0]; 
+                    float $drivenValue[0]; 
+                    $driverValue = `keyframe -index $x -query -fc $curve`;
+
+                    // now get the object's value
+                    $drivenValue = `keyframe -index $x -query -vc $curve`;
+
+                    $cmd = ("setDrivenKeyframe -cd " + $newDriver + " -dv " + $driverValue[0] + " -v " + $drivenValue[0] + " -at " + $attribute + " " + $toObj);
+
+                    // this 
+                    eval $cmd;
+                }
+                // now we need the new curve
+                $newCurve = `js_copySetDrivenKey_getDrivenCurve $newDriver ($toObj + "." + $attribute)`;
+
+                // now go through each curve and copy the values
+                js_copyCurveBits $curve $newCurve;
+                // now check the infinity values
+                $preInf = `getAttr ($curve + ".preInfinity")`;
+                $postInf = `getAttr ($curve + ".postInfinity")`;
+
+                setAttr ($newCurve + ".preInfinity") $preInf;
+                setAttr ($newCurve + ".postInfinity") $postInf;
+
+
+                setAttr ($driver) 0;
+                setAttr ($newDriver) 0;
+                
+            }
+        }
+    }
+}
+global proc js_copyCurveBits (string $sourceCurve, string $destCurve)
+{
+    // get the number of keys
+    int $keyCount = `keyframe -q -keyframeCount $sourceCurve`;
+
+    // first make sure the types of curves are the same
+    $wt = `keyTangent -q -wt $sourceCurve`;
+    keyTangent -edit -wt $wt[0] $destCurve;
+    
+    for ($key = 0; $key < $keyCount; $key++)
+    {
+        // check the locking of the tangents
+        $lock = `keyTangent -index $key -q -lock $sourceCurve`;
+        keyTangent -e -index $key -lock $lock[0] $destCurve;
+
+        // outY of out-tangent
+        $oy = `keyTangent -index $key -q -oy $sourceCurve`;
+        keyTangent -e -index $key -oy $oy[0] $destCurve;
+
+        // outX of out-tangent
+        $ox = `keyTangent -index $key -q -ox $sourceCurve`;
+        keyTangent -e -index $key -ox $ox[0] $destCurve;
+
+        // outWeight of out-tangent
+        $ow = `keyTangent -index $key -q -ow $sourceCurve`;
+        keyTangent -e -index $key -ow $ow[0] $destCurve;
+
+        // inY of out-tangent
+        $iy = `keyTangent -index $key -q -iy $sourceCurve`;
+        keyTangent -e -index $key -iy $iy[0] $destCurve;
+
+        // inX of out-tangent
+        $ix = `keyTangent -index $key -q -ix $sourceCurve`;
+        keyTangent -e -index $key -ix $ix[0] $destCurve;
+
+        // inWeight of out-tangent
+        $iw = `keyTangent -index $key -q -iw $sourceCurve`;
+        keyTangent -e -index $key -iw $iw[0] $destCurve;
+
+        // outAngle
+        $oa = `keyTangent -index $key -q -oa $sourceCurve`;
+        keyTangent -e -index $key -oa $oa[0] $destCurve;
+
+        // inAngle
+        $ia = `keyTangent -index $key -q -ia $sourceCurve`;
+        keyTangent -e -index $key -ia $ia[0] $destCurve;
+
+        // inTangentType
+        $itt = `keyTangent -index $key -q -itt $sourceCurve`;
+        keyTangent -e -index $key -itt $itt[0] $destCurve;
+
+        // inTangentType
+        $ott = `keyTangent -index $key -q -ott $sourceCurve`;
+        keyTangent -e -index $key -ott $ott[0] $destCurve;
+
+
+
+    }
+}
+global proc string js_copySetDrivenKey_getDrivenCurve (string $driver, string $driven)
+{
+    string $return;
+    string $driverFuture[0];
+    string $drivenPast[0];
+
+    // get the output of the driven.. this should be the animCurve
+    $driverFuture = `listConnections -type "animCurve" $driver`;
+
+    // get the inputs to driven
+    // before doing the history, we need to step one incoming back first
+    $tmp = `listConnections -s true $driven`;
+    $drivenPast = `listHistory $tmp[0]`;
+
+    // now get the intersection
+    string $myIntersector = `stringArrayIntersector`;
+    stringArrayIntersector -e -intersect $driverFuture $myIntersector;
+    stringArrayIntersector -e -intersect $drivenPast $myIntersector;
+
+    $tmp = `stringArrayIntersector -q $myIntersector`;
+    $return = $tmp[0];
+
+    // delete the intersector
+    deleteUI $myIntersector;
+
+    return $return;
+}
+
+global proc js_prepMirrorSetDrivenKey (string $stg, string $rtg)
+{
+    // get the results
+    string $search;
+    string $replace;
+    int $dup;
+
+    $search = `textFieldGrp -q -tx $stg`;
+    $replace = `textFieldGrp -q -tx $rtg`;
+
+    if (($search != "") && ($replace != ""))
+    {
+        $cmd = ("js_mirrorSetDrivenKey \"" + $search + "\" \"" + $replace + "\"");
+        evalEcho $cmd;
+    }
+}
+global proc js_mirrorSetDrivenKey (string $searchFor, string $replace)
+{
+
+    // based on the selected object, this script will mirror the setDrivenKey relationships for the selected item.  You pass it the 
+    // search string and replace string, and it will look at the selected objects, find the setDrivenKey drivers and mirror them.
+    //
+    // for example, if you have l_finger selected, and it's being driven by l_hand.curl and l_hand.spread, run:
+    //  js_mirrorSetDrivenKey "l_" "r_"
+    //
+    // and it will mirror the relationship so r_finger will be driven by r_hand.curl and r_hand.spread.
+    //
+
+    string $selectedObjs[0];
+    string $object;
+
+    $selectedObjs = `ls -sl`;
+    for ($object in $selectedObjs)
+    {
+        // get the mirrored version of $object
+        $mirrored_object = `substitute $searchFor $object $replace`;
+        // for each object find out what is driving it
+        string $drivers[0];
+        $drivers = `setDrivenKeyframe -q -dr $object`;
+        string $driver;
+        for ($driver in $drivers)
+        {
+            if ($driver != "No drivers.")
+            {
+                // get the inverse driver
+                $mirrored_driver = `substitute $searchFor $driver $replace`;
+
+                // make sure all objects exist
+                if ((`objExists $object`) && (`objExists $mirrored_object`) && (`objExists $driver`) && (`objExists $mirrored_driver`))
+                {
+                    $cmd = ("js_copySetDrivenKeyGo " + $driver + " " + $mirrored_driver + " " + $object + " " + $mirrored_object);
+                    evalEcho $cmd;
+                }
+                else
+                {
+                    error ("Couldn't mirror because one of these objects doesn't exist: "+ $object + ", " + $mirrored_object + ", " + $driver + ", or " + $mirrored_driver + ".");
+                }
+            }
+        }
+
+            
+    }
+}

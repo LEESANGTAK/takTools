@@ -1,0 +1,48 @@
+/*
+    Script:     js_grepRenameUI
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Bring up an interface for grepRename
+
+    Requires:   js_grepRename;
+*/
+global proc js_grepRenameUI ()
+{
+
+    $win = "js_grepRename";
+    if (`window -exists $win`)
+        deleteUI $win;
+
+    window -title "Grep Rename" $win;
+
+    columnLayout -adj true;
+
+    $searchTextGrp = `textFieldGrp -l "Search For:"`;
+    $replaceTextGrp = `textFieldGrp -l "Replace With:"`;
+    $cbg    = `checkBoxGrp -l "Duplicate then rename:" -l1 "yes/no"`;
+    $button = `button   -l "Go" 
+                        -c ("js_prepGrepRename \"" + $searchTextGrp + "\" \"" + $replaceTextGrp + "\" \""+$cbg+"\"")`;
+    showWindow $win;
+    
+}
+
+global proc js_prepGrepRename (string $stg, string $rtg, string $cbg)
+{
+    // get the results
+    string $search;
+    string $replace;
+    int $dup;
+
+    $search = `textFieldGrp -q -tx $stg`;
+    $replace = `textFieldGrp -q -tx $rtg`;
+    $dup = `checkBoxGrp -q -v1 $cbg`;
+
+    
+    if (($search != "") && ($replace != ""))
+    {
+        $cmd = ("js_grepRename \"" + $search + "\" \"" + $replace + "\" "+$dup + "");
+        evalEcho $cmd;
+    }
+}

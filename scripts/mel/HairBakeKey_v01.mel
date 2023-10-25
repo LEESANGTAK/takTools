@@ -1,0 +1,583 @@
+/*-----------------------------------------------------------------------------------------------------------
+
+	Script Name	: JinnTD HairBakeKey V 0.1 Beta
+	Author		: Tae-Su Jin
+	E-mail		: witchjinn@hotmail.com
+	Last Updated	: Dec 01, 2008
+
+
+▼ updates V0.1 
+1. 
+
+b1 update 
+list 기능 추가.
+-----------------------------------------------------------------------------------------------------------*/
+
+
+global string $WinNameA = "BakeNameKeyWin" ;
+global string $windowLayoutName = "Bake Key" ;
+
+global proc BakeNameKeyWin()
+{
+
+global string $WinNameA;
+global string $windowLayoutName;
+global int $MenuWinNumber;
+
+   if (`window -ex $WinNameA`) 
+   {
+      deleteUI $WinNameA;
+   }
+
+window -width 300 -height 200
+-resizeToFitChildren true
+-menuBar true
+-maximizeButton true
+-titleBar true
+/*-sizeable false*/
+-menuBarVisible true
+-title $windowLayoutName
+$WinNameA;
+
+
+columnLayout;
+
+
+frameLayout
+		-label "" 
+		-labelAlign "bottom"
+		-borderStyle "in";
+		
+
+rowLayout -nc 2 -cw 1 300	-cw 2 300 ;
+
+	columnLayout;
+	
+	rowLayout -nc 4 -cw 1 150 -cw 2 70 -cw 3 30 -cw 4 30 ;
+	string $NSlist[] = `ls "*:root"`;
+	
+	optionMenu -label "namespace: " -changeCommand "getHairBakeChainList" hairBakeNSmenu;
+            
+	if ( size($NSlist) > 0) {
+		for ($curNS in $NSlist){
+			string $tokenTemp[];
+			tokenize $curNS ":" $tokenTemp;
+			menuItem -label $tokenTemp[0];			
+		}
+	} else {
+		menuItem -label ":";
+	}
+	
+	checkBox -l "group" -v 1 -cc "getHairBakeChainList" hairGroupcheckBox;
+	text -l "filter:";
+	intField -minValue 2 -maxValue 8 -value 4 -s 1 -w 30 -cc "getHairBakeChainList" hairFilterField;
+	
+	setParent .. ;
+	
+	textScrollList  -allowMultiSelection 1 -w 290 -h 120 -sc "selectHairBake 0;" hairbakeTxList;
+	rowLayout -nc 7 -cw 1 80	-cw 2 30 ;
+		text -l "type: ";
+	 radioCollection typeRadCol;
+		radioButton -label "5" -cc "getHairBakeChainList" line5radButton;
+		radioButton -label "4" -cc "getHairBakeChainList" line4radButton;
+		radioButton -label "3" -cc "getHairBakeChainList" line3radButton;
+		radioButton -label "2" -cc "getHairBakeChainList" line2radButton;
+		radioButton -label "1" -cc "getHairBakeChainList" line1radButton;
+		radioButton -label "all" -cc "getHairBakeChainList" lineAllradButton;
+		
+	radioCollection -e -sl line5radButton typeRadCol;	
+		
+	setParent .. ;
+	
+	rowLayout -nc 2 -cw 1 180	-cw 2 150 ;
+	button -l "get HairChain List" -w 150 -c "getHairBakeChainList";
+	button -l "select all" -w 100 -c "selectHairBake 1;";
+	setParent .. ;
+	
+	setParent .. ;
+
+
+	columnLayout;
+
+		text -label "  헤어 다이나믹을 제어하기 위한 툴이다." -align "left";
+		text -label "  _Line5_Bake_Con(가장 아래 부분 컨트롤러)" -align "left";
+		text -label "  를 선택하고 실행하면 된다." -align "left";
+
+
+		separator -h 8 -w 289 -style "double";
+
+            	button 
+			-w 280 -h 20 
+			-label "헤어다이나믹의 키를 전환" 
+			-align "center" 
+			-command ("string $Sel[] =`ls -sl`;BakeReNamecommand;BakeNameKeyCommand;select -r $Sel");
+
+            	button 
+			-w 280 -h 20 
+			-label "적용된 모든 키를 삭제하고 정리" 
+			-align "center" 
+			-command ("string $Sel[] =`ls -sl`;BakeReNamecommand;cleanFrameSetCommand;select -r $Sel");
+
+            	button 
+			-w 280 -h 20 
+			-label "0 값으로 초기화" 
+			-align "center" 
+			-command ("string $Sel[] =`ls -sl`;BakeReNamecommand;cleanFrameZeroSetCommand;select -r $Sel");
+
+
+		separator -h 8 -w 289 -style "double";
+
+		textFieldGrp -label "startFrame :" -text "1" -cw 1 100 -cw 2 120 startFrameTextFieldButtonGrp;
+
+            	button 
+			-w 280 -h 20 
+			-label "지정된 시작 프레임으로 헤어 셋팅을 조정한다." 
+			-align "center" 
+			-command ("string $Sel[] =`ls -sl`;BakeReNamecommand;startFrameSetCommand;select -r $Sel");
+
+		separator -h 8 -w 289 -style "double";
+
+
+		text -label " copyright (C) witchjinn@hotmail.com" -align "left";
+
+	setParent .. ;
+	
+	
+setParent .. ;
+
+setParent .. ;
+
+
+showWindow $WinNameA;
+
+window -e -width 300 -height 235 $WinNameA;
+
+
+getHairBakeChainList;
+
+
+
+}
+
+
+BakeNameKeyWin;
+
+
+global proc getHairBakeChainList() {
+
+	string $curNS = `optionMenu -q -v hairBakeNSmenu`;
+	
+	string $line;
+	string $rb = `radioCollection -q -sl typeRadCol`;		
+	if ($rb == "line5radButton")
+		$line = "Line5_Bake_Con";
+	else if ($rb == "line4radButton")
+		$line = "Line4_Bake_Con";	
+	else if ($rb == "line3radButton")
+		$line = "Line3_Bake_Con";		
+	else if ($rb == "line2radButton")
+		$line = "Line2_Bake_Con";			
+	else if ($rb == "line1radButton")
+		$line = "Line_Con";		
+	else if ($rb == "lineAllradButton")
+		$line = "Line*_Con";		
+			
+	string $hairCcList[] = `ls ($curNS + ":*_" + $line)`;	
+	
+	int $group = `checkBox -q -v hairGroupcheckBox`;	
+	int $filter = `intField -q -v hairFilterField`;
+	if ($group) {
+	
+		string $preFix[];
+		for ($i = 0 ; $i <= size($hairCcList) ; $i++  ) {
+			if (size($hairCcList[$i]) > 0){
+				string $removeNS = `substitute ($curNS + ":") $hairCcList[$i] ""`;			
+				$preFix[$i] = `substring $removeNS 1 $filter`;		
+			}	
+		}	
+		
+		string $preFix[] = stringArrayRemoveDuplicates($preFix);	
+		
+		textScrollList -e -ra hairbakeTxList;
+		for ($curHairGrp in $preFix)
+			if ( $curHairGrp != "" )
+			textScrollList -e -a ("-" + $curHairGrp + "-") hairbakeTxList;
+		
+		
+	
+	} else {
+		textScrollList -e -ra hairbakeTxList;
+		for ($curHairCc in $hairCcList)
+			textScrollList -e -a $curHairCc hairbakeTxList;
+	}	
+}
+
+global proc selectHairBake( int $type ) {
+	
+	string $curNS = `optionMenu -q -v hairBakeNSmenu`;
+	
+	string $line;
+	string $rb = `radioCollection -q -sl typeRadCol`;		
+	if ($rb == "line5radButton")
+		$line = "Line5_Bake_Con";
+	else if ($rb == "line4radButton")
+		$line = "Line4_Bake_Con";	
+	else if ($rb == "line3radButton")
+		$line = "Line3_Bake_Con";		
+	else if ($rb == "line2radButton")
+		$line = "Line2_Bake_Con";			
+	else if ($rb == "line1radButton")
+		$line = "Line_Con";		
+	else if ($rb == "lineAllradButton")
+		$line = "Line*_Con";	
+		
+		
+	string $sel[];
+	if ( $type == 0 ) //select 1
+		$sel = `textScrollList -q -si hairbakeTxList`; 
+	else // select all
+		$sel = `textScrollList -q -ai hairbakeTxList`; 
+		
+	select -cl;
+	for ($curSel in $sel){
+		if ( `gmatch $curSel "-*-"` ) {
+			string $sel = `substring $curSel 2 (size($curSel)-1)`;
+			select -add ($curNS + ":" + $sel + "*_" + $line);		
+			print ($curNS + ":" + $sel + "*_" + $line +"\n");
+		}	
+		else
+			select -add $curSel;		
+	}
+	
+	for ($curHairCc in $sel)
+		textScrollList -e -si $curHairCc hairbakeTxList;
+}
+
+
+
+global proc BakeReNamecommand()
+{
+
+global string $Bake_Con_In_M ;
+global string $Bake_Con_M;
+global string $Bake_Out_M;
+
+$Bake_Con_In_M = "";
+$Bake_Con_M = "";
+$Bake_Out_M = "";
+
+string $SelObj[] =`ls -sl`;
+
+	for ($j=0 ; $j <= size($SelObj) ; $j++)
+	{
+	
+		string $RenameA = `substitute "_Line5_Bake_Con" $SelObj[$j] ""`;
+
+		for ($i = 2 ;  $i <= 5 ; $i++ ) {
+		
+			if ( `objExists ($RenameA + "_Line" +$i + "_Bake_Con_In")` )
+				$Bake_Con_In_M += ( $RenameA + "_Line" +$i + "_Bake_Con_In ");
+			if ( `objExists ($RenameA + "_Line" +$i + "_Bake_Con")` )
+				$Bake_Con_M += ($RenameA + "_Line" +$i + "_Bake_Con ");	
+			if ( `objExists ($RenameA + "_Line" +$i + "_Bake_Out")` )
+				$Bake_Out_M += ($RenameA + "_Line" +$i + "_Bake_Out ");
+		
+		}
+
+	}
+
+print ($Bake_Con_In_M+"\n");
+print ($Bake_Con_M+"\n");
+print ($Bake_Out_M+"\n");
+
+}
+
+global proc Bake_pointConstraintOnOff(int $OnOff)
+{
+
+global string $Bake_Con_In_M;
+global string $Bake_Con_M;
+global string $Bake_Out_M;
+
+eval ("select -r "+$Bake_Con_M);
+
+string $SelObj[] =`ls -sl`;
+
+	for ($i=0 ; $i < size($SelObj) ; $i++)
+	{
+
+		if (`gmatch $SelObj[$i] "*Line2_Bake_Con*"`)
+		{
+
+			string $Rename2 = `substitute "_Con" $SelObj[$i] "_P"`;
+			if (`objExists ($Rename2+"_pointConstraint1")`)
+			{
+			setAttr ($Rename2+"_pointConstraint1.BoxA_Line3_Bake_ConW0") $OnOff;
+			setAttr ($Rename2+"_pointConstraint1.BoxA_Line1_ConW1") $OnOff;
+			}
+		}
+
+		if (`gmatch $SelObj[$i] "*Line4_Bake_Con*"`)
+		{
+
+			string $Rename4 = `substitute "_Con" $SelObj[$i] "_P"`;
+			if (`objExists ($Rename4+"_pointConstraint1")`)
+			{
+			setAttr ($Rename4+"_pointConstraint1.BoxA_Line3_Bake_ConW0") $OnOff;
+			setAttr ($Rename4+"_pointConstraint1.BoxA_Line5_Bake_ConW1") $OnOff;
+			}
+		}
+	}
+
+}
+
+
+global proc startFrameSetCommand()
+{
+
+global string $Bake_Con_In_M;
+global string $Bake_Con_M;
+global string $Bake_Out_M;
+
+eval ("select -r "+$Bake_Con_In_M);
+DeleteConstraints;
+
+string $Attr = `textFieldGrp -q -text startFrameTextFieldButtonGrp`;
+hairSystemOnOff $Attr;
+
+
+}
+
+
+global proc cleanFrameSetCommand()
+{
+
+global string $Bake_Con_In_M;
+global string $Bake_Con_M;
+global string $Bake_Out_M;
+
+eval ("select -r "+$Bake_Con_In_M);
+
+DeleteConstraints;
+
+string $Attr = `textFieldGrp -q -text startFrameTextFieldButtonGrp`;
+hairSystemOnOff $Attr;
+
+eval ("select -r "+$Bake_Con_M);
+cutKey -clear -time ":" -hierarchy none -controlPoints 0 -shape 1;
+
+Bake_pointConstraintOnOff 1;
+changeBodyFollowCommand 1;
+
+}
+
+
+global proc cleanFrameZeroSetCommand()
+{
+global string $Bake_Con_In_M;
+global string $Bake_Con_M;
+global string $Bake_Out_M;
+
+eval ("select -r "+$Bake_Con_M);
+
+string $SelHair[] =`ls -sl`;
+
+	for ($i=0 ; $i < size($SelHair) ; $i++)
+	{
+	setAttr ($SelHair[$i]+".translateX") 0;
+	setAttr ($SelHair[$i]+".translateY") 0;
+	setAttr ($SelHair[$i]+".translateZ") 0;
+	setAttr ($SelHair[$i]+".rotateX") 0;
+	setAttr ($SelHair[$i]+".rotateY") 0;
+	setAttr ($SelHair[$i]+".rotateZ") 0;
+	}
+
+eval ("select -r "+$Bake_Con_In_M);
+
+string $SelHair[] =`ls -sl`;
+
+	for ($i=0 ; $i < size($SelHair) ; $i++)
+	{
+	setAttr ($SelHair[$i]+".translateX") 0;
+	setAttr ($SelHair[$i]+".translateY") 0;
+	setAttr ($SelHair[$i]+".translateZ") 0;
+	setAttr ($SelHair[$i]+".rotateX") 0;
+	setAttr ($SelHair[$i]+".rotateY") 0;
+	setAttr ($SelHair[$i]+".rotateZ") 0;
+	}
+
+Bake_pointConstraintOnOff 1;
+changeBodyFollowCommand 1;
+}
+
+
+global proc changeBodyFollowCommand(int $Attr)
+{
+	global string $Bake_Con_M;
+
+	eval ("select -r "+$Bake_Con_M);
+	string $SelObj[] =`ls -sl`;
+		for ($i=0 ; $i < size($SelObj) ; $i++)
+			if (`gmatch $SelObj[$i] "*Line5_Bake_Con*"`&& `objExists ($SelObj[$i] + ".followBodyCon")`)
+				setAttr ($SelObj[$i] + ".followBodyCon") $Attr;
+		
+}
+
+
+global proc BakeNameKeyCommand()
+{
+global string $Bake_Con_In_M;
+global string $Bake_Con_M;
+global string $Bake_Out_M;
+
+
+
+int $Min = `playbackOptions -q -min`;
+int $Max = `playbackOptions -q -max`;
+
+//match bakeCon - bake 하기전에 bake_Con_In을 match 시켜준다.
+currentTime $Min ;
+eval ("select -r "+$Bake_Con_In_M);
+SetInitialPosition "_Bake_Con_In" "_Bake_Con";
+
+
+//pointConstraint 
+
+eval ("select -r "+$Bake_Out_M);
+
+string $Sel[] =`ls -sl`;
+
+	for ($i=0 ; $i < size($Sel) ; $i++)
+	{
+	string $ReName = `substitute "Bake_Out" $Sel[$i] "Bake_Con_In"`;
+
+	select -r $Sel[$i] $ReName;
+	//offset값을 가지게 수정.
+	pointConstraint -mo -weight 1;
+	
+	}
+
+
+//bake
+eval ("select -r "+$Bake_Con_In_M);
+
+eval ("bakeResults -simulation true -t \"" + $Min + "\:" + $Max + "\" -sampleBy 1 -disableImplicitControl true -preserveOutsideKeys true -sparseAnimCurveBake false -removeBakedAttributeFromLayer false -bakeOnOverrideLayer false -controlPoints false -shape true;");
+
+//filterCurve -f simplify -timeTolerance 0.05;
+//keyTangent -itt spline -ott spline -animation objects graphEditor1FromOutliner;
+
+
+CopyNameKey 1 0 "_Bake_Con_In" "_Bake_Con";
+
+eval ("select -r "+$Bake_Con_In_M);
+DeleteConstraints;
+cutKey -clear -time ":" -hierarchy none -controlPoints 0 -shape 1;
+
+hairSystemOnOff 10000;
+Bake_pointConstraintOnOff 0;
+changeBodyFollowCommand 0;
+
+
+
+}
+
+
+
+global proc hairSystemOnOff(float $Attr)
+{
+global string $Bake_Con_In_M;
+global string $Bake_Con_M;
+global string $Bake_Out_M;
+
+eval ("select -r "+$Bake_Con_M);
+
+string $SelObj[] =`ls -sl`;
+
+	for ($i=0 ; $i < size($SelObj) ; $i++)
+	{
+
+		if (`gmatch $SelObj[$i] "*Line5_Bake_Con*"`)
+		{
+			cutKey -cl -t ":" -f ":" -at "startFrame" $SelObj[$i];
+			setAttr ($SelObj[$i]+".startFrame") $Attr;	
+			print ($SelObj[$i] + " set startFrame to "  + $Attr + "\n");
+		}
+
+	}
+}
+
+
+
+global proc CopyNameKey(string $ClearKeyOnOff, float $OffSetKey, string $ReNameA, string $ReNameB)
+{
+
+//select -hi;
+string $listA[] = `ls -sl -transforms`;
+
+	for ($i = 0; $i < size($listA); $i++) 
+	{
+	global string $ReName;
+	string $ReName = `substitute ($ReNameA+"*") $listA[$i] $ReNameB`;
+
+		if (objExists($ReName))
+		{
+//		string $listAttr[] = `listAttr -k -u $ReName`;
+		string $listAttr[] = {"translateX", "translateY", "translateZ", "rotateX", "rotateY", "rotateZ"};
+
+
+			for ($j = 0; $j < size($listAttr); $j++) 
+			{
+
+				if (attributeExists($listAttr[$j], $ReName))
+				{
+				int $copyKeyList = `copyKey -t ":" -f ":" -at $listAttr[$j] $listA[$i]`;
+				global float $KeyframeTime;
+				float $KeyframeTime = `findKeyframe -at $listAttr[$j] -which first $listA[$i]`;
+
+					if (!($copyKeyList == 0))
+					{
+						if ($ClearKeyOnOff == "1")
+						{
+						cutKey -cl -t ":" -f ":" -at $listAttr[$j] $ReName;
+						}
+
+					global float $KeyframeTime;
+//					print ($ReName+"."+$listAttr[$j]+"에 키를 복사합니다."+"\n");
+					pasteKey -connect true -time ($KeyframeTime+$OffSetKey) -at $listAttr[$j] $ReName;
+					}
+				}else{
+				print ($ReName+"."+$listAttr[$j]+"가 존재하지 않습니다."+"\n");
+				}
+			}
+		}else{
+		print ($ReName+"이 존재하지 않습니다."+"\n");
+		}
+
+	}
+	
+select -cl  ;
+select -r $listA;
+
+}
+
+
+global proc SetInitialPosition( string $source , string $target )
+{
+	string $sel[] = `ls -sl`;
+
+	for ( $curCon in $sel ) {		
+		string $targetCon = `substitute $source $curCon $target`;
+		//matchPosition -type2
+		string $const[] = `pointConstraint -o 0 0 0 -weight 1 $targetCon $curCon`;
+		delete $const;
+		
+	}
+}
+
+
+
+
+
+
+
+

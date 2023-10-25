@@ -1,0 +1,128 @@
+/*
+    Script:     js_addNormalizeScale
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      Takes the given distance shape and world scale (if there is one), and creates
+                a normalizeScale attribute on the distance shape to be hooked up however
+                required. 
+
+*/
+global proc string js_addNormalizeScale (string $distanceShape, string $worldScale, string $normalize)
+{
+    global int $g_useExp;
+    global string $g_exp;
+    string $return;
+    string $parent[0]; 
+    string $attribute = "normalize";
+    string $objAttr = ($distanceShape + "." + $attribute);
+
+
+    float $distance = `getAttr ($distanceShape + ".distance")`;
+
+    $parent = `listRelatives -p $distanceShape`;
+    string $niceName = $parent[0];
+
+    // add the normalize scale attribute onto distanceShape
+    if (!`attributeQuery -exists -node $distanceShape $attribute`)
+    {
+        addAttr -ln $attribute -at "double" $distanceShape;
+        setAttr -e -k true $objAttr;
+        print ("Added attribute " + $attribute + " to " + $distanceShape + "\n");
+    }
+
+    // start creating an expression
+    if ($g_useExp)
+    {
+        $g_exp += ("// Finding the distance \n");
+        $g_exp += ("$dist_orig = " + $distanceShape + ".distance;\n");
+    }
+
+    string $multDivide;
+    // if normalize is on, then we'll create the multiplyDivide node.. otherwise we'll just skip it
+    // and directly connect to the worldScale
+    if ($normalize)
+    {
+        if ($g_useExp == 0)
+        {
+            // create a multiplyDivide node to measure the scale
+            $multDivide = `createNode multiplyDivide -n ($niceName + "_normalize")`;
+
+            // connect the distance shape to the multiplyDivide node
+            connectAttr ($distanceShape + ".distance") ($multDivide + ".input1X");
+            setAttr ($multDivide + ".input2X") $distance;
+
+            // now set the multiplyDivide node to work correctly
+            setAttr ($multDivide + ".operation") 2;
+        }
+        else
+        {
+            $g_exp += ("$dist_norm = $dist_orig / " + $distance + ";\n");
+        }
+
+        // check and see if a worldScale is given.  If it is, then we'll connect the multiplyDivide
+        // node to itself to get the worldScale
+        if ($worldScale != "")
+        {
+            // we do have a world scale attribute!  sweet!
+            if ($g_useExp == 0)
+            {
+                // add another multiplyDivide node
+                $multDivide2 = `createNode multiplyDivide -n ($niceName + "_normalize_worldScale")`;
+                setAttr ($multDivide2 + ".operation") 2;
+                connectAttr ($multDivide + ".outputX") ($multDivide2 + ".input1X");
+                connectAttr ($worldScale) ($multDivide2 + ".input2X");
+                connectAttr ($multDivide2 + ".outputX") ($objAttr);
+            }
+            else
+            {
+                $g_exp += ("\n//Adding World scale \n");
+                $g_exp += ("$dist_ws = $dist_norm/"  + $worldScale + ";\n");
+                $g_exp += ($objAttr + "= $dist_ws;\n");
+            }
+        }
+        else
+        {
+            if ($g_useExp)
+                $g_exp += ($objAttr + "= $dist_norm;\n");
+            else
+                connectAttr ($multDivide + ".outputX") ($objAttr);
+
+        }
+    }
+    else
+    {
+        if ($worldScale != "")
+        {
+            // we do have a world scale attribute!  sweet!
+            if ($g_useExp)
+            {
+                $g_exp += ("\n // Adding world scale\n");
+                $g_exp += ("$dist_ws = $dist_orig/" + $worldScale + ";\n");
+                $g_exp += ($objAttr + "= $dist_ws;\n");
+            }
+            else
+            {
+                // add another multiplyDivide node
+                $multDivide = `createNode multiplyDivide -n ($niceName + "_worldScale")`;
+                setAttr ($multDivide + ".operation") 2;
+                connectAttr ($distanceShape + ".distance") ($multDivide + ".input1X");
+                connectAttr ($worldScale) ($multDivide + ".input2X");
+                connectAttr ($multDivide + ".outputX") ($objAttr);
+            }
+        }
+        else
+        {
+            if ($g_useExp)
+                $g_exp += ($objAttr + "= "+$distanceShape + ".distance;\n");
+            else
+                connectAttr ($distanceShape + ".distance") $objAttr;
+        }
+    }
+
+    // now we can connect the outputAttr to the normalized attribute!
+
+    $return = $objAttr;
+    return $return;
+}
