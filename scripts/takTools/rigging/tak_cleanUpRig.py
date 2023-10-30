@@ -285,7 +285,7 @@ def tagWorkingData(*args):
 
 
 def deleteUnusedShadingNodes(*args):
-    pm.mel.hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes");
+    pm.mel.hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes")
 
 
 def deleteWorkingData(*args):

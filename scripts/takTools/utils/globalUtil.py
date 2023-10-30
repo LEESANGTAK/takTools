@@ -220,3 +220,19 @@ for attr in pm.listAttr(sourceObj, ud=True):
 
     if connect:
         srcAttr >> targetObj.attr(trgAttrName)
+
+
+def createSet(suffix='_vtxs_set'):
+    sels = pm.selected(fl=True)
+    if sels:
+        result = pm.promptDialog(
+            title='Create Set',
+            message='Enter Name:',
+            button=['OK', 'Cancel'],
+            defaultButton='OK',
+            cancelButton='Cancel',
+            dismissString='Cancel'
+        )
+        if result == 'OK':
+            text = pm.promptDialog(query=True, text=True)
+            objSet = pm.sets(n=text+suffix)

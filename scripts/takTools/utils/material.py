@@ -128,7 +128,7 @@ def exportMaterialsInfo(geometries, fileName, exportMaterials=True):
         pm.select(preSels, r=True)
 
 
-def loadMaterialsInfo(filePath, importMaterials=True):
+def importMaterialsInfo(filePath, importMaterials=True):
     if importMaterials:
         dir = os.path.dirname(filePath)
         fileName = os.path.basename(filePath)

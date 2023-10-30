@@ -14,7 +14,9 @@ reload(tak_cleanUpModel)
 tak_cleanUpModel.UI()
 '''
 
+import os
 import re
+import shutil
 from functools import partial
 
 import pymel.core as pm
@@ -93,7 +95,7 @@ def UI():
     cmds.button(label = 'Reassign Mat to Face', c = reAssignMatToface)
     cmds.button(label = 'Separate Faces by Mat', c = partial(sepCombineByMat, 'separate'))
     cmds.button(label = 'Combine Objects by Mat', c = combineObjByMat, ann = 'Select poly objects.')
-    cmds.button(label = 'Reassign Mat to Object', c = reAssignMatToObj)
+    cmds.button(label = 'Package Textures', c = packageTextures)
 
     cmds.setParent('procColLay')
     cmds.separator(h = 5, style = 'in')
@@ -564,36 +566,6 @@ def getTrsfLs(selLs):
     return list(set(trsfLs))
 
 
-# def chkFaceAssignedMat(*args):
-#     meshes = cmds.ls(sl=True)
-
-#     selGeoFaceMatLs = faceAssignedMat(meshes)
-
-#     faceAssignedMeshes = []
-#     objectAssignedMeshes = []
-
-#     for mat in selGeoFaceMatLs:
-#         cmds.hyperShade(objects=mat)
-#         matAssignGeoLs = cmds.ls(sl=True)
-#         faces = cmds.filterExpand(matAssignGeoLs, ex=False, sm=34)
-
-#         if faces:
-#             matAssignedFaceShapes = getShapesFromFaces(faces)
-
-#             for faceShp in matAssignedFaceShapes:
-#                 faceAssignedMeshes.append(cmds.listRelatives(faceShp, p=True)[0])
-
-#     faceAssignedMeshes = list(set(faceAssignedMeshes))
-#     objectAssignedMeshes = list(set(meshes) - set(faceAssignedMeshes))
-
-#     if objectAssignedMeshes:
-#         cmds.select(objectAssignedMeshes, r=True)
-#         cmds.warning('Selected are assigned material to object.')
-#     else:
-#         cmds.select(cl=True)
-#         OpenMaya.MGlobal.displayInfo('All meshes are assigned material to face.')
-
-
 def reAssignMatToObj(*args):
     sels = pm.selected()
     for sel in sels:
@@ -602,6 +574,28 @@ def reAssignMatToObj(*args):
         pm.delete(shadingEngine)
         pm.select(sel, r=True)
         pm.hyperShade(assign=mat)
+
+
+def packageTextures(*args):
+    result = pm.promptDialog(
+        title='Package Textures',
+        message='Texture Directory:',
+        button=['OK', 'Cancel'],
+        defaultButton='OK',
+        cancelButton='Cancel',
+        dismissString='Cancel'
+    )
+    if result == 'OK':
+        textureDir = pm.promptDialog(query=True, text=True)
+        for fileTexture in pm.ls(type='file'):
+            oldTexturePath = fileTexture.fileTextureName.get()
+            fileName = os.path.basename(oldTexturePath)
+            try:
+                newTexturePath = os.path.join(textureDir, fileName)
+                shutil.copyfile(oldTexturePath, newTexturePath)
+                fileTexture.fileTextureName.set(newTexturePath)
+            except:
+                print('"{}" is not exists.'.format(oldTexturePath))
 
 
 def reAssignMatToface(*args):
@@ -657,7 +651,7 @@ def sepCombineByMat(mode, *args):
                     # Select faces and assign material
                     cmds.select('{}.f[:]'.format(dupGeo[0]), r = True)
                     cmds.hyperShade(assign = mat)
-                    cmds.rename(dupGeo, mat+'_mesh')
+                    cmds.rename(dupGeo, mat+'_geo')
                     cmds.delete(ch = True)
 
                     toCombineGeoLs.extend(dupGeo)
