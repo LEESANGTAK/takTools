@@ -2091,6 +2091,8 @@ def addInfCopySkin(source=None, targets=None):
 
         cmds.select(source, targets, r=True)
         cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
+    elif cmds.objectType(targets[0]) == 'objectSet':
+        print('copy skin to sets')
     else:
         for trgSkinGeo in targets:
             skinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
@@ -2434,12 +2436,24 @@ def reduceMesh():
     cmds.select(selMeshLs, r=True)
 
 
-def delCnst():
-    allConst = []
-    for sel in pm.selected():
-        cnsts = sel.connections(d=False, type='constraint')
-        allConst.extend(cnsts)
-    pm.delete(allConst)
+def cleanupTransform():
+    sels = pm.selected()
+
+    # Remove constraints
+    for sel in sels:
+        pm.delete(sel.connections(d=False, type='constraint'))
+
+    # Remove input connections
+    for sel in sels:
+        for at in ['translate', 'rotate', 'scale']:
+            if at == 'scale':
+                pass
+            else:
+                sel.attr(at).disconnect()
+            for axis in ['X', 'Y', 'Z']:
+                sel.attr(at+axis).disconnect()
+
+        sel.scale.set(1, 1, 1)
 
 
 def prntLoc():

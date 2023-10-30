@@ -33,7 +33,7 @@ def ui():
     cmds.separator(h=5, style='in')
     cmds.button(label="Lock Geometry Transform", c=lockGeoTransforms)
     cmds.button(label="Delete Display/Render/Animation Layers", c=delAllLayers)
-    cmds.button(label="Delete Keys and Set to Default Value", c=delKeys)
+    cmds.button(label="Delete Keys", c=delKeys)
     cmds.button(label="Check Namespace", c=chkNamespace)
     cmds.button(label="Hide Joints", c=hideJoints)
     cmds.button(label='Remove Unused Animation Curves', c='''mel.eval('deleteUnusedCommon("animCurve", 0, uiRes("m_cleanUpScene.kDeletingUnusedAnimationCurves2"));')''')
@@ -227,12 +227,21 @@ def lockGeoTransforms():
 
 
 def delKeys(*args):
+    ctrls = []
+
     cmds.currentTime(0)
 
     advancedSkeletonControllerSet = 'ControlSet'
     if cmds.objExists(advancedSkeletonControllerSet):
-        cmds.select(cmds.sets(advancedSkeletonControllerSet, q=True), r=True)
-        mel.eval('doClearKeyArgList 3 { "1","0:10","keys","none","0","1","0","0","animationList","0","noOptions","0","0" };')
+        asCtrls = cmds.select(cmds.sets(advancedSkeletonControllerSet, q=True), r=True)
+        ctrls.append(asCtrls)
+
+    for crv in cmds.ls(type='nurbsCurve'):
+        crvTransform = cmds.listRelatives(crv, parent=True)[0]
+        ctrls.append(crvTransform)
+
+    cmds.select(ctrls)
+    mel.eval('doClearKeyArgList 3 { "1","0:10","keys","none","0","1","0","0","animationList","0","noOptions","0","0" };')
 
     cmds.select(cl=True)
 

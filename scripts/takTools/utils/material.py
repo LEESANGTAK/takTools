@@ -102,7 +102,7 @@ def setNormalMapIgnoreColorSpaceRule():
         normalMap.ignoreColorSpaceFileRules.set(True)
 
 
-def exportMaterials(geometries, fileName):
+def exportMaterialsInfo(geometries, fileName, exportMaterials=True):
     materials = []
     for geo in geometries:
         materials.extend(getMaterials(geo))
@@ -120,19 +120,21 @@ def exportMaterials(geometries, fileName):
         json.dump(matAssignInfo, f, indent=4)
 
     # Export materials
-    preSels = pm.selected()
-    matFilePath = os.path.join(outputDir, '{}_materials.ma'.format(fileName))
-    pm.select(materials, r=True)
-    pm.exportSelected(matFilePath, f=True)
-    pm.select(preSels, r=True)
+    if exportMaterials:
+        preSels = pm.selected()
+        matFilePath = os.path.join(outputDir, '{}_materials.ma'.format(fileName))
+        pm.select(materials, r=True)
+        pm.exportSelected(matFilePath, f=True)
+        pm.select(preSels, r=True)
 
 
-def loadMaterials(filePath):
-    dir = os.path.dirname(filePath)
-    fileName = os.path.basename(filePath)
-    matFileName = os.path.splitext(fileName)[0] + '_materials.ma'
-    matFilePath = os.path.join(dir, matFileName)
-    pm.importFile(matFilePath)
+def loadMaterialsInfo(filePath, importMaterials=True):
+    if importMaterials:
+        dir = os.path.dirname(filePath)
+        fileName = os.path.basename(filePath)
+        matFileName = os.path.splitext(fileName)[0] + '_materials.ma'
+        matFilePath = os.path.join(dir, matFileName)
+        pm.importFile(matFilePath)
 
     with open(filePath, 'r') as f:
         matAssignInfo = json.load(f)

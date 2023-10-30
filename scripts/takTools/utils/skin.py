@@ -107,6 +107,16 @@ def copySkin(source, target, components=None):
     pm.PyNode(trgSkinClst).useComponents.set(pm.PyNode(srcSkinClst).useComponents.get())
 
 
+def copySkinSets(sourceSkinMesh, sets):
+    for set in sets:
+        for member in set.members():
+            if type(member) == pm.MeshVertex:
+                targetMesh = member.node()
+                copySkin(sourceSkinMesh, targetMesh, member)
+            else:
+                copySkin(sourceSkinMesh, member)
+
+
 def copySkinOverlapVertices(sourceSkinMesh, targetMesh):
     overlapVtxs = meshUtil.getOverlapVertices(sourceSkinMesh, targetMesh)
     copySkin(sourceSkinMesh, targetMesh, components=overlapVtxs)
