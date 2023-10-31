@@ -425,17 +425,20 @@ def scaleCnntChkBokCC(*args):
 
 
 def popCtrlShpOptMenu():
-    ctrlShpLs = ['circleX','circleY','circleZ','square','pentagon','triangle','squareArc','squareRounded','squareDoubleRounded',
-                                    'cylinder',
-                                    'semiSphere','sphere','cube','pyramid',
-                                    'cross','fatCross',
-                                    'arrowSingle','arrowSingleFat','arrowDouble','arrowDoubleFat','arrow4','arrow4Fat','arrow8','arrowsOnBall',
-                                    'nail','nail2','nail4',
-                                    'eye','teeth','foot','cloth','gear','dumbell','locator',
-                                    'arrowsLocator','arrowsPointCenter','arrowForm','arrowDirectionBall',
-                                    'arrowRotate90','arrowRotate90Fat','arrowRotate180','arrowRotate180Fat',
-                                    'circleArrow','circleArrow1','circleArrow2','circleArrow3','circleArrow1Interior','circleArrow2Axis',
-                                    'masterAnim']
+    ctrlShpLs = [
+        'circleX','circleY','circleZ',
+        'cube','sphere','semiSphere','pyramid',
+        'square','pentagon','triangle','squareArc','squareRounded','squareDoubleRounded',
+        'arrowSingle','arrowSingleFat','arrowDouble','arrowDoubleFat','arrow4','arrow4Fat','arrow8','arrowsOnBall',
+        'cylinder',
+        'cross','fatCross',
+        'nail','nail2','nail4',
+        'eye','teeth','foot','cloth','gear','dumbell','locator',
+        'arrowsLocator','arrowsPointCenter','arrowForm','arrowDirectionBall',
+        'arrowRotate90','arrowRotate90Fat','arrowRotate180','arrowRotate180Fat',
+        'circleArrow','circleArrow1','circleArrow2','circleArrow3','circleArrow1Interior','circleArrow2Axis',
+        'masterAnim'
+    ]
 
     cmds.optionMenuGrp('ctrlShpOptMenuGrp', e = True)
     for ctrlShp in ctrlShpLs:

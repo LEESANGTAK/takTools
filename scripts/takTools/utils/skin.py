@@ -115,7 +115,7 @@ def copySkinSets(sourceSkinMesh, sets):
                 copySkin(sourceSkinMesh, targetMesh, member)
             else:
                 copySkin(sourceSkinMesh, member)
-
+    pm.select(cl=True)
 
 def copySkinOverlapVertices(sourceSkinMesh, targetMesh):
     overlapVtxs = meshUtil.getOverlapVertices(sourceSkinMesh, targetMesh)

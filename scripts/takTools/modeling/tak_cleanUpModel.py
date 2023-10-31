@@ -92,10 +92,10 @@ def UI():
     cmds.rowColumnLayout('viewShaderRowColLay', numberOfColumns = 3, columnWidth = [(1, 135), (2, 135), (3, 120)], columnSpacing = [(2, 2), (3, 2)])
     cmds.text(label = 'Match names to the engine.')
     cmds.button(label = 'Combine Faces by Mat', c = partial(sepCombineByMat, 'combine'))
-    cmds.button(label = 'Reassign Mat to Face', c = reAssignMatToface)
+    cmds.button(label = 'Correct Materials', c = correctMaterials, ann='Correct normal map color space to have raw and remove ambient color.')
     cmds.button(label = 'Separate Faces by Mat', c = partial(sepCombineByMat, 'separate'))
     cmds.button(label = 'Combine Objects by Mat', c = combineObjByMat, ann = 'Select poly objects.')
-    cmds.button(label = 'Package Textures', c = packageTextures)
+    cmds.button(label = 'Package Textures', c = showPackageTexturesUI)
 
     cmds.setParent('procColLay')
     cmds.separator(h = 5, style = 'in')
@@ -576,27 +576,30 @@ def reAssignMatToObj(*args):
         pm.hyperShade(assign=mat)
 
 
-def packageTextures(*args):
-    result = pm.promptDialog(
-        title='Package Textures',
-        message='Texture Directory:',
-        button=['OK', 'Cancel'],
-        defaultButton='OK',
-        cancelButton='Cancel',
-        dismissString='Cancel'
-    )
-    if result == 'OK':
-        textureDir = pm.promptDialog(query=True, text=True)
-        for fileTexture in pm.ls(type='file'):
-            oldTexturePath = fileTexture.fileTextureName.get()
-            fileName = os.path.basename(oldTexturePath)
-            try:
-                newTexturePath = os.path.join(textureDir, fileName)
-                shutil.copyfile(oldTexturePath, newTexturePath)
-                fileTexture.fileTextureName.set(newTexturePath)
-            except:
-                print('"{}" is not exists.'.format(oldTexturePath))
+def showPackageTexturesUI(*args):
+    pm.window('packageTexturesUI', title='Package Textures', mnb=False, mxb=False)
+    pm.columnLayout(adj=True)
+    pm.textFieldButtonGrp('textureDir', label='Texture Directory:', bl='<<', bc=getTextureDir)
+    pm.button(label='Apply', c=packageTextures)
+    pm.showWindow()
 
+def getTextureDir(*args):
+    textureDir = pm.fileDialog2(fileMode=3)
+    if textureDir:
+        pm.textFieldButtonGrp('textureDir', e=True, text=textureDir[0])
+
+def packageTextures(*args):
+    textureDir = pm.textFieldButtonGrp('textureDir', q=True, text=True)
+    for fileTexture in pm.ls(type='file'):
+        oldTexturePath = fileTexture.fileTextureName.get()
+        fileName = os.path.basename(oldTexturePath)
+        try:
+            newTexturePath = os.path.join(textureDir, fileName)
+            shutil.copyfile(oldTexturePath, newTexturePath)
+            fileTexture.fileTextureName.set(newTexturePath)
+        except:
+            print('"{}" is not exists.'.format(oldTexturePath))
+    pm.deleteUI('packageTexturesUI')
 
 def reAssignMatToface(*args):
     sels = pm.selected()
@@ -913,12 +916,20 @@ def delChildOfShape(*args):
             pm.delete(junkShapes)
 
 
-def setNormalmapColorSpace():
+def correctMaterials(*args):
+    # Set ambient color to 0
+    for mat in pm.ls(materials=True):
+        try:
+            mat.ambientColor.set(0, 0, 0)
+        except:
+            pass
+    # Set color space of the normal map to raw
     for node in pm.ls(type='bump2d'):
         fileNode = node.inputs(type='file')
         if fileNode:
             fileNode[0].colorSpace.set('Raw')
             fileNode[0].ignoreColorSpaceFileRules.set(True)
+
 
 
 def allInOne(*args):
@@ -931,6 +942,3 @@ def allInOne(*args):
     delHis()
     delInterMediObj()
     setShpAttrs()
-
-
-setNormalmapColorSpace()
