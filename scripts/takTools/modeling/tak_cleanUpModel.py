@@ -90,12 +90,11 @@ def UI():
     cmds.frameLayout(label = 'Material Clean Up', collapsable = True, collapse = True)
     # cmds.button(label="Check material that assigned to face", c=chkFaceAssignedMat)
     cmds.rowColumnLayout('viewShaderRowColLay', numberOfColumns = 3, columnWidth = [(1, 135), (2, 135), (3, 120)], columnSpacing = [(2, 2), (3, 2)])
-    cmds.text(label = 'Match names to the engine.')
-    cmds.button(label = 'Combine Faces by Mat', c = partial(sepCombineByMat, 'combine'))
     cmds.button(label = 'Correct Materials', c = correctMaterials, ann='Correct normal map color space to have raw and remove ambient color.')
     cmds.button(label = 'Separate Faces by Mat', c = partial(sepCombineByMat, 'separate'))
-    cmds.button(label = 'Combine Objects by Mat', c = combineObjByMat, ann = 'Select poly objects.')
     cmds.button(label = 'Package Textures', c = showPackageTexturesUI)
+    cmds.button(label = 'Combine Faces by Mat', c = partial(sepCombineByMat, 'combine'))
+    cmds.button(label = 'Combine Objects by Mat', c = combineObjByMat, ann = 'Select poly objects.')
 
     cmds.setParent('procColLay')
     cmds.separator(h = 5, style = 'in')
@@ -258,16 +257,19 @@ def findOverlappedRootCurve(*args):
 
 
 def checkUVSets(*args):
+    DEFAULT_UV_SET_NAME = 'map1'
     errorMeshes = []
+
     for sel in pm.selected():
         uvSets = sel.getUVSetNames()
         if len(uvSets) > 1:
             errorMeshes.append(sel)
+        elif len(uvSets) == 1 and DEFAULT_UV_SET_NAME != uvSets[0]:
+            pm.polyUVSet(rename=True, newUVSet=DEFAULT_UV_SET_NAME, uvSet=uvSets[0])
+            print('UV Set "{}" in {} has been renamed to "{}".'.format(uvSets[0], sel, DEFAULT_UV_SET_NAME))
     if errorMeshes:
         pm.warning('{errorMeshes} are have more than one UV Set.'.format(errorMeshes=str(errorMeshes)))
         pm.mel.uvSetEditor()
-    else:
-        print('All meshes are clean.')
 
 
 def setTangentSapceLeftHanded(*args):
@@ -917,12 +919,20 @@ def delChildOfShape(*args):
 
 
 def correctMaterials(*args):
-    # Set ambient color to 0
     for mat in pm.ls(materials=True):
+        # Set ambient color to 0
         try:
             mat.ambientColor.set(0, 0, 0)
         except:
             pass
+        # Remove FBX ascii space string
+        searchStr = 'FBXASC032'
+        relpaceStr = ''
+        try:
+            mat.rename(mat.replace(searchStr, relpaceStr))
+        except:
+            pass
+
     # Set color space of the normal map to raw
     for node in pm.ls(type='bump2d'):
         fileNode = node.inputs(type='file')

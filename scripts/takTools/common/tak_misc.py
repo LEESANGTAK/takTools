@@ -580,7 +580,7 @@ def exportCWD():
     if filePath:
         cmds.file(rename=filePath[0])
         cmds.file(exportSelected=True, force=True, preserveReferences=True, options='v=0;')
-        cmds.file(rename=sceneName)
+        cmds.file(rename=filePath[0])
         cmds.file(modified=False)
         return filePath[0]
 
