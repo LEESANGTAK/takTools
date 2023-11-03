@@ -2059,9 +2059,23 @@ def addInfCopySkin(source=None, targets=None):
     '''
 
     if not source:
-        selLs = cmds.ls(sl=True)
-        source = selLs[0]
-        targets = selLs[1:]
+        sels = cmds.ls(os=True, fl=True)
+
+        # Parse selections
+        components = []
+        geometries = []
+        for sel in sels:
+            if cmds.filterExpand(sel, sm=[28, 31, 32, 34]):
+                components.append(sel)
+            elif cmds.filterExpand(sel, sm=[9, 10, 12]):
+                geometries.append(sel)
+
+        if components and len(geometries) == 1:  # When select components
+            source = geometries[0]
+            targets = components
+        elif len(geometries) > 1:  # When select geometries only
+            source = sels[0]
+            targets = sels[1:]
 
     if not isinstance(targets, list):
         cmds.error('Targets should be a list')
