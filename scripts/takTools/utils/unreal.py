@@ -1,3 +1,4 @@
+import json
 import pymel.core as pm
 
 
@@ -159,3 +160,62 @@ def publishCustomAttrs(sourceNode, attrPrefix, skeletonRoot, sourceAttrs=[]):
         pm.addAttr(skeletonRoot, ln=pubAttr, at='double', keyable=True)
         sourceNode.attr(srcAttr) >> skeletonRoot.attr(pubAttr)
     pm.undoInfo(closeChunk=True)
+
+
+def connectToUESkeleton(maSkeletonRoot, ueSkeletonRoot, forceFrontXAxis=False):
+    """
+    from takTools.utils import unreal as ueUtil; reload(ueUtil)
+
+    sels = pm.selected()
+    maSkelRoot = sels[0]
+    ueSkelRoot = sels[1]
+    ueUtil.connectToUESkeleton(maSkelRoot, ueSkelRoot)
+    """
+    maJnts = pm.ls(maSkeletonRoot, dag=True, type="joint")
+    ueJnts = pm.ls(ueSkeletonRoot, dag=True, type="joint")
+
+    for ueJnt, maJnt in zip(ueJnts, maJnts):
+        ueJntWM = ueJnt.worldMatrix.get()
+
+        maJntWM = ueJntWM
+        if forceFrontXAxis:
+            maJntWM = pm.dt.Matrix([
+                ueJntWM[1],
+                ueJntWM[2],
+                ueJntWM[0],
+                ueJntWM[3]
+            ])
+
+        pm.xform(maJnt, m=maJntWM, ws=True)
+
+        pm.parentConstraint(ueJnt, maJnt, mo=True)
+        pm.scaleConstraint(ueJnt, maJnt, mo=True)
+
+
+def importMatrix(filePath):
+
+    with open(filePath, "r") as f:
+        data = json.load(f)
+
+    fps = data["fps"]
+    timeUnit = "film"
+    if fps == 25:
+        timeUnit = "pal"
+    elif fps == 30:
+        timeUnit = "ntsc"
+    pm.currentUnit(time=timeUnit)
+
+    startFrame = data["startFrame"]
+    endFrame = data["endFrame"]
+    pm.env.setMinTime(startFrame)
+    pm.env.setMaxTime(endFrame)
+
+    pm.refresh(su=True)
+    curFrame = pm.env.getTime()
+    transf = pm.createNode("transform", n=data["name"])
+    for i in range(startFrame, endFrame+1):
+        pm.currentTime(i)
+        pm.xform(transf, matrix=data[str(i)], ws=True)
+        pm.setKeyframe(transf)
+    pm.env.setTime(curFrame)
+    pm.refresh(su=False)

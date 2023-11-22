@@ -260,21 +260,15 @@ def setSolidSkinWeights(sourceVertex):
 
 
 def editSkinMesh(skinMesh):
-    # duplicate skin geometry for saving skin weights
-    tempMesh = pm.duplicate(skinMesh, n='tempMesh')[0]
-    meshUtil.cleanupMesh(tempMesh)
-    tempMesh.v.set(False)
-
-    copySkin(skinMesh, tempMesh)
+    tmpDir = pm.internalVar(userTmpDir=True)
+    skinFile = saveBSkin(skinMesh, tmpDir)
     meshUtil.cleanupMesh(skinMesh)
-    pm.select(skinMesh, r=True)
-    pm.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(skinMesh, tempMesh))
+    pm.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(skinMesh, skinFile))
 
-def doneEditSkinMesh(skinMesh, tempMesh):
+def doneEditSkinMesh(skinMesh, skinFile):
+    meshUtil.cleanupMesh(skinMesh)
+    loadBSkin(skinFile)
     pm.headsUpDisplay('editSkinMeshHUD', remove=True)
-    meshUtil.cleanupMesh(skinMesh)
-    copySkin(tempMesh, skinMesh)
-    pm.delete(tempMesh)
 
 
 def SSD(geo):
@@ -283,7 +277,7 @@ def SSD(geo):
     pm.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=8)
 
 
-def saveBSkin(outputDir, mesh):
+def saveBSkin(mesh, outputDir):
     pm.select(mesh, r=True)
     skinFile = '{}/{}.sw'.format(outputDir, mesh)
     bsk.bSaveSkinValues(skinFile)

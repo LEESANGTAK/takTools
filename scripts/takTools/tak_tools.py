@@ -95,6 +95,7 @@ def UI():
     cmds.shelfButton(annotation = 'Sorting selected items in outliner.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'sortName.png', command = 'import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sortOutl()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Renamer', width = 35, height = 35, imageOverlayLabel = '', image1 = 'quickRename.png', command = 'from takRenamer import main;import imp;imp.reload(main);main.showUI()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Delete construction history, unlock normal, unlock attr, delete intermediate shapes, freeze transform', width = 35, height = 35, imageOverlayLabel = '', image1 = 'cleanUpMesh.bmp', command = 'import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport imp\nimp.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()', sourceType = 'python')
+    cmds.shelfButton(annotation = 'import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\n...', width = 35, height = 35, imageOverlayLabel = '', image1 = 'objectSet.svg', command = 'import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()', sourceType = 'python')
 
     cmds.separator('mainSep', h = 10, style = 'in', p = 'mainFormLo')
 
@@ -467,7 +468,7 @@ def UI():
     cmds.frameLayout('olFrameLo', labelVisible = False, p = 'mainPaneLo')
     panel = cmds.outlinerPanel()
     outliner = cmds.outlinerPanel(panel, query=True, outlinerEditor=True)
-    cmds.outlinerEditor( outliner, edit=True, mainListConnection='worldList', selectionConnection='modelList', showShapes=False, showReferenceNodes=False, showReferenceMembers=False, showAttributes=False, showConnected=False, showAnimCurvesOnly=False, autoExpand=False, showDagOnly=True, ignoreDagHierarchy=False, expandConnections=False, showCompounds=True, showNumericAttrsOnly=False, highlightActive=True, autoSelectNewObjects=False, doNotSelectNewObjects=False, transmitFilters=False, showSetMembers=True, setFilter='defaultSetFilter', ignoreHiddenAttribute=False )
+    cmds.outlinerEditor( outliner, edit=True, mainListConnection='worldList', selectionConnection='modelList', showShapes=False, showAssignedMaterials=False, showReferenceNodes=True, showReferenceMembers=True, showAttributes=False, showConnected=False, showAnimCurvesOnly=False, autoExpand=False, showDagOnly=True, ignoreDagHierarchy=False, expandConnections=False, showCompounds=True, showNumericAttrsOnly=False, highlightActive=True, autoSelectNewObjects=False, doNotSelectNewObjects=False, transmitFilters=False, showSetMembers=True, setFilter='defaultSetFilter', ignoreHiddenAttribute=False )
 
     # Dock window to left side
     cmds.dockControl(MODULE_NAME, area='left', content=WIN_NAME, w=workspaceWidth)
