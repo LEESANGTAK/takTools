@@ -236,3 +236,28 @@ def createSet(suffix='_vtxs_set'):
         if result == 'OK':
             text = pm.promptDialog(query=True, text=True)
             objSet = pm.sets(n=text+suffix)
+
+
+def getDeformerWeights(deformerName, mesh, valueRange=[0.0, 1.0]):
+    """
+    deformerName = "textureDeformer1"
+    mesh = cmds.ls(sl=True)[0]
+    texDefValInfo = getDeformerWeights(deformerName, mesh, valueRange=[0.0, 0.0])
+    zeroWeightVtxIndexes = texDefValInfo.keys()
+    """
+    weightsInfo = {}
+
+    numVtx = cmds.polyEvaluate(mesh, v=True)
+    for vtxID in range(numVtx):
+        w = cmds.percent(deformerName, "{0}.vtx[{1}]".format(mesh, vtxID), q=True, v=True)[0]
+        if valueRange[0] <= w <= valueRange[1]:
+            weightsInfo[vtxID] = w
+
+    return weightsInfo
+
+
+deformerName = "textureDeformer1"
+mesh = cmds.ls(sl=True)[0]
+texDefValInfo = getDeformerWeights(deformerName, mesh, valueRange=[0.0, 0.0])
+zeroWeightVtxIndexes = texDefValInfo.keys()
+
