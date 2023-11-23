@@ -254,10 +254,3 @@ def getDeformerWeights(deformerName, mesh, valueRange=[0.0, 1.0]):
             weightsInfo[vtxID] = w
 
     return weightsInfo
-
-
-deformerName = "textureDeformer1"
-mesh = cmds.ls(sl=True)[0]
-texDefValInfo = getDeformerWeights(deformerName, mesh, valueRange=[0.0, 0.0])
-zeroWeightVtxIndexes = texDefValInfo.keys()
-
