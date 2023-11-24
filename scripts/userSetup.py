@@ -18,5 +18,6 @@ except:
 
 
 pm.evalDeferred("import takTools.pipeline.takToolsMenu as takToolsMenu;takToolsMenu.showMenu()", lowestPriority=True)
+pm.evalDeferred("from takTools.utils import qtUtil;qtUtil.editScriptEditorHorizontal()", lowestPriority=True)
 pm.evalDeferred("from takTools import tak_tools;tak_tools.UI()", lowestPriority=True)
 pm.evalDeferred("from takTools.common import errorFix_look", lowestPriority=True)

@@ -1,6 +1,8 @@
 import os
 from PySide2 import QtCore, QtGui, QtWidgets
 
+import pymel.core as pm
+
 
 class ScreenCapture(QtWidgets.QDialog):
     """
@@ -86,3 +88,28 @@ def duplicateImage(imagePath, suffix='_copy'):
 
     qimg = QtGui.QImage(imagePath)
     qimg.save(newImagePath, ext.strip('.'))
+
+
+def editScriptEditorHorizontal():
+    panel = pm.getPanel(wf=True)
+    qtpanel = panel.asQtObject()
+
+    menuBar, mainWidget = qtpanel.children()[1:]
+
+    seww = mainWidget.layout().itemAt(1).widget()
+    sewww = seww.children()[-1]
+
+    splitter = sewww.children()[1]
+    splitter.setOrientation(QtCore.Qt.Orientation.Horizontal)
+
+    script_console = splitter.widget(0)
+    outputWindow = splitter.widget(1)
+
+    splitter.insertWidget(0, outputWindow)
+
+    se_splitter = outputWindow.children()[1]
+
+    editor = se_splitter.children()[1]
+    tabWidget = editor.children()[1]
+
+    tabWidget.setTabPosition(QtWidgets.QTabWidget.TabPosition.North)
