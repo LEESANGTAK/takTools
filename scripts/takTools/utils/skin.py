@@ -1,3 +1,4 @@
+import os
 import maya.OpenMaya as om
 import maya.OpenMayaAnim as oma
 
@@ -29,11 +30,11 @@ def bind(jnts, geos, maxInfluence=4):
 
 
 def reBind(skinMesh):
-    tempSkinMesh = pm.duplicate(skinMesh, n='{0}_tempSkin'.format(skinMesh))[0]
-    copySkin(skinMesh, tempSkinMesh)
+    tmpDir = pm.internalVar(userTmpDir=True)
+    skinFile = saveBSkin(skinMesh, tmpDir)
     pm.delete(skinMesh, ch=True)
-    copySkin(tempSkinMesh, skinMesh)
-    pm.delete(tempSkinMesh)
+    loadBSkin(skinFile)
+    os.remove(skinFile)
 
 
 def getSkinCluster(geo):
@@ -268,6 +269,7 @@ def editSkinMesh(skinMesh):
 def doneEditSkinMesh(skinMesh, skinFile):
     meshUtil.cleanupMesh(skinMesh)
     loadBSkin(skinFile)
+    os.remove(skinFile)
     pm.headsUpDisplay('editSkinMeshHUD', remove=True)
 
 
