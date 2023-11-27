@@ -50,29 +50,6 @@ def getPoints(mesh):
     return fnMesh.getPoints()
 
 
-def getCenterPoint(mesh, apiVersion=2):
-    if not isinstance(mesh, str):
-        mesh = str(mesh)
-
-    if apiVersion == 1:
-        meshDag = globalUtil.getDagPath(mesh, apiVersion)
-        vtxIt = om1.MItMeshVertex(meshDag)
-        centerPoint = om1.MPoint()
-        while not vtxIt.isDone():
-            centerPoint += om1.MVector(vtxIt.position())
-            vtxIt.next()
-        centerPoint /= vtxIt.count()
-    else:
-        vtxIt = om.MItMeshVertex(globalUtil.getDagPath(mesh))
-        centerPoint = om.MPoint()
-        while not vtxIt.isDone():
-            centerPoint += vtxIt.position()
-            vtxIt.next()
-        centerPoint /= vtxIt.count()
-
-    return centerPoint
-
-
 def getFaceNormalAtPosition(mesh, position):
     meshFn = om.MFnMesh(globalUtil.getDagPath(mesh))
     point = om.MPoint(position)
@@ -470,3 +447,38 @@ def getDeformedMeshes():
             if shape.isIntermediateObject():
                 deformedMeshes.append(geo)
     return list(set(deformedMeshes))
+
+
+def moveToOrigin(meshes):
+    # Get the bottom center point of the bounding box with meshes
+    bbox = getBoundingBox(meshes)
+    ctPnt = bbox.center
+    minPnt = bbox.min
+    botCtPnt = om.MPoint(ctPnt.x, minPnt.y, ctPnt.z)
+
+    # Get a delta from meshes bottom center point to world origin point
+    origPnt = om.MPoint(0, 0, 0)
+    botToOrigDelta = origPnt - botCtPnt
+
+    # Move vertices
+    for mesh in meshes:
+        meshDag = globalUtil.getDagPath(mesh)
+        vtxIt = om.MItMeshVertex(meshDag)
+        while not vtxIt.isDone():
+            pnt = vtxIt.position(space=om.MSpace.kWorld)
+            vtxIt.setPosition(pnt + botToOrigDelta, space=om.MSpace.kWorld)
+            vtxIt.next()
+
+
+def getBoundingBox(meshes):
+    bbox = om.MBoundingBox()
+
+    for mesh in meshes:
+        meshDag = globalUtil.getDagPath(mesh)
+        vtxIt = om.MItMeshVertex(meshDag)
+        while not vtxIt.isDone():
+            pnt = vtxIt.position(space=om.MSpace.kWorld)
+            bbox.expand(pnt)
+            vtxIt.next()
+
+    return bbox

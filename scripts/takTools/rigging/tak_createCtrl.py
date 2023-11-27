@@ -100,11 +100,11 @@ def UI():
     cmds.separator(h = 20, style = 'in')
 
     # search and replace section
-    cmds.radioButtonGrp('strModeRdBtnGrp', labelArray2 = ['Search and Replace', 'Prefix and Suffix'], numberOfRadioButtons = 2, columnWidth = [(1, 200)], columnAttach = [(1, 'left', 50), (2, 'left', 50)], select = 1, cc = strModeBtnCc)
-    cmds.textFieldGrp('srchTexGrp', label = 'Search for: ', text = '_out', visible = True)
-    cmds.textFieldGrp('rplcTexGrp', label = 'Replace with: ', text = '_ctrl', visible = True)
-    cmds.textFieldGrp('preTexGrp', label = 'Prefix: ', text = '', visible = False)
-    cmds.textFieldGrp('sufTexGrp', label = 'Suffix: ', text = '_ctrl', visible = False)
+    cmds.radioButtonGrp('strModeRdBtnGrp', labelArray2 = ['Search and Replace', 'Prefix and Suffix'], numberOfRadioButtons = 2, columnWidth = [(1, 200)], columnAttach = [(1, 'left', 50), (2, 'left', 50)], select = 2, cc = strModeBtnCc)
+    cmds.textFieldGrp('srchTexGrp', label = 'Search for: ', text = '_out', visible = False)
+    cmds.textFieldGrp('rplcTexGrp', label = 'Replace with: ', text = '_ctrl', visible = False)
+    cmds.textFieldGrp('preTexGrp', label = 'Prefix: ', text = '', visible = True)
+    cmds.textFieldGrp('sufTexGrp', label = 'Suffix: ', text = '_ctrl', visible = True)
 
     # set parent tabLayout to the mainFormLay
     cmds.setParent('mainFormLay')

@@ -1,10 +1,7 @@
 import maya.cmds as cmds
 import maya.mel as mel
-from functools import partial
 import pymel.core as pm
 
-from ..modeling import tak_cleanUpModel
-from ..common import tak_lib
 
 mel.eval('source channelBoxCommand;')
 mel.eval('source cleanUpScene;')

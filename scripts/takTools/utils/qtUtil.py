@@ -91,7 +91,16 @@ def duplicateImage(imagePath, suffix='_copy'):
 
 
 def editScriptEditorHorizontal():
-    panel = pm.getPanel(wf=True)
+    panel = None
+    allPanels = pm.getPanel(all=True)
+    for item in allPanels:
+        if "scriptEditorPanel" in item:
+            panel = item
+
+    if not panel:
+        print("Not found script editor panel.")
+        return
+
     qtpanel = panel.asQtObject()
 
     menuBar, mainWidget = qtpanel.children()[1:]
@@ -103,11 +112,11 @@ def editScriptEditorHorizontal():
     splitter.setOrientation(QtCore.Qt.Orientation.Horizontal)
 
     script_console = splitter.widget(0)
-    outputWindow = splitter.widget(1)
+    script_editor = splitter.widget(1)
 
-    splitter.insertWidget(0, outputWindow)
+    splitter.insertWidget(0, script_editor)
 
-    se_splitter = outputWindow.children()[1]
+    se_splitter = script_editor.children()[1]
 
     editor = se_splitter.children()[1]
     tabWidget = editor.children()[1]

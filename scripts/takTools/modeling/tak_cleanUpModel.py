@@ -14,14 +14,18 @@ reload(tak_cleanUpModel)
 tak_cleanUpModel.UI()
 '''
 
+from imp import reload
+
 import os
 import re
 import shutil
 from functools import partial
+from ..utils import mesh as meshUtil; reload(meshUtil)
 
 import pymel.core as pm
 import maya.mel as mel
 import maya.cmds as cmds
+from maya.api import OpenMaya as om
 import maya.OpenMaya as OpenMaya
 
 
@@ -52,7 +56,7 @@ def UI():
     cmds.button(label = 'Overlapped Vertex', w=128, c=lambda args: mel.eval('polyCleanupArgList 4 { "0","2","1","0","0","0","0","0","0","1e-05","1","1e-05","0","1e-05","0","-1","0","0" };'))
     cmds.button(label = 'Overlapped Root Curve', w=128, c=findOverlappedRootCurve)
     cmds.button(label = 'Check UV Sets', w=128, c=checkUVSets)
-    cmds.button(label = 'Left handed tangent space', w=128, c=setTangentSapceLeftHanded)
+    cmds.button(label = 'Move to Origin', w=128, c=moveToOrigin)
 
     cmds.setParent('procColLay')
     cmds.separator(h = 5, style = 'in')
@@ -270,6 +274,12 @@ def checkUVSets(*args):
     if errorMeshes:
         pm.warning('{errorMeshes} are have more than one UV Set.'.format(errorMeshes=str(errorMeshes)))
         pm.mel.uvSetEditor()
+
+
+def moveToOrigin(*args):
+    meshes = pm.selected()
+    for mesh in meshes:
+        meshUtil.moveToOrigin(mesh.name())
 
 
 def setTangentSapceLeftHanded(*args):
@@ -926,12 +936,13 @@ def correctMaterials(*args):
         except:
             pass
         # Remove FBX ascii space string
-        searchStr = 'FBXASC032'
+        searchStrs = ['FBXASC032', 'FBXASC045']
         relpaceStr = ''
-        try:
-            mat.rename(mat.replace(searchStr, relpaceStr))
-        except:
-            pass
+        for searchStr in searchStrs:
+            try:
+                mat.rename(mat.replace(searchStr, relpaceStr))
+            except:
+                pass
 
     # Set color space of the normal map to raw
     for node in pm.ls(type='bump2d'):
@@ -940,6 +951,47 @@ def correctMaterials(*args):
             fileNode[0].colorSpace.set('Raw')
             fileNode[0].ignoreColorSpaceFileRules.set(True)
 
+
+def moveToOrigin(*args):
+    meshes = cmds.ls(sl=True)
+
+    # Get the bottom center point of the bounding box with meshes
+    bbox = getBoundingBox(meshes)
+    ctPnt = bbox.center
+    minPnt = bbox.min
+    botCtPnt = om.MPoint(ctPnt.x, minPnt.y, ctPnt.z)
+
+    # Get a delta from meshes bottom center point to world origin point
+    origPnt = om.MPoint(0, 0, 0)
+    botToOrigDelta = origPnt - botCtPnt
+
+    # Move vertices
+    for mesh in meshes:
+        meshDag = getDagPath(mesh)
+        vtxIt = om.MItMeshVertex(meshDag)
+        while not vtxIt.isDone():
+            pnt = vtxIt.position(space=om.MSpace.kWorld)
+            vtxIt.setPosition(pnt + botToOrigDelta, space=om.MSpace.kWorld)
+            vtxIt.next()
+
+def getBoundingBox(meshes):
+    bbox = om.MBoundingBox()
+
+    for mesh in meshes:
+        meshDag = getDagPath(mesh)
+        vtxIt = om.MItMeshVertex(meshDag)
+        while not vtxIt.isDone():
+            pnt = vtxIt.position(space=om.MSpace.kWorld)
+            bbox.expand(pnt)
+            vtxIt.next()
+
+    return bbox
+
+def getDagPath(nodeName):
+    mSelLs = om.MSelectionList()
+    mSelLs.add(nodeName)
+    dagPath = mSelLs.getDagPath(0)
+    return dagPath
 
 
 def allInOne(*args):
