@@ -246,18 +246,32 @@ def matchShape(*args):
 # Geometry error check related functions
 # --------------------------------------------------------
 def findOverlappedRootCurve(*args):
-    rootCVs = [crv.getShape().cv[0] for crv in pm.selected()]
-    thresholds = 0.1
-    stackedCvs = []
-    for i in range(len(rootCVs)):
-        iCvPos = rootCVs[i].getPosition(space='world')
-        for cv in rootCVs[i+1:]:
-            cvPos = cv.getPosition(space='world')
-            if (cvPos - iCvPos).length() <= thresholds:
-                stackedCvs.extend([rootCVs[i], cv])
+    sels = pm.selected()
+    crvs = pm.filterExpand(sels, sm=9) or []
+    guides = pm.filterExpand(sels, sm=12) or []
+    objects = crvs + guides
 
-    stackedCrvs = [cv.node().getTransform() for cv in stackedCvs]
-    pm.select(stackedCrvs, r=True)
+    rootCvs = ["{}.cv[0]".format(crv) for crv in crvs]
+    rootVtxs = ["{}.vtx[0]".format(guide) for guide in guides]
+    rootCpnts = rootCvs + rootVtxs
+
+    thresholds = 0.1
+    checkedObjs = []
+    stackedObjects = []
+    for i in range(len(rootCpnts)):
+        if objects[i] in checkedObjs:
+            continue
+        checkedObjs.append(objects[i])
+
+        iCpntPos = pm.pointPosition(rootCpnts[i], w=True)
+        for otherCpnt in rootCpnts[i+1:]:
+            otherCpntPos = pm.pointPosition(otherCpnt, w=True)
+            if (otherCpntPos - iCpntPos).length() <= thresholds:
+                otherObj = objects[rootCpnts.index(otherCpnt)]
+                stackedObjects.extend([objects[i], otherObj])
+                checkedObjs.append(otherObj)
+
+    pm.select(stackedObjects, r=True)
 
 
 def checkUVSets(*args):
