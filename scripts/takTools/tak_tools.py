@@ -22,7 +22,6 @@ MODULE_NAME = "takTools"
 WIN_NAME = "{0}Win".format(MODULE_NAME)
 CONFIG_FILENAME = "{}_config.json".format(MODULE_NAME)
 TAK_TOOLS_CONFIG_PATH = cmds.internalVar(userAppDir=True) + "config"
-FILE_PATH = r"C:\GoogleDrive\programs_env\maya\modules\takTools\scripts\takTools\tak_tools.py"
 
 SHELF_HEIGHT = 42
 
@@ -95,7 +94,8 @@ def UI():
     cmds.shelfButton(annotation = 'Sorting selected items in outliner.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'sortName.png', command = 'import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sortOutl()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Renamer', width = 35, height = 35, imageOverlayLabel = '', image1 = 'quickRename.png', command = 'from takRenamer import main;import imp;imp.reload(main);main.showUI()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Delete construction history, unlock normal, unlock attr, delete intermediate shapes, freeze transform', width = 35, height = 35, imageOverlayLabel = '', image1 = 'cleanUpMesh.bmp', command = 'import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport imp\nimp.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()', sourceType = 'python')
-    cmds.shelfButton(annotation = 'import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\n...', width = 35, height = 35, imageOverlayLabel = '', image1 = 'objectSet.svg', command = 'import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()', sourceType = 'python')
+    cmds.shelfButton(annotation = 'Set Manager', width = 35, height = 35, imageOverlayLabel = '', image1 = 'objectSet.svg', command = 'from imp import reload; import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()', sourceType = 'python')
+    cmds.shelfButton(annotation = 'Layout script editor horizontally', width = 35, height = 35, imageOverlayLabel = 'ScriptEditor', image1 = 'defaultTwoSideBySideLayout.png', command = 'from takTools.utils import qtUtil;qtUtil.editScriptEditorHorizontal()', sourceType = 'python')
 
     cmds.separator('mainSep', h = 10, style = 'in', p = 'mainFormLo')
 
@@ -156,9 +156,9 @@ def UI():
     cmds.shelfLayout('Rigging_Build', h = (SHELF_HEIGHT * 4), p = 'riggingBuildFrameLo')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'takSkeleton.png', command = 'import takSkeleton as ts\nimport imp\nimp.reload(ts)\nts.gui.showUI()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Tak auto rigging', width = 35, height = 35, imageOverlayLabel = '', image1 = 'takAutoRig.png', command = 'import takTools.rigging.autoRigging as ar\nimport imp\nimp.reload(ar)\n\ntry:\n    arui.close()\n    arui.deleteLater()\nexcept:\n    pass\n\narui = ar.ui.mainUI.MainUI()\narui.show()', sourceType = 'python')
-    cmds.shelfButton(annotation = 'AdvancedSkeleton5', width = 35, height = 35, imageOverlayLabel = '', image1 = 'C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5Files/icons/AS5.png', command = 'source "C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5.mel";AdvancedSkeleton5;', sourceType = 'mel')
-    cmds.shelfButton(annotation = 'import takTools.rigging.advancedSkeletonHelperUI as ashUI\nimport imp\nimp.reload(ashUI)\n\n...', width = 35, height = 35, imageOverlayLabel = 'Helper', image1 = 'C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5Files/icons/AS5.png', command = 'import takTools.rigging.advancedSkeletonHelperUI as ashUI\nimport imp\nimp.reload(ashUI)\n\ntry:\n    ashUIObj.close()\nexcept:\n    pass\n\nashUIObj = ashUI.AdvancedSkeletonHelperUI()\nashUIObj.show()\n', sourceType = 'python')
-    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'C:/GoogleDrive/programs_env/maya/modules/arise_main/py_2_7/arise/resources/icons/arise_logo_32pix.png', command = 'import sys\nimport os\n\nLOCAL_PATH = r"C:/GoogleDrive/programs_env/maya/modules/arise_main"\nversion_folder = \'py_\' + str(sys.version_info.major) + \'_\' + str(sys.version_info.minor)\npath = os.path.join(LOCAL_PATH, version_folder)\n\nif path not in sys.path:\n    sys.path.append(path)\n\nfrom arise.ui_elements import ior_main_window\n\n# load UI.\ntry:\n    Win.deleteLater()\n    print("deleting old UI")\nexcept:\n    pass\n\nWin = ior_main_window.IORMainWindow(\n    parent_to_maya=None, # can be (True, False, None)\n    always_on_top=None, # can be (True, False, None)\n    log_feedback_level="info",\n    default_settings=False,\n    )\nWin.show_()\n', sourceType = 'python')
+    cmds.shelfButton(annotation = 'AdvancedSkeleton', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/icons/AS.png', command = 'source "D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeleton.mel";AdvancedSkeleton;', sourceType = 'mel')
+    cmds.shelfButton(annotation = 'import takTools.rigging.advancedSkeletonHelperUI as ashUI\nimport imp\nimp.reload(ashUI)\n\n...', width = 35, height = 35, imageOverlayLabel = 'Helper', image1 = 'D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/icons/AS.png', command = 'import takTools.rigging.advancedSkeletonHelperUI as ashUI\nimport imp\nimp.reload(ashUI)\n\ntry:\n    ashUIObj.close()\nexcept:\n    pass\n\nashUIObj = ashUI.AdvancedSkeletonHelperUI()\nashUIObj.show()\n', sourceType = 'python')
+    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/modules/arise_main/py_2_7/arise/resources/icons/arise_logo_32pix.png', command = 'import sys\nimport os\n\nLOCAL_PATH = r"D:/tools/maya/modules/arise_main"\nversion_folder = \'py_\' + str(sys.version_info.major) + \'_\' + str(sys.version_info.minor)\npath = os.path.join(LOCAL_PATH, version_folder)\n\nif path not in sys.path:\n    sys.path.append(path)\n\nfrom arise.ui_elements import ior_main_window\n\n# load UI.\ntry:\n    Win.deleteLater()\n    print("deleting old UI")\nexcept:\n    pass\n\nWin = ior_main_window.IORMainWindow(\n    parent_to_maya=None, # can be (True, False, None)\n    always_on_top=None, # can be (True, False, None)\n    log_feedback_level="info",\n    default_settings=False,\n    )\nWin.show_()\n', sourceType = 'python')
     cmds.shelfButton(annotation = 'b1 hair dynamic tool', width = 35, height = 35, imageOverlayLabel = '', image1 = 'hairChain.bmp', command = 'source IH_buildSpIkChain.mel;\nIH_buildSpIkChain();', sourceType = 'mel')
     cmds.shelfButton(annotation = "Additional functions for the 'IH_buildSpIkChain.mel' script.", width = 35, height = 35, imageOverlayLabel = '', image1 = 'forHairChain.png', command = 'import takTools.rigging.tak_addFuncForIHBuildSpIkChain as tak_addFuncForIHBuildSpIkChain\nimport imp\nimp.reload(tak_addFuncForIHBuildSpIkChain)\ntak_addFuncForIHBuildSpIkChain.ui()', sourceType = 'python')
     cmds.shelfButton(annotation = 'js_createStretchSpline', width = 35, height = 35, imageOverlayLabel = '', image1 = 'scaleJoint.bmp', command = 'source js_createStretchSplineUI;\njs_createStretchSplineUI;', sourceType = 'mel')
@@ -194,8 +194,11 @@ def UI():
     cmds.shelfButton(annotation = 'Set skin weights', width = 35, height = 35, imageOverlayLabel = '', image1 = 'skinWeight.png', command = 'import takTools.rigging.tak_skinWeights as tak_skinWeights\nimport imp\nimp.reload(tak_skinWeights)\ntak_skinWeights.SkinWeights()', sourceType = 'python')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = 'SSD', image1 = 'menuIconSkinning.png', command = 'BakeDeformerTool', sourceType = 'mel')
     cmds.shelfButton(annotation = 'Create range of motion for selected object.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'ROM.png', command = 'import takTools.rigging.tak_ROM as tak_ROM\nimport imp\nimp.reload(tak_ROM)\ntak_ROM.UI()', sourceType = 'python')
+    cmds.shelfButton(annotation = 'Print max influence for a selected mesh.', width = 35, height = 35, imageOverlayLabel = 'maxInf', image1 = 'pythonFamily.png', command = "from imp import reload\nimport takTools.utils.skin as skinUtil; reload(skinUtil)\n\nmesh = cmds.ls(sl=True)[0]\nprint('Max Influence:', skinUtil.getMaxInfluence(mesh, 0.00001))", sourceType = 'python')
+    cmds.shelfButton(annotation = 'Fit max influence for a selected mesh.', width = 35, height = 35, imageOverlayLabel = 'fitMaxInf', image1 = 'pythonFamily.png', command = 'from imp import reload\nimport takTools.utils.skin as skinUtil; reload(skinUtil)\n\nmesh = cmds.ls(sl=True)[0]\nskinUtil.fitMaxInfluence(mesh)', sourceType = 'python')
     cmds.shelfButton(annotation = 'Weight hammer: fix vertices that have bad weights (select them and use the hammer)', width = 35, height = 35, imageOverlayLabel = '', image1 = 'weightHammer.bmp', command = 'weightHammerVerts', sourceType = 'mel')
     cmds.shelfButton(annotation = 'Weight Hammer on Edge Loop', width = 35, height = 35, imageOverlayLabel = '', image1 = 'weightHammerOnEdgeLoop.bmp', command = "### Weight Hammer on Edge Loop ###\ncmds.SelectEdgeLoopSp()\nmel.eval('weightHammerVerts;')", sourceType = 'python')
+    cmds.shelfButton(annotation = 'from maya import cmds, mel\n\nweightHammerBrush = cmds.artSelectCt...', width = 35, height = 35, imageOverlayLabel = '', image1 = 'weightHammer.png', command = "from maya import cmds, mel\n\nweightHammerBrush = cmds.artSelectCtx(beforeStrokeCmd='select -cl;', afterStrokeCmd='if (size(`ls -sl`) > 0){WeightHammer;}')\ncmds.setToolTo(weightHammerBrush)", sourceType = 'python')
     cmds.shelfButton(annotation = 'tf_smoothSkinWeight', width = 35, height = 35, imageOverlayLabel = '', image1 = 'tf_smoothSkin.bmp', command = 'import takTools.rigging.averageVertexSkinWeightBrush as averageVertexSkinWeightBrush\nimport imp\nimp.reload(averageVertexSkinWeightBrush)\naverageVertexSkinWeightBrush.paint()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Paint Smooth Weights Tool', width = 35, height = 35, imageOverlayLabel = '', image1 = 'brSmoothWeights.svg', command = 'if (! `pluginInfo -q -loaded brSmoothWeights`)\n{\n    loadPlugin brSmoothWeights;\n}\nbrSmoothWeightsToolCtx;', sourceType = 'mel')
     cmds.shelfButton(annotation = 'Paint skin weights tool options', width = 35, height = 35, imageOverlayLabel = '', image1 = 'paintSkinWeights.png', command = 'ArtPaintSkinWeightsToolOptions', sourceType = 'mel')
@@ -233,6 +236,7 @@ def UI():
     cmds.shelfButton(annotation = 'Convert mash to joints', width = 35, height = 35, imageOverlayLabel = 'MASHtoJoints', image1 = 'pythonFamily.png', command = 'from maya import cmds\nfrom takTools.utils import MASH as mashUtil\nimport imp\nimp.reload(mashUtil)\n\nwaiter = cmds.ls(sl=True)[0]\njoints = mashUtil.buildJoints(waiter)\nmashUtil.buildSkinMesh(waiter, joints)', sourceType = 'python')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = 'Fold', image1 = 'commandButton.png', command = 'source makeFoldingRig.mel;', sourceType = 'mel')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'autoSwim.bmp', command = 'import takTools.rigging.tak_autoSwim as tak_autoSwim\nimport imp\nimp.reload(tak_autoSwim)\ntak_autoSwim.UI()', sourceType = 'python')
+    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'MHC.png', command = 'import dna_viewer\ndna_viewer.show()', sourceType = 'python')
 
 
     # animation tab
@@ -241,9 +245,9 @@ def UI():
     cmds.frameLayout('aniCtrlSelFrameLo', label = 'Control Select', collapse = False, collapsable = True, p = 'aniScrLo')
     cmds.shelfLayout('Animation_Control_Select', h = SHELF_HEIGHT, p = 'aniCtrlSelFrameLo')
     cmds.shelfButton(annotation = 'Save controls selected', width = 35, height = 35, imageOverlayLabel = '', image1 = 'pos2Shelf.bmp', command = 'pose2shelf', sourceType = 'mel')
-    cmds.shelfButton(annotation = 'Selector:biped', width = 35, height = 35, imageOverlayLabel = '', image1 = 'C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5Files/icons/asBiped.png', command = 'source "C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5Files/Selector/biped.mel";', sourceType = 'mel')
-    cmds.shelfButton(annotation = 'Selector:face', width = 35, height = 35, imageOverlayLabel = '', image1 = 'C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5Files/icons/asFace.png', command = 'source "C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5Files/Selector/face.mel";', sourceType = 'mel')
-    cmds.shelfButton(annotation = 'picker', width = 35, height = 35, imageOverlayLabel = '', image1 = 'C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5Files/picker/pickerFiles/icons/picker.png', command = 'source "C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5Files/picker/picker.mel";', sourceType = 'mel')
+    cmds.shelfButton(annotation = 'Selector:biped', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/icons/asBiped.png', command = 'source "D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/Selector/biped.mel";', sourceType = 'mel')
+    cmds.shelfButton(annotation = 'Selector:face', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/icons/asFace.png', command = 'source "D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/Selector/face.mel";', sourceType = 'mel')
+    cmds.shelfButton(annotation = 'picker', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/picker/pickerFiles/icons/picker.png', command = 'source "D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/picker/picker.mel";', sourceType = 'mel')
 
     cmds.frameLayout('aniDisplayFrameLo', label = 'Display', collapse = False, collapsable = True, p = 'aniScrLo')
     cmds.shelfLayout('Animation_Display', h = SHELF_HEIGHT, p = 'aniDisplayFrameLo')
@@ -486,7 +490,7 @@ def saveTools(*args):
     Save tak_tools with current state.
     """
     # Read tool file
-    with open(FILE_PATH, 'r') as f:
+    with open(__file__, 'r') as f:
         contents = f.read()
 
     # Get shelf buttons for each shelfLayout
@@ -507,7 +511,7 @@ def saveTools(*args):
         contents = contents.replace(codeBlock, curBtnCodes)
 
     # Save tool file
-    with open(FILE_PATH, 'w') as f:
+    with open(__file__, 'w') as f:
         f.write(contents)
 
 

@@ -702,6 +702,7 @@ def bSkinObject(objectName, fileJoints, weights):
             cmd += " " + fileJoints[i]
 
         cmd += " " + objectName
+        print(cmd)
         maya.mel.eval(cmd)
 
         maya.mel.eval("skinCluster -tsb -mi 10");
@@ -808,20 +809,25 @@ def bLoadSkinValues(loadOnSelection, inputFile):
     PolygonObject = ""
 
 
+    # if loadOnSelection == True:
+    #     selectionList = OpenMaya.MSelectionList()
+    #     OpenMaya.MGlobal.getActiveSelectionList(selectionList)
+    #     node = OpenMaya.MDagPath()
+    #     component = OpenMaya.MObject()
+    #     if selectionList.length():
+    #         selectionList.getDagPath( 0, node, component )
+    #         if node.hasFn(OpenMaya.MFn.kTransform):
+	#             NewTransform = OpenMaya.MFnTransform (node)
+	#             if NewTransform.childCount():
+	# 	            if NewTransform.child(0).hasFn(OpenMaya.MFn.kMesh):
+	# 		            PolygonObject = str(OpenMaya.MFnDagNode(NewTransform.child(0)).partialPathName())
+
     if loadOnSelection == True:
-        selectionList = OpenMaya.MSelectionList()
-        OpenMaya.MGlobal.getActiveSelectionList(selectionList)
-        node = OpenMaya.MDagPath()
-        component = OpenMaya.MObject()
-        if selectionList.length():
-            selectionList.getDagPath( 0, node, component )
-            if node.hasFn(OpenMaya.MFn.kTransform):
-	            NewTransform = OpenMaya.MFnTransform (node)
-	            if NewTransform.childCount():
-		            if NewTransform.child(0).hasFn(OpenMaya.MFn.kMesh):
-			            PolygonObject = str(OpenMaya.MFnDagNode(NewTransform.child(0)).partialPathName())
-
-
+        sels = cmds.ls(sl=True)
+        if sels:
+            meshes = cmds.listRelatives(sels[0], ni=True, shapes=True, type='mesh')
+            if meshes:
+                PolygonObject = meshes[0]
 
     if loadOnSelection and len(PolygonObject) == 0:
         print("You need to select a polygon object")

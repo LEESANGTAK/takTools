@@ -2133,6 +2133,8 @@ def addInfCopySkin(source=None, targets=None):
     srcUseComponent = cmds.getAttr('%s.useComponents' % srcSkinClst)
     cmds.setAttr('%s.useComponents' % skinClst, srcUseComponent)
 
+    cmds.select(source, targets, r=True)
+
 
 def smoothSkinBind():
     selLs = cmds.ls(sl=True)

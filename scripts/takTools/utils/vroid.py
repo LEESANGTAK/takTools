@@ -297,7 +297,7 @@ def cleanupModel(height, flipZ):
     docDir = os.path.expanduser('~')
     skinFiles = []
     for mesh in meshes:
-        skinFile = skinUtil.saveBSkin(docDir, mesh)
+        skinFile = skinUtil.saveBSkin(mesh, docDir)
         skinFiles.append(skinFile)
         pm.polySoftEdge(mesh, a=180)
         meshUtil.cleanupMesh(mesh)
@@ -310,7 +310,7 @@ def cleanupModel(height, flipZ):
     # Rotate the root joint for the unreal engine
     pm.parent(rootChild, world=True)
     root.rotate.set(0, 0, 0)
-    root.jointOrient.set(-90, yRotate, 0)
+    root.jointOrient.set(-90, 0, 0)
     pm.parent(rootChild, root)
 
     # Freeze joints
@@ -397,17 +397,18 @@ def cleanupMaterial(textureDirectory, name):
     for mat in materials:
         result = re.search(r'N.+?_(\D+.+?)FBX.+', mat.name())
 
-        mat.specularColor.set(0, 0, 0)
-        mat.reflectedColor.set(0, 0, 0)
+        if result:
+            mat.specularColor.set(0, 0, 0)
+            mat.reflectedColor.set(0, 0, 0)
 
-        mat.rename('{}_{}_MI'.format(name, result.group(1)))
+            mat.rename('{}_{}_MI'.format(name, result.group(1)))
 
-        try:
-            rawTexName = MAT_INFO[result.group(1)]
-        except KeyError:
-            continue
+            try:
+                rawTexName = MAT_INFO[result.group(1)]
+            except KeyError:
+                continue
 
-        tex = '{}{}'.format(name, rawTexName)
+            tex = '{}{}'.format(name, rawTexName)
 
         fileNode = pm.shadingNode('file', asTexture=True)
         place2dNode = pm.shadingNode('place2dTexture', asUtility=True)

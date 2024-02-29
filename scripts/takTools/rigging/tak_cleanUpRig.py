@@ -32,7 +32,7 @@ def ui():
     cmds.button(label="Delete Display/Render/Animation Layers", c=delAllLayers)
     cmds.button(label="Delete Keys", c=delKeys)
     cmds.button(label="Check Namespace", c=chkNamespace)
-    cmds.button(label="Hide Joints", c=hideJoints)
+    # cmds.button(label="Hide Joints", c=hideJoints)
     cmds.button(label='Remove Unused Animation Curves', c='''mel.eval('deleteUnusedCommon("animCurve", 0, uiRes("m_cleanUpScene.kDeletingUnusedAnimationCurves2"));')''')
     cmds.button(label="All in One", c=allInOne, h=40, bgc=[0, 0.5, 0.5])
 
@@ -328,24 +328,25 @@ def setVisCtrlAttrs():
 
 
 def createControllerNodesSet():
-    ctrlNodesSetName = 'controllerNodes_set'
-    if not pm.objExists(ctrlNodesSetName):
-        ctrlNodesSet = pm.createNode('objectSet', n=ctrlNodesSetName)
-    else:
-        ctrlNodesSet = pm.PyNode(ctrlNodesSetName)
-
     ctrlNodes = pm.ls(type='controller')
-    ctrlNodesSet.addMembers(ctrlNodes)
+    if ctrlNodes:
+        ctrlNodesSetName = 'controllerNodes_set'
+        if not pm.objExists(ctrlNodesSetName):
+            ctrlNodesSet = pm.createNode('objectSet', n=ctrlNodesSetName)
+        else:
+            ctrlNodesSet = pm.PyNode(ctrlNodesSetName)
 
-    advancedSkelSetName = 'Sets'
-    if pm.objExists(advancedSkelSetName):
-        pm.PyNode(advancedSkelSetName).addMember(ctrlNodesSet)
+        ctrlNodesSet.addMembers(ctrlNodes)
+
+        advancedSkelSetName = 'Sets'
+        if pm.objExists(advancedSkelSetName):
+            pm.PyNode(advancedSkelSetName).addMember(ctrlNodesSet)
 
 def allInOne(*args):
     """ Preprocess to publish rig """
 
     if cmds.objExists('Sets'):
-        mel.eval('source "C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton5/AdvancedSkeleton5Files/Selector/biped.mel";')
+        mel.eval('source "C:/GoogleDrive/programs_env/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/Selector/biped.mel";')
         if cmds.objExists('MotionSystem'):
             cmds.setAttr('MotionSystem.v', True)
 
@@ -353,7 +354,7 @@ def allInOne(*args):
     delAllLayers()
     delKeys()
     chkNamespace()
-    hideJoints()
+    # hideJoints()
     mel.eval('deleteUnusedCommon("animCurve", 0, uiRes("m_cleanUpScene.kDeletingUnusedAnimationCurves2"));')
 
     setVisCtrlAttrs()

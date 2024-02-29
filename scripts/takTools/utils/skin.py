@@ -3,7 +3,7 @@ import maya.OpenMaya as om
 import maya.OpenMayaAnim as oma
 
 import pymel.core as pm
-import maya.cmds as cmds
+from maya import cmds, mel
 
 from . import globalUtil
 from . import mesh as meshUtil
@@ -32,7 +32,7 @@ def bind(jnts, geos, maxInfluence=4):
 def reBind(skinMesh):
     tmpDir = pm.internalVar(userTmpDir=True)
     skinFile = saveBSkin(skinMesh, tmpDir)
-    pm.delete(skinMesh, ch=True)
+    pm.skinCluster(skinMesh, e=True, ub=True)
     loadBSkin(skinFile)
     os.remove(skinFile)
 
@@ -261,22 +261,23 @@ def setSolidSkinWeights(sourceVertex):
 
 
 def editSkinMesh(skinMesh):
-    tmpDir = pm.internalVar(userTmpDir=True)
-    skinFile = saveBSkin(skinMesh, tmpDir)
+    tempSkin = pm.duplicate(skinMesh, n='temp_skin')[0]
+    tempSkin.hide()
+    copySkin(skinMesh, tempSkin)
     meshUtil.cleanupMesh(skinMesh)
-    pm.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(skinMesh, skinFile))
+    pm.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(tempSkin, skinMesh))
 
-def doneEditSkinMesh(skinMesh, skinFile):
+def doneEditSkinMesh(tempSkin, skinMesh):
     meshUtil.cleanupMesh(skinMesh)
-    loadBSkin(skinFile)
-    os.remove(skinFile)
+    copySkin(tempSkin, skinMesh)
+    pm.delete(tempSkin)
     pm.headsUpDisplay('editSkinMeshHUD', remove=True)
 
 
 def SSD(geo):
     influences = getInfluences(geo)
     topInfluence = globalUtil.getTopDagNode(influences)
-    pm.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=8)
+    pm.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=4)
 
 
 def saveBSkin(mesh, outputDir):
@@ -292,3 +293,30 @@ def loadBSkin(skinFile):
         mesh = fContents[0]
     pm.select(mesh, r=True)
     bsk.bLoadSkinValues(True, skinFile)
+
+
+def getMaxInfluence(mesh: str, ignoreWeight: float) -> int:
+    skinClst = mel.eval(f'findRelatedSkinCluster("{mesh}");')
+    vertCount = cmds.polyEvaluate(mesh, v=True)
+    numInfsPerVtx = []
+    for i in range(vertCount):
+        numInfsPerVtx.append(len(cmds.skinPercent(skinClst, f'{mesh}.vtx[{i}]', q=True, ignoreBelow=ignoreWeight, v=True)))
+    return max(numInfsPerVtx)
+
+
+def fitMaxInfluence(mesh: str, goalMaxInfluence=4, ignoreWeight=0.00001) -> None:
+    skinClst = mel.eval(f'findRelatedSkinCluster("{mesh}");')
+    cmds.setAttr(f"{skinClst}.maintainMaxInfluences", True)
+    cmds.setAttr(f"{skinClst}.maxInfluences", goalMaxInfluence)
+    vertCount = cmds.polyEvaluate(mesh, v=True)
+
+    for i in range(vertCount):
+        vert = f'{mesh}.vtx[{i}]'
+        weights = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, v=True)
+        infs = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, transform=None)
+        itemsToRemove = sorted(zip(weights, infs), reverse=True)[goalMaxInfluence:]
+        if itemsToRemove:
+            for item in itemsToRemove:
+                cmds.skinPercent(skinClst, vert, transformValue=[(item[1], 0.0)])
+
+    print('# Fit max influence is done successfully!')

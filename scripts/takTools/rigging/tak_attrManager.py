@@ -244,7 +244,7 @@ def aliasAttr(*args):
 
 	for sel in selList:
 		# cmds.aliasAttr(replace, '%s.%s' %(sel, selAttr))
-		cmds.addAttr('%s.%s' %(sel, selAttr), e=True, nn=replace)
+		# cmds.addAttr('%s.%s' %(sel, selAttr), e=True, nn=replace)
 		cmds.renameAttr('%s.%s' %(sel, selAttr), replace)
 
 	cmds.select(selList, r = True)
