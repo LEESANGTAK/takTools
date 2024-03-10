@@ -295,23 +295,23 @@ def loadBSkin(skinFile):
     bsk.bLoadSkinValues(True, skinFile)
 
 
-def getMaxInfluence(mesh: str, ignoreWeight: float) -> int:
-    skinClst = mel.eval(f'findRelatedSkinCluster("{mesh}");')
+def getMaxInfluence(mesh, ignoreWeight):
+    skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
     vertCount = cmds.polyEvaluate(mesh, v=True)
     numInfsPerVtx = []
     for i in range(vertCount):
-        numInfsPerVtx.append(len(cmds.skinPercent(skinClst, f'{mesh}.vtx[{i}]', q=True, ignoreBelow=ignoreWeight, v=True)))
+        numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{i}]'.format(mesh), q=True, ignoreBelow=ignoreWeight, v=True)))
     return max(numInfsPerVtx)
 
 
-def fitMaxInfluence(mesh: str, goalMaxInfluence=4, ignoreWeight=0.00001) -> None:
-    skinClst = mel.eval(f'findRelatedSkinCluster("{mesh}");')
-    cmds.setAttr(f"{skinClst}.maintainMaxInfluences", True)
-    cmds.setAttr(f"{skinClst}.maxInfluences", goalMaxInfluence)
+def fitMaxInfluence(mesh, goalMaxInfluence=4, ignoreWeight=0.00001):
+    skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
+    cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
+    cmds.setAttr("{}.maxInfluences".format(skinClst), goalMaxInfluence)
     vertCount = cmds.polyEvaluate(mesh, v=True)
 
     for i in range(vertCount):
-        vert = f'{mesh}.vtx[{i}]'
+        vert = '{}.vtx[{i}]'.format(mesh)
         weights = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, v=True)
         infs = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, transform=None)
         itemsToRemove = sorted(zip(weights, infs), reverse=True)[goalMaxInfluence:]
