@@ -1,3 +1,4 @@
+from maya import cmds
 import pymel.core as pm
 
 
@@ -40,3 +41,37 @@ def copyAnimation(source, target):
             newDestAttr = pm.PyNode(newDestAttr)
             if not newDestAttr.isLocked():
                 newAnimCrv.output >> newDestAttr
+
+
+def transferRootSidemotionToPelvis(worldUpAxis='Y', rootJoint='Root', pelvisJoint='pelvis'):
+    minTime = cmds.playbackOptions(q=True, minTime=True)
+    maxTime = cmds.playbackOptions(q=True, maxTime=True)
+    attrs = [ch + axis for ch in 'trs' for axis in 'xyz']
+
+    # Extract animations of the root front and pelvis in the world coordinate
+    rootLoc = cmds.spaceLocator(n='{}_loc'.format(rootJoint))[0]
+    pelvisLoc = cmds.spaceLocator(n='{}_loc'.format(pelvisJoint))[0]
+    cmds.parent(pelvisLoc, rootLoc)
+
+    if worldUpAxis == 'Y':
+        cmds.pointConstraint(rootJoint, rootLoc, mo=False, skip=['x', 'y'])
+    elif worldUpAxis == 'Z':
+        cmds.pointConstraint(rootJoint, rootLoc, mo=False, skip=['x', 'z'])
+    cmds.parentConstraint(pelvisJoint, pelvisLoc, mo=False)
+
+    cmds.select([rootLoc, pelvisLoc], r=True)
+    cmds.bakeResults(t=(minTime, maxTime))
+
+    # Transfer extracted world animation to the root and pelvis joint
+    cmds.cutKey(rootJoint, pelvisJoint, cl=True, at=attrs)
+
+    if worldUpAxis == 'Y':
+        cmds.pointConstraint(rootLoc, rootJoint, mo=False, skip=['x', 'y'])
+    elif worldUpAxis == 'Z':
+        cmds.pointConstraint(rootLoc, rootJoint, mo=False, skip=['x', 'z'])
+    cmds.parentConstraint(pelvisLoc, pelvisJoint, mo=False)
+
+    cmds.select([rootJoint, pelvisJoint], r=True)
+    cmds.bakeResults(t=(minTime, maxTime))
+
+    cmds.delete(rootLoc, pelvisLoc)

@@ -1,6 +1,7 @@
 import os
 import shutil
 from maya.api import OpenMaya as om
+from maya import cmds
 import pymel.core as pm
 
 # Skeleton joints
@@ -740,6 +741,41 @@ def redirectShaderPath(targetPath='Z:/maya/plug-ins/metaHuman/SourceAssets/shade
         dxShader.shader.set(newPath)
 
 
+def connectFaceControlBoard(topNode):
+    """
+    topNode = 'Hi:Face_ControlBoard_CtrlRig'
+    connectFaceControlBoard(topNode)
+    """
+    faceCtrlNodes = cmds.listRelatives(topNode, type='transform')
+    chs = [ch + axis for ch in 'trs' for axis in 'xyz']
+
+    for ctrlNode in faceCtrlNodes:
+        trgCtrl = ctrlNode.replace('Hi:', '')
+        for ch in chs:
+            try:
+                cmds.connectAttr('{}.{}'.format(ctrlNode, ch), '{}.{}'.format(trgCtrl, ch), f=True)
+            except:
+                pass
+
+
+def disconnectFaceControlBoard(topNode):
+    """
+    topNode = 'Hi:Face_ControlBoard_CtrlRig'
+    disconnectFaceControlBoard(topNode)
+    """
+    faceCtrlNodes = cmds.listRelatives(topNode, type='transform')
+    chs = [ch + axis for ch in 'trs' for axis in 'xyz']
+
+    for ctrlNode in faceCtrlNodes:
+        trgCtrl = ctrlNode.replace('Hi:', '')
+        for ch in chs:
+            try:
+                connections = cmds.listConnections('{}.{}'.format(ctrlNode, ch), plugs=True, source=False)
+                if connections:
+                    for connection in connections:
+                        cmds.disconnectAttr('{}.{}'.format(ctrlNode, ch), connection)
+            except:
+                pass
 
 
 '''

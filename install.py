@@ -37,20 +37,20 @@ def createModuleFile():
     moduleFileName = '{}.mod'.format(MODULE_NAME)
 
     contents = '''+ MAYAVERSION:2020 {0} {1} {2}
-MAYA_PLUG_IN_PATH +:= plug-ins/2020
 MAYA_SCRIPT_PATH +:= scripts/mel
+MAYA_PLUG_IN_PATH +:= plug-ins/2020
 
 + MAYAVERSION:2022 {0} {1} {2}
-MAYA_PLUG_IN_PATH +:= plug-ins/2022
 MAYA_SCRIPT_PATH +:= scripts/mel
+MAYA_PLUG_IN_PATH +:= plug-ins/2022
 
 + MAYAVERSION:2023 {0} {1} {2}
-MAYA_PLUG_IN_PATH +:= plug-ins/2023
 MAYA_SCRIPT_PATH +:= scripts/mel
+MAYA_PLUG_IN_PATH +:= plug-ins/2023
 
 + MAYAVERSION:2024 {0} {1} {2}
-MAYA_PLUG_IN_PATH +:= plug-ins/2024
 MAYA_SCRIPT_PATH +:= scripts/mel
+MAYA_PLUG_IN_PATH +:= plug-ins/2024
 '''.format(MODULE_NAME, MODULE_VERSION, MODULE_PATH)
 
     with open(os.path.join(getModulesDirectory(), moduleFileName), 'w') as f:
@@ -70,11 +70,10 @@ def getModulesDirectory():
 
 
 def addEnvPaths():
-    # Add plug-ins paths
-    pluginsPaths = mel.eval('getenv "MAYA_PLUG_IN_PATH";')
-    pluginsPaths += ';{}/plug-ins'.format(MODULE_PATH)
-    pluginsPaths += ';{}/plug-ins/{}'.format(MODULE_PATH, MODULE_VERSION)
-    mel.eval('putenv "MAYA_PLUG_IN_PATH" "{}";'.format(pluginsPaths))
+    # Add python script paths
+    pythonPath = '{}/scripts'.format(MODULE_PATH)
+    if not pythonPath in sys.path:
+        sys.path.append(pythonPath)
 
     # Add mel script paths
     melScriptPaths = mel.eval('getenv "MAYA_SCRIPT_PATH";')
@@ -82,10 +81,11 @@ def addEnvPaths():
     mel.eval('putenv "MAYA_SCRIPT_PATH" "{}";'.format(melScriptPaths))
     mel.eval('rehash();')
 
-    # Add python script paths
-    pythonPath = '{}/scripts'.format(MODULE_PATH)
-    if not pythonPath in sys.path:
-        sys.path.append(pythonPath)
+    # Add plug-ins paths
+    pluginsPaths = mel.eval('getenv "MAYA_PLUG_IN_PATH";')
+    pluginsPaths += ';{}/plug-ins'.format(MODULE_PATH)
+    pluginsPaths += ';{}/plug-ins/{}'.format(MODULE_PATH, MAYA_VERSION)
+    mel.eval('putenv "MAYA_PLUG_IN_PATH" "{}";'.format(pluginsPaths))
 
 
 # def addShelfButtons():

@@ -517,17 +517,21 @@ def addInf(*args):
 
 # Assign Random Color Lambert #
 def ranColLam():
-    selList = cmds.ls(sl=True)
+    selList = cmds.ls(sl=True, fl=True)
     colRange = (0, 1)
-    for x in selList:
-        shapeName = cmds.ls(x, s=True, dag=True)
-        sgName = cmds.listConnections(shapeName, d=True, type="shadingEngine")
-        if not cmds.objExists('%s_ranCol_mat' % x):
-            shaderName = cmds.shadingNode('lambert', n='%s_ranCol_mat' % x, asShader=True)
-        cmds.setAttr('%s_ranCol_mat.color' % x, random.uniform(*colRange), random.uniform(*colRange),
-                     random.uniform(*colRange), type='double3')
-        cmds.select(x)
-        cmds.hyperShade(assign='%s_ranCol_mat' % x)
+    if '.f' in str(selList):  # When select faces
+            shaderName = cmds.shadingNode('lambert', n='facet#_ranCol_mat', asShader=True)
+            cmds.setAttr('%s.color' % shaderName, random.uniform(*colRange), random.uniform(*colRange), random.uniform(*colRange), type='double3')
+            cmds.select(selList)
+            cmds.hyperShade(assign=shaderName)
+    else:  # When select objects
+        for sel in selList:
+            shaderName = '%s_ranCol_mat' % sel
+            if not cmds.objExists(shaderName):
+                cmds.shadingNode('lambert', n=shaderName, asShader=True)
+            cmds.setAttr('.color' % shaderName, random.uniform(*colRange), random.uniform(*colRange), random.uniform(*colRange), type='double3')
+            cmds.select(sel)
+            cmds.hyperShade(assign=shaderName)
     cmds.select(selList, r=True)
 
 
