@@ -24,7 +24,7 @@ def getMayaWin():
     mayaWin = None
 
     mayaWinPtr = omui.MQtUtil.mainWindow()
-    mayaWin = wrapInstance(long(mayaWinPtr), QtWidgets.QWidget)
+    mayaWin = wrapInstance(int(mayaWinPtr), QtWidgets.QWidget)
 
     return mayaWin
 

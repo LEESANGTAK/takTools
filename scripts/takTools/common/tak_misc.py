@@ -6,6 +6,8 @@ Description:
 This module is the library that relatively simple functions.
 """
 
+from imp import reload
+
 import os
 import random
 import re
@@ -24,7 +26,7 @@ import pymel.core as pm
 
 from . import tak_lib
 from ..modeling import tak_cleanUpModel
-from ..utils import skin as skinUtil
+from ..utils import skin as skinUtil; reload(skinUtil)
 from ..rigging.autoRigging.base import controller as control
 
 
@@ -529,7 +531,7 @@ def ranColLam():
             shaderName = '%s_ranCol_mat' % sel
             if not cmds.objExists(shaderName):
                 cmds.shadingNode('lambert', n=shaderName, asShader=True)
-            cmds.setAttr('.color' % shaderName, random.uniform(*colRange), random.uniform(*colRange), random.uniform(*colRange), type='double3')
+            cmds.setAttr('%s.color' % shaderName, random.uniform(*colRange), random.uniform(*colRange), random.uniform(*colRange), type='double3')
             cmds.select(sel)
             cmds.hyperShade(assign=shaderName)
     cmds.select(selList, r=True)
@@ -2066,13 +2068,8 @@ def addInfCopySkin(source=None, targets=None):
         sels = cmds.ls(os=True, fl=True)
 
         # Parse selections
-        components = []
-        geometries = []
-        for sel in sels:
-            if cmds.filterExpand(sel, sm=[28, 31, 32, 34]):
-                components.append(sel)
-            elif cmds.filterExpand(sel, sm=[9, 10, 12]):
-                geometries.append(sel)
+        components = cmds.filterExpand(sels, sm=[28, 31, 32, 34])
+        geometries = cmds.filterExpand(sels, sm=[9, 10, 12])
 
         if components and len(geometries) == 1:  # When select components
             source = geometries[0]
@@ -2656,7 +2653,7 @@ def selAffectedVertex():
     infs = cmds.ls(sl=True)
     vtxs = []
     for inf in infs:
-        vtxs.extend(skinUtil.getAffectedVertex(inf, 1.0))
+        vtxs.extend(skinUtil.getAffectedVertex(inf, 0.5))
     pm.select(vtxs, r=True)
 
 

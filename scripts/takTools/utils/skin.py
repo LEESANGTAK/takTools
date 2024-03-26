@@ -195,6 +195,7 @@ def getAffectedVertex(inf, minWeight):
         selLs.add(skinCluster.name())
         selLs.getDependNode(0, skinNode)
         if not skinNode.hasFn(om.MFn.kSkinClusterFilter):
+            print("Warning: Selection has no related skin cluster.")
             continue
         skinFn = oma.MFnSkinCluster(skinNode)
 
@@ -204,10 +205,20 @@ def getAffectedVertex(inf, minWeight):
 
         # Get affected points
         skinFn.getPointsAffectedByInfluence(infDagPath, componentsSelLs, weights)
+        print(skinCluster.name(), weights)
 
         # Get vertices
         if componentsSelLs.length() >= 1:
-            componentsSelLs.getDagPath(0, geoDagPath, vertices)
+            print(weights)
+            # componentsSelLs.getDagPath(0, geoDagPath, vertices)
+            selIt = om.MItSelectionList(componentsSelLs)
+            i = 0
+            while not selIt.isDone():
+                if weights[i] >= minWeight:
+                    print('get vertex')
+                    selIt.getDagPath(geoDagPath, vertices)
+                i += 1
+                selIt.next()
             om.MGlobal.select(geoDagPath, vertices, om.MGlobal.kAddToList)
 
         selLs.clear()
