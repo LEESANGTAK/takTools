@@ -61,8 +61,11 @@ class SkeletorUI(object):
         self.rowColumnLayout__ioA = cmds.rowColumnLayout('columnLayout__ioA', parent = self.columnLayout__ui, numberOfColumns=2)
         self.textField__filepath = cmds.textFieldGrp('textField__filepath', label='File: ', text=dirpath, editable=0, columnWidth=[(1, 50)], parent = self.rowColumnLayout__ioA)
         cmds.button(label='...', width = 30,  height = self.buttonHeight, command = self.btnCmd_setDirpath, parent = self.rowColumnLayout__ioA)
-        cmds.separator(h=10)
         cmds.setParent('..')
+        cmds.optionMenu('namespaceOptMenu', label='Namespace: ', changeCommand=self._nsChangedCallback)
+        cmds.menuItem(label='')
+        self._populateNamespaces()
+        cmds.separator(h=10)
 
         #...buttons
         cmds.intFieldGrp('sampleCountIntFldGrp', label='Sample Count: ', v1=self.cSkeletor.sampleCount, columnWidth=[(1, 80)])
@@ -90,6 +93,15 @@ class SkeletorUI(object):
         cmds.showWindow(self.window)
 
         return True
+
+    def _populateNamespaces(self, *args):
+        allNamespaces = set(cmds.namespaceInfo(listOnlyNamespaces=True, recurse=False)) - set(['UI', 'shared'])
+        for namespace in allNamespaces:
+            cmds.menuItem(label=namespace+':')
+
+    def _nsChangedCallback(self, *args):
+        selNamespace = args[0]
+        self.cSkeletor.namespace = selNamespace
 
     #...UI
     def btnCmd_setDirpath(self, *args, **kwargs):
@@ -167,7 +179,16 @@ class Skeletor(object):
         self.sampleCount = 10
         self.filenameExtension = 'skeletor'
         self.vtxPosition_Array = []
+        self._namespace = ''
         pass
+
+    @property
+    def namespace(self):
+        return self._namespace
+
+    @namespace.setter
+    def namespace(self, namespace):
+        self._namespace = namespace
 
     #...record
     def record_all(self, sel_Array=None):
@@ -229,6 +250,7 @@ class Skeletor(object):
         return True
 
     def remove_one(self, node):
+        node = removeNamespace(node, self._namespace)
         self.load_data(None, self.filePath)
         if self.data and node in self.data.keys():
             del(self.data[node])
@@ -265,6 +287,7 @@ class Skeletor(object):
             print('ERROR: Select both a Mesh and Node to show Node Samples!')
             return False
         node = node_Array[0]
+        node = removeNamespace(node, self._namespace)
         #...load_data
         self.load_data(mesh, self.filePath)
         #...select sample
@@ -299,10 +322,13 @@ class Skeletor(object):
         cmds.select(auto_Array, r=True)
         return True
 
-    def reconform_all(self, sel_Array=None):
+    def reconform_all(self, mesh=None):
         #...parse_selection
-        if not sel_Array:
-            sel_Array = cmds.ls(sl=1)
+        if not mesh:
+            mesh = cmds.filterExpand(cmds.ls(sl=1), sm=12)[0]
+        if not mesh:
+            print("ERROR: Please select a mesh.")
+            return False
         # #...debug
         # if len(sel_Array) != 2:
         #     print('ERROR: Select a Source and Destination mesh to reconform nodes too!')
@@ -311,9 +337,12 @@ class Skeletor(object):
         # self.load_data(sel_Array[0], self.filePath)
         self.load_data(None, self.filePath)
         #...place_all
-        self.place_all(sel_Array[0])
+        success = self.place_all(mesh)
         #...debug
-        print('SUCCESS: Reconform nodes to mesh: "%s"' % sel_Array[0])
+        if success:
+            print('SUCCESS: Reconform nodes to mesh: "%s"' % mesh)
+        else:
+            print('FAILED: Reconform nodes to mesh: "%s"' % mesh)
         return True
 
     #...analyze
@@ -374,19 +403,19 @@ class Skeletor(object):
         return True
 
     def sample_one(self, sample_Array=None, node=None, auto=False):
-        #...use existing sample_Array?
-        if not sample_Array:
-            sample_Array = ['%s.vtx[%s]'%(self.mesh, d) for d in self.data[node][0]]
         #...check for node
         if not node:
             return False
-        #...use existing auto setting?
-        if not auto:
-            auto = self.data[node][3]
+        #...use existing sample_Array?
+        if not sample_Array:
+            sample_Array = ['%s.vtx[%s]'%(self.mesh, d) for d in self.data[node][0]]
+        # #...use existing auto setting?
+        # if not auto:
+        #     auto = self.data[node][3]
         #...get position of centroid of sel_Array
         pos_centroid = get_centroid(sample_Array)
         #...get position of node
-        pos_node = cmds.xform(node, q=1,t=1,ws=1)
+        pos_node = cmds.xform(node, q=1, t=1, ws=1)
         #...get vector of centroid to node
         vector = get_vector(pos_centroid, pos_node)
         #...convert sample_Array to number_Array only
@@ -429,10 +458,13 @@ class Skeletor(object):
         return True
 
     #...reconform nodes to new mesh
-    def place_all(self, mesh, node_Array = None):
+    def place_all(self, mesh, node_Array=None):
         #...node_Array == None, reconform nodes in self.data
         if node_Array == None:
-            node_Array = [n for n in self.data.keys() if cmds.objExists(n)]
+            node_Array = [self._namespace+n for n in self.data.keys() if cmds.objExists(self._namespace+n)]
+        if not node_Array:
+            print('ERROR: There is nothing matching node.')
+            return False
         #...store parent_Array
         hierarchy_Array = unparent_hierarchy(node_Array)
         for node in node_Array:
@@ -443,6 +475,7 @@ class Skeletor(object):
 
     def place_one(self, mesh, node):
         #...get data info
+        node = removeNamespace(node, self._namespace)
         [vtxID_Array, vector, scaleFactorOld, auto] = self.data[node]
         #...create sample_Array
         sample_Array = ['%s.vtx[%s]'%(mesh, v) for v in vtxID_Array]
@@ -472,7 +505,7 @@ class Skeletor(object):
         pos_nodeNew[2] = pos_centroid[2] + (vector[2] * scaleFactorMult[2])
         #...move node to reconform position
         cmds.select(cl=1)
-        cmds.xform(node, t=pos_nodeNew, ws=1)
+        cmds.xform(self._namespace+node, t=pos_nodeNew, ws=1)
         return True
 
     #...save/load
@@ -517,6 +550,9 @@ class Skeletor(object):
 #############################################
 #...other funcs
 #############################################
+def removeNamespace(node, namesapce):
+    return node.replace(namesapce, '')
+
 def unparent_hierarchy(node_Array):
     hierarchy_Array = []
     #...get child/parent
