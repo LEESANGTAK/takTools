@@ -1,0 +1,588 @@
+
+    menuItem
+        -label "Default Transform" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.setDefaultTransform()\")" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "N" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "zeroDepth.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem1;
+
+    menuItem
+        -label "Delete Keys" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.delKey()\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "W" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "setKeyframe.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem2;
+
+    menuItem
+        -label "Lock and Hide" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    string $sels[] = `ls -sl`;\n    for ($sel in $sels)\n    {\n        string $selAttrs[] = `channelBox -q -selectedMainAttributes \"mainChannelBox\"`;\n        for ($attr in $selAttrs)\n        {\n            string $attrFullName = $sel + \".\" + $attr;\n            setAttr -lock 1 -keyable 0 $attrFullName;\n        }\n    }\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "E" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "lock.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem5;
+
+    menuItem
+        -label "Match Transform" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n\tstring $sels[] = `ls -sl`;\n\tmatchTransform -pos -rot -scl;\n\tselect -r $sels[0];\n}\n" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "NE" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "alignOnMid.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem3;
+
+    menuItem
+        -label "menuEditorMenuItem20" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.rigging.tak_matchTransform as tak_matchTransform;import imp; imp.reload(tak_matchTransform);tak_matchTransform.UI()\");" 
+        -optionBox 1
+        -enable 1
+        -visible 0
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 0
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem20;
+
+    menuItem
+        -label "Unlock" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"for sel in pm.selected(): tak_misc.unlockChannels(sel)\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "SE" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "unlockGeneric.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem4;
+
+    menuItem
+        -label "Cleanup Transform" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.cleanupTransform()\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "SW" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "deleteConstraints.bmp" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem8;
+
+    menuItem
+        -label "Freeze Transform" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "FreezeTransformations;" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "NW" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "FreezeTransform.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem10;
+
+    menuItem
+        -label "Cleanup Mesh" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from takTools.utils import mesh as meshUtil; import imp; imp.reload(meshUtil)\");\npython(\"meshes = pm.selected(type='transform')\");\npython(\"for mesh in meshes: [attr.unlock() for attr in mesh.listAttr()]\");\npython(\"for mesh in meshes: meshUtil.cleanupMesh(mesh)\");\npython(\"pm.select(meshes, r=True)\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "S" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "cleanUpMesh.bmp" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem13;
+
+    menuItem
+        -label "menuEditorMenuItem26" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\\nimport imp; imp.reload(tak_cleanUpModel)\\ntak_cleanUpModel.UI()\");" 
+        -optionBox 1
+        -enable 1
+        -visible 0
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 0
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem14;
+
+    menuItem
+        -label "Rename" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from takRenamer import main\");\npython(\"import imp; imp.reload(main)\");\npython(\"main.showUI()\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "quickRename.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem7;
+
+    menuItem
+        -label "Skeleton" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takSkeleton as ts\");\npython(\"import imp; imp.reload(ts)\");\npython(\"ts.gui.showUI()\");\n" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "takSkeleton.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem18;
+
+    menuItem
+        -label "Group" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.common.tak_misc as tak_misc;import imp; imp.reload(tak_misc)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels:\\n    tak_misc.doGroup(sel, '_zero')\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "out_transform.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem6;
+
+    menuItem
+        -label "menuEditorMenuItem24" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.rigging.tak_group as tak_group\\nimport imp; imp.reload(tak_group)\\ntak_group.UI()\");" 
+        -optionBox 1
+        -enable 1
+        -visible 0
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 0
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem16;
+
+    menuItem
+        -label "Controller" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.rigging.tak_createCtrl as tak_createCtrl\\nimport imp; imp.reload(tak_createCtrl)\\ntak_createCtrl.UI()\");\n" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "circle.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem12;
+
+    menuItem
+        -label "separator" 
+        -divider 1
+        -dividerLabel "separator" 
+        -subMenu 0
+        -tearOff 0
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem32;
+
+    menuItem
+        -label "Connect Attributes" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.cnntAttrs()\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "multiConnections.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem9;
+
+    menuItem
+        -label "menuEditorMenuItem17" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.rigging.tak_multiConnectAttr as tak_multiConnectAttr\\nimport imp; imp.reload(tak_multiConnectAttr)\\ntak_multiConnectAttr.UI()\");" 
+        -optionBox 1
+        -enable 1
+        -visible 0
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 0
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem25;
+
+    menuItem
+        -label "Multi Constraint" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.rigging.tak_mulConst as tak_mulConst\\nimport imp; imp.reload(tak_mulConst)\\ntak_mulConst.UI()\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "multiConstraint.bmp" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem27;
+
+    menuItem
+        -label "Create Cage Mesh" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"bfUtil.convertToCageMesh(pm.selected()[0])\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "polyToggleProxy.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem17;
+
+    menuItem
+        -label "menuEditorMenuItem25" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"bfUtil.showConvertToCageMeshUI()\");" 
+        -optionBox 1
+        -enable 1
+        -visible 0
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 0
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem31;
+
+    menuItem
+        -label "separator" 
+        -divider 1
+        -dividerLabel "separator" 
+        -subMenu 0
+        -tearOff 0
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem30;
+
+    menuItem
+        -label "Duplicate Face" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from takTools.utils import mesh as mUtil; import imp; imp.reload(mUtil)\");\npython(\"mUtil.duplicateFace()\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "polyDuplicateFacet.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem22;
+
+    menuItem
+        -label "Separate Face" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from takTools.utils import mesh as mUtil; import imp; imp.reload(mUtil)\");\npython(\"mUtil.separateFace()\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "polySeparate.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem23;
+
+    menuItem
+        -label "separator" 
+        -divider 1
+        -dividerLabel "separator" 
+        -subMenu 0
+        -tearOff 0
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem29;
+
+    menuItem
+        -label "Duplicate Orig" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"import imp; imp.reload(meshUtil)\");\npython(\"sels = pm.selected()\");\npython(\"for sel in sels:\\n\\tmeshUtil.duplicateOrigMesh(sel)\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "polyCopyColors.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem26;
+
+    menuItem
+        -label "Duplicate Unique Name" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "duplicatePreset(1,1,2,0,0,0,1,0,0,0,0,0,0,0,1,1,1)" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "polyCopyColors.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem21;
+
+    menuItem
+        -label "Duplicate Parent Only" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "duplicate -po;\nparent -world;" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "polyCopyColors.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem24;
+
+setParent -m ..;
+

@@ -1,0 +1,38 @@
+//Maya Preference 2020 (Release 1)
+//
+//
+
+//
+// The hotkey set
+//
+hotkeySet -source "Maya_Default" -current User1;
+//
+// The hotkey contexts and hotkeys
+//
+hotkey -keyShortcut "@" -releaseName ("Tak_Selection_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "@" -name ("Tak_Selection_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "!" -name ("Tak_Display_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "!" -releaseName ("Tak_Display_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "#" -releaseName ("Tak_Rigging_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "#" -name ("Tak_Rigging_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "$" -releaseName ("Tak_Skin_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "$" -name ("Tak_Skin_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "c" -ctrlModifier -name ("");
+hotkey -keyShortcut "v" -ctrlModifier -name ("");
+hotkeyCtx -type "Editor" -addClient "outlinerPanel";
+hotkeyCtx -type "Editor" -addClient "graphEditor";
+hotkeyCtx -type "Editor" -addClient "nodeEditorPanel";
+hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel";
+hotkeyCtx -type "Editor" -addClient "hyperGraphPanel";
+hotkeyCtx -type "Editor" -addClient "posePanel";
+hotkeyCtx -type "Editor" -addClient "hyperShadePanel";
+hotkeyCtx -type "Editor" -addClient "timeEditorPanel";
+hotkeyCtx -type "Editor" -addClient "shapePanel";
+hotkeyCtx -type "Editor" -addClient "profilerPanel";
+hotkeyCtx -type "Tool" -addClient "polyCutUV";
+hotkeyCtx -type "Tool" -addClient "xgmIGBrush";
+hotkeyCtx -type "Tool" -addClient "texCutContext";
+hotkeyCtx -type "Tool" -addClient "texSculptCacheContext";
+hotkeyCtx -type "Tool" -addClient "Unfold3DBrush";
+hotkeyCtx -type "Tool" -addClient "sculptMeshCache";
+hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush";

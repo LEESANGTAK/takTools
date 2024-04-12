@@ -1,0 +1,121 @@
+//Maya Preference 2020 (Release 1)
+//
+//
+
+runTimeCommand
+	-label ""
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-annotation "Tak_Display_MarkingMenu (Press)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Display_MarkingMenu\";\n")
+	Tak_Display_MarkingMenu_Press;
+
+runTimeCommand
+	-label ""
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-annotation "Tak_Display_MarkingMenu (Release)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Display_MarkingMenu_Release;
+
+runTimeCommand
+	-label ""
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-annotation "Tak_Selection_MarkingMenu (Release)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Selection_MarkingMenu_Release;
+
+runTimeCommand
+	-label ""
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-annotation "Tak_Rigging_MarkingMenu (Press)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Rigging_MarkingMenu\";\n")
+	Tak_Rigging_MarkingMenu_Press;
+
+runTimeCommand
+	-label ""
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-annotation "Tak_Selection_MarkingMenu (Press)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Selection_MarkingMenu\";\n")
+	Tak_Selection_MarkingMenu_Press;
+
+runTimeCommand
+	-label ""
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-annotation "Tak_Rigging_MarkingMenu (Release)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Rigging_MarkingMenu_Release;
+
+runTimeCommand
+	-label ""
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-annotation "Run AdvancedSkeleton as WorkSpace controller"
+	-category "User"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (!`exists AdvancedSkeleton5`) evalEcho (\"source \\\"C:/GoogleDrive/programs_env/maya/plug-ins/AdvancedSkeleton5/AdvancedSkeleton5.mel\\\"\");AdvancedSkeleton5;")
+	AdvancedSkeletonWorkspaceController;
+
+runTimeCommand
+	-label ""
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-annotation "Tak_Skin_MarkingMenu (Press)"
+	-category ""
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Skin_MarkingMenu\";\n")
+	Tak_Skin_MarkingMenu_Press;
+
+runTimeCommand
+	-label ""
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-annotation "Tak_Skin_MarkingMenu (Release)"
+	-category "Other items.User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Skin_MarkingMenu_Release;
+
