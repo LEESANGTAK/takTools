@@ -311,7 +311,7 @@ def getMaxInfluence(mesh, ignoreWeight):
     vertCount = cmds.polyEvaluate(mesh, v=True)
     numInfsPerVtx = []
     for i in range(vertCount):
-        numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{i}]'.format(mesh), q=True, ignoreBelow=ignoreWeight, v=True)))
+        numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{}]'.format(mesh, i), q=True, ignoreBelow=ignoreWeight, v=True)))
     return max(numInfsPerVtx)
 
 
@@ -322,7 +322,7 @@ def fitMaxInfluence(mesh, goalMaxInfluence=4, ignoreWeight=0.00001):
     vertCount = cmds.polyEvaluate(mesh, v=True)
 
     for i in range(vertCount):
-        vert = '{}.vtx[{i}]'.format(mesh)
+        vert = '{}.vtx[{}]'.format(mesh, i)
         weights = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, v=True)
         infs = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, transform=None)
         itemsToRemove = sorted(zip(weights, infs), reverse=True)[goalMaxInfluence:]
