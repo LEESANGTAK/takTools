@@ -87,6 +87,11 @@ def addEnvPaths():
     pluginsPaths += ';{}/plug-ins/{}'.format(MODULE_PATH, MAYA_VERSION)
     mel.eval('putenv "MAYA_PLUG_IN_PATH" "{}";'.format(pluginsPaths))
 
+    # Add icon folder path
+    iconPaths = mel.eval('getenv "XBMLANGPATH";')
+    iconPaths += ';{}/icons'.format(MODULE_PATH)
+    mel.eval('putenv "XBMLANGPATH" "{}";'.format(iconPaths))
+
 
 # def addShelfButtons():
 #     curShelf = getCurrentShelf()
