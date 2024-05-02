@@ -2,13 +2,14 @@
 Author: Tak
 Website: https://ta-note.com
 Description:
-    Drag and drop install.py file in maya viewport.
-    "<moduleName>.mod" file will created in "Documents\maya\modules" directory automatically.
+    Drag and drop this file to the maya viewport.
+    "<ModuleName>.mod" file will be created in the "Documents\maya\modules" directory.
 """
 
 import os
 import sys
 import imp
+import shutil
 
 from maya import cmds, mel
 
@@ -25,54 +26,58 @@ MODULE_VERSION = 'any'
 
 
 def onMayaDroppedPythonFile(*args, **kwargs):
-    createModuleFile()
+    removeOldInstallModule()
+    runScripts()
+    copyFiles()
     addEnvPaths()
     # addShelfButtons()
-    run()
+    createModuleFile()
     cmds.confirmDialog(title='Info', message='"{}" module installed successfully.'.format(MODULE_NAME))
 
 
-# Folders in the module directory that named as "icons, plug-ins, scripts" are automatically added to the maya environment variables.
-def createModuleFile():
-    moduleFileName = '{}.mod'.format(MODULE_NAME)
-
-    contents = '''+ MAYAVERSION:2020 {0} {1} {2}
-MAYA_SCRIPT_PATH +:= scripts/mel
-MAYA_PLUG_IN_PATH +:= plug-ins/2020
-
-+ MAYAVERSION:2022 {0} {1} {2}
-MAYA_SCRIPT_PATH +:= scripts/mel
-MAYA_PLUG_IN_PATH +:= plug-ins/2022
-
-+ MAYAVERSION:2023 {0} {1} {2}
-MAYA_SCRIPT_PATH +:= scripts/mel
-MAYA_PLUG_IN_PATH +:= plug-ins/2023
-
-+ MAYAVERSION:2024 {0} {1} {2}
-MAYA_SCRIPT_PATH +:= scripts/mel
-MAYA_PLUG_IN_PATH +:= plug-ins/2024
-'''.format(MODULE_NAME, MODULE_VERSION, MODULE_PATH)
-
-    with open(os.path.join(getModulesDirectory(), moduleFileName), 'w') as f:
-        f.write(contents)
+def removeOldInstallModule():
+    foundOldInstall = False
+    for modName in sys.modules:
+        if modName == 'install':
+            foundOldInstall = True
+            break
+    if foundOldInstall:
+        del(sys.modules[modName])
 
 
-def getModulesDirectory():
-    modulesDir = None
+def runScripts():
+    # Install python packages. Packages will be installed in "C:\Users\<User Name>\AppData\Roaming\Python\<Python Version>\site-packages"
+    os.putenv('MayaVersion', str(MAYA_VERSION))
+    os.system('{}/bat/install_python_packages.bat'.format(MODULE_PATH))
 
-    mayaAppDir = cmds.internalVar(uad=True)
-    modulesDir = os.path.join(mayaAppDir, 'modules')
+    imp.load_source('', '{}/scripts/userSetup.py'.format(MODULE_PATH))
 
-    if not os.path.exists(modulesDir):
-        os.mkdir(modulesDir)
 
-    return modulesDir
+def copyFiles():
+    # Copy preferences files
+    prefsDir = '{}/prefs'.format(MODULE_PATH)
+    mayaPrefDir = '{}/{}/prefs'.format(cmds.internalVar(uad=True), MAYA_VERSION)
+    shutil.copytree(prefsDir, mayaPrefDir, dirs_exist_ok=True)
+
+    if not 'Tak' in cmds.hotkeySet(q=True, current=True):
+        cmds.hotkeySet(e=True, ip='{}/hotkeys/Tak.mhk'.format(mayaPrefDir))
+
+    # # Copy dynamic dag menu mel file
+    # srcDir = '{}/Program Files'.format(MODULE_PATH)
+    # for file in os.listdir(srcDir):
+    #     srcFilePath = os.path.join(srcDir, file)
+    #     trgFilePath = os.path.join('C:/Program Files/Autodesk/Maya{}/scripts/others'.format(MAYA_VERSION), file)
+    #     if os.path.exists(trgFilePath):
+    #         os.rename(trgFilePath, '{}.bak'.format(trgFilePath))
+    #     shutil.copyfile(srcFilePath, trgFilePath)
 
 
 def addEnvPaths():
-    # Add python script paths
-    pythonPath = '{}/scripts'.format(MODULE_PATH)
-    if not pythonPath in sys.path:
+    # Add python paths
+    pythonPaths = [
+        '{}/scripts'.format(MODULE_PATH),
+    ]
+    for pythonPath in pythonPaths:
         sys.path.append(pythonPath)
 
     # Add mel script paths
@@ -115,5 +120,38 @@ def addEnvPaths():
 #     return curShelf
 
 
-def run():
-    imp.load_source('', '{}/scripts/userSetup.py'.format(MODULE_PATH))
+# Folders in the module directory that named as "icons, plug-ins, scripts" are automatically added to the maya environment variables.
+def createModuleFile():
+    moduleFileName = '{}.mod'.format(MODULE_NAME)
+
+    contents = '''+ MAYAVERSION:2020 {0} {1} {2}
+MAYA_SCRIPT_PATH +:= scripts/mel
+MAYA_PLUG_IN_PATH +:= plug-ins/2020
+
++ MAYAVERSION:2022 {0} {1} {2}
+MAYA_SCRIPT_PATH +:= scripts/mel
+MAYA_PLUG_IN_PATH +:= plug-ins/2022
+
++ MAYAVERSION:2023 {0} {1} {2}
+MAYA_SCRIPT_PATH +:= scripts/mel
+MAYA_PLUG_IN_PATH +:= plug-ins/2023
+
++ MAYAVERSION:2024 {0} {1} {2}
+MAYA_SCRIPT_PATH +:= scripts/mel
+MAYA_PLUG_IN_PATH +:= plug-ins/2024
+'''.format(MODULE_NAME, MODULE_VERSION, MODULE_PATH)
+
+    with open(os.path.join(getModulesDirectory(), moduleFileName), 'w') as f:
+        f.write(contents)
+
+
+def getModulesDirectory():
+    modulesDir = None
+
+    mayaAppDir = cmds.internalVar(uad=True)
+    modulesDir = os.path.join(mayaAppDir, 'modules')
+
+    if not os.path.exists(modulesDir):
+        os.mkdir(modulesDir)
+
+    return modulesDir

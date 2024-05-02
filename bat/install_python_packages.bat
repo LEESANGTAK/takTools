@@ -1,11 +1,7 @@
 @echo off
 
-set /p mayaVersion=Maya Version?:
-set mayapyPath="%ProgramFiles%\Autodesk\Maya%mayaVersion%\bin"
+set mayapyPath="%ProgramFiles%\Autodesk\Maya%MayaVersion%\bin\mayapy.exe"
 
-cd %mayapyPath%
-mayapy -m pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org pymel
-mayapy -m pip install numpy
-mayapy -m pip install scipy
-
-pause
+%mayapyPath% -m pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org pymel
+%mayapyPath% -m pip install numpy
+%mayapyPath% -m pip install scipy

@@ -96,6 +96,7 @@ def UI():
     cmds.shelfButton(annotation = 'Delete construction history, unlock normal, unlock attr, delete intermediate shapes, freeze transform', width = 35, height = 35, imageOverlayLabel = '', image1 = 'cleanUpMesh.bmp', command = 'import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport imp\nimp.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Set Manager', width = 35, height = 35, imageOverlayLabel = '', image1 = 'objectSet.svg', command = 'from imp import reload; import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Layout script editor horizontally', width = 35, height = 35, imageOverlayLabel = 'ScriptEditor', image1 = 'defaultTwoSideBySideLayout.png', command = 'from takTools.utils import qtUtil;qtUtil.editScriptEditorHorizontal()', sourceType = 'python')
+    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'ChatGPT_logo.png', command = '\nfrom imp import reload\nimport chatmaya; reload(chatmaya)\nchatmaya.run()\n', sourceType = 'python')
 
     cmds.separator('mainSep', h = 10, style = 'in', p = 'mainFormLo')
 
