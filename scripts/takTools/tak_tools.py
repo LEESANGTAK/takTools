@@ -97,6 +97,7 @@ def UI():
     cmds.shelfButton(annotation = 'Set Manager', width = 35, height = 35, imageOverlayLabel = '', image1 = 'objectSet.svg', command = 'from imp import reload; import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Layout script editor horizontally', width = 35, height = 35, imageOverlayLabel = 'ScriptEditor', image1 = 'defaultTwoSideBySideLayout.png', command = 'from takTools.utils import qtUtil;qtUtil.editScriptEditorHorizontal()', sourceType = 'python')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'ChatGPT_logo.png', command = '\nfrom imp import reload\nimport chatmaya; reload(chatmaya)\nchatmaya.run()\n', sourceType = 'python')
+    cmds.shelfButton(annotation = 'Open Panel', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/takTools/icons/mdla_logo.png', command = 'import maya.cmds as cmds;cmds.mandala()', sourceType = 'python')
 
     cmds.separator('mainSep', h = 10, style = 'in', p = 'mainFormLo')
 
