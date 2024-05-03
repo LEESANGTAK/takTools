@@ -1,9 +1,15 @@
 from maya import cmds, mel
 
 
+MENU_NAME = 'takToolsMenu'
+
+
 def showMenu():
-    mayaWindow = mayaWindow = mel.eval("$retvalue = $gMainWindow;")
-    customMenu = cmds.menu("takToolsMenu", label="Tak Tools", parent=mayaWindow)
+    if cmds.menu(MENU_NAME, q=True, ex=True):
+        cmds.deleteUI(MENU_NAME)
+
+    mayaWindow = mel.eval("$retvalue = $gMainWindow;")
+    customMenu = cmds.menu(MENU_NAME, label="Tak Tools", parent=mayaWindow)
 
     cmds.menuItem(
         label="Custom Shelf",
@@ -12,12 +18,10 @@ def showMenu():
         parent=customMenu
     )
 
-
     ### Display Menu ###
     cmds.menuItem(label="Display", subMenu=True, to=True, parent=customMenu)
     cmds.menuItem(label="Toggle Wire", command="")
     cmds.menuItem(label="Toggle X-Ray for Selection", command="")
-
 
     ### Modeling Menu ###
     cmds.menuItem(label="Modeling", subMenu=True, to=True, parent=customMenu)
@@ -39,7 +43,6 @@ def showMenu():
         command="spPaint3d;",
         sourceType="mel"
     )
-
 
     ### Rigging Menu ###
     cmds.menuItem(label="Rigging", subMenu=True, to=True, parent=customMenu)
@@ -187,7 +190,6 @@ def showMenu():
         sourceType="python"
     )
 
-
     ### Animation Menu ###
     cmds.menuItem(label="Animation", subMenu=True, to=True, parent=customMenu)
     cmds.menuItem(
@@ -197,10 +199,8 @@ def showMenu():
         sourceType="python"
     )
 
-
     ### FX Menu ###
     cmds.menuItem(label="FX", subMenu=True, to=True, parent=customMenu)
-
 
     ### Misc Menu ###
     cmds.menuItem(label="Misc", subMenu=True, to=True, parent=customMenu)

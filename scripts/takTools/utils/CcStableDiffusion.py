@@ -1,17 +1,17 @@
 '''
 SCRIPT NAME: CcStableDiffusion
 AUTHOR: Cody Childress
-VERSION: 0.1                                                                 
+VERSION: 0.1
 DESCRIPTION: Stable Diffusion in Maya using Dream Studio's API
-INSTALLING: 
-USING: insert youtube link here
-    
-LICENSE:    
+INSTALLING:
+USING: https://www.youtube.com/watch?v=p3DmqKpwYHc
+
+LICENSE:
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -64,9 +64,9 @@ class CcStableDiffusion():
 
         #check if the window exists and delete it if it does
         if (cmds.window(win, exists=True)):
-            cmds.deleteUI(win);
+            cmds.deleteUI(win)
         if ( cmds.dockControl(dock, exists=True)):
-            cmds.deleteUI(dock);
+            cmds.deleteUI(dock)
 
         #define the GUI window
         self.win = cmds.window(win, width=212, height=256, menuBar=True, sizeable=True, title=title)
@@ -88,7 +88,7 @@ class CcStableDiffusion():
         self.cfgScaleField = cmds.intFieldGrp( numberOfFields=1, label='cfg scale', extraLabel='pixels', value1=8 )
 
         self.samplerField = cmds.optionMenuGrp(label='sampler')
-        cmds.menuItem( label='k_lms' )       
+        cmds.menuItem( label='k_lms' )
         cmds.menuItem( label='dim' )
         cmds.menuItem( label='plms' )
         cmds.menuItem( label='k_euler' )
@@ -96,7 +96,7 @@ class CcStableDiffusion():
         cmds.menuItem( label='k_heun' )
         cmds.menuItem( label='k_dpm_2' )
         cmds.menuItem( label='k_dpm_2_ancestral' )
-     
+
         self.stepsField = cmds.intFieldGrp( numberOfFields=1, label='steps', value1=50 )
         self.randomizeSeedCheckBox = cmds.checkBox( label='randomize seed' )
         self.seedField = cmds.intFieldGrp( numberOfFields=1, label='seed', value1=12345 )
@@ -108,7 +108,7 @@ class CcStableDiffusion():
         cmds.button( label='Generate', height=50, width=400, command=self.CcGenerateImage )
         cmds.button( label='Buy me a coffee <3', height=30, width=200, command='cmds.launch(web= "https://www.buymeacoffee.com/codychildress")' )
 
-        # end contents 
+        # end contents
         # show & dock window
         cmds.showWindow (win)
         cmds.dockControl(dock, area=defaultDockArea, floating=floating, content=win, allowedArea= 'left', label=title) # allowedArea='right'
@@ -127,7 +127,7 @@ class CcStableDiffusion():
         _seed = cmds.intFieldGrp(self.seedField, query=True, value1=True)
 
         if _randomizeSeed:
-            _seed = random.randrange(1,99999999) 
+            _seed = random.randrange(1,99999999)
 
         _numSamples = cmds.intFieldGrp(self.numSamplesField, query=True, value1=True)
 
@@ -167,7 +167,7 @@ class CcStableDiffusion():
             # sampler=_sampler,
             steps=_steps, # defaults to 50 if not specified
             seed=_seed, # if provided, specifying a random seed makes results deterministic
-            # num_samples=_numSamples,            
+            # num_samples=_numSamples,
 
         )
 
@@ -181,7 +181,7 @@ class CcStableDiffusion():
                 if artifact.type == generation.ARTIFACT_IMAGE:
                     img = Image.open(io.BytesIO(artifact.binary))
                     img.save(fp=os.path.join(image_dir, image_name))
-                   
+
         pm.setAttr(_fileNode, image_name)
 
 
@@ -194,13 +194,13 @@ class CcStableDiffusion():
 
 
     def CcApplyTexture(self, *args):
-        # object = [] 
+        # object = []
         object = cmds.ls(sl=True)
-        
+
         #create surface shader and shading group
         imgMaterialGrp = cmds.sets(name='imageMaterialGroup', renderable=True, empty=True)
         shaderNode = cmds.shadingNode('surfaceShader', name='SD_shaderNode', asShader=True)
-        
+
         #construct name for file node
         image_name = cmds.textFieldGrp(self.nameField, query=True, text=True)
         image_name = image_name.replace(" ", "_")
@@ -211,12 +211,12 @@ class CcStableDiffusion():
 
         #create shading group, connect surface shader to shading group
         shadingGroup = cmds.sets(name='textureMaterialGroup', renderable=True, empty=True)
-        cmds.connectAttr(shaderNode+'.outColor',shadingGroup+'.surfaceShader', force=True) 
+        cmds.connectAttr(shaderNode+'.outColor',shadingGroup+'.surfaceShader', force=True)
 
         #connect file node to surface shader
         cmds.connectAttr(fileNode+'.outColor',shaderNode+'.outColor', force=True)
-        cmds.surfaceShaderList(shaderNode, add=imgMaterialGrp) 
-        cmds.sets(object, e=True, forceElement=imgMaterialGrp) 
+        cmds.surfaceShaderList(shaderNode, add=imgMaterialGrp)
+        cmds.sets(object, e=True, forceElement=imgMaterialGrp)
         cmds.select(object, replace=True)
 
 
@@ -227,7 +227,7 @@ class CcStableDiffusion():
 
         if(cmds.window(win1, exists=True)):
             cmds.deleteUI(win1)
-            
+
         cmds.window(win1, width=150, title=title1)
         cmds.columnLayout (adjustableColumn=True)
         cmds.text(label='Script instructions')
@@ -237,15 +237,15 @@ class CcStableDiffusion():
 
         title1 = 'About'
         win1 = 'aboutWin'
-        
+
         if (cmds.window(win1, exists=True)):
             cmds.deleteUI(win1)
 
-        cmds.window(win1, width=150, title=title1) 
+        cmds.window(win1, width=150, title=title1)
         cmds.columnLayout(adjustableColumn=True)
         cmds.text(label='Created by Cody Childress 2022 \n \n Contact \n email: codyrchildress@gmail.com \n \nMore info at \n')
         cmds.button(label='www.codychildress.com', command= 'cmds.launch(web= "www.codychildress.com")')
-        cmds.showWindow(win1);    
+        cmds.showWindow(win1);
 
     def CcSetAPIKey(self, *args):
         # To get your API key, visit https://beta.dreamstudio.ai/membership

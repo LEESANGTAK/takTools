@@ -1081,20 +1081,20 @@ global proc createSelectMenuItems(string $parent, string $item, int $defaultItem
 					$breakSymmetryCmd += "$bones[size($bones)] = \"" + $item + "\";";
 				}
 				$breakSymmetryCmd += "breakSymmetry($bones);";
-				menuItem -ltVersion "2015" -label $setPreferred
+				menuItem -label $setPreferred
 					-echoCommand true
 					-c ($setCmd)
 					-rp $setPreferredQuad
 					setPrefAngleItem;
 				// Custom menu
 				if (isComponentSelected()) {
-				menuItem -ltVersion "2015" -label ("Set weight 1.0 for \""+$item+"\"")
+				menuItem -label ("Set weight 1.0 for \""+$item+"\"")
 					-echoCommand true
 					-c ("setSkinWeightSelect(\""+$item+"\", 1.0)")
 					-rp "SE"
 					setSolidWeightItem;
 				}
-				menuItem -ltVersion "2015" -label $assumePreferred
+				menuItem -label $assumePreferred
 					-echoCommand true
 					-c ($assumeCmd)
 					-rp $assumePreferredQuad
@@ -1205,35 +1205,35 @@ global proc createSelectMenuItems(string $parent, string $item, int $defaultItem
 	} else if ($isIkHandleObject) {
 		string $selectikHandlesJointsAnnot = (uiRes("m_dagMenuProc.kSelectikHandlesAnnot"));
 		string $selectikHandlesAnnot = (uiRes("m_dagMenuProc.kEnableIKHandlesAnnot"));
-		menuItem -ltVersion "2015" -label $setPreferred
+		menuItem -label $setPreferred
 			-annotation $selectikHandlesJointsAnnot
 			-echoCommand true
 			-c (`performSetPrefAngle 2` + " " + $item)
 			-rp "W"
 			setPrefAngleItem;
 
-		menuItem -ltVersion "2015" -label $assumePreferred
+		menuItem -label $assumePreferred
 			-annotation $selectikHandlesJointsAnnot
 			-echoCommand true
 			-c (`performAssumePrefAngle 2` + " " + $item)
 			-rp "E"
 			assumePrefAngleItem;
 
-		menuItem -ltVersion "2015" -label $enableIkHandle
+		menuItem -label $enableIkHandle
 			-annotation $selectikHandlesAnnot
 			-echoCommand true
 			-c ("ikHandle -e -eh " + $item)
 			-rp "N"
 			enableIKHandlesItem;
 
-		menuItem -ltVersion "2015" -label $disableikHandle
+		menuItem -label $disableikHandle
 			-annotation $selectikHandlesAnnot
 			-echoCommand true
 			-c ("ikHandle -e -dh " + $item)
 			-rp "S"
 			disableIKHandlesItem;
 
-		menuItem -ltVersion "2015" -label (uiRes("m_dagMenuProc.kEnableSnap"))
+		menuItem -label (uiRes("m_dagMenuProc.kEnableSnap"))
 			-annotation $selectikHandlesAnnot
 			-echoCommand true
 			-c ("ikHandle -e -see " + $item + ";" +
@@ -1241,7 +1241,7 @@ global proc createSelectMenuItems(string $parent, string $item, int $defaultItem
 			-rp "SE"
 			enableIKHandlesSnapItem;
 
-		menuItem -ltVersion "2015" -label (uiRes("m_dagMenuProc.kDisableSnap"))
+		menuItem -label (uiRes("m_dagMenuProc.kDisableSnap"))
 			-annotation $selectikHandlesAnnot
 			-echoCommand true
 			-c ("ikHandle -e -shf off " + $item)
@@ -1326,13 +1326,13 @@ global proc createSelectMenuItems(string $parent, string $item, int $defaultItem
 		}
 
 		if ($maxRadialPos < 5) {
-			menuItem -ltVersion "2015" -label $disableikHandle
+			menuItem -label $disableikHandle
 				-annotation (uiRes("m_dagMenuProc.kDisableIKHandleAnnot"))
 				-echoCommand true
 				-c ("ikHandle -e -dh " + $handle)
 				-rp $radialPosition[5];
 
-			menuItem -ltVersion "2015" -label $enableIkHandle
+			menuItem -label $enableIkHandle
 				-annotation (uiRes("m_dagMenuProc.kEnableIKHandleAnnot"))
 				-echoCommand true
 				-c ("ikHandle -e -eh " + $handle)
