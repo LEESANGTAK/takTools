@@ -28,7 +28,11 @@ MODULE_VERSION = 'any'
 def onMayaDroppedPythonFile(*args, **kwargs):
     removeOldInstallModule()
     runScripts()
-    copyFiles()
+
+    result = cmds.confirmDialog(title='Choose Option', message='Do you want to install marking menu and hotkey?\nShift + 1~4 will be used.', button=['Yes', 'No'], defaultButton='Yes', cancelButton='No', dismissString='No')
+    if result == 'Yes':
+        copyFiles()
+
     addEnvPaths()
     # addShelfButtons()
     createModuleFile()
