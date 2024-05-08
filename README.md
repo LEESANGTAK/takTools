@@ -1,8 +1,7 @@
-
+# takTools
 ![takTools](./images/takTools.png)
 
-![License: MIT](https://img.shields.io/badge/license-MIT-darkgreen.svg)
-
+![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)\
 A toolset module for the Autodesk Maya.
 You can try use it. But all risk is yours.
 
@@ -25,8 +24,8 @@ But you have to save tools to keep shelf icons you add.
 
 ### Marking Menu
 ![takToolsMarkingMenu](./images/takTools_markingMenu.gif)\
-You can use marking menu with Hotkey Shift + 1~4.
-- Shift + 1: Display Tools
-- Shift + 2: Selection Tools
-- Shift + 3: Rigging Tools
-- Shift + 4: Skinning Tools
+You can use marking menu with Hotkey **Shift + 1~4**.
+> - Shift + 1: Display Tools
+> - Shift + 2: Selection Tools
+> - Shift + 3: Rigging Tools
+> - Shift + 4: Skinning Tools
