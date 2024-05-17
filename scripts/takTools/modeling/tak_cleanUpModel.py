@@ -947,6 +947,8 @@ def correctMaterials(*args):
         # Set ambient color to 0
         try:
             mat.ambientColor.set(0, 0, 0)
+            mat.specularColor.set(0.1, 0.1, 0.1)
+            mat.cosinePower.set(10)
         except:
             pass
         # Remove FBX ascii space string

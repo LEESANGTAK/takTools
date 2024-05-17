@@ -211,7 +211,7 @@
         -image "objectSet.svg" 
         -echoCommand 0
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem17;
@@ -230,7 +230,7 @@
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem18;
@@ -257,7 +257,28 @@
         menuEditorMenuItem14;
 
     menuItem
-        -label "Except End Joint" 
+        -label "Select End Joints" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"endJnts = []\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: endJnts.extend(jntUtils.getEndJoints(sel))\");\npython(\"cmds.select(endJnts, r=True)\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "kinJoint.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem15;
+
+    menuItem
+        -label "Select No End Joints" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -291,7 +312,7 @@
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem16;
@@ -352,7 +373,7 @@
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem19;

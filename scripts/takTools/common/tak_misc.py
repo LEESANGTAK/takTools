@@ -2463,13 +2463,9 @@ def cleanupTransform():
     # Remove input connections
     for sel in sels:
         for at in ['translate', 'rotate', 'scale']:
-            if at == 'scale':
-                pass
-            else:
-                sel.attr(at).disconnect()
+            sel.attr(at).disconnect(inputs=True, outputs=False)
             for axis in ['X', 'Y', 'Z']:
                 sel.attr(at+axis).disconnect()
-
         sel.scale.set(1, 1, 1)
 
 

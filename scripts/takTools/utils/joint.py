@@ -121,6 +121,15 @@ def getUnusedJnt(jnts):
     return unUsedJnts
 
 
+def getEndJoints(rootJnt):
+    endJnts = []
+    childJnts = cmds.listRelatives(rootJnt, ad=True, type='joint')
+    for childJnt in childJnts:
+        if not cmds.listRelatives(childJnt, type='joint'):
+            endJnts.append(childJnt)
+    return endJnts
+
+
 def getJointsExceptEnd(rootJnt):
     joints = []
 
