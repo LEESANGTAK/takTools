@@ -94,8 +94,6 @@ def UI():
     cmds.shelfButton(annotation = 'Delete construction history, unlock normal, unlock attr, delete intermediate shapes, freeze transform', width = 35, height = 35, imageOverlayLabel = '', image1 = 'cleanUpMesh.bmp', command = 'import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport imp\nimp.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Set Manager', width = 35, height = 35, imageOverlayLabel = '', image1 = 'objectSet.svg', command = 'from imp import reload; import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Layout script editor horizontally', width = 35, height = 35, imageOverlayLabel = 'ScriptEditor', image1 = 'defaultTwoSideBySideLayout.png', command = 'from takTools.utils import qtUtil;qtUtil.editScriptEditorHorizontal()', sourceType = 'python')
-    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'ChatGPT_logo.png', command = '\nfrom imp import reload\nimport chatmaya; reload(chatmaya)\nchatmaya.run()\n', sourceType = 'python')
-    cmds.shelfButton(annotation = 'Open Panel', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/takTools/icons/mdla_logo.png', command = 'import maya.cmds as cmds;cmds.mandala()', sourceType = 'python')
 
     cmds.separator('mainSep', h = 10, style = 'in', p = 'mainFormLo')
 
@@ -153,11 +151,11 @@ def UI():
 
     cmds.frameLayout('riggingDeformationFrameLo', label = 'Deformation', collapse = False, collapsable = True, p = 'riggingScrLo')
     cmds.shelfLayout('Rigging_Deformation', h = (SHELF_HEIGHT * 4), p = 'riggingDeformationFrameLo')
-    cmds.shelfButton(annotation = 'DNA Editor', width = 35, height = 35, imageOverlayLabel = 'DNA', image1 = 'MHC.png', command = 'from imp import reload\nimport dna_editor; reload(dna_editor)\ndna_editor.gui.show()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Create a skeleton and manage skeleton poses.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'takSkeleton.png', command = 'import takSkeleton as ts\nimport imp\nimp.reload(ts)\nts.gui.showUI()', sourceType = 'python')
-    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'HIKCharacterToolSkeleton_100.png', command = 'from imp import reload\nimport takSkelMeshManager as tsm; reload(tsm)\ntsm.showUI()\n', sourceType = 'python')
+    cmds.shelfButton(annotation = 'DNA Editor', width = 35, height = 35, imageOverlayLabel = 'DNA', image1 = 'MHC.png', command = 'from imp import reload\nimport dna_editor; reload(dna_editor)\ndna_editor.gui.show()', sourceType = 'python')
     cmds.shelfButton(annotation = "EA's SSD(Smooth Skin Deformation) tool with custom GUI.", width = 35, height = 35, imageOverlayLabel = '', image1 = 'dembones.jpg', command = 'import dem_bones\ndem_bones.showUI()', sourceType = 'python')
     cmds.shelfButton(annotation = '"takRigLogic" pose editor.', width = 35, height = 35, imageOverlayLabel = 'Editor', image1 = 'dembones.jpg', command = 'import imp\nimport editPoseGUI\nimp.reload(editPoseGUI)\ngui = editPoseGUI.EditPoseGUI()\ngui.show()', sourceType = 'python')
+    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'HIKCharacterToolSkeleton_100.png', command = 'from imp import reload\nimport takSkelMeshManager as tsm; reload(tsm)\ntsm.showUI()\n', sourceType = 'python')
     cmds.shelfButton(annotation = 'Select affected vertices by a selected influence', width = 35, height = 35, imageOverlayLabel = '', image1 = 'selAffectedVertex.png', command = 'import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.selAffectedVertex()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Select influence(s).', width = 35, height = 35, imageOverlayLabel = '', image1 = 'selectInfluences.bmp', command = 'import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.selInflu()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Select all the child joints', width = 35, height = 35, imageOverlayLabel = '', image1 = 'selChldJnt.bmp', command = "### Select Joint in Hierarchy ###\njntList = cmds.ls(sl = True, dag = True, type = 'joint')\ncmds.select(jntList)", sourceType = 'python')
@@ -513,6 +511,8 @@ def saveTools(*args):
     # Save tool file
     with open(__file__, 'w') as f:
         f.write(contents)
+
+    print('"Tak Tools" is saved successfully.')
 
 
 def getBtns(layout):
