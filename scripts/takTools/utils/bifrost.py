@@ -12,8 +12,8 @@ def convertToCageMesh(mesh, detailSize=0.02, faceCount=1000, keepOriginal=True):
     # Build bifrost graph node
     bfGraph = pm.createNode('bifrostGraphShape')
 
-    pm.vnnNode(bfGraph, '/input', createOutputPort=('inMesh', 'Amino::Object'))
-    pm.vnnNode(bfGraph, '/output', createInputPort=('outMeshes', 'array<Amino::Object>'))
+    pm.vnnNode(bfGraph, '/input', createOutputPort=('inMesh', 'Object'))
+    pm.vnnNode(bfGraph, '/output', createInputPort=('outMeshes', 'array<Object>'))
 
     pm.vnnCompound(bfGraph, '/', addNode='BifrostGraph,Geometry::Converters,mesh_to_volume')
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('volume_mode', '1'))
