@@ -136,8 +136,11 @@ def duplicateSkinMesh():
         mesh = cmds.listRelatives(sels[0], p=True)[0]
         meshTrsf = cmds.listRelatives(mesh, p=True)[0]
         copySkin(meshTrsf, dupMesh)
-    dupMesh.displayBorders.set(True)
-    cmds.select(cl=True)
+    try:
+        dupMesh.displayBorders.set(True)
+    except:
+        pass
+    pm.select(dupMesh, r=True)
 
 
 def separateSkinMesh():
@@ -276,6 +279,7 @@ def editSkinMesh(skinMesh):
     tempSkin.hide()
     copySkin(skinMesh, tempSkin)
     meshUtil.cleanupMesh(skinMesh)
+    pm.select(skinMesh, r=True)
     pm.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(tempSkin, skinMesh))
 
 def doneEditSkinMesh(tempSkin, skinMesh):
@@ -315,7 +319,7 @@ def getMaxInfluence(mesh, ignoreWeight):
     return max(numInfsPerVtx)
 
 
-def fitMaxInfluence(mesh, goalMaxInfluence=4, ignoreWeight=0.00001):
+def fitMaxInfluence(mesh, goalMaxInfluence=8, ignoreWeight=0.00001):
     skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
     cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
     cmds.setAttr("{}.maxInfluences".format(skinClst), goalMaxInfluence)

@@ -57,6 +57,12 @@ class SkinWeights(object):
         cmds.window(cls.uiWidgets['winName'], title='Tak Skin Weights Tool')
 
         cls.uiWidgets['mainMenuBarLo'] = cmds.menuBarLayout(p=cls.uiWidgets['winName'])
+        cls.uiWidgets['editMenu'] = cmds.menu(p=cls.uiWidgets['mainMenuBarLo'], label='Edit')
+        cls.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Copy and Paste', c=cls.copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
+        cls.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
+        cls.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
+        cls.uiWidgets['pruneMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Prune Small Weights', c="mel.eval('PruneSmallWeights;')")
+        cls.uiWidgets['rmvUnusedInfMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Remove Unused Influences', c="mel.eval('removeUnusedInfluences;')")
         cls.uiWidgets['optMenu'] = cmds.menu(p=cls.uiWidgets['mainMenuBarLo'], label='Options')
         cls.uiWidgets['hideZroInfMenuItem'] = cmds.menuItem(p=cls.uiWidgets['optMenu'], checkBox=True,
                                                             label='Hide Zero Influences', c=cls.loadInf)
@@ -107,13 +113,6 @@ class SkinWeights(object):
         cmds.button(p=cls.uiWidgets['wghtSubAddRowColLo'], label='-', c=partial(cls.subAddWeight, 'sub'))
         cmds.button(p=cls.uiWidgets['wghtSubAddRowColLo'], label='+', c=partial(cls.subAddWeight, 'add'))
 
-        cls.uiWidgets['copyPasteRowColLo'] = cmds.rowColumnLayout(p=cls.uiWidgets['mainColLo'], numberOfColumns=3,
-                                                                  columnWidth=[(1, 88), (2, 88), (3, 88)],
-                                                                  columnSpacing=[(1, 7), (2, 7), (3, 7)])
-        cmds.button(p=cls.uiWidgets['copyPasteRowColLo'], label='Copy and Paste', c=cls.copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
-        cmds.button(p=cls.uiWidgets['copyPasteRowColLo'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
-        cmds.button(p=cls.uiWidgets['copyPasteRowColLo'], label='Mirror', c=lambda x: mel.eval('MirrorSkinWeights;'), ann='Mirror skin weights positive X to negative X.')
-
         cls.uiWidgets['wghtTrsfRowColLo'] = cmds.rowColumnLayout(p=cls.uiWidgets['mainColLo'], numberOfColumns=4,
                                                                  columnWidth=[(1, 93), (2, 20), (3, 93), (4, 50)],
                                                                  columnSpacing=[(1, 7), (2, 7), (3, 7), (4, 7)])
@@ -126,7 +125,16 @@ class SkinWeights(object):
         cmds.menuItem(label='Load Selected Influence', c=partial(cls.loadSelInf, cls.uiWidgets['trgInfTxtFld']))
         cmds.button(p=cls.uiWidgets['wghtTrsfRowColLo'], label='Transfer', c=cls.transferWeights)
 
-        cmds.window(cls.uiWidgets['winName'], e=True, w=200, h=200)
+        cls.uiWidgets['maxInfRowColLo'] = cmds.rowColumnLayout(p=cls.uiWidgets['mainColLo'], numberOfColumns=3, columnSpacing=[(1, 2), (2, 2), (3, 2)])
+        cmds.button(p=cls.uiWidgets['maxInfRowColLo'], label='Check Max Influences', c=cls.getMaxInfluence)
+        cls.uiWidgets['maxInfsOptMenu'] = cmds.optionMenu(p=cls.uiWidgets['maxInfRowColLo'], label='Max Influences:')
+        cmds.menuItem(label='4')
+        cmds.menuItem(label='8')
+        cmds.menuItem(label='12')
+        cmds.optionMenu(cls.uiWidgets['maxInfsOptMenu'], e=True, v='8')
+        cmds.button(p=cls.uiWidgets['maxInfRowColLo'], label='Set', c=cls.fitMaxInfluence, w=50)
+
+        cmds.window(cls.uiWidgets['winName'], e=True, w=100, h=200)
         cmds.showWindow(cls.uiWidgets['winName'])
 
     @classmethod
@@ -425,6 +433,63 @@ class SkinWeights(object):
         # Refresh influence text scroll list.
         cls.loadInf()
 
+    @classmethod
+    def getMaxInfluence(cls, *args, mesh=None, printResult=True, ignoreWeight=0.00001):
+        if not mesh:
+            mesh = cmds.ls(sl=True)[0]
+        skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
+        vertCount = cmds.polyEvaluate(mesh, v=True)
+        numInfsPerVtx = []
+        for i in range(vertCount):
+            numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{}]'.format(mesh, i), q=True, ignoreBelow=ignoreWeight, v=True)))
+        maxInf = max(numInfsPerVtx)
+        if printResult:
+            print('"{}" Max Influence: {}'.format(mesh, maxInf))
+        return maxInf
+
+    @classmethod
+    def fitMaxInfluence(cls, *args, ignoreWeight=0.00001):
+        for mesh in cmds.ls(sl=True):
+            meshMaxInfs = cls.getMaxInfluence(mesh=mesh, printResult=False)
+            targetMaxInfs = int(cmds.optionMenu(cls.uiWidgets['maxInfsOptMenu'], q=True, v=True))
+            if meshMaxInfs <= targetMaxInfs:
+                print('"{}"s max influence is {}. Skip processing.'.format(mesh, meshMaxInfs))
+                continue
+
+            # Create progress window
+            cmds.window('progWin', title='working on "{}"'.format(mesh), mnb=False, mxb=False)
+            cmds.columnLayout(adj=True)
+            cmds.progressBar('progBar', w=400, isMainProgressBar=True, beginProgress=True, isInterruptable=True)
+            cmds.showWindow('progWin')
+
+            skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
+
+            # Optimize weights and influences to speed up processing
+            cmds.skinPercent(skinClst, mesh, pruneWeights=0.001)
+            cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
+
+            # Set max influences for a skin cluster
+            cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
+            cmds.setAttr("{}.maxInfluences".format(skinClst), targetMaxInfs)
+
+            vertCount = cmds.polyEvaluate(mesh, v=True)
+            cmds.progressBar('progBar', e=True, min=0, max=vertCount)
+            for i in range(vertCount):
+                if cmds.progressBar('progBar', q=True, isCancelled=True):
+                    print('Fitting max influence job for a "{}" is cancelled.'.format(mesh))
+                    break
+                vert = '{}.vtx[{}]'.format(mesh, i)
+                weights = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, v=True)
+                infs = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, transform=None)
+                itemsToRemove = sorted(zip(weights, infs), reverse=True)[targetMaxInfs:]
+                weightsForRemoveInfs = [(item[1], 0.0) for item in itemsToRemove]
+                cmds.skinPercent(skinClst, vert, transformValue=weightsForRemoveInfs)
+                cmds.progressBar('progBar', e=True, step=1)
+            print('Fitting max influence for a "{}" is done.'.format(mesh))
+
+            cmds.progressBar('progBar', e=True, endProgress=True)
+            cmds.deleteUI('progWin')
+
     @staticmethod
     def copyPasteWeight(*args):
         '''
@@ -484,6 +549,7 @@ class SkinWeights(object):
             skinClst = oma.MFnSkinCluster(dgIt.currentItem())
             dgIt.next()
         return skinClst
+
 
 
 def createIntArrayFromList(list):
