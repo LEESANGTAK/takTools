@@ -487,6 +487,9 @@ class SkinWeights(object):
                 cmds.progressBar('progBar', e=True, step=1)
             print('Fitting max influence for a "{}" is done.'.format(mesh))
 
+            # Remove zero weighted influences
+            cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
+
             cmds.progressBar('progBar', e=True, endProgress=True)
             cmds.deleteUI('progWin')
 
