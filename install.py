@@ -14,10 +14,11 @@ import shutil
 from maya import cmds, mel
 
 
+MODULE_NAME = os.path.dirname(__file__).rsplit('/', 1)[-1]
 MODULE_PATH = os.path.dirname(__file__).replace('\\', '/')
-MODULE_NAME = MODULE_PATH.rsplit('/', 1)[-1]
 MAYA_VERSION = int(cmds.about(version=True))
 # Need to modify below depend on module
+AVAILABLE_VERSIONS = [2020, 2022, 2024]
 MODULE_VERSION = 'any'
 # SHELF_ICON_FILE = <'icon.png'>
 # SHELF_BUTTON_COMMAND = <'''
@@ -128,22 +129,14 @@ def addEnvPaths():
 def createModuleFile():
     moduleFileName = '{}.mod'.format(MODULE_NAME)
 
-    contents = '''+ MAYAVERSION:2020 {0} {1} {2}
+    contentsBlock = '''+ MAYAVERSION:{0} {1} {2} {3}
 MAYA_SCRIPT_PATH +:= scripts/mel
-MAYA_PLUG_IN_PATH +:= plug-ins/2020
+MAYA_PLUG_IN_PATH +:= plug-ins/{0}
 
-+ MAYAVERSION:2022 {0} {1} {2}
-MAYA_SCRIPT_PATH +:= scripts/mel
-MAYA_PLUG_IN_PATH +:= plug-ins/2022
-
-+ MAYAVERSION:2023 {0} {1} {2}
-MAYA_SCRIPT_PATH +:= scripts/mel
-MAYA_PLUG_IN_PATH +:= plug-ins/2023
-
-+ MAYAVERSION:2024 {0} {1} {2}
-MAYA_SCRIPT_PATH +:= scripts/mel
-MAYA_PLUG_IN_PATH +:= plug-ins/2024
-'''.format(MODULE_NAME, MODULE_VERSION, MODULE_PATH)
+'''
+    contents = ''
+    for availVersion in AVAILABLE_VERSIONS:
+        contents += contentsBlock.format(availVersion, MODULE_NAME, MODULE_VERSION, MODULE_PATH)
 
     with open(os.path.join(getModulesDirectory(), moduleFileName), 'w') as f:
         f.write(contents)
