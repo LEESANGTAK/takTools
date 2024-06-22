@@ -165,14 +165,12 @@ def getCurveInfo(curve):
     crv = pm.PyNode(curve)
     shapes = crv.getShapes()
     for shp in shapes:
+        form = shp.f.get()
+        degree = shp.d.get()
         cvPos = []
-        form = None
-        degree = None
         for cv in shp.cv:
             cvPos.append(list(cv.getPosition(space='world')))
-            form = shp.f.get()
-            degree = shp.d.get()
-        crvInfo[shp.nodeName()] = {'cvPos': cvPos, 'degree': degree, 'form': form}
+        crvInfo[shp.nodeName()] = {'form': form, 'degree': degree, 'cvPos': cvPos}
     return crvInfo
 
 
