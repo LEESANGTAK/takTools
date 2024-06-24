@@ -22,123 +22,122 @@ import maya.OpenMayaAnim as oma
 import pymel.core as pm
 
 
+WIN_NAME = 'takWeightsWin'
+
+
+def showUI():
+    sw = SkinWeights()
+    sw.ui()
+
+    # Create script job to populate influence text scroll list automatically
+    cmds.scriptJob(parent=WIN_NAME, event=['SelectionChanged', sw.loadInf])
+
+    # When window is closed call destructor function.
+    cmds.scriptJob(uid=[WIN_NAME, sw.__del__])
+
+
 class SkinWeights(object):
-    vtxList = []
-    uiWidgets = {}
-    oriWeightTable = {}
-    skinClst = ''
-    infTxtScrLsCurrentAllItems = []
+    def __init__(self):
+        self.vtxList = []
+        self.uiWidgets = {}
+        self.oriWeightTable = {}
+        self.skinClst = ''
+        self.infTxtScrLsCurrentAllItems = []
 
-    @classmethod
-    def __init__(cls):
-        cls.uiWidgets['winName'] = 'takWeightsWin'
+    def __del__(self):
+        if self.infTxtScrLsCurrentAllItems:
+            for inf in self.infTxtScrLsCurrentAllItems:
+                SkinWeights.unuseObjectColor(inf)
+        self.infTxtScrLsCurrentAllItems = []
 
-        if cmds.window(cls.uiWidgets['winName'], exists=True):
-            cmds.deleteUI(cls.uiWidgets['winName'])
+    def ui(self):
+        if cmds.window(WIN_NAME, exists=True):
+            cmds.deleteUI(WIN_NAME)
 
-        # Show user interface
-        cls.ui()
+        cmds.window(WIN_NAME, title='Tak Skin Weights Tool')
 
-        # Create script job to populate influence text scroll list automatically
-        cmds.scriptJob(parent=cls.uiWidgets['winName'], event=['SelectionChanged', cls.loadInf])
+        self.uiWidgets['mainMenuBarLo'] = cmds.menuBarLayout(p=WIN_NAME)
+        self.uiWidgets['editMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Edit')
+        self.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy and Paste', c=SkinWeights.copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
+        self.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
+        self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
+        self.uiWidgets['pruneMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Prune Small Weights', c="mel.eval('PruneSmallWeights;')")
+        self.uiWidgets['rmvUnusedInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Remove Unused Influences', c="mel.eval('removeUnusedInfluences;')")
+        self.uiWidgets['optMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Options')
+        self.uiWidgets['hideZroInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['optMenu'], checkBox=True,
+                                                            label='Hide Zero Influences', c=self.loadInf)
+        self.uiWidgets['sortHierMenuItem'] = cmds.menuItem(p=self.uiWidgets['optMenu'], checkBox=False,
+                                                          label='Sort by Hierarchy', c=self.loadInf)
 
-        # When window is closed call destructor function.
-        cmds.scriptJob(uid=[cls.uiWidgets['winName'], cls.__del__])
-
-    @classmethod
-    def __del__(cls):
-        if SkinWeights.infTxtScrLsCurrentAllItems:
-            for inf in SkinWeights.infTxtScrLsCurrentAllItems:
-                cls.unuseObjectColor(inf)
-        SkinWeights.infTxtScrLsCurrentAllItems = []
-
-    @classmethod
-    def ui(cls):
-        cmds.window(cls.uiWidgets['winName'], title='Tak Skin Weights Tool')
-
-        cls.uiWidgets['mainMenuBarLo'] = cmds.menuBarLayout(p=cls.uiWidgets['winName'])
-        cls.uiWidgets['editMenu'] = cmds.menu(p=cls.uiWidgets['mainMenuBarLo'], label='Edit')
-        cls.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Copy and Paste', c=cls.copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
-        cls.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
-        cls.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
-        cls.uiWidgets['pruneMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Prune Small Weights', c="mel.eval('PruneSmallWeights;')")
-        cls.uiWidgets['rmvUnusedInfMenuItem'] = cmds.menuItem(p=cls.uiWidgets['editMenu'], label='Remove Unused Influences', c="mel.eval('removeUnusedInfluences;')")
-        cls.uiWidgets['optMenu'] = cmds.menu(p=cls.uiWidgets['mainMenuBarLo'], label='Options')
-        cls.uiWidgets['hideZroInfMenuItem'] = cmds.menuItem(p=cls.uiWidgets['optMenu'], checkBox=True,
-                                                            label='Hide Zero Influences', c=cls.loadInf)
-        cls.uiWidgets['sortHierMenuItem'] = cmds.menuItem(p=cls.uiWidgets['optMenu'], checkBox=False,
-                                                          label='Sort by Hierarchy', c=cls.loadInf)
-
-        cls.uiWidgets['mainColLo'] = cmds.columnLayout(p=cls.uiWidgets['winName'], adj=True)
+        self.uiWidgets['mainColLo'] = cmds.columnLayout(p=WIN_NAME, adj=True)
 
         # Selection buttons layout
-        cls.uiWidgets['selectRowLo'] = cmds.rowLayout(p=cls.uiWidgets['mainColLo'], nc=4)
-        cls.uiWidgets['shrinkBtn'] = cmds.button(l='Shrink', w=70, c=lambda x: mel.eval('ShrinkPolygonSelectionRegion;'))
-        cls.uiWidgets['growBtn'] = cmds.button(l='Grow', w=70, c=lambda x: mel.eval('GrowPolygonSelectionRegion;'))
-        cls.uiWidgets['ringBtn'] = cmds.button(l='Ring', w=70, c=selectVtxRing)
-        cls.uiWidgets['loopBtn'] = cmds.button(l='Loop', w=70, c=lambda x: mel.eval('polySelectSp -loop;'))
+        self.uiWidgets['selectRowLo'] = cmds.rowLayout(p=self.uiWidgets['mainColLo'], nc=4)
+        self.uiWidgets['shrinkBtn'] = cmds.button(l='Shrink', w=70, c=lambda x: mel.eval('ShrinkPolygonSelectionRegion;'))
+        self.uiWidgets['growBtn'] = cmds.button(l='Grow', w=70, c=lambda x: mel.eval('GrowPolygonSelectionRegion;'))
+        self.uiWidgets['ringBtn'] = cmds.button(l='Ring', w=70, c=selectVtxRing)
+        self.uiWidgets['loopBtn'] = cmds.button(l='Loop', w=70, c=lambda x: mel.eval('polySelectSp -loop;'))
 
-        cls.uiWidgets['mainTabLo'] = cmds.tabLayout(p=cls.uiWidgets['mainColLo'], tv=False)
-        cls.uiWidgets['infWghtRowColLo'] = cmds.rowColumnLayout(p=cls.uiWidgets['mainTabLo'], numberOfColumns=2,
+        self.uiWidgets['mainTabLo'] = cmds.tabLayout(p=self.uiWidgets['mainColLo'], tv=False)
+        self.uiWidgets['infWghtRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainTabLo'], numberOfColumns=2,
                                                                 columnWidth=[(1, 140), (2, 140)],
                                                                 columnSpacing=[(2, 5)])
-        cls.uiWidgets['infFrmLo'] = cmds.frameLayout(p=cls.uiWidgets['infWghtRowColLo'], label='Influences')
-        cls.uiWidgets['infTxtScrLs'] = cmds.textScrollList(p=cls.uiWidgets['infFrmLo'], h=200, sc=cls.infTxtScrLsSelCmd,
-                                                           allowMultiSelection=True, append='Select a skined vertex(s)')
-        cls.uiWidgets['infPopMenu'] = cmds.popupMenu(p=cls.uiWidgets['infTxtScrLs'])
-        cls.uiWidgets['loadInfMenu'] = cmds.menuItem(p=cls.uiWidgets['infPopMenu'], label='Load Influences',
-                                                     c=cls.loadInf)
+        self.uiWidgets['infFrmLo'] = cmds.frameLayout(p=self.uiWidgets['infWghtRowColLo'], label='Influences')
+        self.uiWidgets['infTxtScrLs'] = cmds.textScrollList(p=self.uiWidgets['infFrmLo'], h=200, sc=self.infTxtScrLsSelCmd,
+                                                           allowMultiSelection=True)
+        self.uiWidgets['infPopMenu'] = cmds.popupMenu(p=self.uiWidgets['infTxtScrLs'])
+        self.uiWidgets['loadInfMenu'] = cmds.menuItem(p=self.uiWidgets['infPopMenu'], label='Load Influences',
+                                                     c=self.loadInf)
 
-        cls.uiWidgets['wghtFrmLo'] = cmds.frameLayout(p=cls.uiWidgets['infWghtRowColLo'], label='Weight Value')
-        cls.uiWidgets['wghtTxtScrLs'] = cmds.textScrollList(p=cls.uiWidgets['wghtFrmLo'], h=200, enable=True,
+        self.uiWidgets['wghtFrmLo'] = cmds.frameLayout(p=self.uiWidgets['infWghtRowColLo'], label='Weight Value')
+        self.uiWidgets['wghtTxtScrLs'] = cmds.textScrollList(p=self.uiWidgets['wghtFrmLo'], h=200, enable=True,
                                                             allowMultiSelection=True)
 
-        cls.uiWidgets['wghtPrsRowColLo'] = cmds.rowColumnLayout(p=cls.uiWidgets['mainColLo'], numberOfColumns=5,
+        self.uiWidgets['wghtPrsRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=5,
                                                                 columnWidth=[(1, 50), (2, 50), (3, 50), (4, 50),
                                                                              (5, 50)],
                                                                 columnSpacing=[(1, 7), (2, 7), (3, 7), (4, 7), (5, 7)])
-        cmds.button(p=cls.uiWidgets['wghtPrsRowColLo'], label='0', c=partial(cls.setWeight, 0.0))
-        cmds.button(p=cls.uiWidgets['wghtPrsRowColLo'], label='0.25', c=partial(cls.setWeight, 0.25))
-        cmds.button(p=cls.uiWidgets['wghtPrsRowColLo'], label='0.5', c=partial(cls.setWeight, 0.5))
-        cmds.button(p=cls.uiWidgets['wghtPrsRowColLo'], label='0.75', c=partial(cls.setWeight, 0.75))
-        cmds.button(p=cls.uiWidgets['wghtPrsRowColLo'], label='1', c=partial(cls.setWeight, 1.0))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0', c=partial(self.setWeight, 0.0))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0.25', c=partial(self.setWeight, 0.25))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0.5', c=partial(self.setWeight, 0.5))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0.75', c=partial(self.setWeight, 0.75))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='1', c=partial(self.setWeight, 1.0))
 
-        cls.uiWidgets['wghtSubAddRowColLo'] = cmds.rowColumnLayout(p=cls.uiWidgets['mainColLo'], numberOfColumns=4,
+        self.uiWidgets['wghtSubAddRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=4,
                                                                    columnWidth=[(1, 107), (2, 50), (3, 50), (4, 50)],
                                                                    columnSpacing=[(1, 7), (2, 7), (3, 7), (4, 7)])
-        cmds.button(p=cls.uiWidgets['wghtSubAddRowColLo'], label='Set Custom Weight',
-                    c=partial(cls.subAddWeight, 'default'))
-        cls.uiWidgets['rltvWghtValfloatFld'] = cmds.floatField(p=cls.uiWidgets['wghtSubAddRowColLo'], v=0.050,
+        cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='Set Custom Weight',
+                    c=partial(self.subAddWeight, 'default'))
+        self.uiWidgets['rltvWghtValfloatFld'] = cmds.floatField(p=self.uiWidgets['wghtSubAddRowColLo'], v=0.050,
                                                                min=0.001, max=1.000, step=0.010, precision=3)
-        cmds.button(p=cls.uiWidgets['wghtSubAddRowColLo'], label='-', c=partial(cls.subAddWeight, 'sub'))
-        cmds.button(p=cls.uiWidgets['wghtSubAddRowColLo'], label='+', c=partial(cls.subAddWeight, 'add'))
+        cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='-', c=partial(self.subAddWeight, 'sub'))
+        cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='+', c=partial(self.subAddWeight, 'add'))
 
-        cls.uiWidgets['wghtTrsfRowColLo'] = cmds.rowColumnLayout(p=cls.uiWidgets['mainColLo'], numberOfColumns=4,
+        self.uiWidgets['wghtTrsfRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=4,
                                                                  columnWidth=[(1, 93), (2, 20), (3, 93), (4, 50)],
                                                                  columnSpacing=[(1, 7), (2, 7), (3, 7), (4, 7)])
-        cls.uiWidgets['srcInfTxtFld'] = cmds.textField(p=cls.uiWidgets['wghtTrsfRowColLo'])
+        self.uiWidgets['srcInfTxtFld'] = cmds.textField(p=self.uiWidgets['wghtTrsfRowColLo'])
         cmds.popupMenu()
-        cmds.menuItem(label='Load Selected Influence', c=partial(cls.loadSelInf, cls.uiWidgets['srcInfTxtFld']))
-        cmds.text(p=cls.uiWidgets['wghtTrsfRowColLo'], label='>>>')
-        cls.uiWidgets['trgInfTxtFld'] = cmds.textField(p=cls.uiWidgets['wghtTrsfRowColLo'])
+        cmds.menuItem(label='Load Selected Influence', c=partial(self.loadSelInf, self.uiWidgets['srcInfTxtFld']))
+        cmds.text(p=self.uiWidgets['wghtTrsfRowColLo'], label='>>>')
+        self.uiWidgets['trgInfTxtFld'] = cmds.textField(p=self.uiWidgets['wghtTrsfRowColLo'])
         cmds.popupMenu()
-        cmds.menuItem(label='Load Selected Influence', c=partial(cls.loadSelInf, cls.uiWidgets['trgInfTxtFld']))
-        cmds.button(p=cls.uiWidgets['wghtTrsfRowColLo'], label='Transfer', c=cls.transferWeights)
+        cmds.menuItem(label='Load Selected Influence', c=partial(self.loadSelInf, self.uiWidgets['trgInfTxtFld']))
+        cmds.button(p=self.uiWidgets['wghtTrsfRowColLo'], label='Transfer', c=self.transferWeights)
 
-        cls.uiWidgets['maxInfRowColLo'] = cmds.rowColumnLayout(p=cls.uiWidgets['mainColLo'], numberOfColumns=3, columnSpacing=[(1, 2), (2, 2), (3, 2)])
-        cmds.button(p=cls.uiWidgets['maxInfRowColLo'], label='Check Max Influences', c=cls.getMaxInfluence)
-        cls.uiWidgets['maxInfsOptMenu'] = cmds.optionMenu(p=cls.uiWidgets['maxInfRowColLo'], label='Max Influences:')
+        self.uiWidgets['maxInfRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=3, columnSpacing=[(1, 2), (2, 2), (3, 2)])
+        cmds.button(p=self.uiWidgets['maxInfRowColLo'], label='Check Max Influences', c=self.getMaxInfluence)
+        self.uiWidgets['maxInfsOptMenu'] = cmds.optionMenu(p=self.uiWidgets['maxInfRowColLo'], label='Max Influences:')
         cmds.menuItem(label='4')
         cmds.menuItem(label='8')
         cmds.menuItem(label='12')
-        cmds.optionMenu(cls.uiWidgets['maxInfsOptMenu'], e=True, v='8')
-        cmds.button(p=cls.uiWidgets['maxInfRowColLo'], label='Set', c=cls.fitMaxInfluence, w=50)
+        cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], e=True, v='8')
+        cmds.button(p=self.uiWidgets['maxInfRowColLo'], label='Set', c=self.fitMaxInfluence, w=50)
 
-        cmds.window(cls.uiWidgets['winName'], e=True, w=100, h=200)
-        cmds.showWindow(cls.uiWidgets['winName'])
+        cmds.window(WIN_NAME, e=True, w=100, h=200)
+        cmds.showWindow(WIN_NAME)
 
-    @classmethod
-    def loadInf(cls, *args):
+    def loadInf(self, *args):
         '''
         Main method.
         Populate influence and weight value text scroll list.
@@ -147,170 +146,153 @@ class SkinWeights(object):
         cmds.undoInfo(openChunk=True)
 
         # Deactivate influences object color
-        if SkinWeights.infTxtScrLsCurrentAllItems:
-            for inf in SkinWeights.infTxtScrLsCurrentAllItems:
-                cls.unuseObjectColor(inf)
+        if self.infTxtScrLsCurrentAllItems:
+            for inf in self.infTxtScrLsCurrentAllItems:
+                SkinWeights.unuseObjectColor(inf)
 
         cmds.undoInfo(closeChunk=True)
 
         # Get options
-        hideZroInfOpt = cmds.menuItem(cls.uiWidgets['hideZroInfMenuItem'], q=True, checkBox=True)
-        hierSortOpt = cmds.menuItem(cls.uiWidgets['sortHierMenuItem'], q=True, checkBox=True)
+        hideZroInfOpt = cmds.menuItem(self.uiWidgets['hideZroInfMenuItem'], q=True, checkBox=True)
+        hierSortOpt = cmds.menuItem(self.uiWidgets['sortHierMenuItem'], q=True, checkBox=True)
 
-        cls.vtxList = cmds.ls(sl=True)
+        self.vtxList = cmds.ls(sl=True)
 
         # Check selection error
-        geoChkResult = cls.checkGeoNum()
-        if not '.' in str(cls.vtxList) or not geoChkResult:
-            cls.userFeedback()
+        geoChkResult = self.checkGeoNum()
+        if not '.' in str(self.vtxList) or not geoChkResult:
+            self.userFeedback()
             return
 
         # Get skin cluster from selected vertex
-        cls.getSkinClst(cls.vtxList[0])
-        if not cls.skinClst:
-            cls.userFeedback()
+        self.getSkinClst(self.vtxList[0])
+        if not self.skinClst:
+            self.userFeedback()
             return
 
         # Get influences
-        infs = cmds.skinCluster(cls.skinClst, q=True, inf=True)
+        infs = cmds.skinCluster(self.skinClst, q=True, inf=True)
 
         # Make influences weight value table
-        cls.skinWeightTable(cls.skinClst, cls.vtxList, infs)
+        self.skinWeightTable(self.skinClst, self.vtxList, infs)
 
         # Hide zero weighted influences depend on option state
         if hideZroInfOpt:
-            rmvedZroWghtTable = cls.hideZeroWghtInfs()
+            rmvedZroWghtTable = self.hideZeroWghtInfs()
             infs = rmvedZroWghtTable.keys()
 
         # Sorting
         if hierSortOpt:
-            infs = cls.sortByHierarchy(infs)
+            infs = self.sortByHierarchy(infs)
         else:
-            infs = cls.sortByAlphabetically(infs)
+            infs = self.sortByAlphabetically(infs)
 
         # Populate text scroll list
-        cls.populateInfList(infs)
-        cls.populateWghtList(infs)
+        self.populateInfList(infs)
+        self.populateWghtList(infs)
 
-    @classmethod
-    def getSkinClst(cls, vtx):
+    def getSkinClst(self, vtx):
         '''
         Get skin cluster with a vertex.
         '''
 
         geo = vtx.split('.')[0]
 
-        cls.skinClst = mel.eval('findRelatedSkinCluster "%s";' % geo)
+        self.skinClst = mel.eval('findRelatedSkinCluster "%s";' % geo)
 
-    @classmethod
-    def skinWeightTable(cls, skinClst, vtxList, infs):
+    def skinWeightTable(self, skinClst, vtxList, infs):
         '''
         Make skin influences weight table.
         '''
-        cls.oriWeightTable = {}
+        self.oriWeightTable = {}
 
         # Initialize original weight value table
         for inf in infs:
-            cls.oriWeightTable[inf] = str(0.0) + '   ' + inf
+            self.oriWeightTable[inf] = str(0.0) + '   ' + inf
 
         # Replace initialized value if not value is 0
         for inf in infs:
             for vtx in vtxList:
                 infWeightVal = cmds.skinPercent(skinClst, vtx, q=True, transform=inf)
                 if not infWeightVal == 0.0:
-                    cls.oriWeightTable[inf] = str(round(infWeightVal, 4)) + '   ' + inf
+                    self.oriWeightTable[inf] = str(round(infWeightVal, 4)) + '   ' + inf
                 else:
                     continue
 
-
-    @classmethod
-    def populateInfList(cls, infs):
+    def populateInfList(self, infs):
         '''
         Populate influences text scroll list.
         '''
 
-        items = cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], q=True, allItems=True)
-        selItems = cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
+        items = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, allItems=True)
+        selItems = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
         if items:
-            cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
-        cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], e=True, append=infs)
+            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
+        cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, append=infs)
 
-        cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], e=True, selectItem=selItems)
+        cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, selectItem=selItems)
 
-    @classmethod
-    def populateWghtList(cls, infs):
+    def populateWghtList(self, infs):
         '''
         Populate weight value for each influence.
         '''
 
-        items = cmds.textScrollList(cls.uiWidgets['wghtTxtScrLs'], q=True, allItems=True)
+        items = cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], q=True, allItems=True)
         if items:
-            cmds.textScrollList(cls.uiWidgets['wghtTxtScrLs'], e=True, removeAll=True)
+            cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, removeAll=True)
         for inf in infs:
-            cmds.textScrollList(cls.uiWidgets['wghtTxtScrLs'], e=True, append=cls.oriWeightTable[inf])
+            cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, append=self.oriWeightTable[inf])
 
-    @classmethod
-    def hideZeroWghtInfs(cls, *args):
+    def hideZeroWghtInfs(self, *args):
         '''
         Hide zero weights value influences in the list.
         '''
         # Initialize data
         rmvZroWghtTable = {}
 
-        for inf in cls.oriWeightTable.keys():
-            if float(cls.oriWeightTable[inf].split(' ')[0]) < 0.0001:
+        for inf in self.oriWeightTable.keys():
+            if float(self.oriWeightTable[inf].split(' ')[0]) < 0.0001:
                 continue
             else:
-                rmvZroWghtTable[inf] = cls.oriWeightTable[inf]
+                rmvZroWghtTable[inf] = self.oriWeightTable[inf]
 
 
         return rmvZroWghtTable
 
-    @classmethod
-    def setWeight(cls, weightVal, mode='default', *args):
+    def setWeight(self, weightVal, mode='default', *args):
         '''
         Set weight value with given value.
         '''
 
         # Get selected influence
-        selInfList = cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
+        selInfList = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
 
-        # for vtx in cls.vtxList:
-        #     for selInf in selInfList:
-        #         if mode == 'sub':
-        #             cmds.skinPercent(cls.skinClst, vtx, transformValue=[(selInf, -weightVal)], prw=0, relative=True)
-        #         elif mode == 'add':
-        #             cmds.skinPercent(cls.skinClst, vtx, transformValue=[(selInf, weightVal)], prw=0, relative=True)
-        #         else:
-        #             cmds.skinPercent(cls.skinClst, vtx, transformValue=[(selInf, weightVal)], prw=0)
         for selInf in selInfList:
             if mode == 'sub':
-                cmds.skinPercent(cls.skinClst, cls.vtxList, transformValue=[(selInf, -weightVal)], prw=0, relative=True)
+                cmds.skinPercent(self.skinClst, self.vtxList, transformValue=[(selInf, -weightVal)], prw=0, relative=True)
             elif mode == 'add':
-                cmds.skinPercent(cls.skinClst, cls.vtxList, transformValue=[(selInf, weightVal)], prw=0, relative=True)
+                cmds.skinPercent(self.skinClst, self.vtxList, transformValue=[(selInf, weightVal)], prw=0, relative=True)
             else:
-                cmds.skinPercent(cls.skinClst, cls.vtxList, transformValue=[(selInf, weightVal)], prw=0)
+                cmds.skinPercent(self.skinClst, self.vtxList, transformValue=[(selInf, weightVal)], prw=0)
 
-        cls.loadInf()
-        cls.infTxtScrLsSelCmd()
+        self.loadInf()
+        self.infTxtScrLsSelCmd()
 
-    @classmethod
-    def subAddWeight(cls, mode, *args):
+    def subAddWeight(self, mode, *args):
         '''
         Subtract or Add weight value for selected influence.
         '''
 
-        weightVal = cmds.floatField(cls.uiWidgets['rltvWghtValfloatFld'], q=True, v=True)
+        weightVal = cmds.floatField(self.uiWidgets['rltvWghtValfloatFld'], q=True, v=True)
 
-        cls.setWeight(weightVal, mode)
+        self.setWeight(weightVal, mode)
 
-    @classmethod
-    def sortByHierarchy(cls, infs, *args):
+    def sortByHierarchy(self, infs, *args):
         '''
         Sorting influences order by hierarchy depend on option.
         '''
 
-        allInfList = cmds.skinCluster(cls.skinClst, q=True, inf=True)
+        allInfList = cmds.skinCluster(self.skinClst, q=True, inf=True)
         hierSortInfList = []
 
         for inf in allInfList:
@@ -321,8 +303,7 @@ class SkinWeights(object):
 
         return hierSortInfList
 
-    @classmethod
-    def sortByAlphabetically(cls, infs, *args):
+    def sortByAlphabetically(self, infs, *args):
         '''
         Sorting influences order by alphanetically depend on option.
         '''
@@ -331,33 +312,31 @@ class SkinWeights(object):
 
         return alphSortList
 
-    @classmethod
-    def infTxtScrLsSelCmd(cls, *args):
+    def infTxtScrLsSelCmd(self, *args):
         """ Select matching weight value in weight value text scroll list """
 
-        allInfs = cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], q=True, allItems=True)
-        selInfList = cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
+        allInfs = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, allItems=True)
+        selInfList = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
 
-        SkinWeights.infTxtScrLsCurrentAllItems = allInfs
+        self.infTxtScrLsCurrentAllItems = allInfs
 
-        cmds.textScrollList(cls.uiWidgets['wghtTxtScrLs'], e=True, deselectAll=True)
+        cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, deselectAll=True)
         selInfWghtList = []
 
         if selInfList:
             for selInf in selInfList:
-                matchingWeightVal = cls.oriWeightTable[selInf]
+                matchingWeightVal = self.oriWeightTable[selInf]
                 selInfWghtList.append(matchingWeightVal)
-                wghtVal = cls.oriWeightTable[selInf].split(' ')[0]
+                wghtVal = self.oriWeightTable[selInf].split(' ')[0]
 
-            cls.changeSelInfCol(allInfs, selInfList)
+            self.changeSelInfCol(allInfs, selInfList)
 
-    @classmethod
-    def changeSelInfCol(cls, allInfs, selInfList):
+    def changeSelInfCol(self, allInfs, selInfList):
         for inf in allInfs:
-            cls.unuseObjectColor(inf)
+            SkinWeights.unuseObjectColor(inf)
 
         for selInf in selInfList:
-            cls.useObjectColor(selInf)
+            SkinWeights.useObjectColor(selInf)
 
     @staticmethod
     def unuseObjectColor(inf):
@@ -369,72 +348,66 @@ class SkinWeights(object):
         infNode = pm.PyNode(inf)
         infNode.setObjectColor(8)
 
-    @classmethod
-    def userFeedback(cls):
+    def userFeedback(self):
         """ Annotation when user did not select a vertex """
 
         # Remove items in influences text scroll list
-        items = cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], q=True, allItems=True)
+        items = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, allItems=True)
         if items:
-            cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
-        cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], e=True, append='Select a skined vertex(s)')
+            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
 
         # Remove items in weight value text scroll list
-        items = cmds.textScrollList(cls.uiWidgets['wghtTxtScrLs'], q=True, allItems=True)
+        items = cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], q=True, allItems=True)
         if items:
-            cmds.textScrollList(cls.uiWidgets['wghtTxtScrLs'], e=True, removeAll=True)
+            cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, removeAll=True)
 
-    @classmethod
-    def checkGeoNum(cls):
+    def checkGeoNum(self):
         '''
         Check if user select component more than two geometry.
         '''
 
         geoList = []
 
-        for vtx in cls.vtxList:
+        for vtx in self.vtxList:
             geo = vtx.split('.')[0]
             if not geo in geoList:
                 geoList.append(geo)
 
         if len(geoList) >= 2:
-            cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
-            cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], e=True, append='Select vertex of one object')
+            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
+            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, append='Select vertex of one object')
             return False
         else:
             return True
 
-    @classmethod
-    def loadSelInf(cls, wgt, *arg):
+    def loadSelInf(self, wgt, *arg):
         '''
         Load selected influence that in the influences text scroll list.
         '''
 
-        selInf = cmds.textScrollList(cls.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
+        selInf = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
         cmds.textField(wgt, e=True, text=selInf[0])
 
-    @classmethod
-    def transferWeights(cls, *args):
+    def transferWeights(self, *args):
         vtxList = cmds.ls(sl=True, fl=True)
 
-        srcInf = cmds.textField(cls.uiWidgets['srcInfTxtFld'], q=True, text=True)
-        trgInf = cmds.textField(cls.uiWidgets['trgInfTxtFld'], q=True, text=True)
+        srcInf = cmds.textField(self.uiWidgets['srcInfTxtFld'], q=True, text=True)
+        trgInf = cmds.textField(self.uiWidgets['trgInfTxtFld'], q=True, text=True)
 
         for vtx in vtxList:
             # get skin weight value
-            srcInfSkinVal = cmds.skinPercent(cls.skinClst, vtx, transform=srcInf, query=True)
-            trgInfSkinVal = cmds.skinPercent(cls.skinClst, vtx, transform=trgInf, query=True)
+            srcInfSkinVal = cmds.skinPercent(self.skinClst, vtx, transform=srcInf, query=True)
+            trgInfSkinVal = cmds.skinPercent(self.skinClst, vtx, transform=trgInf, query=True)
 
             resultSkinVal = srcInfSkinVal + trgInfSkinVal
 
             # transfer skin weights
-            cmds.skinPercent(cls.skinClst, vtx, transformValue=[(srcInf, 0), (trgInf, resultSkinVal)], nrm=True)
+            cmds.skinPercent(self.skinClst, vtx, transformValue=[(srcInf, 0), (trgInf, resultSkinVal)], nrm=True)
 
         # Refresh influence text scroll list.
-        cls.loadInf()
+        self.loadInf()
 
-    @classmethod
-    def getMaxInfluence(cls, *args, mesh=None, printResult=True, ignoreWeight=0.00001):
+    def getMaxInfluence(self, *args, mesh=None, printResult=True, ignoreWeight=0.00001):
         if not mesh:
             mesh = cmds.ls(sl=True)[0]
         skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
@@ -447,11 +420,10 @@ class SkinWeights(object):
             print('"{}" Max Influence: {}'.format(mesh, maxInf))
         return maxInf
 
-    @classmethod
-    def fitMaxInfluence(cls, *args, ignoreWeight=0.00001):
+    def fitMaxInfluence(self, *args, ignoreWeight=0.00001):
         for mesh in cmds.ls(sl=True):
-            meshMaxInfs = cls.getMaxInfluence(mesh=mesh, printResult=False)
-            targetMaxInfs = int(cmds.optionMenu(cls.uiWidgets['maxInfsOptMenu'], q=True, v=True))
+            meshMaxInfs = self.getMaxInfluence(mesh=mesh, printResult=False)
+            targetMaxInfs = int(cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], q=True, v=True))
             if meshMaxInfs <= targetMaxInfs:
                 print('"{}"s max influence is {}. Skip processing.'.format(mesh, meshMaxInfs))
                 continue

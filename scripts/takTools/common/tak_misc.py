@@ -2133,6 +2133,12 @@ def addInfCopySkin(source=None, targets=None):
     cmds.setAttr('%s.skinningMethod' % skinClst, srcSkinMethod)
     srcUseComponent = cmds.getAttr('%s.useComponents' % srcSkinClst)
     cmds.setAttr('%s.useComponents' % skinClst, srcUseComponent)
+    srcNormalize = cmds.getAttr('%s.normalizeWeights' % srcSkinClst)
+    cmds.setAttr('%s.normalizeWeights' % skinClst, srcNormalize)
+    srcMaintainMI = cmds.getAttr('%s.maintainMaxInfluences' % srcSkinClst)
+    cmds.setAttr('%s.maintainMaxInfluences' % skinClst, srcMaintainMI)
+    srcMI = cmds.getAttr('%s.maxInfluences' % srcSkinClst)
+    cmds.setAttr('%s.maxInfluences' % skinClst, srcMI)
 
     cmds.select(source, targets, r=True)
 
@@ -2649,7 +2655,10 @@ def selAffectedVertex():
     infs = cmds.ls(sl=True)
     vtxs = []
     for inf in infs:
-        vtxs.extend(skinUtil.getAffectedVertex(inf, 0.5))
+        vtxs.extend(skinUtil.getAffectedVertex(inf, 0.001))
+    if not vtxs:
+        print('No vertices be affected by selected infuences.')
+        return
     pm.select(vtxs, r=True)
 
 

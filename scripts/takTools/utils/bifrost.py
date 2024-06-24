@@ -91,7 +91,7 @@ def showConvertToCageMeshUI():
 
     pm.window(title='Create Cage Mesh', mnb=False, mxb=False)
     pm.columnLayout(adj=True)
-    pm.floatFieldGrp('detailSizeFloatFld', label='Detail Size:', v1=0.01, pre=3, columnWidth=[(1,80)])
+    pm.floatFieldGrp('detailSizeFloatFld', label='Detail Size:', v1=0.02, pre=3, columnWidth=[(1,80)])
     pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=1000, columnWidth=[(1,80)])
     pm.checkBoxGrp('keepOrigChkbox', label='Keep Original', v1=True, columnWidth=[(1,80)])
     pm.button(label='Apply', c=applyBtnCallback)
