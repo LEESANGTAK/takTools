@@ -48,7 +48,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.rigging.tak_skinWeights as tak_skinWeights\\nimport imp; imp.reload(tak_skinWeights)\\ntak_skinWeights.SkinWeights()\");" 
+        -command "python(\"import takTools.rigging.tak_skinWeights as tak_skinWeights\\nimport imp; imp.reload(tak_skinWeights)\\ntak_skinWeights.showUI()\");" 
         -optionBox 0
         -enable 1
         -visible 1
