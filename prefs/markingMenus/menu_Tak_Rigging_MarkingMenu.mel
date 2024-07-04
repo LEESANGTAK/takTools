@@ -296,7 +296,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem19;
+        menuEditorMenuItem11;
 
     menuItem
         -label "Controller" 
@@ -377,7 +377,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem25;
+        menuEditorMenuItem15;
 
     menuItem
         -label "Multi Constraint" 
@@ -439,7 +439,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem28;
+        menuEditorMenuItem16;
 
     menuItem
         -label "separator" 
@@ -568,7 +568,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $sels[] = `ls -sl -type \"joint\"`;\n    for ($sel in $sels) {\n        select -r $sel;\n        string $dupJnt[] = `duplicate -po`;\n        parent $dupJnt $sel;\n    }\n}" 
+        -command "{\n    string $sels[] = `ls -sl -type \"joint\"`;\n\tstring $dupJnts[];\n    for ($sel in $sels) {\n        select -r $sel;\n        string $dupJnt[] = `duplicate -po`;\n        parent $dupJnt $sel;\n\t\t$dupJnts[size($dupJnts)] = $dupJnt[0];\n    }\n\tselect -r $dupJnts;\n}" 
         -optionBox 0
         -enable 1
         -visible 1
