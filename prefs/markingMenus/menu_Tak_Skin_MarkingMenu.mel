@@ -26,7 +26,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "copySkinWeights -mirrorMode YZ -surfaceAssociation closestPoint -influenceAssociation closestJoint -influenceAssociation oneToOne;\n" 
+        -command "copySkinWeights -mirrorMode YZ -surfaceAssociation closestPoint -influenceAssociation oneToOne -influenceAssociation closestJoint;\n" 
         -optionBox 0
         -enable 1
         -visible 1
