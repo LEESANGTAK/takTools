@@ -1,0 +1,258 @@
+////
+//// Auto Smoothing Groups by Dennis Porter
+//// Dennis.Porter.3D@gmail.com
+////
+//// Release Date 		7 Oct 2018
+//// Current Version	1.3
+global string $asg_version = "1.3";
+////
+
+
+global proc dp_autoSG() {
+	string $sel[] = `ls -l -sl`;
+	string $allBorders[];
+	string $flippedShells[];
+	if ( `size $sel` == 0 ) { evalDeferred("warning \"Objects must be selected.\""); return; }
+	if ( `size $sel` == 1 && ! dp_isModel($sel[0]) ) { evalDeferred("warning \"Objects must be selected.\""); return; }
+
+	//Check for high shell count
+	string $highShellModels[];
+	int $shellThreshold = 750;
+	for ( $obj in $sel ) {
+		if ( dp_countUVShells($obj) > $shellThreshold ) { 
+			$highShellModels[`size $highShellModels`] = $obj;
+		}
+	}
+
+	if ( `size $highShellModels` > 0 ) {
+		string $option = `confirmDialog 
+			-t "High UV Shell Count" 
+			-m ( "One or more of your models has a very high amount of UV shells (over " + $shellThreshold + ").\nThese may take a couple minutes each to process." )
+			-b "Skip High-shell Objects"
+			-b "Process All Models"
+			-b "Abort"`;
+
+		if ( $option == "Abort" ) { return; }
+		else if ( $option == "Skip High-shell Objects" ) { $sel = stringArrayRemove( $highShellModels, $sel ); }
+
+
+	}
+
+	//Check for all locked normals
+	string $lockedModels[];
+	for ( $obj in $sel ) {
+		int $numVerts[] = `polyEvaluate -v $obj`;
+		int $locked[] = `polyNormalPerVertex -q -fn ( $obj + ".vtx[0:" + ($numVerts[0]-1) + "]" )`;
+		if ( ! intArrayContains( 0, $locked ) ) { $lockedModels[`size $lockedModels`] = $obj; }
+	}
+
+	if ( `size $lockedModels` > 0 ) {
+		string $option = `confirmDialog 
+			-t "Locked Normals" 
+			-m ( "One or more of your models have all of their vertex normals locked.  This usually happens when importing models into Maya.\nAutoSG will not process these models unless the normals are unlocked." )
+			-b "Skip Locked Meshes"
+			-b "Unlock && Process"
+			-b "Abort"`;
+
+		if ( $option == "Skip Locked Meshes" ) { 
+			$sel = stringArrayRemove($lockedModels, $sel); 
+		}
+		else if ( $option == "Unlock && Process" ) { 
+			polyNormalPerVertex -ufn 1;
+		}
+		else if ( $option == "Abort" ) { return; }
+	}
+
+	if ( `size $sel` == 0 ) { evalDeferred("warning \"After omitting locked meshes and/or meshes with high shell counts, your slection was empty.  Nothing to smooth.\""); return; }
+
+	for ( $obj in $sel ) {
+		if ( dp_isModel($obj) ) {
+			select $obj;
+			SoftPolyEdgeElements 1;
+			ConvertSelectionToFaces;
+			string $faces[] = `ls -l -fl -sl`;
+			int $len = `size $faces`;
+			dp_makeProgressBar("Defining Smoothing Groups... (Hold ESC to Stop)", $len);
+
+			int $shellCount;
+			while ( `size $faces` > 0 ) {
+				if ( dp_isProgressBarCancelled() ) { 
+					dp_reinstateMainProgressBar();
+					return; 
+				}
+
+				int $count = `size $faces`;
+				select $faces[0];
+				polySelectBorderShell 0;
+				string $pass[] = `ls -l -fl -sl`;
+				$faces = stringArrayRemove($pass, $faces);
+				dp_toEdgePerimeter();
+				string $edges[] = `ls -l -sl`;
+				$allBorders = stringArrayCatenate($allBorders, $edges);
+				++$shellCount;
+
+				dp_stepProgressBar(`size $pass`);
+			}
+
+			dp_reinstateMainProgressBar();
+
+			if ( dp_getVersion() >= 2017.8 ) {
+				print ("\nThe model " + $obj + " has " + dp_countUVShells($obj) + " UV shells.\n");
+			}
+			else {
+				print ("\nThe model " + $obj + " has " + $shellCount + " UV shells.\n");
+			}
+		}
+	}
+
+	dp_makeProgressBar("Finalizing edges...", 100);
+	dp_stepProgressBar(76);
+
+	select $allBorders;
+	SoftPolyEdgeElements 0;
+
+	dp_stepProgressBar(12);
+
+	// 2017 and newer changed how edges are displayed.  If the mesh with selected edges is toggled off, the edges are hidden also
+	// In this case we don't do anything extra with the selection settings, but for older versions we can toggle off the mesh to
+	// make the final smoothing splits more visible.
+	if ( dp_getVersion() < 2017.0 ) {
+		hilite -r $sel;
+		hilite -tgl $sel;
+	}
+
+	dp_stepProgressBar(12);
+	dp_reinstateMainProgressBar();
+
+	global string $asg_version;
+	print ( "Auto Smoothing Groups v" + $asg_version );
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////  Support Procs
+
+global proc float dp_getVersion() {
+	int $info = `about -api`;
+	string $num;
+	if ( `size ((string)$info)` > 4 ) {
+		string $val = ((string)$info);
+		$num = ( `substring $val 1 4` + "." );
+		$num = ( $num + `substring $val 5 (size($val))` );
+	}
+	float $ver = ((float)$num);
+	return $ver;
+}
+
+global proc int dp_isComponent(string $obj) {
+	if ( `nodeType -api $obj` == "kMesh" ) {
+		return 1;
+	}
+	return 0;
+}
+
+global proc int dp_isModel(string $obj) {
+	int $mode;
+
+	if ( $obj == "") { return 0; }
+
+	if ( `objectType -isType "mesh" $obj` ) { $mode = 1; }
+
+	if ( `objectType -isType "transform" $obj` && ! dp_isComponent($obj) ) { 
+		string $meshes[] = `listRelatives -c -f -type "mesh" $obj`;
+		if ( $meshes[0] == "" ) { $mode = 0; }
+		else { $mode = 1; }
+	}
+
+	if ( dp_isComponent($obj) ) { $mode = 0; }
+	return $mode;
+
+}
+
+global proc dp_toEdgePerimeter() {
+	if ( dp_getVersion() >= 2015.0 ) { eval "ConvertSelectionToEdgePerimeter;"; }
+	else {
+		string $allComponents[] = `ls -l -sl`;
+		ConvertSelectionToEdges;
+		string $allEdges[] = `ls -l -fl -sl`;
+		select $allComponents;
+		ConvertSelectionToContainedEdges;
+		string $interior[] = `ls -l -fl -sl`;
+		string $remaining[] = stringArrayRemove($interior, $allEdges);
+		select $remaining;
+	}
+}
+
+global proc int dp_countUVShells(string $obj) {
+	int $shellCount[];
+	if ( dp_getVersion() >= 2017.8 ) { $shellCount = eval( "polyEvaluate -us " + $obj ); }
+	else {
+		$shellCount[0] = -1;
+	}
+	return $shellCount[0];
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////  Progress Bar Procs
+
+global proc dp_makeProgressBar(string $title, int $maxValue) {
+	global string $gMainProgressBar;
+	global string $gMainWindow;
+	global string $dp_progress_toolbox = "dp_toolProgressWindow";
+	global string $dp_progress_bar = "dp_toolProgressBar";
+	string $form = "dp_toolProgressForm";
+	int $le = `window -q -le $gMainWindow`;
+	int $te = `window -q -te $gMainWindow`;
+
+	if ( `window -ex $dp_progress_toolbox` ) { deleteUI $dp_progress_toolbox; }
+
+	window -title $title 
+		-toolbox 1 
+		-minimizeButton 1 
+		-maximizeButton 0 
+		-menuBar 0 
+		-width 400 
+		-height 50 
+		$dp_progress_toolbox;
+
+	formLayout -p $dp_progress_toolbox $form;
+		progressBar -maxValue $maxValue -width 400 -height 50 -imp on -bp -isInterruptable 1 -p $form $dp_progress_bar;
+	showWindow $dp_progress_toolbox;
+
+	window -e -te ($te + 500) -le ($le + 800) $dp_progress_toolbox;
+}
+
+global proc dp_stepProgressBar(float $step) {
+	global string $dp_progress_bar;
+	progressBar -e -step $step $dp_progress_bar;
+}
+
+
+global proc int dp_isProgressBarCancelled() {
+	global string $dp_progress_bar;
+	if ( `progressBar -q -isCancelled $dp_progress_bar` ) { 
+		progressBar -e -endProgress $dp_progress_bar; return 1; 
+	}
+	return 0;
+}
+
+global proc dp_reinstateMainProgressBar() {
+	global string $gMainProgressBar;
+	global string $dp_progress_bar;
+	global string $dp_progress_toolbox;
+	if ( `progressBar -q -ex $dp_progress_bar` ) {
+		progressBar -e -imp 1 $gMainProgressBar;
+		deleteUI $dp_progress_bar;
+		deleteUI $dp_progress_toolbox;
+	}
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+dp_autoSG();

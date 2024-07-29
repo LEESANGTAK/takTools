@@ -305,10 +305,11 @@ def UI():
     cmds.shelfButton(annotation = 'Vertex Normals', width = 35, height = 35, imageOverlayLabel = 'VN', image1 = 'menuIconDisplay.png', command = 'ToggleVertexNormalDisplay', sourceType = 'mel')
     cmds.shelfButton(annotation = 'Face Normals', width = 35, height = 35, imageOverlayLabel = 'FN', image1 = 'menuIconDisplay.png', command = 'ToggleFaceNormalDisplay', sourceType = 'mel')
     cmds.shelfButton(annotation = 'Normals Size...', width = 35, height = 35, imageOverlayLabel = 'NS', image1 = 'menuIconDisplay.png', command = 'ChangeNormalSize', sourceType = 'mel')
-    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polyNormal.png', command = 'ReversePolygonNormals', sourceType = 'mel')
+    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polyNormalUnlock.png', command = 'polyNormalPerVertex -ufn true', sourceType = 'mel')
+    cmds.shelfButton(annotation = 'Auto Smoothing Groups', width = 35, height = 35, imageOverlayLabel = 'Auto', image1 = 'polyHardEdge.png', command = 'dp_autoSG();', sourceType = 'mel')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polySoftEdge.png', command = 'SoftPolyEdgeElements 1', sourceType = 'mel')
     cmds.shelfButton(annotation = 'Harden Edge', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polyHardEdge.png', command = 'SoftPolyEdgeElements 0', sourceType = 'mel')
-    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polyNormalUnlock.png', command = 'polyNormalPerVertex -ufn true', sourceType = 'mel')
+    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polyNormal.png', command = 'ReversePolygonNormals', sourceType = 'mel')
 
     cmds.frameLayout('mdlSelFrameLo', label = 'Selection', collapse = False, collapsable = True, p = 'mdlScrLo')
     cmds.shelfLayout('Modeling_Selection', h = SHELF_HEIGHT, p = 'mdlSelFrameLo')
