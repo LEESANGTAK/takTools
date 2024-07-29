@@ -19,14 +19,14 @@ global proc dp_autoSG() {
 	string $highShellModels[];
 	int $shellThreshold = 750;
 	for ( $obj in $sel ) {
-		if ( dp_countUVShells($obj) > $shellThreshold ) { 
+		if ( dp_countUVShells($obj) > $shellThreshold ) {
 			$highShellModels[`size $highShellModels`] = $obj;
 		}
 	}
 
 	if ( `size $highShellModels` > 0 ) {
-		string $option = `confirmDialog 
-			-t "High UV Shell Count" 
+		string $option = `confirmDialog
+			-t "High UV Shell Count"
 			-m ( "One or more of your models has a very high amount of UV shells (over " + $shellThreshold + ").\nThese may take a couple minutes each to process." )
 			-b "Skip High-shell Objects"
 			-b "Process All Models"
@@ -47,17 +47,17 @@ global proc dp_autoSG() {
 	}
 
 	if ( `size $lockedModels` > 0 ) {
-		string $option = `confirmDialog 
-			-t "Locked Normals" 
+		string $option = `confirmDialog
+			-t "Locked Normals"
 			-m ( "One or more of your models have all of their vertex normals locked.  This usually happens when importing models into Maya.\nAutoSG will not process these models unless the normals are unlocked." )
 			-b "Skip Locked Meshes"
 			-b "Unlock && Process"
 			-b "Abort"`;
 
-		if ( $option == "Skip Locked Meshes" ) { 
-			$sel = stringArrayRemove($lockedModels, $sel); 
+		if ( $option == "Skip Locked Meshes" ) {
+			$sel = stringArrayRemove($lockedModels, $sel);
 		}
-		else if ( $option == "Unlock && Process" ) { 
+		else if ( $option == "Unlock && Process" ) {
 			polyNormalPerVertex -ufn 1;
 		}
 		else if ( $option == "Abort" ) { return; }
@@ -76,9 +76,9 @@ global proc dp_autoSG() {
 
 			int $shellCount;
 			while ( `size $faces` > 0 ) {
-				if ( dp_isProgressBarCancelled() ) { 
+				if ( dp_isProgressBarCancelled() ) {
 					dp_reinstateMainProgressBar();
-					return; 
+					return;
 				}
 
 				int $count = `size $faces`;
@@ -124,6 +124,10 @@ global proc dp_autoSG() {
 	dp_stepProgressBar(12);
 	dp_reinstateMainProgressBar();
 
+	selectMode -component;
+	selectMode -object;
+	select -cl;
+
 	global string $asg_version;
 	print ( "Auto Smoothing Groups v" + $asg_version );
 }
@@ -160,7 +164,7 @@ global proc int dp_isModel(string $obj) {
 
 	if ( `objectType -isType "mesh" $obj` ) { $mode = 1; }
 
-	if ( `objectType -isType "transform" $obj` && ! dp_isComponent($obj) ) { 
+	if ( `objectType -isType "transform" $obj` && ! dp_isComponent($obj) ) {
 		string $meshes[] = `listRelatives -c -f -type "mesh" $obj`;
 		if ( $meshes[0] == "" ) { $mode = 0; }
 		else { $mode = 1; }
@@ -210,13 +214,13 @@ global proc dp_makeProgressBar(string $title, int $maxValue) {
 
 	if ( `window -ex $dp_progress_toolbox` ) { deleteUI $dp_progress_toolbox; }
 
-	window -title $title 
-		-toolbox 1 
-		-minimizeButton 1 
-		-maximizeButton 0 
-		-menuBar 0 
-		-width 400 
-		-height 50 
+	window -title $title
+		-toolbox 1
+		-minimizeButton 1
+		-maximizeButton 0
+		-menuBar 0
+		-width 400
+		-height 50
 		$dp_progress_toolbox;
 
 	formLayout -p $dp_progress_toolbox $form;
@@ -234,8 +238,8 @@ global proc dp_stepProgressBar(float $step) {
 
 global proc int dp_isProgressBarCancelled() {
 	global string $dp_progress_bar;
-	if ( `progressBar -q -isCancelled $dp_progress_bar` ) { 
-		progressBar -e -endProgress $dp_progress_bar; return 1; 
+	if ( `progressBar -q -isCancelled $dp_progress_bar` ) {
+		progressBar -e -endProgress $dp_progress_bar; return 1;
 	}
 	return 0;
 }

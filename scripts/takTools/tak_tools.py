@@ -306,9 +306,8 @@ def UI():
     cmds.shelfButton(annotation = 'Face Normals', width = 35, height = 35, imageOverlayLabel = 'FN', image1 = 'menuIconDisplay.png', command = 'ToggleFaceNormalDisplay', sourceType = 'mel')
     cmds.shelfButton(annotation = 'Normals Size...', width = 35, height = 35, imageOverlayLabel = 'NS', image1 = 'menuIconDisplay.png', command = 'ChangeNormalSize', sourceType = 'mel')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polyNormalUnlock.png', command = 'polyNormalPerVertex -ufn true', sourceType = 'mel')
-    cmds.shelfButton(annotation = 'Auto Smoothing Groups', width = 35, height = 35, imageOverlayLabel = 'Auto', image1 = 'polyHardEdge.png', command = 'dp_autoSG();', sourceType = 'mel')
+    cmds.shelfButton(annotation = 'Auto Smoothing Groups', width = 35, height = 35, imageOverlayLabel = 'Auto', image1 = 'polyHardEdge.png', command = 'source "dp_autoSmoothingGroups.mel";', sourceType = 'mel')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polySoftEdge.png', command = 'SoftPolyEdgeElements 1', sourceType = 'mel')
-    cmds.shelfButton(annotation = 'Harden Edge', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polyHardEdge.png', command = 'SoftPolyEdgeElements 0', sourceType = 'mel')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polyNormal.png', command = 'ReversePolygonNormals', sourceType = 'mel')
 
     cmds.frameLayout('mdlSelFrameLo', label = 'Selection', collapse = False, collapsable = True, p = 'mdlScrLo')
