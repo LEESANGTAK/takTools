@@ -131,7 +131,7 @@ class SkinWeights(object):
         cmds.menuItem(label='4')
         cmds.menuItem(label='8')
         cmds.menuItem(label='12')
-        cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], e=True, v='8')
+        cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], e=True, v='4')
         cmds.button(p=self.uiWidgets['maxInfRowColLo'], label='Set', c=self.fitMaxInfluence, w=50)
 
         cmds.window(WIN_NAME, e=True, w=100, h=200)

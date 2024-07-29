@@ -2085,6 +2085,7 @@ def addInfCopySkin(source=None, targets=None):
     srcSkinClst = mel.eval('findRelatedSkinCluster("%s");' % source)
     srcInfs = selInflu()
 
+    skinClsts = []
     if '.' in str(targets):
         trgSkinGeo = targets[0].split('.')[0]
 
@@ -2106,6 +2107,7 @@ def addInfCopySkin(source=None, targets=None):
 
         cmds.select(source, targets, r=True)
         cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
+        skinClsts.append(skinClst)
     elif cmds.objectType(targets[0]) == 'objectSet':
         print('copy skin to sets')
     else:
@@ -2129,16 +2131,19 @@ def addInfCopySkin(source=None, targets=None):
             cmds.select(source, trgSkinGeo, r=True)
             cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
 
-    srcSkinMethod = cmds.getAttr('%s.skinningMethod' % srcSkinClst)
-    cmds.setAttr('%s.skinningMethod' % skinClst, srcSkinMethod)
-    srcUseComponent = cmds.getAttr('%s.useComponents' % srcSkinClst)
-    cmds.setAttr('%s.useComponents' % skinClst, srcUseComponent)
-    srcNormalize = cmds.getAttr('%s.normalizeWeights' % srcSkinClst)
-    cmds.setAttr('%s.normalizeWeights' % skinClst, srcNormalize)
-    srcMaintainMI = cmds.getAttr('%s.maintainMaxInfluences' % srcSkinClst)
-    cmds.setAttr('%s.maintainMaxInfluences' % skinClst, srcMaintainMI)
-    srcMI = cmds.getAttr('%s.maxInfluences' % srcSkinClst)
-    cmds.setAttr('%s.maxInfluences' % skinClst, srcMI)
+            skinClsts.append(skinClst)
+
+    for skinClst in skinClsts:
+        srcSkinMethod = cmds.getAttr('%s.skinningMethod' % srcSkinClst)
+        cmds.setAttr('%s.skinningMethod' % skinClst, srcSkinMethod)
+        srcUseComponent = cmds.getAttr('%s.useComponents' % srcSkinClst)
+        cmds.setAttr('%s.useComponents' % skinClst, srcUseComponent)
+        srcNormalize = cmds.getAttr('%s.normalizeWeights' % srcSkinClst)
+        cmds.setAttr('%s.normalizeWeights' % skinClst, srcNormalize)
+        srcMaintainMI = cmds.getAttr('%s.maintainMaxInfluences' % srcSkinClst)
+        cmds.setAttr('%s.maintainMaxInfluences' % skinClst, srcMaintainMI)
+        srcMI = cmds.getAttr('%s.maxInfluences' % srcSkinClst)
+        cmds.setAttr('%s.maxInfluences' % skinClst, srcMI)
 
     cmds.select(source, targets, r=True)
 
