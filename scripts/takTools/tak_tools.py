@@ -230,7 +230,6 @@ def UI():
     cmds.shelfButton(annotation = 'Convert mash to joints', width = 35, height = 35, imageOverlayLabel = 'MASHtoJoints', image1 = 'pythonFamily.png', command = 'from maya import cmds\nfrom takTools.utils import MASH as mashUtil\nimport imp\nimp.reload(mashUtil)\n\nwaiter = cmds.ls(sl=True)[0]\njoints = mashUtil.buildJoints(waiter)\nmashUtil.buildSkinMesh(waiter, joints)', sourceType = 'python')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = 'Fold', image1 = 'commandButton.png', command = 'source makeFoldingRig.mel;', sourceType = 'mel')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'autoSwim.bmp', command = 'import takTools.rigging.tak_autoSwim as tak_autoSwim\nimport imp\nimp.reload(tak_autoSwim)\ntak_autoSwim.UI()', sourceType = 'python')
-    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'MHC.png', command = 'import dna_viewer\ndna_viewer.show()', sourceType = 'python')
 
 
     # animation tab
@@ -242,6 +241,7 @@ def UI():
     cmds.shelfButton(annotation = 'Selector:biped', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/icons/asBiped.png', command = 'source "D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/Selector/biped.mel";', sourceType = 'mel')
     cmds.shelfButton(annotation = 'Selector:face', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/icons/asFace.png', command = 'source "D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/Selector/face.mel";', sourceType = 'mel')
     cmds.shelfButton(annotation = 'picker', width = 35, height = 35, imageOverlayLabel = '', image1 = 'D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/picker/pickerFiles/icons/picker.png', command = 'source "D:/tools/maya/modules/AdvancedSkeleton/AdvancedSkeletonFiles/picker/picker.mel";', sourceType = 'mel')
+    cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'colorPickCursor.png', command = '\nimport ARSpicker\nARSpicker.picker.main()\n', sourceType = 'python')
 
     cmds.frameLayout('aniDisplayFrameLo', label = 'Display', collapse = False, collapsable = True, p = 'aniScrLo')
     cmds.shelfLayout('Animation_Display', h = SHELF_HEIGHT, p = 'aniDisplayFrameLo')

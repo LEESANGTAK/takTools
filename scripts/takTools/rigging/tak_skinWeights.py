@@ -13,6 +13,7 @@ reload(tak_skinWeights)
 tak_skinWeights.SkinWeights()
 """
 
+import os
 from functools import partial
 
 import maya.cmds as cmds
@@ -21,13 +22,17 @@ import maya.OpenMaya as om
 import maya.OpenMayaAnim as oma
 import pymel.core as pm
 
-
-WIN_NAME = 'takWeightsWin'
+MODULE_NAME = 'takTools'
+MODULE_DIR = os.path.dirname(__file__).split(MODULE_NAME, 1)[0] + MODULE_NAME
+CUSTOM_DAG_MENU_FILE = '{}\\Program Files\\dagMenuProc.mel'.format(MODULE_DIR).replace('\\', '/')
+ORIG_DAG_MENU_FILE = "C:/Program Files/Autodesk/Maya{}/scripts/others/dagMenuProc.mel".format(cmds.about(v=True))
+WIN_NAME = 'takSkinWeightsWin'
 
 
 def showUI():
     sw = SkinWeights()
     sw.ui()
+    sw.enableCustomDagMenu()
 
     # Create script job to populate influence text scroll list automatically
     cmds.scriptJob(parent=WIN_NAME, event=['SelectionChanged', sw.loadInf])
@@ -49,6 +54,7 @@ class SkinWeights(object):
             for inf in self.infTxtScrLsCurrentAllItems:
                 SkinWeights.unuseObjectColor(inf)
         self.infTxtScrLsCurrentAllItems = []
+        self.enableCustomDagMenu(False)
 
     def ui(self):
         if cmds.window(WIN_NAME, exists=True):
@@ -68,6 +74,8 @@ class SkinWeights(object):
                                                             label='Hide Zero Influences', c=self.loadInf)
         self.uiWidgets['sortHierMenuItem'] = cmds.menuItem(p=self.uiWidgets['optMenu'], checkBox=False,
                                                           label='Sort by Hierarchy', c=self.loadInf)
+        self.uiWidgets['toggleCustomDagMenuItem'] = cmds.menuItem(p=self.uiWidgets['optMenu'], checkBox=True,
+                                                          label='Custom DAG Menu', c=self.toggleCustomDagMenu)
 
         self.uiWidgets['mainColLo'] = cmds.columnLayout(p=WIN_NAME, adj=True)
 
@@ -311,6 +319,16 @@ class SkinWeights(object):
         alphSortList = sorted(infs)
 
         return alphSortList
+
+    def toggleCustomDagMenu(self, *args):
+        loadCustomDagMenu = cmds.menuItem(self.uiWidgets['toggleCustomDagMenuItem'], q=True, checkBox=True)
+        self.enableCustomDagMenu(loadCustomDagMenu)
+
+    def enableCustomDagMenu(self, enable=True):
+        if enable:
+            mel.eval('source "{}"'.format(CUSTOM_DAG_MENU_FILE))
+        else:
+            mel.eval('source "{}"'.format(ORIG_DAG_MENU_FILE))
 
     def infTxtScrLsSelCmd(self, *args):
         """ Select matching weight value in weight value text scroll list """
