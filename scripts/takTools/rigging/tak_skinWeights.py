@@ -18,8 +18,8 @@ from functools import partial
 
 import maya.cmds as cmds
 import maya.mel as mel
-import maya.OpenMaya as om
-import maya.OpenMayaAnim as oma
+import maya.api.OpenMaya as om
+import maya.api.OpenMayaAnim as oma
 import pymel.core as pm
 
 MODULE_NAME = 'takTools'
@@ -27,6 +27,7 @@ MODULE_DIR = os.path.dirname(__file__).split(MODULE_NAME, 1)[0] + MODULE_NAME
 CUSTOM_DAG_MENU_FILE = '{}\\Program Files\\dagMenuProc.mel'.format(MODULE_DIR).replace('\\', '/')
 ORIG_DAG_MENU_FILE = "C:/Program Files/Autodesk/Maya{}/scripts/others/dagMenuProc.mel".format(cmds.about(v=True))
 WIN_NAME = 'takSkinWeightsWin'
+MIN_WEIGHT = 0.00001
 
 
 def showUI():
@@ -425,7 +426,7 @@ class SkinWeights(object):
         # Refresh influence text scroll list.
         self.loadInf()
 
-    def getMaxInfluence(self, *args, mesh=None, printResult=True, ignoreWeight=0.00001):
+    def getMaxInfluence(self, *args, mesh=None, printResult=True, ignoreWeight=MIN_WEIGHT):
         if not mesh:
             mesh = cmds.ls(sl=True)[0]
         skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
@@ -438,7 +439,7 @@ class SkinWeights(object):
             print('"{}" Max Influence: {}'.format(mesh, maxInf))
         return maxInf
 
-    def fitMaxInfluence(self, *args, ignoreWeight=0.00001):
+    def fitMaxInfluence(self, *args, ignoreWeight=MIN_WEIGHT):
         for mesh in cmds.ls(sl=True):
             meshMaxInfs = self.getMaxInfluence(mesh=mesh, printResult=False)
             targetMaxInfs = int(cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], q=True, v=True))
@@ -455,26 +456,27 @@ class SkinWeights(object):
             skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
 
             # Optimize weights and influences to speed up processing
-            cmds.skinPercent(skinClst, mesh, pruneWeights=0.001)
+            cmds.skinPercent(skinClst, mesh, pruneWeights=MIN_WEIGHT)
             cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
 
             # Set max influences for a skin cluster
             cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
             cmds.setAttr("{}.maxInfluences".format(skinClst), targetMaxInfs)
 
-            vertCount = cmds.polyEvaluate(mesh, v=True)
-            cmds.progressBar('progBar', e=True, min=0, max=vertCount)
-            for i in range(vertCount):
-                if cmds.progressBar('progBar', q=True, isCancelled=True):
-                    print('Fitting max influence job for a "{}" is cancelled.'.format(mesh))
-                    break
-                vert = '{}.vtx[{}]'.format(mesh, i)
-                weights = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, v=True)
-                infs = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, transform=None)
-                itemsToRemove = sorted(zip(weights, infs), reverse=True)[targetMaxInfs:]
-                weightsForRemoveInfs = [(item[1], 0.0) for item in itemsToRemove]
-                cmds.skinPercent(skinClst, vert, transformValue=weightsForRemoveInfs)
-                cmds.progressBar('progBar', e=True, step=1)
+            # vertCount = cmds.polyEvaluate(mesh, v=True)
+            # cmds.progressBar('progBar', e=True, min=0, max=vertCount)
+            # for i in range(vertCount):
+            #     if cmds.progressBar('progBar', q=True, isCancelled=True):
+            #         print('Fitting max influence job for a "{}" is cancelled.'.format(mesh))
+            #         break
+            #     vert = '{}.vtx[{}]'.format(mesh, i)
+            #     weights = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, v=True)
+            #     infs = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, transform=None)
+            #     itemsToRemove = sorted(zip(weights, infs), reverse=True)[targetMaxInfs:]
+            #     weightsForRemoveInfs = [(item[1], 0.0) for item in itemsToRemove]
+            #     cmds.skinPercent(skinClst, vert, transformValue=weightsForRemoveInfs)
+            #     cmds.progressBar('progBar', e=True, step=1)
+            self._setWeights(mesh, skinClst, targetMaxInfs)
             print('Fitting max influence for a "{}" is done.'.format(mesh))
 
             # Remove zero weighted influences
@@ -483,12 +485,55 @@ class SkinWeights(object):
             cmds.progressBar('progBar', e=True, endProgress=True)
             cmds.deleteUI('progWin')
 
+    def _setWeights(self, mesh, skinClst, maxInfs):
+        if cmds.nodeType(mesh) == 'transform':
+            mesh = cmds.listRelatives(mesh, shapes=True, ni=True)[0]
+
+        vertCount = cmds.polyEvaluate(mesh, vertex=True)
+
+        cmds.progressBar('progBar', e=True, min=0, max=vertCount)
+
+        resultMeshWeights = []
+        for i in range(vertCount):
+            vert = '{}.vtx[{}]'.format(mesh, i)
+            weights = cmds.skinPercent(skinClst, vert, q=True, v=True)
+            infs = cmds.skinPercent(skinClst, vert, q=True, transform=None)
+
+            sortedItems = sorted(zip(weights, infs), reverse=True)
+            itemsToKeep = sortedItems[:maxInfs]
+            itemsToRemove = sortedItems[maxInfs:]
+
+            weightToRemove = 0.0
+            for item in itemsToRemove:
+                weightToRemove += item[0]
+            weightToDistribute = weightToRemove / maxInfs
+
+            sortedFinalWeights = [item[0] + weightToDistribute for item in itemsToKeep] + [0.0 for item in itemsToRemove]
+            sortedFinalInfs = [item[1] for item in itemsToKeep] + [item[1] for item in itemsToRemove]
+
+            resultVtxWeights = [sortedFinalWeights[sortedFinalInfs.index(inf)] for inf in infs]
+            resultMeshWeights.extend(resultVtxWeights)
+
+            cmds.progressBar('progBar', e=True, step=1)
+        resultMeshWeights = om.MDoubleArray(resultMeshWeights)
+
+        sels = om.MSelectionList()
+        sels.add(mesh)
+        sels.add(skinClst)
+        meshDag = sels.getDagPath(0)
+        skObj = sels.getDependNode(1)
+        cpntFn = om.MFnSingleIndexedComponent()
+        cpntObj = cpntFn.create(om.MFn.kMeshVertComponent)
+        cpntFn.setCompleteData(vertCount)
+        skFn = oma.MFnSkinCluster(skObj)
+        infIds = om.MIntArray([id for id in range(len(skFn.influenceObjects()))])
+        skFn.setWeights(meshDag, cpntObj, infIds, resultMeshWeights)
+
     @staticmethod
     def copyPasteWeight(*args):
         '''
         Copy first vertex skin weights in selection list and paste to the others.
         '''
-
         selVtxs = cmds.ls(os=True, fl=True)
         srcVtx = selVtxs[0]
         trgVtxs = selVtxs[1:]
@@ -498,66 +543,6 @@ class SkinWeights(object):
         cmds.select(trgVtxs, r=True)
         mel.eval('artAttrSkinWeightPaste;')
         cmds.select(srcVtx, add=True)
-
-    @staticmethod
-    def smoothSkinWeights(*args):
-        selLs = om.MSelectionList()
-        om.MGlobal.getActiveSelectionList(selLs)
-        selShape = om.MDagPath()
-        selLs.getDagPath(0, selShape)
-        selShape.extendToShape()
-        skinClst = SkinWeights.getSkinCluster(selShape)
-
-        vtxIt = om.MItMeshVertex(selShape)
-        neighborVtxs = om.MIntArray()
-        singleIndexComponentFn = om.MFnSingleIndexedComponent()
-        weights = om.MDoubleArray()
-        util = om.MScriptUtil()
-        numInf = util.asUintPtr()
-        influenceIndices = om.MIntArray()
-        while not vtxIt.isDone():
-            weightsList = []
-            vtxIt.getConnectedVertices(neighborVtxs)
-            for vtxId in neighborVtxs:
-                component = singleIndexComponentFn.create(om.MFn.kMeshVertComponent)
-                singleIndexComponentFn.addElement(vtxId)
-                skinClst.getWeights(selShape, component, weights, numInf)
-                weightsList.append(weights)
-            averageWeights = [item/len(neighborVtxs) for item in map(sum, zip(*weightsList))]
-            skinClst.setWeights(selShape,
-                                vtxIt.currentItem(),
-                                createIntArrayFromList(range(util.getUint(numInf))),
-                                createDoubleArrayFromList(averageWeights))
-            vtxIt.next()
-
-    @staticmethod
-    def getSkinCluster(shape):
-        """
-        Parameters:
-            shape<MDagPath>: Shape dag path
-        """
-        dgIt = om.MItDependencyGraph(shape.node(), om.MFn.kSkinClusterFilter, om.MItDependencyGraph.kUpstream)
-        skinClst = None
-        while not dgIt.isDone():
-            skinClst = oma.MFnSkinCluster(dgIt.currentItem())
-            dgIt.next()
-        return skinClst
-
-
-
-def createIntArrayFromList(list):
-    intArray = om.MIntArray()
-    for item in list:
-        intArray.append(item)
-    return intArray
-
-
-def createDoubleArrayFromList(list):
-    doubleArray = om.MDoubleArray()
-    for item in list:
-        doubleArray.append(item)
-    return doubleArray
-
 
 def selectVtxRing(*args):
     mel.eval('PolySelectConvert 20;')

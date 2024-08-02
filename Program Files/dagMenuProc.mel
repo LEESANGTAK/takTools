@@ -821,9 +821,6 @@ global proc createSelectMenuItems(string $parent, string $item, int $defaultItem
 		}
 	}
 
-	if (`exists xgenSelectMenuItems`)
-		xgenSelectMenuItems $parent $item;
-
 //	for ($i = 0; $i < size($maskList); $i++) {
 //       $itemName = "SELM" + string($i);
 //			setParent -menu $parent;
@@ -1041,9 +1038,6 @@ proc setUpArtisanSkinContext(string $parent, string $object)
 //
 global proc dagMenuProc(string $parent, string $object)
 {
-	print("\n");
-	print($object);
-
 	int $defaultObject = ($object == "");
 	if ($defaultObject) {
 		// MAYA-67156: If object under the the cursor is not selected or highlighted
@@ -1395,9 +1389,12 @@ global proc dagMenuProc(string $parent, string $object)
 
 // Custom menu related procedures
 global proc int isComponentSelected() {
-	string $sels[] = `ls -sl -fl`;
-	string $selsString = stringArrayToString($sels, "");
-	return `gmatch $selsString "*.*"`;
+	string $sels[] = `ls -sl`;
+	string $filteredCpnts[] = `filterExpand -sm 31 -sm 32 -sm 34`;
+	if (size($filteredCpnts) > 0) {
+		return 1;
+	}
+	return 0;
 }
 
 global proc setSkinWeightSelect(string $joint, float $weight) {
