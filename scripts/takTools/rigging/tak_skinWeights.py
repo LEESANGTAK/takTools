@@ -22,6 +22,10 @@ import maya.api.OpenMaya as om
 import maya.api.OpenMayaAnim as oma
 import pymel.core as pm
 
+from ..utils import decorators
+from imp import reload
+reload(decorators)
+
 MODULE_NAME = 'takTools'
 MODULE_DIR = os.path.dirname(__file__).split(MODULE_NAME, 1)[0] + MODULE_NAME
 CUSTOM_DAG_MENU_FILE = '{}\\Program Files\\dagMenuProc.mel'.format(MODULE_DIR).replace('\\', '/')
@@ -68,7 +72,7 @@ class SkinWeights(object):
         self.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy and Paste', c=SkinWeights.copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
         self.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
         self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
-        self.uiWidgets['pruneMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Prune Small Weights', c="mel.eval('PruneSmallWeights;')")
+        self.uiWidgets['pruneMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Prune Small Weights', c=SkinWeights.prunSkinWeights)
         self.uiWidgets['rmvUnusedInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Remove Unused Influences', c="mel.eval('removeUnusedInfluences;')")
         self.uiWidgets['optMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Options')
         self.uiWidgets['hideZroInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['optMenu'], checkBox=True,
@@ -135,7 +139,7 @@ class SkinWeights(object):
         cmds.button(p=self.uiWidgets['wghtTrsfRowColLo'], label='Transfer', c=self.transferWeights)
 
         self.uiWidgets['maxInfRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=3, columnSpacing=[(1, 2), (2, 2), (3, 2)])
-        cmds.button(p=self.uiWidgets['maxInfRowColLo'], label='Check Max Influences', c=self.getMaxInfluence)
+        cmds.button(p=self.uiWidgets['maxInfRowColLo'], label='Max Influences', c=self.getMaxInfluence)
         self.uiWidgets['maxInfsOptMenu'] = cmds.optionMenu(p=self.uiWidgets['maxInfRowColLo'], label='Max Influences:')
         cmds.menuItem(label='4')
         cmds.menuItem(label='8')
@@ -436,10 +440,25 @@ class SkinWeights(object):
             numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{}]'.format(mesh, i), q=True, ignoreBelow=ignoreWeight, v=True)))
         maxInf = max(numInfsPerVtx)
         if printResult:
-            print('"{}" Max Influence: {}'.format(mesh, maxInf))
+            print('"{}" Max Influences: {}'.format(mesh, maxInf))
         return maxInf
 
-    def fitMaxInfluence(self, *args, ignoreWeight=MIN_WEIGHT):
+    @staticmethod
+    def prunSkinWeights(skinCluster=None, mesh=None, threshold=MIN_WEIGHT):
+        if not mesh:
+            # Try to get a mesh from selection
+            meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
+            if not meshes:
+                return
+            mesh = meshes[0]
+
+        if not skinCluster:
+            skinCluster = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
+
+        cmds.skinPercent(skinCluster, mesh, pruneWeights=threshold)
+
+    @decorators.printElapsedTime
+    def fitMaxInfluence(self, *args):
         for mesh in cmds.ls(sl=True):
             meshMaxInfs = self.getMaxInfluence(mesh=mesh, printResult=False)
             targetMaxInfs = int(cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], q=True, v=True))
@@ -456,26 +475,13 @@ class SkinWeights(object):
             skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
 
             # Optimize weights and influences to speed up processing
-            cmds.skinPercent(skinClst, mesh, pruneWeights=MIN_WEIGHT)
+            SkinWeights.prunSkinWeights(skinClst, mesh)
             cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
 
             # Set max influences for a skin cluster
             cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
             cmds.setAttr("{}.maxInfluences".format(skinClst), targetMaxInfs)
 
-            # vertCount = cmds.polyEvaluate(mesh, v=True)
-            # cmds.progressBar('progBar', e=True, min=0, max=vertCount)
-            # for i in range(vertCount):
-            #     if cmds.progressBar('progBar', q=True, isCancelled=True):
-            #         print('Fitting max influence job for a "{}" is cancelled.'.format(mesh))
-            #         break
-            #     vert = '{}.vtx[{}]'.format(mesh, i)
-            #     weights = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, v=True)
-            #     infs = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, transform=None)
-            #     itemsToRemove = sorted(zip(weights, infs), reverse=True)[targetMaxInfs:]
-            #     weightsForRemoveInfs = [(item[1], 0.0) for item in itemsToRemove]
-            #     cmds.skinPercent(skinClst, vert, transformValue=weightsForRemoveInfs)
-            #     cmds.progressBar('progBar', e=True, step=1)
             self._setWeights(mesh, skinClst, targetMaxInfs)
             print('Fitting max influence for a "{}" is done.'.format(mesh))
 
@@ -496,22 +502,17 @@ class SkinWeights(object):
         resultMeshWeights = []
         for i in range(vertCount):
             vert = '{}.vtx[{}]'.format(mesh, i)
-            weights = cmds.skinPercent(skinClst, vert, q=True, v=True)
             infs = cmds.skinPercent(skinClst, vert, q=True, transform=None)
+            weights = cmds.skinPercent(skinClst, vert, q=True, v=True)
+            infWeightMap = dict(zip(infs, weights))
 
-            sortedItems = sorted(zip(weights, infs), reverse=True)
-            itemsToKeep = sortedItems[:maxInfs]
-            itemsToRemove = sortedItems[maxInfs:]
+            sortedItems = sorted(infWeightMap.items(), key=lambda item: item[1], reverse=True)
+            prunedItems = sortedItems[:maxInfs] + [(jnt, 0.0) for jnt, w in sortedItems[maxInfs:]]
 
-            weightToRemove = 0.0
-            for item in itemsToRemove:
-                weightToRemove += item[0]
-            weightToDistribute = weightToRemove / maxInfs
+            totalWeight = sum([item[1] for item in prunedItems])
+            prunedItemsNormalizedMap = dict([(jnt, weight/totalWeight) for jnt, weight in prunedItems])
 
-            sortedFinalWeights = [item[0] + weightToDistribute for item in itemsToKeep] + [0.0 for item in itemsToRemove]
-            sortedFinalInfs = [item[1] for item in itemsToKeep] + [item[1] for item in itemsToRemove]
-
-            resultVtxWeights = [sortedFinalWeights[sortedFinalInfs.index(inf)] for inf in infs]
+            resultVtxWeights = [prunedItemsNormalizedMap.get(inf) for inf in infs]
             resultMeshWeights.extend(resultVtxWeights)
 
             cmds.progressBar('progBar', e=True, step=1)

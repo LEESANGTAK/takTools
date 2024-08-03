@@ -289,7 +289,7 @@ def doneEditSkinMesh(tempSkin, skinMesh):
 def SSD(geo):
     influences = getInfluences(geo)
     topInfluence = globalUtil.getTopDagNode(influences)
-    pm.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=4)
+    pm.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=8)
 
 
 def saveBSkin(mesh, outputDir):
@@ -332,3 +332,37 @@ def fitMaxInfluence(mesh, goalMaxInfluence=8, ignoreWeight=0.00001):
                 cmds.skinPercent(skinClst, vert, transformValue=[(item[1], 0.0)])
 
     print('# Fit max influence is done successfully!')
+
+
+def prune_small_weights(mesh, threshold=0.05):
+    # Get the skin cluster associated with the mesh
+    skin_clusters = cmds.ls(cmds.listHistory(mesh), type='skinCluster')
+    if not skin_clusters:
+        raise RuntimeError(f"No skinCluster found for mesh: {mesh}")
+    skin_cluster = skin_clusters[0]
+
+    # Get the list of influences (joints) affecting the skin cluster
+    influences = cmds.skinCluster(skin_cluster, query=True, influence=True)
+
+    # Iterate over each vertex in the mesh
+    vertices = cmds.ls(f"{mesh}.vtx[*]", flatten=True)
+    for vertex in vertices:
+        # Get current weights for the vertex
+        weights = cmds.skinPercent(skin_cluster, vertex, query=True, value=True)
+
+        # Create a dictionary of influence-weight pairs
+        weight_dict = dict(zip(influences, weights))
+
+        # Prune weights below the threshold
+        pruned_weights = {joint: weight for joint, weight in weight_dict.items() if weight >= threshold}
+
+        # Normalize the remaining weights
+        total_weight = sum(pruned_weights.values())
+        if total_weight > 0:
+            normalized_weights = {joint: weight / total_weight for joint, weight in pruned_weights.items()}
+        else:
+            normalized_weights = {joint: 0 for joint in influences}  # If all weights are pruned, set to 0
+
+        # Apply the normalized weights back to the vertex
+        for joint, weight in normalized_weights.items():
+            cmds.skinPercent(skin_cluster, vertex, transformValue=[(joint, weight)])
