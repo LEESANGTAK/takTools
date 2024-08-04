@@ -443,27 +443,13 @@ class SkinWeights(object):
             print('"{}" Max Influences: {}'.format(mesh, maxInf))
         return maxInf
 
-    @staticmethod
-    def prunSkinWeights(skinCluster=None, mesh=None, threshold=MIN_WEIGHT):
-        if not mesh:
-            # Try to get a mesh from selection
-            meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
-            if not meshes:
-                return
-            mesh = meshes[0]
-
-        if not skinCluster:
-            skinCluster = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
-
-        cmds.skinPercent(skinCluster, mesh, pruneWeights=threshold)
-
     @decorators.printElapsedTime
     def fitMaxInfluence(self, *args):
         for mesh in cmds.ls(sl=True):
             meshMaxInfs = self.getMaxInfluence(mesh=mesh, printResult=False)
             targetMaxInfs = int(cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], q=True, v=True))
             if meshMaxInfs <= targetMaxInfs:
-                print('"{}"s max influence is {}. Skip processing.'.format(mesh, meshMaxInfs))
+                print('"{}"s max influence is {} already. Skip processing.'.format(mesh, meshMaxInfs))
                 continue
 
             # Create progress window
@@ -482,8 +468,9 @@ class SkinWeights(object):
             cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
             cmds.setAttr("{}.maxInfluences".format(skinClst), targetMaxInfs)
 
-            self._setWeights(mesh, skinClst, targetMaxInfs)
-            print('Fitting max influence for a "{}" is done.'.format(mesh))
+            infPrunedWeights = SkinWeights.pruneSkinInfluences(mesh, skinClst, targetMaxInfs)
+            SkinWeights.setWeights(mesh, skinClst, infPrunedWeights)
+            print('Fitting max influence for the "{}" is done.'.format(mesh))
 
             # Remove zero weighted influences
             cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
@@ -491,7 +478,22 @@ class SkinWeights(object):
             cmds.progressBar('progBar', e=True, endProgress=True)
             cmds.deleteUI('progWin')
 
-    def _setWeights(self, mesh, skinClst, maxInfs):
+    @staticmethod
+    def prunSkinWeights(skinCluster=None, mesh=None, threshold=MIN_WEIGHT):
+        if not mesh:
+            # Try to get a mesh from selection
+            meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
+            if not meshes:
+                return
+            mesh = meshes[0]
+
+        if not skinCluster:
+            skinCluster = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
+
+        cmds.skinPercent(skinCluster, mesh, pruneWeights=threshold)
+
+    @staticmethod
+    def pruneSkinInfluences(mesh, skinClst, maxInfs):
         if cmds.nodeType(mesh) == 'transform':
             mesh = cmds.listRelatives(mesh, shapes=True, ni=True)[0]
 
@@ -516,19 +518,26 @@ class SkinWeights(object):
             resultMeshWeights.extend(resultVtxWeights)
 
             cmds.progressBar('progBar', e=True, step=1)
-        resultMeshWeights = om.MDoubleArray(resultMeshWeights)
 
+        return resultMeshWeights
+
+    @staticmethod
+    def setWeights(mesh, skinClst, weights):
         sels = om.MSelectionList()
         sels.add(mesh)
         sels.add(skinClst)
         meshDag = sels.getDagPath(0)
         skObj = sels.getDependNode(1)
+
         cpntFn = om.MFnSingleIndexedComponent()
         cpntObj = cpntFn.create(om.MFn.kMeshVertComponent)
+        vertCount = cmds.polyEvaluate(mesh, vertex=True)
         cpntFn.setCompleteData(vertCount)
+
         skFn = oma.MFnSkinCluster(skObj)
         infIds = om.MIntArray([id for id in range(len(skFn.influenceObjects()))])
-        skFn.setWeights(meshDag, cpntObj, infIds, resultMeshWeights)
+        weights = om.MDoubleArray(weights)
+        skFn.setWeights(meshDag, cpntObj, infIds, weights)
 
     @staticmethod
     def copyPasteWeight(*args):

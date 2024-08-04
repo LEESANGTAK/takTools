@@ -307,62 +307,30 @@ def loadBSkin(skinFile):
     bsk.bLoadSkinValues(True, skinFile)
 
 
-def getMaxInfluence(mesh, ignoreWeight):
-    skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
-    vertCount = cmds.polyEvaluate(mesh, v=True)
-    numInfsPerVtx = []
-    for i in range(vertCount):
-        numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{}]'.format(mesh, i), q=True, ignoreBelow=ignoreWeight, v=True)))
-    return max(numInfsPerVtx)
+def pruneSkinInfluences(mesh, skinClst, maxInfs):
+    if cmds.nodeType(mesh) == 'transform':
+        mesh = cmds.listRelatives(mesh, shapes=True, ni=True)[0]
 
+    vertCount = cmds.polyEvaluate(mesh, vertex=True)
 
-def fitMaxInfluence(mesh, goalMaxInfluence=8, ignoreWeight=0.00001):
-    skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
-    cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
-    cmds.setAttr("{}.maxInfluences".format(skinClst), goalMaxInfluence)
-    vertCount = cmds.polyEvaluate(mesh, v=True)
+    cmds.progressBar('progBar', e=True, min=0, max=vertCount)
 
+    resultMeshWeights = []
     for i in range(vertCount):
         vert = '{}.vtx[{}]'.format(mesh, i)
-        weights = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, v=True)
-        infs = cmds.skinPercent(skinClst, vert, q=True, ignoreBelow=ignoreWeight, transform=None)
-        itemsToRemove = sorted(zip(weights, infs), reverse=True)[goalMaxInfluence:]
-        if itemsToRemove:
-            for item in itemsToRemove:
-                cmds.skinPercent(skinClst, vert, transformValue=[(item[1], 0.0)])
+        infs = cmds.skinPercent(skinClst, vert, q=True, transform=None)
+        weights = cmds.skinPercent(skinClst, vert, q=True, v=True)
+        infWeightMap = dict(zip(infs, weights))
 
-    print('# Fit max influence is done successfully!')
+        sortedItems = sorted(infWeightMap.items(), key=lambda item: item[1], reverse=True)
+        prunedItems = sortedItems[:maxInfs] + [(jnt, 0.0) for jnt, w in sortedItems[maxInfs:]]
 
+        totalWeight = sum([item[1] for item in prunedItems])
+        prunedItemsNormalizedMap = dict([(jnt, weight/totalWeight) for jnt, weight in prunedItems])
 
-def prune_small_weights(mesh, threshold=0.05):
-    # Get the skin cluster associated with the mesh
-    skin_clusters = cmds.ls(cmds.listHistory(mesh), type='skinCluster')
-    if not skin_clusters:
-        raise RuntimeError(f"No skinCluster found for mesh: {mesh}")
-    skin_cluster = skin_clusters[0]
+        resultVtxWeights = [prunedItemsNormalizedMap.get(inf) for inf in infs]
+        resultMeshWeights.extend(resultVtxWeights)
 
-    # Get the list of influences (joints) affecting the skin cluster
-    influences = cmds.skinCluster(skin_cluster, query=True, influence=True)
+        cmds.progressBar('progBar', e=True, step=1)
 
-    # Iterate over each vertex in the mesh
-    vertices = cmds.ls(f"{mesh}.vtx[*]", flatten=True)
-    for vertex in vertices:
-        # Get current weights for the vertex
-        weights = cmds.skinPercent(skin_cluster, vertex, query=True, value=True)
-
-        # Create a dictionary of influence-weight pairs
-        weight_dict = dict(zip(influences, weights))
-
-        # Prune weights below the threshold
-        pruned_weights = {joint: weight for joint, weight in weight_dict.items() if weight >= threshold}
-
-        # Normalize the remaining weights
-        total_weight = sum(pruned_weights.values())
-        if total_weight > 0:
-            normalized_weights = {joint: weight / total_weight for joint, weight in pruned_weights.items()}
-        else:
-            normalized_weights = {joint: 0 for joint in influences}  # If all weights are pruned, set to 0
-
-        # Apply the normalized weights back to the vertex
-        for joint, weight in normalized_weights.items():
-            cmds.skinPercent(skin_cluster, vertex, transformValue=[(joint, weight)])
+    return resultMeshWeights
