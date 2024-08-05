@@ -1,8 +1,6 @@
 """
-Author: Sang-tak Lee
+Author: Tak
 Website: ta-note.com
-Created: 09/16/2015
-Updated: 10/06/2020
 
 Description:
 You can assign specific numeric value to the selected vertices skin weights like using component editor.
@@ -23,12 +21,11 @@ import maya.api.OpenMayaAnim as oma
 import pymel.core as pm
 
 from ..utils import decorators
-from imp import reload
-reload(decorators)
+
 
 MODULE_NAME = 'takTools'
 MODULE_DIR = os.path.dirname(__file__).split(MODULE_NAME, 1)[0] + MODULE_NAME
-CUSTOM_DAG_MENU_FILE = '{}\\Program Files\\dagMenuProc.mel'.format(MODULE_DIR).replace('\\', '/')
+CUSTOM_DAG_MENU_FILE = '{}\\scripts\\mel\\dagMenuProc.mel'.format(MODULE_DIR).replace('\\', '/')
 ORIG_DAG_MENU_FILE = "C:/Program Files/Autodesk/Maya{}/scripts/others/dagMenuProc.mel".format(cmds.about(v=True))
 WIN_NAME = 'takSkinWeightsWin'
 MIN_WEIGHT = 0.00001
