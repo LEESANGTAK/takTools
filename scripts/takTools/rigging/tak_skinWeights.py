@@ -139,7 +139,7 @@ class SkinWeights(object):
         cmds.button(p=self.uiWidgets['wghtTrsfRowColLo'], label='Transfer', c=self.transferWeights)
 
         self.uiWidgets['maxInfRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=3, columnSpacing=[(1, 2), (2, 2), (3, 2)])
-        cmds.button(p=self.uiWidgets['maxInfRowColLo'], label='Max Influences', c=self.getMaxInfluence)
+        cmds.button(p=self.uiWidgets['maxInfRowColLo'], label='Max Influences', c=SkinWeights.checkMaxInfluences)
         self.uiWidgets['maxInfsOptMenu'] = cmds.optionMenu(p=self.uiWidgets['maxInfRowColLo'], label='Max Influences:')
         cmds.menuItem(label='4')
         cmds.menuItem(label='8')
@@ -155,15 +155,10 @@ class SkinWeights(object):
         Main method.
         Populate influence and weight value text scroll list.
         '''
-
-        cmds.undoInfo(openChunk=True)
-
         # Deactivate influences object color
         if self.infTxtScrLsCurrentAllItems:
             for inf in self.infTxtScrLsCurrentAllItems:
                 SkinWeights.unuseObjectColor(inf)
-
-        cmds.undoInfo(closeChunk=True)
 
         # Get options
         hideZroInfOpt = cmds.menuItem(self.uiWidgets['hideZroInfMenuItem'], q=True, checkBox=True)
@@ -430,23 +425,10 @@ class SkinWeights(object):
         # Refresh influence text scroll list.
         self.loadInf()
 
-    def getMaxInfluence(self, *args, mesh=None, printResult=True, ignoreWeight=MIN_WEIGHT):
-        if not mesh:
-            mesh = cmds.ls(sl=True)[0]
-        skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
-        vertCount = cmds.polyEvaluate(mesh, v=True)
-        numInfsPerVtx = []
-        for i in range(vertCount):
-            numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{}]'.format(mesh, i), q=True, ignoreBelow=ignoreWeight, v=True)))
-        maxInf = max(numInfsPerVtx)
-        if printResult:
-            print('"{}" Max Influences: {}'.format(mesh, maxInf))
-        return maxInf
-
     @decorators.printElapsedTime
     def fitMaxInfluence(self, *args):
         for mesh in cmds.ls(sl=True):
-            meshMaxInfs = self.getMaxInfluence(mesh=mesh, printResult=False)
+            meshMaxInfs = SkinWeights.getMaxInfluences(mesh)
             targetMaxInfs = int(cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], q=True, v=True))
             if meshMaxInfs <= targetMaxInfs:
                 print('"{}"s max influence is {} already. Skip processing.'.format(mesh, meshMaxInfs))
@@ -477,6 +459,25 @@ class SkinWeights(object):
 
             cmds.progressBar('progBar', e=True, endProgress=True)
             cmds.deleteUI('progWin')
+
+    @staticmethod
+    def getMaxInfluences(mesh=None, ignoreWeight=MIN_WEIGHT):
+        if not mesh:
+            mesh = cmds.ls(sl=True)[0]
+        skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
+        vertCount = cmds.polyEvaluate(mesh, v=True)
+        numInfsPerVtx = []
+        for i in range(vertCount):
+            numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{}]'.format(mesh, i), q=True, ignoreBelow=ignoreWeight, v=True)))
+        maxInfs = max(numInfsPerVtx)
+        return maxInfs
+
+    @staticmethod
+    def checkMaxInfluences(*args):
+        meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
+        for mesh in meshes:
+            maxInfs = SkinWeights.getMaxInfluences(mesh)
+            print('"{}" Max Influences: {}'.format(mesh, maxInfs))
 
     @staticmethod
     def prunSkinWeights(skinCluster=None, mesh=None, threshold=MIN_WEIGHT):
