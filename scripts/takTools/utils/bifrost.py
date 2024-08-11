@@ -5,7 +5,7 @@ if not pm.pluginInfo('bifrostGraph', q=True, loaded=True):
     pm.loadPlugin('bifrostGraph')
 
 
-def convertToCageMesh(mesh, detailSize=0.02, faceCount=1000, keepOriginal=True):
+def convertToCageMesh(mesh, detailSize=0.02, faceCount=500, keepHardEdge=False, symmetry=False):
     # It takes long time and produce not good result when below 0.01 value for the detail size
     detailSize = max(detailSize, 0.01)
 
@@ -41,9 +41,7 @@ def convertToCageMesh(mesh, detailSize=0.02, faceCount=1000, keepOriginal=True):
 
     pm.delete(cageMesh, ch=True)
     pm.delete(bfGraph.getParent())
-
-    if not keepOriginal:
-        pm.delete(mesh)
+    pm.delete(mesh)
 
     # Clean up cage mesh
     largestArea = 0.0
@@ -69,13 +67,18 @@ def convertToCageMesh(mesh, detailSize=0.02, faceCount=1000, keepOriginal=True):
     pm.polyRetopo(
         cageMesh,
         ch=False,
+        symmetry=symmetry,
+        axisPosition=1,
+        axisOffset=0,
+        axis=1,
         replaceOriginal=True,
-        preserveHardEdges=True,
+        preprocessMesh=True,
+        preserveHardEdges=keepHardEdge,
         topologyRegularity=1.0,
-        faceUniformity=1.0,
+        faceUniformity=0.0,
         anisotropy=0.75,
+        targetFaceCount=faceCount,
         targetFaceCountTolerance=10,
-        targetFaceCount=faceCount
     )
 
     return cageMesh
@@ -83,16 +86,32 @@ def convertToCageMesh(mesh, detailSize=0.02, faceCount=1000, keepOriginal=True):
 
 def showConvertToCageMeshUI():
     def applyBtnCallback(*args):
-        mesh = pm.selected()[0]
+        meshes = pm.filterExpand(pm.selected(), sm=12)
+        dupMeshes = pm.duplicate(meshes, rc=True)
+        if len(dupMeshes) > 1:
+            mesh = pm.polyUnite(dupMeshes, ch=False)[0]
+        else:
+            mesh = dupMeshes[0]
+
         detailSize = pm.floatFieldGrp('detailSizeFloatFld', q=True, v1=True)
         faceCount = pm. intFieldGrp('faceCountIntFld', q=True, v1=True)
-        keepOrig = pm.checkBoxGrp('keepOrigChkbox', q=True, v1=True)
-        convertToCageMesh(mesh, detailSize, faceCount, keepOrig)
+        keepHardEdges = pm.checkBoxGrp('retopoOptions', q=True, v1=True)
+        symmetry = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
+        convertToCageMesh(mesh, detailSize, faceCount, keepHardEdges, symmetry)
+        pm.delete(dupMeshes)
 
     pm.window(title='Create Cage Mesh', mnb=False, mxb=False)
-    pm.columnLayout(adj=True)
-    pm.floatFieldGrp('detailSizeFloatFld', label='Detail Size:', v1=0.02, pre=3, columnWidth=[(1,80)])
-    pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=1000, columnWidth=[(1,80)])
-    pm.checkBoxGrp('keepOrigChkbox', label='Keep Original', v1=True, columnWidth=[(1,80)])
+    pm.columnLayout(adj=True, cal='left')
+
+    pm.text(label='Volume Mesh Settings')
+    pm.floatFieldGrp('detailSizeFloatFld', label='Detail Size:', v1=0.02, pre=3, columnWidth=[(1, 60)])
+
+    pm.separator()
+
+    pm.text(label='Retopology Settings')
+    pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=500, columnWidth=[(1, 60)])
+    pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=2, label='', labelArray2=['Keep Hard Edges', 'Symmetry'], v1=1, columnWidth=[(1, 10)])
+
     pm.button(label='Apply', c=applyBtnCallback)
+
     pm.showWindow()
