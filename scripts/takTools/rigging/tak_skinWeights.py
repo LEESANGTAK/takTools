@@ -66,6 +66,7 @@ class SkinWeights(object):
 
         self.uiWidgets['mainMenuBarLo'] = cmds.menuBarLayout(p=WIN_NAME)
         self.uiWidgets['editMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Edit')
+        self.uiWidgets['skinIOMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Skin I/O...', c=SkinWeights.showSkinIOGUI, ann='Import/Export skin weights for selected geometries.')
         self.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy and Paste', c=SkinWeights.copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
         self.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
         self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
@@ -536,6 +537,28 @@ class SkinWeights(object):
         infIds = om.MIntArray([id for id in range(len(skFn.influenceObjects()))])
         weights = om.MDoubleArray(weights)
         skFn.setWeights(meshDag, cpntObj, infIds, weights)
+
+    @staticmethod
+    def showSkinIOGUI(*args):
+        from ..utils import skin as skUtil
+
+        def importSkin(skinDirectory, *args):
+            for skinFile in os.listdir(skinDirectory):
+                skUtil.loadBSkin(os.path.join(skinDirectory, skinFile))
+
+        def exportSkin(skinDirectory, *args):
+            meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
+            if not meshes:
+                return
+            for mesh in meshes:
+                skUtil.saveBSkin(mesh, skinDirectory)
+
+        cmds.window(title='Skin I/O', p=WIN_NAME)
+        cmds.columnLayout(adj=True)
+        cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', label='Skin Directory:', buttonLabel='...')
+        cmds.button(label='Import', c=lambda x: importSkin(cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', q=True, text=True)))
+        cmds.button(label='Export', c=lambda x: exportSkin(cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', q=True, text=True)))
+        cmds.showWindow()
 
     @staticmethod
     def copyPasteWeight(*args):
