@@ -230,6 +230,7 @@ def UI():
     cmds.shelfButton(annotation = 'Convert mash to joints', width = 35, height = 35, imageOverlayLabel = 'MASHtoJoints', image1 = 'pythonFamily.png', command = 'from maya import cmds\nfrom takTools.utils import MASH as mashUtil\nimport imp\nimp.reload(mashUtil)\n\nwaiter = cmds.ls(sl=True)[0]\njoints = mashUtil.buildJoints(waiter)\nmashUtil.buildSkinMesh(waiter, joints)', sourceType = 'python')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = 'Fold', image1 = 'commandButton.png', command = 'source makeFoldingRig.mel;', sourceType = 'mel')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'autoSwim.bmp', command = 'import takTools.rigging.tak_autoSwim as tak_autoSwim\nimport imp\nimp.reload(tak_autoSwim)\ntak_autoSwim.UI()', sourceType = 'python')
+    cmds.shelfButton(annotation = 'Show js_rotationOrderWin', width = 35, height = 35, imageOverlayLabel = '', image1 = 'rotate_M.png', command = 'source "js_rotationOrderWin.mel";\njs_rotationOrderWin();', sourceType = 'mel')
 
 
     # animation tab
@@ -478,6 +479,7 @@ SHELF_LIST = ['Common',
 'Modeling_Display', 'Modeling_Selection', 'Modeling_Edit_Component', 'Modeling_Edit_Mesh', 'Modeling_Material', 'Modeling_Extra_Tools',
 'Fx_Particle', 'Fx_RBD', 'Fx_Volume', 'Fx_Fluid',
 'Misc_Misc', 'Misc_Temp']
+START_SHELFS = ['Rigging_Display', 'Animation_Control_Select', 'Modeling_Display', 'Fx_Particle', 'Misc_Misc']
 
 
 def saveTools(*args):
@@ -557,6 +559,8 @@ def addToolUi(*args):
 
     cmds.optionMenu('shlfOptMenu', label = 'Shelf: ')
     for shelf in SHELF_LIST:
+        if shelf in START_SHELFS:
+            cmds.menuItem(divider=True)
         cmds.menuItem(label = shelf, p = 'shlfOptMenu')
     cmds.textFieldGrp('annoTxtFldGrp', columnWidth = [(1, 110), (2, 100)], label = 'Annotation: ')
     cmds.textFieldButtonGrp('imgTxtFldBtnGrp', columnWidth = [(1, 110), (2, 100)], label = 'Image: ', buttonLabel = '...', bc = partial(loadImgPath, 'imgTxtFldBtnGrp'))

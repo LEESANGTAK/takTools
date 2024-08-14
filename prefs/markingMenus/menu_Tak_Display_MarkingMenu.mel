@@ -508,6 +508,27 @@
         menuEditorMenuItem11;
 
     menuItem
+        -label "X-Ray Joints" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -jointXray $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -jointXray true $modelPan;\n    } else {\n        modelEditor -e -jointXray false $modelPan;\n    }\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "XRayJoints.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem21;
+
+    menuItem
         -label "Joint Size" 
         -divider 0
         -subMenu 0
@@ -542,7 +563,7 @@
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem20;
@@ -586,7 +607,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem18;
+        menuEditorMenuItem15;
 
     menuItem
         -label "Color Feedback" 
