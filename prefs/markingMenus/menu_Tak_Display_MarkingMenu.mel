@@ -176,6 +176,111 @@
         menuEditorMenuItem5;
 
     menuItem
+        -label "Wireframe On Shaded" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -wireframeOnShaded $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -wireframeOnShaded true $modelPan;\n    } else {\n        modelEditor -e -wireframeOnShaded false $modelPan;\n    }\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "WireFrameOnShaded.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem18;
+
+    menuItem
+        -label "X-Ray Joints" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -jointXray $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -jointXray true $modelPan;\n    } else {\n        modelEditor -e -jointXray false $modelPan;\n    }\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "XRayJoints.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem21;
+
+    menuItem
+        -label "Joint Size" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "jdsWin" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "kinJoint.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem12;
+
+    menuItem
+        -label "Local Axis On" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state on -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"joint\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state on -localAxis $jnt;\n    }\n}\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "channelBoxUseManips.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem10;
+
+    menuItem
+        -label "Local Axis Off" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"joint\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "channelBoxUseManips.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem11;
+
+    menuItem
         -label "Component" 
         -divider 0
         -subMenu 1
@@ -464,90 +569,6 @@
             menuEditorMenuItem7;
 
     setParent -m ..;
-
-    menuItem
-        -label "Local Axis On" 
-        -divider 0
-        -subMenu 0
-        -tearOff 0
-        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state on -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"joint\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state on -localAxis $jnt;\n    }\n}\n}" 
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -image "channelBoxUseManips.png" 
-        -echoCommand 0
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem10;
-
-    menuItem
-        -label "Local Axis Off" 
-        -divider 0
-        -subMenu 0
-        -tearOff 0
-        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"joint\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\n}" 
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -image "channelBoxUseManips.png" 
-        -echoCommand 0
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem11;
-
-    menuItem
-        -label "X-Ray Joints" 
-        -divider 0
-        -subMenu 0
-        -tearOff 0
-        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -jointXray $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -jointXray true $modelPan;\n    } else {\n        modelEditor -e -jointXray false $modelPan;\n    }\n}" 
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -image "XRayJoints.png" 
-        -echoCommand 0
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem21;
-
-    menuItem
-        -label "Joint Size" 
-        -divider 0
-        -subMenu 0
-        -tearOff 0
-        -command "jdsWin" 
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -image "kinJoint.png" 
-        -echoCommand 0
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem12;
 
     menuItem
         -label "separator" 
