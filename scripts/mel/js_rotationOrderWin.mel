@@ -12,7 +12,7 @@ global proc js_rotationOrderWin ()
 {
     // This procedure creates a window to quickly set the rotationOrder on the selected
     // objects.
-    
+
     $win = "js_rotOrderWin";
     if (`window -exists $win`)
         deleteUI $win;
@@ -35,9 +35,9 @@ global proc js_rotationOrderWin ()
         -af js_rotOrderOMG right 5
 
         -ac js_rotOrderB top 5 js_rotOrderOMG
-        -af js_rotOrderB left 5 
-        -af js_rotOrderB right 5 
-        -af js_rotOrderB bottom 5 
+        -af js_rotOrderB left 5
+        -af js_rotOrderB right 5
+        -af js_rotOrderB bottom 5
         $f;
 
     showWindow $win;
@@ -48,14 +48,11 @@ global proc js_rotationOrderPrepCmd ()
 
     // find out what the user picked from the optionMenuGrp
     $item = `optionMenuGrp -q -sl js_rotOrderOMG`;
-    
+
     $item = $item-1;
     $rotOrder = `js_rotOrderConvertToString $item`;
 
-    $cmd = ("source js_rotationOrderWin; js_rotOrderSwitchItems \"" + $rotOrder + "\"");
-    print ("// Rotation order command to switch the rotation orders of the\n");
-    print ("// selected items to " + $rotOrder + "\n");
-    print ("//\n");
+    $cmd = ("js_rotOrderSwitchItems \"" + $rotOrder + "\"");
     evalEcho $cmd;
 }
 
@@ -69,14 +66,12 @@ global proc js_rotOrderSwitchItems (string $rotOrder)
     {
         // get the actual rotation order
         int $ro = `js_rotOrderConvertToInt $rotOrder`;
-        print ("//\n");
-        print ("// Rotation Orders switched...\n");
-        print ("//\n");
         for ($ob in $objs)
-        {   
-            $cmd = ("setAttr \"" + $ob + ".rotateOrder\" " + $ro);
-            evalEcho $cmd;
-        }   
+        {
+            // $cmd = ("setAttr \"" + $ob + ".rotateOrder\" " + $ro);
+            // evalEcho $cmd;
+            setAttr ($ob + ".rotateOrder") $ro;
+        }
     }
     else
     {
