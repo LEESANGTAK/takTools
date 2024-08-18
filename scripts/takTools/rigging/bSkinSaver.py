@@ -163,15 +163,25 @@ class bSkinSaverUI(QDialog):
 
 bSkinPath = OpenMaya.MDagPath()
 def bFindSkinCluster(objectName):
-    it = OpenMaya.MItDependencyNodes(OpenMaya.MFn.kSkinClusterFilter)
-    while not it.isDone():
-        fnSkinCluster = OpenMayaAnim.MFnSkinCluster(it.item())
-        fnSkinCluster.getPathAtIndex(0,bSkinPath)
-
-        if OpenMaya.MFnDagNode(bSkinPath.node()).partialPathName() == objectName or OpenMaya.MFnDagNode(OpenMaya.MFnDagNode(bSkinPath.node()).parent(0)).partialPathName() == objectName:
-            return it.item()
-        it.next()
+    print(objectName)
+    skinClst = maya.mel.eval('findRelatedSkinCluster("{}");'.format(objectName))
+    if skinClst:
+        sels = OpenMaya.MSelectionList()
+        sels.add(skinClst)
+        skinObj = OpenMaya.MObject()
+        sels.getDependNode(0, skinObj)
+        return skinObj
     return False
+
+    # it = OpenMaya.MItDependencyNodes(OpenMaya.MFn.kSkinClusterFilter)
+    # while not it.isDone():
+    #     fnSkinCluster = OpenMayaAnim.MFnSkinCluster(it.item())
+    #     fnSkinCluster.getPathAtIndex(0,bSkinPath)
+
+    #     if OpenMaya.MFnDagNode(bSkinPath.node()).partialPathName() == objectName or OpenMaya.MFnDagNode(OpenMaya.MFnDagNode(bSkinPath.node()).parent(0)).partialPathName() == objectName:
+    #         return it.item()
+    #     it.next()
+    # return False
 
     # skinClst = False
 

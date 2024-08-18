@@ -36,11 +36,11 @@ def showUI():
     sw.ui()
     sw.enableCustomDagMenu()
 
-    # Create script job to populate influence text scroll list automatically
-    cmds.scriptJob(parent=WIN_NAME, event=['SelectionChanged', sw.loadInf])
+    # # Create script job to populate influence text scroll list automatically
+    # cmds.scriptJob(parent=WIN_NAME, event=['SelectionChanged', sw.loadInf])
 
-    # When window is closed call destructor function.
-    cmds.scriptJob(uid=[WIN_NAME, sw.__del__])
+    # # When window is closed call destructor function.
+    # cmds.scriptJob(uid=[WIN_NAME, sw.__del__])
 
 
 class SkinWeights(object):
@@ -544,6 +544,7 @@ class SkinWeights(object):
 
         def importSkin(skinDirectory, *args):
             for skinFile in os.listdir(skinDirectory):
+                print(os.path.join(skinDirectory, skinFile))
                 skUtil.loadBSkin(os.path.join(skinDirectory, skinFile))
 
         def exportSkin(skinDirectory, *args):
@@ -553,9 +554,14 @@ class SkinWeights(object):
             for mesh in meshes:
                 skUtil.saveBSkin(mesh, skinDirectory)
 
+        def setDirectory(*args):
+            dir = cmds.fileDialog2(fm=3)
+            if dir:
+                cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', e=True, text=dir[0])
+
         cmds.window(title='Skin I/O', p=WIN_NAME)
         cmds.columnLayout(adj=True)
-        cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', label='Skin Directory:', buttonLabel='...')
+        cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', label='Skin Directory:', buttonLabel='...', bc=setDirectory)
         cmds.button(label='Import', c=lambda x: importSkin(cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', q=True, text=True)))
         cmds.button(label='Export', c=lambda x: exportSkin(cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', q=True, text=True)))
         cmds.showWindow()
