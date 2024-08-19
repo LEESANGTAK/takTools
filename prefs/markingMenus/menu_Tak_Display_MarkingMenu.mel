@@ -176,107 +176,86 @@
         menuEditorMenuItem5;
 
     menuItem
-        -label "Viewport" 
+        -label "Wireframe On Shaded" 
         -divider 0
-        -subMenu 1
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -wireframeOnShaded $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -wireframeOnShaded true $modelPan;\n    } else {\n        modelEditor -e -wireframeOnShaded false $modelPan;\n    }\n\tpython(\"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', True)\");\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "WireFrameOnShaded.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem21;
+
+    menuItem
+        -label "X-Ray Joints" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -jointXray $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -jointXray true $modelPan;\n    } else {\n        modelEditor -e -jointXray false $modelPan;\n    }\n\tpython(\"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', True)\");\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "XRayJoints.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem18;
+
+    menuItem
+        -label "Use Default Material" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $curState = `modelEditor -q -useDefaultMaterial $modelPan`;\n    if ($curState == 0) {\n        modelEditor -e -useDefaultMaterial true $modelPan;\n    } else {\n        modelEditor -e -useDefaultMaterial false $modelPan;\n    }\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "UseDefaultMaterial.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem23;
+
+    menuItem
+        -label "separator" 
+        -divider 1
+        -dividerLabel "separator" 
+        -subMenu 0
         -tearOff 0
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
         -allowOptionBoxes 1
+        -postMenuCommandOnce 0
         -enableCommandRepeat 1
         -italicized 0
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem24;
-
-        menuItem
-            -label "X-Ray Joints" 
-            -divider 0
-            -subMenu 0
-            -tearOff 0
-            -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -jointXray $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -jointXray true $modelPan;\n    } else {\n        modelEditor -e -jointXray false $modelPan;\n    }\n}" 
-            -optionBox 0
-            -enable 1
-            -visible 1
-            -data 0
-            -allowOptionBoxes 1
-            -postMenuCommandOnce 0
-            -enableCommandRepeat 1
-            -image "XRayJoints.png" 
-            -echoCommand 0
-            -italicized 0
-            -boldFont 1
-            -sourceType "mel" 
-            -longDivider 1
-            menuEditorMenuItem3;
-
-        menuItem
-            -label "Wireframe On Shaded" 
-            -divider 0
-            -subMenu 0
-            -tearOff 0
-            -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -wireframeOnShaded $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -wireframeOnShaded true $modelPan;\n    } else {\n        modelEditor -e -wireframeOnShaded false $modelPan;\n    }\n}" 
-            -optionBox 0
-            -enable 1
-            -visible 1
-            -data 0
-            -allowOptionBoxes 1
-            -postMenuCommandOnce 0
-            -enableCommandRepeat 1
-            -image "WireFrameOnShaded.png" 
-            -echoCommand 0
-            -italicized 0
-            -boldFont 1
-            -sourceType "mel" 
-            -longDivider 1
-            menuEditorMenuItem2;
-
-        menuItem
-            -label "Anti-Aliasing" 
-            -divider 0
-            -subMenu 0
-            -tearOff 0
-            -command "python(\"curState = cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')\");\npython(\"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', not curState)\");\n" 
-            -optionBox 0
-            -enable 1
-            -visible 1
-            -data 0
-            -allowOptionBoxes 1
-            -postMenuCommandOnce 0
-            -enableCommandRepeat 1
-            -image "MultisampleAA.png" 
-            -echoCommand 0
-            -italicized 0
-            -boldFont 1
-            -sourceType "mel" 
-            -longDivider 1
-            menuEditorMenuItem4;
-
-        menuItem
-            -label "Use Default Material" 
-            -divider 0
-            -subMenu 0
-            -tearOff 0
-            -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $curState = `modelEditor -q -useDefaultMaterial $modelPan`;\n    if ($curState == 0) {\n        modelEditor -e -useDefaultMaterial true $modelPan;\n    } else {\n        modelEditor -e -useDefaultMaterial false $modelPan;\n    }\n}" 
-            -optionBox 0
-            -enable 1
-            -visible 1
-            -data 0
-            -allowOptionBoxes 1
-            -postMenuCommandOnce 0
-            -enableCommandRepeat 1
-            -image "UseDefaultMaterial.png" 
-            -echoCommand 0
-            -italicized 0
-            -boldFont 1
-            -sourceType "mel" 
-            -longDivider 1
-            menuEditorMenuItem1;
-
-    setParent -m ..;
+        menuEditorMenuItem25;
 
     menuItem
         -label "Joint Size" 
@@ -689,7 +668,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem18;
+        menuEditorMenuItem24;
 
     menuItem
         -label "Color Feedback" 
