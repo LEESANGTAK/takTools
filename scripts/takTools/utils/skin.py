@@ -32,7 +32,7 @@ def bind(jnts, geos, maxInfluence=4):
 def reBind(skinMesh):
     tmpDir = pm.internalVar(userTmpDir=True)
     skinFile = saveBSkin(skinMesh, tmpDir)
-    pm.skinCluster(skinMesh, e=True, ub=True)
+    meshUtil.cleanupMesh(skinMesh)
     loadBSkin(skinFile)
     os.remove(skinFile)
 
