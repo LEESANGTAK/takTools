@@ -104,7 +104,8 @@ def copySkin(source, target, components=None):
 
     pm.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
 
-    pm.PyNode(trgSkinClst).skinningMethod.set(pm.PyNode(srcSkinClst).skinningMethod.get())
+    skinMethod = max(pm.PyNode(srcSkinClst).skinningMethod.get(), 0)  # Prevent the value of skinning method not to be negative
+    pm.PyNode(trgSkinClst).skinningMethod.set(skinMethod)
     pm.PyNode(trgSkinClst).useComponents.set(pm.PyNode(srcSkinClst).useComponents.get())
 
 
