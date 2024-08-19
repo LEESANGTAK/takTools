@@ -37,7 +37,8 @@ def UI():
     cmds.menuItem(label='custom')
     cmds.textFieldGrp('customSuffixTxtFldGrp', label='Custom Suffix: ', columnWidth=[(1, 75), (2, 70)], enable=False)
 
-    cmds.checkBox('locGrpChkBox', label='Locator Groups')
+    cmds.checkBox('locGrpChkBox', label='Locator Groups', cc=lambda val: cmds.checkBox('negateScaleXChkBox', e=True, vis=val))
+    cmds.checkBox('negateScaleXChkBox', label='Negate ScaleX', vis=False)
     cmds.checkBox('ctrlGrpChkBox', label='Control Groups')
     cmds.checkBox('revGrpChkBox', label='Reverse Group')
     cmds.checkBox('spaceGrpChkBox', label='Space Group')
@@ -99,6 +100,7 @@ def app(*args):
 
     locGrpOpt = cmds.checkBox('locGrpChkBox', q=True, value=True)
     ctrlGrpOpt = cmds.checkBox('ctrlGrpChkBox', q=True, value=True)
+    negateScaleXOpt = cmds.checkBox('negateScaleXChkBox', q=True, value=True)
     revGrpOpt = cmds.checkBox('revGrpChkBox', q=True, value=True)
     spaceGrpOpt = cmds.checkBox('spaceGrpChkBox', q=True, value=True)
     moduleGrpOpt = cmds.checkBox('moduleGrpChkBox', q=True, value=True)
@@ -110,7 +112,7 @@ def app(*args):
     else:
         for trg in trgList:
             if locGrpOpt:
-                locGrp(trg)
+                locGrp(trg, negateScaleXOpt)
             elif ctrlGrpOpt:
                 tak_misc.doGroup(trg, '_zero')
                 tak_misc.doGroup(trg, '_auto')
@@ -186,23 +188,25 @@ def createModuleGroups(moduleName, parentSpace):
         grp.rotate.set([0, 0, 0])
         grp.scale.set([1, 1, 1])
 
-def locGrp(obj):
+def locGrp(obj, negateScaleX=False):
     parent = cmds.listRelatives(obj, parent=True)
 
     loc = cmds.spaceLocator(n=obj + '_loc')[0]
     cmds.matchTransform(loc, obj, pos=True, rot=True, scl=True)
 
-    spaceGrp = cmds.duplicate(loc, po=True, n=loc + "_zero")
-    autoGrp = cmds.duplicate(loc, po=True, n=loc + "_auto")
+    zeroGrp = cmds.duplicate(loc, po=True, n=loc + "_zero")[0]
+    autoGrp = cmds.duplicate(loc, po=True, n=loc + "_auto")[0]
 
-    cmds.parent(obj, loc)
+    cmds.parent(autoGrp, zeroGrp)
     cmds.parent(loc, autoGrp)
-    cmds.parent(autoGrp, spaceGrp)
+    if negateScaleX:
+        cmds.setAttr('{}.scaleX'.format(zeroGrp), -1)
+    cmds.parent(obj, loc)
 
     if parent:
-        cmds.parent(spaceGrp, parent)
+        cmds.parent(zeroGrp, parent)
 
-    return spaceGrp
+    return zeroGrp
 
 
 def spaceGroup(obj):
