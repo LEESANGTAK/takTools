@@ -195,9 +195,11 @@ class UI(object):
         cmds.text(label = 'Make sure that select a target in Target Shape List.\nGo to the pose then apply.', align = 'left', p = cls.widgets['posRdrTab'])
         cmds.button(label = 'Apply', h = 30, c = Functions.poseReader, p = cls.widgets['posRdrTab'])
 
-        cls.widgets['drvrObjTexBtnGrp'] = cmds.textFieldButtonGrp(label = 'Driver Object: ', buttonLabel = '<<', columnWidth = [(1, 80), (2, 120), (3, 50)], p = cls.widgets['distTab'])
+        cls.widgets['drvrObjTexBtnGrp'] = cmds.textFieldButtonGrp(label = 'Driver Locator: ', buttonLabel = '<<', columnWidth = [(1, 80), (2, 120), (3, 50)], p = cls.widgets['distTab'])
         cmds.textFieldButtonGrp(cls.widgets['drvrObjTexBtnGrp'], e = True, bc = partial(Functions.loadSel, cls.widgets['drvrObjTexBtnGrp']))
-        cmds.text(label = 'Make sure that select a target in Target Shape List.\nGo to the pose then apply.', align = 'left', p = cls.widgets['distTab'])
+        cls.widgets['targetObjTexBtnGrp'] = cmds.textFieldButtonGrp(label = 'Target Locator: ', buttonLabel = '<<', columnWidth = [(1, 80), (2, 120), (3, 50)], p = cls.widgets['distTab'])
+        cmds.textFieldButtonGrp(cls.widgets['targetObjTexBtnGrp'], e = True, bc = partial(Functions.loadSel, cls.widgets['targetObjTexBtnGrp']))
+        cmds.text(label = 'Make sure that select a target in Target Shape List.\nGo to the default pose then apply.', align = 'left', p = cls.widgets['distTab'])
         cmds.button(label = 'Apply', h = 30, c = Functions.distDrvr, p = cls.widgets['distTab'])
 
         # Combo Tab
@@ -1732,38 +1734,57 @@ class Functions(object):
 
     @classmethod
     def distDrvr(cls, *args):
+        # trgName = cmds.textScrollList(UI.widgets['correctiveTrgTxtScrList'], q = True, selectItem = True)[0]
+        # drvrObj = cmds.textFieldButtonGrp(UI.widgets['drvrObjTexBtnGrp'], q = True, text = True)
+
+        # # create locators for measure distance
+        # poseLoc = cmds.spaceLocator(n = trgName + '_pose_loc')[0]
+        # cmds.addAttr(poseLoc, ln = 'startDist', at = 'double', keyable = True)
+        # prntCnst = cmds.parentConstraint(drvrObj, poseLoc, mo = False)
+        # cmds.delete(prntCnst)
+        # trigLoc = cmds.spaceLocator(n = trgName + '_trigger_loc')[0]
+        # prntCnst = cmds.parentConstraint(drvrObj, trigLoc, mo = False)
+        # cmds.delete(prntCnst)
+        # cmds.parentConstraint(drvrObj, trigLoc, mo = False)
+
+        # # create distance node and remapvalue node
+        # distNode = cmds.shadingNode('distanceBetween', n = trgName + '_DIST', asUtility = True)
+        # remapVal = cmds.shadingNode('remapValue', n = trgName + '_remapVal', asUtility = True)
+        # cmds.setAttr('%s.inputMax' %remapVal, 0)
+
+        # # connect attributes
+        # poseLocShp = cmds.listRelatives(poseLoc, s = True)[0]
+        # cmds.connectAttr('%s.worldPosition[0]' %poseLocShp, '%s.point1' %distNode)
+        # trigLocShp = cmds.listRelatives(trigLoc, s = True)[0]
+        # cmds.connectAttr('%s.worldPosition[0]' %trigLocShp, '%s.point2' %distNode)
+        # cmds.connectAttr('%s.distance' %distNode, '%s.inputValue' %remapVal, force = True)
+        # cmds.connectAttr('%s.startDist' %poseLoc, '%s.inputMin' %remapVal, force = True)
+        # cmds.connectAttr('%s.outValue' %remapVal, '%s.%s' %(cls.bsNodeName, trgName), force = True)
+
+        # cmds.setAttr('%s.translateX' %drvrObj, 0)
+        # cmds.setAttr('%s.translateY' %drvrObj, 0)
+        # cmds.setAttr('%s.translateZ' %drvrObj, 0)
+        # distVal = cmds.getAttr('%s.distance' %distNode)
+        # cmds.setAttr('%s.startDist' %poseLoc, distVal)
+
         trgName = cmds.textScrollList(UI.widgets['correctiveTrgTxtScrList'], q = True, selectItem = True)[0]
-        drvrObj = cmds.textFieldButtonGrp(UI.widgets['drvrObjTexBtnGrp'], q = True, text = True)
+        driverLoc = cmds.textFieldButtonGrp(UI.widgets['drvrObjTexBtnGrp'], q = True, text = True)
+        targetLoc = cmds.textFieldButtonGrp(UI.widgets['targetObjTexBtnGrp'], q = True, text = True)
 
-        # create locators for measure distance
-        poseLoc = cmds.spaceLocator(n = trgName + '_pose_loc')[0]
-        cmds.addAttr(poseLoc, ln = 'startDist', at = 'double', keyable = True)
-        prntCnst = cmds.parentConstraint(drvrObj, poseLoc, mo = False)
-        cmds.delete(prntCnst)
-        trigLoc = cmds.spaceLocator(n = trgName + '_trigger_loc')[0]
-        prntCnst = cmds.parentConstraint(drvrObj, trigLoc, mo = False)
-        cmds.delete(prntCnst)
-        cmds.parentConstraint(drvrObj, trigLoc, mo = False)
-
-        # create distance node and remapvalue node
+        # create distance node
         distNode = cmds.shadingNode('distanceBetween', n = trgName + '_DIST', asUtility = True)
+        driverLocShp = cmds.listRelatives(driverLoc, s = True)[0]
+        cmds.connectAttr('%s.worldPosition[0]' %driverLocShp, '%s.point1' %distNode)
+        targetLocShp = cmds.listRelatives(targetLoc, s = True)[0]
+        cmds.connectAttr('%s.worldPosition[0]' %targetLocShp, '%s.point2' %distNode)
+
         remapVal = cmds.shadingNode('remapValue', n = trgName + '_remapVal', asUtility = True)
-        cmds.setAttr('%s.inputMax' %remapVal, 0)
+        cmds.setAttr('%s.inputMax' %remapVal, cmds.getAttr('{}.distance'.format(distNode)))
+        cmds.setAttr('%s.outputMin' %remapVal, 1)
+        cmds.setAttr('%s.outputMax' %remapVal, 0)
 
-        # connect attributes
-        poseLocShp = cmds.listRelatives(poseLoc, s = True)[0]
-        cmds.connectAttr('%s.worldPosition[0]' %poseLocShp, '%s.point1' %distNode)
-        trigLocShp = cmds.listRelatives(trigLoc, s = True)[0]
-        cmds.connectAttr('%s.worldPosition[0]' %trigLocShp, '%s.point2' %distNode)
         cmds.connectAttr('%s.distance' %distNode, '%s.inputValue' %remapVal, force = True)
-        cmds.connectAttr('%s.startDist' %poseLoc, '%s.inputMin' %remapVal, force = True)
         cmds.connectAttr('%s.outValue' %remapVal, '%s.%s' %(cls.bsNodeName, trgName), force = True)
-
-        cmds.setAttr('%s.translateX' %drvrObj, 0)
-        cmds.setAttr('%s.translateY' %drvrObj, 0)
-        cmds.setAttr('%s.translateZ' %drvrObj, 0)
-        distVal = cmds.getAttr('%s.distance' %distNode)
-        cmds.setAttr('%s.startDist' %poseLoc, distVal)
 
         cls.populateCorrectiveTrgList()
 
