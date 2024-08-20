@@ -482,3 +482,17 @@ def getBoundingBox(meshes):
             vtxIt.next()
 
     return bbox
+
+
+def toggleDeformers(mesh=''):
+    history = cmds.listHistory(mesh, pruneDagObjects=True)
+    deformers = cmds.ls(history, type="geometryFilter")
+
+    if deformers:
+        for dfm in deformers:
+            curEnv = cmds.getAttr('{}.envelope'.format(dfm))
+            reverseEnv = int(not curEnv)
+            cmds.setAttr('{}.envelope'.format(dfm), reverseEnv)
+            print('"{}": {} {}'.format(mesh, dfm, reverseEnv))
+    else:
+        print(f"No deformers found on {mesh}.")

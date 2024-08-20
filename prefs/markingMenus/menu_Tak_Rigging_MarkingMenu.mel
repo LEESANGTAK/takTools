@@ -258,6 +258,27 @@
         menuEditorMenuItem18;
 
     menuItem
+        -label "Toggle Deformers" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from imp import reload\\nfrom takTools.utils import mesh as meshUtil\\nreload(meshUtil)\");\npython(\"meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\\nfor mesh in meshes:\\n\\tmeshUtil.toggleDeformers(mesh)\");\n" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "pickDeformerObj.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem19;
+
+    menuItem
         -label "Group" 
         -divider 0
         -subMenu 0
@@ -296,7 +317,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem19;
+        menuEditorMenuItem11;
 
     menuItem
         -label "Controller" 
@@ -377,7 +398,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem25;
+        menuEditorMenuItem15;
 
     menuItem
         -label "Multi Constraint" 
@@ -439,7 +460,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem28;
+        menuEditorMenuItem16;
 
     menuItem
         -label "separator" 
