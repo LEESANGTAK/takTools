@@ -1510,6 +1510,7 @@ def arrangeObj(*args):
             colMoveVec = xDir*(columnVec * j)
             moveVec = startVec + rowMoveVec + colMoveVec
 
+            unlockChannels(sels[index])
             cmds.xform(sels[index], t=moveVec, ws=True)
 
             index += 1
@@ -2885,14 +2886,12 @@ def unlockChannels(transform):
     mel.eval('source channelBoxCommand;')
     transform = pm.PyNode(transform)
 
-    attrList = ['translate', 'rotate', 'scale']
-    axisList = ['X', 'Y', 'Z']
+    compoundAttrs = ['translate', 'rotate', 'scale', 'visibility']
+    attrs = [ch + axis for ch in 'trs' for axis in 'xyz']
+    attrList = compoundAttrs + attrs
     for attr in attrList:
-        for axis in axisList:
-            cmds.setAttr('%s.%s%s' %(transform.name(), attr, axis), keyable = True)
-            mel.eval('CBunlockAttr "%s.%s%s";' %(transform.name(), attr, axis))
-    cmds.setAttr('%s.visibility' %transform.name(), keyable = True)
-    mel.eval('CBunlockAttr "%s.visibility";' %transform.name())
+        cmds.setAttr('%s.%s' %(transform.name(), attr), keyable = True)
+        mel.eval('CBunlockAttr "%s.%s";' %(transform.name(), attr))
 
     return transform
 
