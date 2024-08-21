@@ -248,9 +248,8 @@ def hideJoints(*args):
     Hide all joints in current scene.
     '''
 
-    jntLs = cmds.ls(type='joint')
-    for jnt in jntLs:
-        cmds.setAttr('%s.drawStyle' % jnt, 2)
+    if cmds.objExists('Main'):
+        cmds.setAttr('Main.jointVis', False)
 
 
 def delAllLayers(*args):
@@ -354,7 +353,7 @@ def allInOne(*args):
     delAllLayers()
     delKeys()
     chkNamespace()
-    # hideJoints()
+    hideJoints()
     mel.eval('deleteUnusedCommon("animCurve", 0, uiRes("m_cleanUpScene.kDeletingUnusedAnimationCurves2"));')
 
     setVisCtrlAttrs()
