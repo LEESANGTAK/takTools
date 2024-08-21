@@ -957,13 +957,16 @@ class Functions(object):
     def extractMesh(cls, *args):
         allTrgs = cmds.textScrollList(UI.widgets['correctiveTrgTxtScrList'], q = True, allItems = True)
         for trg in allTrgs:
-            cmds.setAttr('{0}.{1}'.format(cls.bsNodeName, trg), 0)
+            try:
+                cmds.setAttr('{0}.{1}'.format(cls.bsNodeName, trg), 0)
+            except:
+                pass
 
         selTrgList = cmds.textScrollList(UI.widgets['correctiveTrgTxtScrList'], q = True, selectItem = True)
         for selTrg in selTrgList:
             cmds.setAttr('{0}.{1}'.format(cls.bsNodeName, selTrg), 1)
             extractedMesh = cmds.duplicate(cls.baseGeo, n=selTrg)[0]
-            cmds.parent(extractedMesh, world=True)
+            if cmds.listRelatives(extractedMesh, p=True): cmds.parent(extractedMesh, world=True)
             cmds.setAttr('{0}.{1}'.format(cls.bsNodeName, selTrg), 0)
 
 
@@ -1576,7 +1579,7 @@ class Functions(object):
             drvrDatas.append(tuple(drvrElemBuffer))
 
         drivnVals = []
-        # get driver data
+        # get driven data
         drvnObj = cmds.scrollLayout(UI.widgets['cbDrvnSclLo'], q = True, childArray = True)
         drvnElem = cmds.rowColumnLayout(drvnObj, q = True, childArray = True)
         drvnName = cmds.text(drvnElem[0], q = True, label = True)
@@ -1586,20 +1589,25 @@ class Functions(object):
         drvnEndVal = cmds.textField(drvnElem[3], q = True, text = True)
         drivnVals.append(drvnEndVal)
 
-        # Create combo expression
-        exprNodeName = drvnAttrName + '_expr'
-        exprStr = '{0}.{1} = '.format(drvnName, drvnAttrName)
+        # # Create combo expression
+        # exprNodeName = drvnAttrName + '_expr'
+        # exprStr = '{0}.{1} = '.format(drvnName, drvnAttrName)
 
-        # Convert driver data to string for expression
-        for i in range(len(drvrDatas)):
-            drvrName = drvrDatas[i][0]
-            drvrAttrName = drvrDatas[i][1]
-            drvrStartVal = drvrDatas[i][2]
-            drvrEndVal = drvrDatas[i][3]
-            drvrDatas[i] = '`clamp 0 1 (%s.%s / (%s - %s))`' %(drvrName, drvrAttrName, drvrEndVal, drvrStartVal)
+        # # Convert driver data to string for expression
+        # for i in range(len(drvrDatas)):
+        #     drvrName = drvrDatas[i][0]
+        #     drvrAttrName = drvrDatas[i][1]
+        #     drvrStartVal = drvrDatas[i][2]
+        #     drvrEndVal = drvrDatas[i][3]
+        #     drvrDatas[i] = '`clamp 0 1 (%s.%s / (%s - %s))`' %(drvrName, drvrAttrName, drvrEndVal, drvrStartVal)
 
-        exprStr += ' * '.join(drvrDatas)
-        cmds.expression(s = exprStr, ae = True, uc = 'all', n = exprNodeName)
+        # exprStr += ' * '.join(drvrDatas)
+        # cmds.expression(s = exprStr, ae = True, uc = 'all', n = exprNodeName)
+
+        combShapeNode = cmds.createNode('combinationShape', n='{}_comb'.format(drvnName))
+        for i, drvrData in enumerate(drvrDatas):
+            cmds.connectAttr('{}.{}'.format(drvrData[0], drvrData[1]), '{}.inputWeight[{}]'.format(combShapeNode, i))
+        cmds.connectAttr('{}.outputWeight'.format(combShapeNode), '{}.{}'.format(drvnName, drvnAttrName))
 
         cls.populateCorrectiveTrgList()
 

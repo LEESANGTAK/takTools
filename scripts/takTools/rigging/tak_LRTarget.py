@@ -153,6 +153,7 @@ def createLfRtTarget(baseName, targetName, side):
                 }
 
     blendTarget = pm.duplicate(baseName, renameChildren=True)[0]
+    tak_misc.unlockChannels(blendTarget)
     pm.parent(blendTarget, world=True)
     blendTarget.rename(lfRtTable[side]['prefix'] + targetName + lfRtTable[side]['suffix'])
     blendTarget.setTranslation(lfRtTable[side]['position'], space='world')
