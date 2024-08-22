@@ -39,8 +39,8 @@ def showUI():
     # # Create script job to populate influence text scroll list automatically
     # cmds.scriptJob(parent=WIN_NAME, event=['SelectionChanged', sw.loadInf])
 
-    # # When window is closed call destructor function.
-    # cmds.scriptJob(uid=[WIN_NAME, sw.__del__])
+    # When window is closed call destructor function.
+    cmds.scriptJob(uid=[WIN_NAME, sw.__del__])
 
 
 class SkinWeights(object):
@@ -466,7 +466,12 @@ class SkinWeights(object):
         vertCount = cmds.polyEvaluate(mesh, v=True)
         numInfsPerVtx = []
         for i in range(vertCount):
-            numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{}]'.format(mesh, i), q=True, ignoreBelow=ignoreWeight, v=True)))
+            try:
+                numInfsPerVtx.append(len(cmds.skinPercent(skinClst, '{}.vtx[{}]'.format(mesh, i), q=True, ignoreBelow=ignoreWeight, v=True)))
+            except:
+                cmds.select('{}.vtx[{}]'.format(mesh, i), r=True)
+                mel.eval('doHammerWeightsArgList 1 { "1" };')
+                cmds.select(mesh, r=True)
         maxInfs = max(numInfsPerVtx)
         return maxInfs
 
