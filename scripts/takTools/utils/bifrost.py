@@ -5,7 +5,13 @@ if not pm.pluginInfo('bifrostGraph', q=True, loaded=True):
     pm.loadPlugin('bifrostGraph')
 
 
-def convertToCageMesh(mesh, detailSize=0.02, faceCount=500, keepHardEdge=False, symmetry=False):
+def convertToCageMesh(meshes, detailSize=0.02, faceCount=1000, keepHardEdge=True, symmetry=False):
+    dupMeshes = pm.duplicate(meshes, rc=True)
+    if len(dupMeshes) > 1:
+        mesh = pm.polyUnite(dupMeshes, ch=False)[0]
+    else:
+        mesh = dupMeshes[0]
+
     # It takes long time and produce not good result when below 0.01 value for the detail size
     detailSize = max(detailSize, 0.01)
 
@@ -81,24 +87,19 @@ def convertToCageMesh(mesh, detailSize=0.02, faceCount=500, keepHardEdge=False, 
         targetFaceCountTolerance=10,
     )
 
+    pm.delete(dupMeshes)
+
     return cageMesh
 
 
 def showConvertToCageMeshUI():
     def applyBtnCallback(*args):
         meshes = pm.filterExpand(pm.selected(), sm=12)
-        dupMeshes = pm.duplicate(meshes, rc=True)
-        if len(dupMeshes) > 1:
-            mesh = pm.polyUnite(dupMeshes, ch=False)[0]
-        else:
-            mesh = dupMeshes[0]
-
         detailSize = pm.floatFieldGrp('detailSizeFloatFld', q=True, v1=True)
         faceCount = pm. intFieldGrp('faceCountIntFld', q=True, v1=True)
         keepHardEdges = pm.checkBoxGrp('retopoOptions', q=True, v1=True)
         symmetry = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
-        convertToCageMesh(mesh, detailSize, faceCount, keepHardEdges, symmetry)
-        pm.delete(dupMeshes)
+        convertToCageMesh(meshes, detailSize, faceCount, keepHardEdges, symmetry)
 
     pm.window(title='Create Cage Mesh', mnb=False, mxb=False)
     pm.columnLayout(adj=True, cal='left')
@@ -109,7 +110,7 @@ def showConvertToCageMeshUI():
     pm.separator()
 
     pm.text(label='Retopology Settings')
-    pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=500, columnWidth=[(1, 60)])
+    pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=1000, columnWidth=[(1, 60)])
     pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=2, label='', labelArray2=['Keep Hard Edges', 'Symmetry'], v1=1, columnWidth=[(1, 10)])
 
     pm.button(label='Apply', c=applyBtnCallback)

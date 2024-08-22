@@ -290,6 +290,9 @@ def doneEditSkinMesh(tempSkin, skinMesh):
 def SSD(geo):
     influences = getInfluences(geo)
     topInfluence = globalUtil.getTopDagNode(influences)
+    skinCluster = mel.eval('findRelatedSkinCluster("{}");'.format(geo))
+    cmds.skinPercent(skinCluster, str(geo), pruneWeights=0.01)
+    cmds.skinCluster(skinCluster, e=True, removeUnusedInfluence=True)
     pm.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=8)
 
 
