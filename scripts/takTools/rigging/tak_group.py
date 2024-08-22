@@ -38,8 +38,8 @@ def UI():
     cmds.textFieldGrp('customSuffixTxtFldGrp', label='Custom Suffix: ', columnWidth=[(1, 75), (2, 70)], enable=False)
 
     cmds.checkBox('locGrpChkBox', label='Locator Groups', cc=lambda val: cmds.checkBox('negateScaleXChkBox', e=True, vis=val))
+    cmds.checkBox('ctrlGrpChkBox', label='Control Groups', cc=lambda val: cmds.checkBox('negateScaleXChkBox', e=True, vis=val))
     cmds.checkBox('negateScaleXChkBox', label='Negate ScaleX', vis=False)
-    cmds.checkBox('ctrlGrpChkBox', label='Control Groups')
     cmds.checkBox('revGrpChkBox', label='Reverse Group')
     cmds.checkBox('spaceGrpChkBox', label='Space Group')
     cmds.checkBox('moduleGrpChkBox', label='Module Groups', cc=lambda val: cmds.columnLayout('moduleDataColLo', e=True, vis=val))
@@ -114,9 +114,7 @@ def app(*args):
             if locGrpOpt:
                 locGrp(trg, negateScaleXOpt)
             elif ctrlGrpOpt:
-                tak_misc.doGroup(trg, '_zero')
-                tak_misc.doGroup(trg, '_auto')
-                tak_misc.doGroup(trg, '_extra')
+                ctrlGrp(trg, negateScaleXOpt)
             elif revGrpOpt:
                 revGrp(trg)
             elif spaceGrpOpt:
@@ -209,6 +207,22 @@ def locGrp(obj, negateScaleX=False):
     return zeroGrp
 
 
+def ctrlGrp(obj, negateScaleX=False):
+    zeroGrp = cmds.createNode('transform', n='{}_zero'.format(obj))
+    autoGrp = cmds.createNode('transform', n='{}_auto'.format(obj))
+    extraGrp = cmds.createNode('transform', n='{}_extra'.format(obj))
+
+    for grp in [zeroGrp, autoGrp, extraGrp]:
+        cmds.matchTransform(grp, obj)
+
+    chainParent(zeroGrp, autoGrp, extraGrp)
+
+    if negateScaleX:
+        cmds.setAttr('{}.scaleX'.format(zeroGrp))
+
+    cmds.parent(obj, zeroGrp)
+
+
 def spaceGroup(obj):
     obj = pm.PyNode(obj)
     group = pm.group(n="%s_space" % obj, empty=True)
@@ -216,3 +230,11 @@ def spaceGroup(obj):
     pm.parentConstraint(obj, group)
     obj.scale >> group.scale
 
+
+def chainParent(*args):
+    objects = sum([item if isinstance(item, list) else [item] for item in args], [])
+    objects.reverse()
+    for i, parentObj in enumerate(objects):
+        if i == 0:
+            continue
+        cmds.parent(objects[i-1], parentObj)
