@@ -36,8 +36,8 @@ def showUI():
     sw.ui()
     sw.enableCustomDagMenu()
 
-    # # Create script job to populate influence text scroll list automatically
-    # cmds.scriptJob(parent=WIN_NAME, event=['SelectionChanged', sw.loadInf])
+    # Create script job to populate influence text scroll list automatically
+    cmds.scriptJob(parent=WIN_NAME, event=['SelectionChanged', sw.loadInf])
 
     # When window is closed call destructor function.
     cmds.scriptJob(uid=[WIN_NAME, sw.__del__])
