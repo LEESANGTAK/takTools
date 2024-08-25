@@ -217,6 +217,7 @@ def UI():
     cmds.shelfButton(annotation = 'nCloth set up with skined geometry.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'nClothSetUp.png', command = 'import takTools.rigging.tak_nClothSetUp as tak_nClothSetUp\nimport imp\nimp.reload(tak_nClothSetUp)\ntak_nClothSetUp.nClothSetUp()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Create locator to keep place for selected items.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'placeHolder.bmp', command = 'import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.plcHldr()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Create curve with selected objects.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'crvFromSels.bmp', command = 'import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.crvFromSelsUi()', sourceType = 'python')
+    cmds.shelfButton(annotation = 'Set up driver locators for a selected curve.', width = 35, height = 35, imageOverlayLabel = 'crvLocs', image1 = 'locator.png', command = 'from imp import reload\nfrom takTools.utils import curve as crvUtil; reload(crvUtil)\ncrv = cmds.filterExpand(cmds.ls(sl=True), sm=9)[0]\ncrvUtil.setupDriveLocators(crv)\n', sourceType = 'python')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = '', image1 = 'polyEdgeToCurves.png', command = 'meshName = pm.selected()[0].node().getTransform();pm.polyToCurve(form=2, degree=3, n=meshName+"_crv")', sourceType = 'python')
     cmds.shelfButton(annotation = 'Create curve from edge ring with an selected edge.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'curveFromEdgeRing.png', command = 'import takTools.utils.mesh as meshUtil\nimport imp\nimp.reload(meshUtil)\nselEdge = pm.selected()[0]\nmeshUtil.curveFromEdgeRing(selEdge, "{0}_crv".format(selEdge.node().getTransform()))\n', sourceType = 'python')
     cmds.shelfButton(annotation = 'CV Curve Tool', width = 35, height = 35, imageOverlayLabel = '', image1 = 'curveCV.png', command = 'CVCurveTool', sourceType = 'mel')
@@ -505,7 +506,7 @@ def saveTools(*args):
         codeBlock = re.search(r'.*%s.*\n((\s+cmds.shelfButton.*\n){0,100})' %shelf, contents).group(1)
 
         # Replace prior button codes to current shelf button codes in contents
-        contents = contents.replace(codeBlock, curBtnCodes)
+        contents = contents.replace(codeBlock.encode('utf-8'), curBtnCodes)
 
     # Save tool file
     with open(__file__, 'w') as f:

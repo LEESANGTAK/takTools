@@ -1,5 +1,6 @@
 import maya.OpenMaya as om1
 import maya.api.OpenMaya as om
+from maya import cmds
 
 import pymel.core as pm
 
@@ -182,3 +183,14 @@ def createCurve(curveInfo, curveName):
             pm.closeCurve(ch=False, preserveShape=False, replaceOriginal=True)
         pm.parent(crv.getShape(), transform, s=True, r=True)
         pm.delete(crv)
+
+
+def setupDriveLocators(curve):
+    cmds.undoInfo(openChunk=True)
+    cvs = cmds.ls('{}.cv[*]'.format(curve), fl=True)
+    for i, cv in enumerate(cvs):
+        cvWorldPos = cmds.pointPosition(cv, world=True)
+        loc = cmds.spaceLocator(n='{}_{}_loc'.format(curve, i))[0]
+        cmds.xform(loc, t=cvWorldPos, ws=True)
+        cmds.connectAttr('{}.worldPosition[0]'.format(loc), '{}.controlPoints[{}]'.format(curve, i))
+    cmds.undoInfo(closeChunk=True)
