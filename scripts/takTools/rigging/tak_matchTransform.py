@@ -56,14 +56,20 @@ def match(*args):
 
     for srcTrsf in srcTrsfs:
         if mirror:
-            trgWsMatrix = trgTrsf.worldMatrix.get()
+            tempLoc = pm.spaceLocator()
+            pm.matchTransform(tempLoc, trgTrsf)
+
+            tmpTrgLocWsMtx = pm.xform(tempLoc, q=True, matrix=True, ws=True)
             mirrorXMatrix = [
                 -1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
                 0, 0, 0, 1
             ]
-            trgWsMatrix *= pm.datatypes.Matrix(mirrorXMatrix)
-            pm.xform(srcTrsf, matrix=trgWsMatrix, ws=True)
+            tmpSrcWsMtx = pm.datatypes.Matrix(tmpTrgLocWsMtx) * pm.datatypes.Matrix(mirrorXMatrix)
+            pm.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
+
+            pm.matchTransform(srcTrsf, tempLoc)
+            pm.delete(tempLoc)
         else:
             pm.matchTransform(srcTrsf, trgTrsf, pos=translateOpt, rot=rotateOpt, scl=scaleOpt, piv=pivotOpt)

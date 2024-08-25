@@ -298,9 +298,11 @@ def mirCtrlShape(*args):
 
     cons = cmds.ls(sl=True)
     for con in cons:
-        shpList = cmds.listRelatives(con, s=True)
         symCtrl = re.sub(srch, rplc, con)
-        symCtrlShps = cmds.listRelatives(symCtrl, s=True)
+        conPos = cmds.xform(con, q=True, t=True, ws=True)
+        cmds.xform(symCtrl, t=[-conPos[0], conPos[1], conPos[2]], ws=True)
+        symCtrlShps = cmds.listRelatives(symCtrl, ad=True, type='nurbsCurve')
+        shpList = cmds.listRelatives(con, ad=True, type='nurbsCurve')
         for i in range(len(shpList)):
             # get number of cvs
             degs = cmds.getAttr('%s.degree' % shpList[i])

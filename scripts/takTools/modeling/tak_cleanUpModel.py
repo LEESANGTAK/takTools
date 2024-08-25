@@ -61,11 +61,12 @@ def UI():
     cmds.setParent('procColLay')
     cmds.separator(h = 5, style = 'in')
     cmds.frameLayout(label = 'Manual Check List', collapsable = True, collapse = True)
-    cmds.checkBox('mdlGridChkBox', label = 'World Position: Center of the Grid in Front and Side, Bottom on Grid', cc = partial(chkBoxCC, 'mdlGridChkBox'))
-    cmds.checkBox('scaleChkBox', label = 'Scale: Compare to other characters, Real World Scale', cc = partial(chkBoxCC, 'scaleChkBox'))
-    cmds.checkBox('dfltStateChkBox', label = 'Default Pose: Middle Pose between extreme poses', cc = partial(chkBoxCC, 'dfltStateChkBox'))
-    cmds.checkBox('topoChkBox', label = 'Topology: Deformable/Continuous Flow, Enough Resolution, Quad', cc = partial(chkBoxCC, 'topoChkBox'))
-    cmds.checkBox('hiddenChkBox', label = 'Hidden Area: Inner Eyelid, Inner Mouth, Inner Cloth', cc = partial(chkBoxCC, 'hiddenChkBox'))
+    cmds.checkBox('mdlGridChkBox', label = '[ World Position ]  Center of the Grid in Front and Side, Bottom on Grid', cc = partial(chkBoxCC, 'mdlGridChkBox'))
+    cmds.checkBox('scaleChkBox', label = '[ Scale ]  Compare to other characters, Real World Scale', cc = partial(chkBoxCC, 'scaleChkBox'))
+    cmds.checkBox('dfltStateChkBox', label = '[ Default Pose ]  Middle Pose between extreme poses', cc = partial(chkBoxCC, 'dfltStateChkBox'))
+    cmds.checkBox('topoChkBox', label = '[ Topology ]  Deformable/Continuous Flow, Enough Resolution, Quad', cc = partial(chkBoxCC, 'topoChkBox'))
+    cmds.checkBox('hiddenChkBox', label = '[ Hidden Area ]  Inner Eyelid, Inner Mouth, Inner Cloth', cc = partial(chkBoxCC, 'hiddenChkBox'))
+    cmds.checkBox('uvChkBox', label = '[ UV ]  No overlaped UVs', cc = partial(chkBoxCC, 'uvChkBox'))
 
     cmds.setParent('procColLay')
     cmds.separator(h = 5, style = 'in')
@@ -887,7 +888,7 @@ def freezeTrnf(*args):
     Freeze transform.
     '''
 
-    sels = cmds.ls(sl = True, dag = True)
+    sels = cmds.ls(sl = True, dag = True, type='transform')
 
     # Get place3dTexture nodes.
     plc3dTexLs = cmds.ls(sl = True, dag = True, type = 'place3dTexture')
@@ -916,6 +917,10 @@ def freezeTrnf(*args):
         sels.remove(plce3dTex)
 
     # Freeze transform.
+    chAttrs = list('trs') + [ch + axis for ch in 'trs' for axis in 'xyz']
+    for sel in sels:
+        for attr in chAttrs:
+            cmds.setAttr('{}.{}'.format(sel, attr), lock=False)
     cmds.select(sels, r = True)
     cmds.makeIdentity(apply = True)
 

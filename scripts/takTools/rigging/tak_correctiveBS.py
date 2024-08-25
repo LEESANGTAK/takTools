@@ -150,7 +150,7 @@ class UI(object):
         cls.widgets['correctiveTrgWgtScrLo'] = cmds.scrollLayout(p = cls.widgets['correctiveTrgRowColLo'])
 
         cls.widgets['slderRowColLo'] = cmds.rowColumnLayout(numberOfColumns = 2, columnWidth = [(1, 370)], p = cls.widgets['correctiveTrgColLo'])
-        cls.widgets['trgFltSldrGrp'] = cmds.floatSliderGrp(field = True, columnWidth = [(1, 30)], min = 0.00, max = 1.00, step = 0.01, dc = Functions.trgSldrDragCmd, cc = Functions.trgSldrDragCmd, enable = True, p = cls.widgets['slderRowColLo'])
+        cls.widgets['trgFltSldrGrp'] = cmds.floatSliderGrp(field = True, columnWidth = [(1, 30)], min = 0.00, max = 1.00, step = 0.01, cc = Functions.trgSldrDragCmd, enable = True, p = cls.widgets['slderRowColLo'])
         cmds.symbolButton(image = 'setKeyframe.png', c = Functions.setKey, p = cls.widgets['slderRowColLo'])
 
         cls.widgets['shpDrvrFrmLo'] = cmds.frameLayout(label = 'Shape Driver', collapse = True, collapsable = True, p = cls.widgets['mainColLo'])
@@ -660,13 +660,11 @@ class Functions(object):
 
         #cmds.floatSliderGrp(UI.widgets['trgFltSldrGrp'], e = True, enable = False)
 
-
     @classmethod
     def addTrgWgtWdgt(cls, bsTrg):
         bsTrgWgtFltFld = cmds.floatField(bsTrg + '_wgtFltFld', precision = 2, w = 30, p = UI.widgets['correctiveTrgWgtScrLo'])
         cmds.connectControl(bsTrgWgtFltFld, cls.bsNodeName + '.' + bsTrg)
         cmds.floatField(bsTrg + '_wgtFltFld', e = True, enable = False)
-
 
     @classmethod
     def trgSldrDragCmd(cls, *args):
@@ -678,7 +676,6 @@ class Functions(object):
                     cmds.setAttr('{0}.{1}'.format(cls.bsNodeName, selTrg), trgSldrVal)
                 except:
                     pass
-
 
     @classmethod
     def correctiveTrgListSelCmd(cls, *args):
@@ -1029,9 +1026,8 @@ class Functions(object):
     def splitLR(cls, *args):
         baseName = cls.baseGeo
         targetList = cmds.textScrollList(UI.widgets['correctiveTrgTxtScrList'], q = True, selectItem = True)
-        lPrefix = 'L_'
-        rPrefix = 'R_'
-        correctiveTrgGeoGrpName = cls.baseGeo + '_correctiveTrg_geo_grp'
+        lSuffix = '_L'
+        rSuffix = '_R'
 
         for targetName in targetList:
             # Check target mesh existsing.
@@ -1039,7 +1035,6 @@ class Functions(object):
             if not cmds.objExists(targetName):
                 cmds.setAttr('{0}.{1}'.format(cls.bsNodeName, targetName), 1)
                 cmds.duplicate(cls.baseGeo, n = targetName)
-                cmds.parent(targetName, correctiveTrgGeoGrpName)
                 cmds.setAttr(targetName + ".visibility", False)
                 cmds.setAttr('{0}.{1}'.format(cls.bsNodeName, targetName), 0)
 
@@ -1065,7 +1060,7 @@ class Functions(object):
             lrTargets = []
 
             # create left side blend target
-            lBlendTarget = cmds.duplicate(baseName, n = lPrefix + targetName, rr = True, renameChildren = True)
+            lBlendTarget = cmds.duplicate(baseName, n = targetName + lSuffix, rr = True, renameChildren = True)
             lrTargets.append(lBlendTarget[0])
             # unlock attributes
             attrList = ['translateX', 'translateY', 'translateZ']
@@ -1073,26 +1068,15 @@ class Functions(object):
                 cmds.setAttr(lBlendTarget[0] + '.' + str(attr), lock = False)
             # move to target's left side
             cmds.xform(lBlendTarget, ws = True, t = ((targetPos[0] + LRDist), targetPos[1], targetPos[2]))
-            # parent to correctiveTrg_geo_grp
-            if cmds.objExists(correctiveTrgGeoGrpName):
-                cmds.parent(lBlendTarget[0], correctiveTrgGeoGrpName)
-                cmds.setAttr('%s.visibility' %lBlendTarget[0], False)
-            else:
-                cmds.createNode('transform', n = correctiveTrgGeoGrpName)
-                cmds.parent(lBlendTarget[0], correctiveTrgGeoGrpName)
-                cmds.setAttr('%s.visibility' %lBlendTarget[0], False)
 
             # create right side belnd target
-            rBlendTarget = cmds.duplicate(baseName, n = rPrefix + targetName, rr = True, renameChildren = True)
+            rBlendTarget = cmds.duplicate(baseName, n = targetName + rSuffix, rr = True, renameChildren = True)
             lrTargets.append(rBlendTarget[0])
             # unlock attributes
             for attr in attrList:
                 cmds.setAttr(rBlendTarget[0] + '.' + str(attr), lock = False)
             # move to target's right side
             cmds.xform(rBlendTarget, ws = True, t = ((targetPos[0] - LRDist), targetPos[1], targetPos[2]))
-            # parent to correctiveTrg_geo_grp
-            cmds.parent(rBlendTarget[0], correctiveTrgGeoGrpName)
-            cmds.setAttr('%s.visibility' %rBlendTarget[0], False)
 
             # initialize list variables
             baseChildList = []
