@@ -217,10 +217,9 @@ def ctrlGrp(obj, negateScaleX=False):
 
     chainParent(zeroGrp, autoGrp, extraGrp)
 
-    if negateScaleX:
-        cmds.setAttr('{}.scaleX'.format(zeroGrp))
-
     cmds.parent(obj, extraGrp)
+    if negateScaleX:
+        cmds.setAttr('{}.scaleX'.format(zeroGrp), -1)
 
 
 def spaceGroup(obj):
