@@ -194,3 +194,25 @@ def setupDriveLocators(curve):
         cmds.xform(loc, t=cvWorldPos, ws=True)
         cmds.connectAttr('{}.worldPosition[0]'.format(loc), '{}.controlPoints[{}]'.format(curve, i))
     cmds.undoInfo(closeChunk=True)
+
+
+def setupDriveClusters(curve):
+    cmds.undoInfo(openChunk=True)
+    cvs = cmds.ls('{}.cv[*]'.format(curve), fl=True)
+    for i, cv in enumerate(cvs):
+        cmds.cluster(cv, n='{}_{}_clst'.format(curve, i))
+    cmds.undoInfo(closeChunk=True)
+
+
+def extractCurveFromSelectedEdges():
+    edges = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=32)
+    if not edges:
+        cmds.warning('Please select polygon edges first.')
+        return
+    shape = cmds.ls(edges, objectsOnly=True)[0]
+    transform = cmds.listRelatives(shape, p=True)[0]
+    tempMesh = cmds.duplicate(transform, n='temp_mesh')[0]
+    tempMeshEdges = [edge.replace(transform, tempMesh) for edge in edges]
+    cmds.select(tempMeshEdges, r=True)
+    cmds.polyToCurve(form=2, degree=3, n='{}_crv'.format(transform), ch=False)
+    cmds.delete(tempMesh)
