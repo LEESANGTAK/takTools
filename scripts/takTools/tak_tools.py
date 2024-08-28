@@ -163,6 +163,7 @@ def UI():
     cmds.shelfButton(annotation = 'Select surface(s) and a joint.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'smoothSkin.png', command = 'import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.smoothSkinBind()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Rebind Skin.', width = 35, height = 35, imageOverlayLabel = 'Rebind', image1 = 'smoothSkin.png', command = 'import takTools.utils.skin as skinUtil\nimport imp\nimp.reload(skinUtil)\nsels = pm.selected()\nfor sel in sels: skinUtil.reBind(sel)', sourceType = 'python')
     cmds.shelfButton(annotation = 'Detach Skin', width = 35, height = 35, imageOverlayLabel = '', image1 = 'detachSkin.png', command = 'DetachSkin', sourceType = 'mel')
+    cmds.shelfButton(annotation = 'Convert any deformer to skin for controllers.', width = 35, height = 35, imageOverlayLabel = 'd2s', image1 = 'smoothSkin.png', command = 'from imp import reload\nfrom takTools.rigging import All_Deformers_2_SkinCluster\nreload(All_Deformers_2_SkinCluster)', sourceType = 'python')
     cmds.shelfButton(annotation = '', width = 35, height = 35, imageOverlayLabel = 'SSD', image1 = 'menuIconSkinning.png', command = 'BakeDeformerTool', sourceType = 'mel')
     cmds.shelfButton(annotation = 'Create range of motion for selected object.', width = 35, height = 35, imageOverlayLabel = '', image1 = 'ROM.png', command = 'import takTools.rigging.tak_ROM as tak_ROM\nimport imp\nimp.reload(tak_ROM)\ntak_ROM.UI()', sourceType = 'python')
     cmds.shelfButton(annotation = 'Weight Hammer on Edge Loop', width = 35, height = 35, imageOverlayLabel = '', image1 = 'weightHammerOnEdgeLoop.bmp', command = "### Weight Hammer on Edge Loop ###\ncmds.SelectEdgeLoopSp()\nmel.eval('weightHammerVerts;')", sourceType = 'python')
@@ -506,7 +507,7 @@ def saveTools(*args):
         codeBlock = re.search(r'.*%s.*\n((\s+cmds.shelfButton.*\n){0,100})' %shelf, contents).group(1)
 
         # Replace prior button codes to current shelf button codes in contents
-        contents = contents.replace(codeBlock.encode('utf-8'), curBtnCodes)
+        contents = contents.replace(codeBlock, curBtnCodes)
 
     # Save tool file
     with open(__file__, 'w') as f:
