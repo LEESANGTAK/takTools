@@ -20,6 +20,8 @@ import maya.api.OpenMaya as om
 import maya.api.OpenMayaAnim as oma
 import pymel.core as pm
 
+from imp import reload
+from ..rigging import All_Deformers_2_SkinCluster as ad2sc; reload(ad2sc)
 from ..utils import decorators
 
 
@@ -62,11 +64,10 @@ class SkinWeights(object):
         if cmds.window(WIN_NAME, exists=True):
             cmds.deleteUI(WIN_NAME)
 
-        cmds.window(WIN_NAME, title='Tak Skin Weights Tool')
+        cmds.window(WIN_NAME, title='Tak Skin Weights Tool', tlb=True)
 
         self.uiWidgets['mainMenuBarLo'] = cmds.menuBarLayout(p=WIN_NAME)
         self.uiWidgets['editMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Edit')
-        self.uiWidgets['skinIOMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Skin I/O...', c=SkinWeights.showSkinIOGUI, ann='Import/Export skin weights for selected geometries.')
         self.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy and Paste', c=SkinWeights.copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
         self.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
         self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
@@ -79,6 +80,9 @@ class SkinWeights(object):
                                                           label='Sort by Hierarchy', c=self.loadInf)
         self.uiWidgets['toggleCustomDagMenuItem'] = cmds.menuItem(p=self.uiWidgets['optMenu'], checkBox=True,
                                                           label='Custom DAG Menu', c=self.toggleCustomDagMenu)
+        self.uiWidgets['utilsMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Utils')
+        self.uiWidgets['skinIOMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin I/O...', c=SkinWeights.showSkinIOGUI, ann='Import/Export skin weights for selected geometries.')
+        self.uiWidgets['convertMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Convert Deformer', c=ad2sc.showGUI, ann='Convert any deformers to a skin cluster for controllers.')
 
         self.uiWidgets['mainColLo'] = cmds.columnLayout(p=WIN_NAME, adj=True)
 

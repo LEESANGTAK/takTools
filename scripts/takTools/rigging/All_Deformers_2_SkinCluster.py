@@ -6,143 +6,136 @@
 # This script can Convert all kind deformers into skincluster .
 # The skinned weight result will be very much near to the deformer deformation.
 #
-# Use:  Run ---------> All_Deformer_2_SkinCluster
+# Use:
+#   import All_Deformers_2_SkinCluster as ad2sc
+#   ad2sc.showGUI()
+#
+# Notice:
+#   Refactored by Sangtak Lee
+#       - Renamed variables and functions to meaningfull
+#       - Added some comments
+#       - It works correctly with progress window
+#       - Prevent causes bugs
+#       - etc...
+#   Contact: https://ta-note.com or chst27@gmail.com
 #---------------------------------------------------------------------------------------------------------------
 
-#  Importing necessary module
 
 import maya.cmds as cmds
-import maya.mel as mel
 import math
 
-selVex = []
-selCtr = []
+
+HOLD_JOINT_NAME = 'hold_jnt'
+
+selVtxs = []
+selCtrls = []
 
 
 # Procedure to get the selected vertexs information
+def getSelectedVertices(*args):
+    global selVtxs
+    selVtxs = cmds.filterExpand(cmds.ls(sl=1, fl=1), sm=31)
 
-def vp_selVex(*args):
-    global selVex
-    selVex = cmds.ls(sl=1,fl=1)
-    #print selVex
-    return selVex
 
 # Procedure to get the selected controls information
+def getSelectedControllers(*args):
+    global selCtrls
+    selCtrls = cmds.ls(sl=1, fl=1, type='transform')
 
-def vp_selCtr(*args):
-    global selCtr
-    selCtr = cmds.ls(sl=1,fl=1)
-    #print selCtr
-    return selCtr
 
 # This procedure will return name of the skincluster for selected object
-
-def vp_SknFrmGeo (geo):
+def getSkinCluster(geo):
     skinCluster = []
     vertHistory = cmds.listHistory(geo, il=1, pdo=True)
     skinCluster = cmds.ls(vertHistory, type='skinCluster')
     if skinCluster:
         return skinCluster[0]
 
-# Procedure to unhold the joints for selected object
 
-def vp_holdAllJnt (skinCluster, onOff=0):
+# Procedure to unhold the joints for selected object
+def unlockAllInfluences(skinCluster):
     influences = cmds.skinCluster (skinCluster, q=1, inf=1)
     for inf in influences:
-        cmds.setAttr(inf + '.liw', onOff)
+        cmds.setAttr(inf + '.liw', 0)
+
 
 # Main Procedure which converts deformation information into skincluster weight information
+def convert(*args):
+    Base_GeoNm = selVtxs[0].split('.')
+    skinClst = getSkinCluster(Base_GeoNm[0])
 
-def vp_w2sConvert(*args):
-    Base_GeoNm = selVex[0].split('.')
-
-    Base_GeoSkn = vp_SknFrmGeo(Base_GeoNm[0])
-    #print Base_GeoSkn
-
-    if(Base_GeoSkn == None):
-        if cmds.objExists('vp_hold'):
-            cmds.delete('vp_hold')
+    if(skinClst == None):
+        if cmds.objExists(HOLD_JOINT_NAME):
+            cmds.delete(HOLD_JOINT_NAME)
         cmds.select(cl=1)
-        cmds.joint(n='vp_hold')
+        cmds.joint(n=HOLD_JOINT_NAME)
         cmds.select(Base_GeoNm[0],add=1)
         cmds.SmoothBindSkin()
-        Base_GeoSkn = vp_SknFrmGeo(Base_GeoNm[0])
+        skinClst = getSkinCluster(Base_GeoNm[0])
 
-    vp_holdAllJnt(Base_GeoSkn, onOff=0)
-    jntNam = []
+    unlockAllInfluences(skinClst)
+    joints = []
 
-    for i in range (0,len(selCtr)):
+    # Create joints for the controllers
+    for i in range(0, len(selCtrls)):
         cmds.select (cl=1)
-        jntNam.append (cmds.joint(n=selCtr[i]+'_jnt'))
-        tmp_grp = cmds.group (n=selCtr[i]+'_jnt_Grp')
-        cmds.delete(cmds.parentConstraint(selCtr[i],tmp_grp))
+        joints.append(cmds.joint(n=selCtrls[i] + '_jnt'))
+        jntZeroGrp = cmds.group(n=selCtrls[i] + '_jnt_grp')  # Group a joint
+        cmds.delete(cmds.parentConstraint(selCtrls[i], jntZeroGrp))  # Match a joint's zero group transform to a controller
         cmds.select(Base_GeoNm[0])
-        cmds.skinCluster(e=1,dr=4,lw=0,wt=0,ai=jntNam[i])
+        cmds.skinCluster(e=1, dr=4, lw=0, wt=0, ai=joints[i])  # Add a joint to geometry as influence
 
-    amount = 0
-    amountPlus = 100/len(selCtr)
+    numCtrls = len(selCtrls)
+    numVtxs = len(selVtxs)
+    cmds.progressWindow(title='Convert 2 Skin', minValue=0, maxValue=numCtrls, progress=0, status='Stand by', isInterruptable=True)
 
-    cmds.progressWindow (title = 'Converting 2 Skin',
-                progress = amount,
-                status = 'Converting : 0%',
-                isInterruptable = True)
-
-    for i in range (0,len(selCtr)):
-        for j in range (0,len(selVex)):
-
+    for i in range (0,numCtrls):
+        for j in range (0,numVtxs):
             if cmds.progressWindow(query=True, isCancelled=True):
                 break
 
-            originalPos = cmds.xform(selVex[j], q=1, wd=1, t=1)
-            cmds.setAttr(selCtr[i] + '.tz', -1)
+            originalPos = cmds.xform(selVtxs[j], q=1, wd=1, t=1)
 
-            deformPos = cmds.xform(selVex[j], q=1, wd=1, t=1)
-            cmds.setAttr(selCtr[i] + '.tz', 0)
+            # Get deformed position for a vertex
+            ctrlOrigTz = cmds.getAttr(selCtrls[i] + '.tz')
+            cmds.setAttr(selCtrls[i] + '.tz', -1)
+            deformPos = cmds.xform(selVtxs[j], q=1, wd=1, t=1)
+            cmds.setAttr(selCtrls[i] + '.tz', ctrlOrigTz)
 
-            difference = [ deformPos[0]-originalPos[0], deformPos[1]-originalPos[1], deformPos[2]-originalPos[2] ]
+            # Calculate weight for a controller using basis function depend on delta between deformed vertex and original vertex
+            difference = [deformPos[0]-originalPos[0], deformPos[1]-originalPos[1], deformPos[2]-originalPos[2]]
             wtValue = math.sqrt (pow(difference[0] ,2) + pow(difference[1] ,2) + pow(difference[2] ,2))
 
-            cmds.skinPercent (Base_GeoSkn,selVex[j], nrm=1, tv=[jntNam[i],wtValue])
+            cmds.skinPercent(skinClst, selVtxs[j], nrm=1, tv=[joints[i],wtValue])
 
-        if cmds.progressWindow(query=1, progress = 1) == len(selCtr):
-            break
-
-        amount += amountPlus
-        cmds.progressWindow ( edit=1, progress=amount, status=('converted : ' + str(amount) + '%'))
-        cmds.pause(seconds=1)
+        cmds.progressWindow(e=True, progress=i, status=selCtrls[i])
 
     cmds.progressWindow(endProgress=1)
-    mel.eval('print "--------------> Converted";')
 
 
 # The Main Window Procedure
+def showGUI(*args):
+    if cmds.window('convert2skinWin', exists=True):
+        cmds.deleteUI('convert2skinWin', window=True)
 
-def All_Deformer_2_SkinCluster():
-
-    if cmds.window('wire2skinWin', exists=True):
-        cmds.deleteUI('wire2skinWin',window=True)
-
-    cmds.window('wire2skinWin',t='All_Deformer_2_Skin')
+    cmds.window('convert2skinWin', t='All_Deformer_2_Skin', tlb=True)
 
     cmds.columnLayout(adj=1)
 
-    cmds.rowLayout(numberOfColumns=2,columnWidth=[(1,125),(2,125)])
-    cmds.button(ann ='Select the vertexs which is need to be Converted' ,
-                l='     Select The Vertexs',
-                h=40,w=125,bgc=(1,0.424,0.343),c=vp_selVex)
+    cmds.rowLayout(numberOfColumns=2, columnWidth=[(1,125), (2,125)])
+    cmds.button(ann ='Select the vertices which is need to be Converted' ,
+                l='Get Selected Vertices',
+                h=40, w=125, c=getSelectedVertices)
 
-    cmds.button(ann ='Select the Deformers which deforms the selected vertexs' ,
-                l='     Select The Controls',
-                h=40,w=125,bgc=(1,0.424,0.343),c=vp_selCtr)
+    cmds.button(ann ='Select the controllers which deforms the selected vertices' ,
+                l='Get Selected Controllers',
+                h=40, w=125, c=getSelectedControllers)
 
     cmds.setParent('..')
-
+    cmds.separator(h=10)
     cmds.button(ann ='Press the button to Convert. Note:- This will some time according to the number of vertex selected ' ,
-                l='-----------    CONVERT    ------------',
-                h=40,bgc=(1,0.424,0.343),c=vp_w2sConvert)
+                l='CONVERT',
+                h=40, c=convert)
 
-    cmds.window('wire2skinWin',e=1,s=0,w=258,h=106)
-    cmds.showWindow('wire2skinWin')
-
-All_Deformer_2_SkinCluster()
-
+    cmds.window('convert2skinWin', e=1, s=0, w=50, h=50)
+    cmds.showWindow('convert2skinWin')
