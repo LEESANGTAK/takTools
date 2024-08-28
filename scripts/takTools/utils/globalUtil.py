@@ -92,9 +92,12 @@ def getLogicalIndices(node, attribute):
 
 
 def getManipPosition():
-    ctxTable = {'moveSuperContext': ['Move', cmds.manipMoveContext],
-                    'RotateSuperContext': ['Rotate', cmds.manipRotateContext],
-                    'scaleSuperContext':['Scale', cmds.manipScaleContext]}
+    ctxTable = {
+        'selectSuperContext': ['Move', cmds.manipMoveContext],
+        'moveSuperContext': ['Move', cmds.manipMoveContext],
+        'RotateSuperContext': ['Rotate', cmds.manipRotateContext],
+        'scaleSuperContext':['Scale', cmds.manipScaleContext]
+    }
     curCtx = cmds.currentCtx()
     ctxInfo = ctxTable[curCtx]
     cmds.setToolTo(ctxInfo[0])

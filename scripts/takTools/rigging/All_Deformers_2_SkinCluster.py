@@ -16,6 +16,7 @@
 #       - Added some comments
 #       - It works correctly with progress window
 #       - Prevent causes bugs
+#       - It works to controllers or components of a deformer
 #       - etc...
 #   Contact: https://ta-note.com or chst27@gmail.com
 #---------------------------------------------------------------------------------------------------------------
@@ -28,7 +29,7 @@ import math
 HOLD_JOINT_NAME = 'hold_jnt'
 
 selVtxs = []
-selCtrls = []
+selDrivers = []
 
 
 # Procedure to get the selected vertexs information
@@ -37,10 +38,10 @@ def getSelectedVertices(*args):
     selVtxs = cmds.filterExpand(cmds.ls(sl=1, fl=1), sm=31)
 
 
-# Procedure to get the selected controls information
-def getSelectedControllers(*args):
-    global selCtrls
-    selCtrls = cmds.ls(sl=1, fl=1, type='transform')
+# Procedure to get the selected drivers information
+def getSelectedDrivers(*args):
+    global selDrivers
+    selDrivers = cmds.ls(sl=1, fl=1)
 
 
 # This procedure will return name of the skincluster for selected object
@@ -54,61 +55,69 @@ def getSkinCluster(geo):
 
 # Procedure to unhold the joints for selected object
 def unlockAllInfluences(skinCluster):
-    influences = cmds.skinCluster (skinCluster, q=1, inf=1)
+    influences = cmds.skinCluster(skinCluster, q=1, inf=1)
     for inf in influences:
         cmds.setAttr(inf + '.liw', 0)
 
 
 # Main Procedure which converts deformation information into skincluster weight information
 def convert(*args):
-    Base_GeoNm = selVtxs[0].split('.')
-    skinClst = getSkinCluster(Base_GeoNm[0])
+    geo = selVtxs[0].split('.')[0]
+    skinClst = getSkinCluster(geo)
 
-    if(skinClst == None):
+    # If mesh has no skin cluster bind with a 'hold_jnt'
+    if not skinClst:
         if cmds.objExists(HOLD_JOINT_NAME):
             cmds.delete(HOLD_JOINT_NAME)
         cmds.select(cl=1)
         cmds.joint(n=HOLD_JOINT_NAME)
-        cmds.select(Base_GeoNm[0],add=1)
+        cmds.select(geo, add=1)
         cmds.SmoothBindSkin()
-        skinClst = getSkinCluster(Base_GeoNm[0])
+        skinClst = getSkinCluster(geo)
 
     unlockAllInfluences(skinClst)
-    joints = []
 
-    # Create joints for the controllers
-    for i in range(0, len(selCtrls)):
+    # Create joints for the drivers
+    joints = []
+    for i in range(0, len(selDrivers)):
         cmds.select (cl=1)
-        joints.append(cmds.joint(n=selCtrls[i] + '_jnt'))
-        jntZeroGrp = cmds.group(n=selCtrls[i] + '_jnt_grp')  # Group a joint
-        cmds.delete(cmds.parentConstraint(selCtrls[i], jntZeroGrp))  # Match a joint's zero group transform to a controller
-        cmds.select(Base_GeoNm[0])
+        jnt = cmds.joint()
+        joints.append(jnt)
+        jntZeroGrp = cmds.group(n=jnt + '_jnt_grp')  # Group a joint
+
+        # Match a joint's zero group transform to a driver
+        driverPos = cmds.xform(selDrivers[i], q=True, t=True, ws=True)
+        if driverPos == [0.0, 0.0, 0.0]:
+            driverPos = cmds.xform(selDrivers[i], q=True, rp=True, ws=True)
+        cmds.xform(jntZeroGrp, t=driverPos, ws=True)
+
+        cmds.select(geo)
         cmds.skinCluster(e=1, dr=4, lw=0, wt=0, ai=joints[i])  # Add a joint to geometry as influence
 
-    numCtrls = len(selCtrls)
+    numDrivers = len(selDrivers)
     numVtxs = len(selVtxs)
-    cmds.progressWindow(title='Convert 2 Skin', minValue=0, maxValue=numCtrls, progress=0, status='Stand by', isInterruptable=True)
+    cmds.progressWindow(title='Convert 2 Skin', minValue=0, maxValue=numDrivers, progress=0, status='Stand by', isInterruptable=True)
 
-    for i in range (0,numCtrls):
-        for j in range (0,numVtxs):
+    for i in range (0, numDrivers):
+        for j in range (0, numVtxs):
             if cmds.progressWindow(query=True, isCancelled=True):
                 break
 
             originalPos = cmds.xform(selVtxs[j], q=1, wd=1, t=1)
 
-            # Get deformed position for a vertex
-            ctrlOrigTz = cmds.getAttr(selCtrls[i] + '.tz')
-            cmds.setAttr(selCtrls[i] + '.tz', -1)
-            deformPos = cmds.xform(selVtxs[j], q=1, wd=1, t=1)
-            cmds.setAttr(selCtrls[i] + '.tz', ctrlOrigTz)
+            # Get deformed position for a vertex by moving a driver
+            driverOrigPos = cmds.xform(selDrivers[i], q=True, t=True, ws=True)
+            cmds.xform(selDrivers[i], t=[driverOrigPos[0], driverOrigPos[1], driverOrigPos[2] + 1], ws=True)
+            deformPos = cmds.xform(selVtxs[j], q=1, t=1, wd=1)
+            cmds.xform(selDrivers[i], t=driverOrigPos, ws=True)
 
-            # Calculate weight for a controller using basis function depend on delta between deformed vertex and original vertex
+            # Set weight as length of the delta for a contoller
+            # Moved just 1 unit so delta length is be weight literally
             difference = [deformPos[0]-originalPos[0], deformPos[1]-originalPos[1], deformPos[2]-originalPos[2]]
-            wtValue = math.sqrt (pow(difference[0] ,2) + pow(difference[1] ,2) + pow(difference[2] ,2))
+            deltaLength = math.sqrt(pow(difference[0], 2) + pow(difference[1], 2) + pow(difference[2], 2))
+            cmds.skinPercent(skinClst, selVtxs[j], nrm=1, tv=[joints[i], deltaLength])
 
-            cmds.skinPercent(skinClst, selVtxs[j], nrm=1, tv=[joints[i],wtValue])
-
-        cmds.progressWindow(e=True, progress=i, status=selCtrls[i])
+        cmds.progressWindow(e=True, progress=i, status=selDrivers[i])
 
     cmds.progressWindow(endProgress=1)
 
@@ -127,9 +136,9 @@ def showGUI(*args):
                 l='Get Selected Vertices',
                 h=40, w=125, c=getSelectedVertices)
 
-    cmds.button(ann ='Select the controllers which deforms the selected vertices' ,
-                l='Get Selected Controllers',
-                h=40, w=125, c=getSelectedControllers)
+    cmds.button(ann ='Select the drivers which deforms the selected vertices. It can be cv, cluster, point...' ,
+                l='Get Selected drivers',
+                h=40, w=125, c=getSelectedDrivers)
 
     cmds.setParent('..')
     cmds.separator(h=10)
