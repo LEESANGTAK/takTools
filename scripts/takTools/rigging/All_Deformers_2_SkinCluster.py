@@ -17,6 +17,7 @@
 #       - It works correctly with progress window
 #       - Prevent causes bugs
 #       - It works to controllers or components of a deformer
+#       - Improved performance x10
 #       - etc...
 #   Contact: https://ta-note.com or chst27@gmail.com
 #---------------------------------------------------------------------------------------------------------------
@@ -24,9 +25,11 @@
 
 import maya.cmds as cmds
 import math
+import time
 
 
 HOLD_JOINT_NAME = 'hold_jnt'
+MIN_WEIGHT = 0.01
 
 selVtxs = []
 selDrivers = []
@@ -62,6 +65,8 @@ def unlockAllInfluences(skinCluster):
 
 # Main Procedure which converts deformation information into skincluster weight information
 def convert(*args):
+    startTime = time.time()
+
     geo = selVtxs[0].split('.')[0]
     skinClst = getSkinCluster(geo)
 
@@ -94,32 +99,32 @@ def convert(*args):
         cmds.select(geo)
         cmds.skinCluster(e=1, dr=4, lw=0, wt=0, ai=joints[i])  # Add a joint to geometry as influence
 
+
     numDrivers = len(selDrivers)
-    numVtxs = len(selVtxs)
     cmds.progressWindow(title='Convert 2 Skin', minValue=0, maxValue=numDrivers, progress=0, status='Stand by', isInterruptable=True)
 
-    for i in range (0, numDrivers):
-        for j in range (0, numVtxs):
-            if cmds.progressWindow(query=True, isCancelled=True):
-                break
+    # Get vertices original positions
+    vtxsOrigPos = [cmds.xform(vtx, q=True, t=True, ws=True) for vtx in selVtxs]
+    for i in range(0, numDrivers):
+        # Get vertices deformed positions
+        driverOrigPos = cmds.xform(selDrivers[i], q=True, t=True, ws=True)
+        cmds.xform(selDrivers[i], t=[driverOrigPos[0], driverOrigPos[1], driverOrigPos[2] + 1], ws=True)
+        vtxsDefPos = [cmds.xform(vtx, q=True, t=True, ws=True) for vtx in selVtxs]
+        cmds.xform(selDrivers[i], t=driverOrigPos, ws=True)
 
-            originalPos = cmds.xform(selVtxs[j], q=1, wd=1, t=1)
-
-            # Get deformed position for a vertex by moving a driver
-            driverOrigPos = cmds.xform(selDrivers[i], q=True, t=True, ws=True)
-            cmds.xform(selDrivers[i], t=[driverOrigPos[0], driverOrigPos[1], driverOrigPos[2] + 1], ws=True)
-            deformPos = cmds.xform(selVtxs[j], q=1, t=1, wd=1)
-            cmds.xform(selDrivers[i], t=driverOrigPos, ws=True)
-
-            # Set weight as length of the delta for a contoller
-            # Moved just 1 unit so delta length is be weight literally
-            difference = [deformPos[0]-originalPos[0], deformPos[1]-originalPos[1], deformPos[2]-originalPos[2]]
-            deltaLength = math.sqrt(pow(difference[0], 2) + pow(difference[1], 2) + pow(difference[2], 2))
-            cmds.skinPercent(skinClst, selVtxs[j], nrm=1, tv=[joints[i], deltaLength])
+        # Set weights for a driver
+        for j, (vtxOrigPos, vtxDefPos) in enumerate(zip(vtxsOrigPos, vtxsDefPos)):
+            delta = [vtxDefPos[0]-vtxOrigPos[0], vtxDefPos[1]-vtxOrigPos[1], vtxDefPos[2]-vtxOrigPos[2]]
+            weight = math.sqrt(pow(delta[0], 2) + pow(delta[1], 2) + pow(delta[2], 2))
+            if weight < MIN_WEIGHT:
+                continue
+            cmds.skinPercent(skinClst, selVtxs[j], nrm=1, tv=[joints[i], weight])
 
         cmds.progressWindow(e=True, progress=i, status=selDrivers[i])
-
     cmds.progressWindow(endProgress=1)
+
+    elapsedTime = time.time() - startTime
+    print('"{}()" takes time to run {}s.'.format(convert.__name__, round(elapsedTime, 2)))
 
 
 # The Main Window Procedure
@@ -132,17 +137,17 @@ def showGUI(*args):
     cmds.columnLayout(adj=1)
 
     cmds.rowLayout(numberOfColumns=2, columnWidth=[(1,125), (2,125)])
-    cmds.button(ann ='Select the vertices which is need to be Converted' ,
+    cmds.button(ann ='Select the vertices which is need to be converted.' ,
                 l='Get Selected Vertices',
                 h=40, w=125, c=getSelectedVertices)
 
-    cmds.button(ann ='Select the drivers which deforms the selected vertices. It can be cv, cluster, point...' ,
+    cmds.button(ann ='Select the drivers which deforms the selected vertices.\nIt can be CVs, points of a lattice, clusters, locators ...' ,
                 l='Get Selected drivers',
                 h=40, w=125, c=getSelectedDrivers)
 
     cmds.setParent('..')
     cmds.separator(h=10)
-    cmds.button(ann ='Press the button to Convert. Note:- This will some time according to the number of vertex selected ' ,
+    cmds.button(ann ='Press the button to Convert. Note:- This will some time according to the number of vertex selected.' ,
                 l='CONVERT',
                 h=40, c=convert)
 
