@@ -158,10 +158,10 @@ class SkinWeights(object):
         Main method.
         Populate influence and weight value text scroll list.
         '''
-        # Deactivate influences object color
-        if self.infTxtScrLsCurrentAllItems:
-            for inf in self.infTxtScrLsCurrentAllItems:
-                SkinWeights.unuseObjectColor(inf)
+        # # Deactivate influences object color
+        # if self.infTxtScrLsCurrentAllItems:
+        #     for inf in self.infTxtScrLsCurrentAllItems:
+        #         SkinWeights.unuseObjectColor(inf)
 
         # Get options
         hideZroInfOpt = cmds.menuItem(self.uiWidgets['hideZroInfMenuItem'], q=True, checkBox=True)
