@@ -44,8 +44,21 @@ def getSelectedVertices(*args):
 # Procedure to get the selected drivers information
 def getSelectedDrivers(*args):
     global selDrivers
-    selDrivers = cmds.ls(sl=1, fl=1)
+    selDrivers = cmds.ls(sl=True, fl=True)
 
+    # Since weights are constantly normalized from start to end of the process, weights of a center joint can be asymmetry
+    # To prevent this sort drivers from bounds of the bounding box to center
+    bbox = cmds.exactWorldBoundingBox(selDrivers)
+    bboxCenter = [(bbox[0]+bbox[3])*0.5, (bbox[1]+bbox[4])*0.5, (bbox[2]+bbox[5])*0.5]
+    distFromCenterMap = {}
+    for driver in selDrivers:
+        driverPos = cmds.xform(driver, q=True, t=True, ws=True)
+        if driverPos == [0.0, 0.0, 0.0]:
+            driverPos = cmds.xform(driver, q=True, rp=True, ws=True)
+        distFromCenter = math.sqrt(math.pow(driverPos[0]-bboxCenter[0], 2) + math.pow(driverPos[1]-bboxCenter[1], 2) + math.pow(driverPos[2]-bboxCenter[2], 2))
+        distFromCenterMap[driver] = distFromCenter
+    sortedDrivers = dict(sorted(distFromCenterMap.items(), key=lambda item: item[1], reverse=True))
+    selDrivers = list(sortedDrivers.keys())
 
 # This procedure will return name of the skincluster for selected object
 def getSkinCluster(geo):
@@ -63,13 +76,22 @@ def unlockAllInfluences(skinCluster):
         cmds.setAttr(inf + '.liw', 0)
 
 
+def correctDeformersOrder(geometry, skinCluster):
+    history = cmds.listHistory(geometry, pruneDagObjects=True)
+    deformers = cmds.ls(history, type="geometryFilter")
+    if not deformers[0] == skinCluster:
+        # First move skincluster to below the first deformer
+        cmds.reorderDeformers(deformers[0], skinCluster, geometry)
+        # Then swap order to place skin cluster as top
+        cmds.reorderDeformers(skinCluster, deformers[0], geometry)
+
+
 # Main Procedure which converts deformation information into skincluster weight information
 def convert(*args):
     startTime = time.time()
 
     geo = selVtxs[0].split('.')[0]
     skinClst = getSkinCluster(geo)
-
     # If mesh has no skin cluster bind with a 'hold_jnt'
     if not skinClst:
         if cmds.objExists(HOLD_JOINT_NAME):
@@ -79,7 +101,7 @@ def convert(*args):
         cmds.select(geo, add=1)
         cmds.SmoothBindSkin()
         skinClst = getSkinCluster(geo)
-
+    correctDeformersOrder(geo, skinClst)
     unlockAllInfluences(skinClst)
 
     # Create joints for the drivers
@@ -88,17 +110,15 @@ def convert(*args):
         cmds.select (cl=1)
         jnt = cmds.joint()
         joints.append(jnt)
-        jntZeroGrp = cmds.group(n=jnt + '_jnt_grp')  # Group a joint
 
-        # Match a joint's zero group transform to a driver
+        # Match a joint position to a driver
         driverPos = cmds.xform(selDrivers[i], q=True, t=True, ws=True)
         if driverPos == [0.0, 0.0, 0.0]:
             driverPos = cmds.xform(selDrivers[i], q=True, rp=True, ws=True)
-        cmds.xform(jntZeroGrp, t=driverPos, ws=True)
+        cmds.xform(jnt, t=driverPos, ws=True)
 
         cmds.select(geo)
         cmds.skinCluster(e=1, dr=4, lw=0, wt=0, ai=joints[i])  # Add a joint to geometry as influence
-
 
     numDrivers = len(selDrivers)
     cmds.progressWindow(title='Convert 2 Skin', minValue=0, maxValue=numDrivers, progress=0, status='Stand by', isInterruptable=True)
@@ -115,7 +135,7 @@ def convert(*args):
         # Set weights for a driver
         for j, (vtxOrigPos, vtxDefPos) in enumerate(zip(vtxsOrigPos, vtxsDefPos)):
             delta = [vtxDefPos[0]-vtxOrigPos[0], vtxDefPos[1]-vtxOrigPos[1], vtxDefPos[2]-vtxOrigPos[2]]
-            weight = math.sqrt(pow(delta[0], 2) + pow(delta[1], 2) + pow(delta[2], 2))
+            weight = math.sqrt(pow(delta[0], 2) + pow(delta[1], 2) + pow(delta[2], 2))  # Since we move a driver 1 unit the weight for a vertex is same as distance of delta
             if weight < MIN_WEIGHT:
                 continue
             cmds.skinPercent(skinClst, selVtxs[j], nrm=1, tv=[joints[i], weight])
