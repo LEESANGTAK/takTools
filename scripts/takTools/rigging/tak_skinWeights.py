@@ -158,16 +158,11 @@ class SkinWeights(object):
         Main method.
         Populate influence and weight value text scroll list.
         '''
-        # # Deactivate influences object color
-        # if self.infTxtScrLsCurrentAllItems:
-        #     for inf in self.infTxtScrLsCurrentAllItems:
-        #         SkinWeights.unuseObjectColor(inf)
-
         # Get options
         hideZroInfOpt = cmds.menuItem(self.uiWidgets['hideZroInfMenuItem'], q=True, checkBox=True)
         hierSortOpt = cmds.menuItem(self.uiWidgets['sortHierMenuItem'], q=True, checkBox=True)
 
-        self.vtxList = cmds.ls(sl=True)
+        self.vtxList = cmds.ls(sl=True, fl=True)
 
         # Check selection error
         geoChkResult = self.checkGeoNum()
@@ -610,9 +605,6 @@ def extendEdgeRingSelection(*args):
 
 def extendEdgeLoopSelection(*args):
     preSelEdges = cmds.ls(sl=True, fl=True)
-
-    # mel.eval('polySelectSp -loop;')
-    # loopEdges = cmds.ls(sl=True, fl=True)
 
     loopEdges = []
     for preSelEdge in preSelEdges:
