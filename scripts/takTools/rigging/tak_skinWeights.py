@@ -611,8 +611,14 @@ def extendEdgeRingSelection(*args):
 def extendEdgeLoopSelection(*args):
     preSelEdges = cmds.ls(sl=True, fl=True)
 
-    mel.eval('polySelectSp -loop;')
-    loopEdges = cmds.ls(sl=True, fl=True)
+    # mel.eval('polySelectSp -loop;')
+    # loopEdges = cmds.ls(sl=True, fl=True)
+
+    loopEdges = []
+    for preSelEdge in preSelEdges:
+        cmds.select(preSelEdge, r=True)
+        mel.eval('polySelectSp -loop;')
+        loopEdges.extend(cmds.ls(sl=True, fl=True))
 
     cmds.select(preSelEdges, r=True)
     mel.eval('GrowPolygonSelectionRegion;')
