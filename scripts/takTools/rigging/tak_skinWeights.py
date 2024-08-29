@@ -1,6 +1,6 @@
 """
 Author: Tak
-Website: ta-note.com
+Contact: https://ta-note.com
 
 Description:
 You can assign specific numeric value to the selected vertices skin weights like using component editor.
@@ -12,6 +12,7 @@ tak_skinWeights.SkinWeights()
 """
 
 import os
+import math
 from functools import partial
 
 import maya.cmds as cmds
@@ -90,8 +91,8 @@ class SkinWeights(object):
         self.uiWidgets['selectRowLo'] = cmds.rowLayout(p=self.uiWidgets['mainColLo'], nc=4)
         self.uiWidgets['shrinkBtn'] = cmds.button(l='Shrink', w=70, c=lambda x: mel.eval('ShrinkPolygonSelectionRegion;'))
         self.uiWidgets['growBtn'] = cmds.button(l='Grow', w=70, c=lambda x: mel.eval('GrowPolygonSelectionRegion;'))
-        self.uiWidgets['ringBtn'] = cmds.button(l='Ring', w=70, c=selectVtxRing)
-        self.uiWidgets['loopBtn'] = cmds.button(l='Loop', w=70, c=lambda x: mel.eval('polySelectSp -loop;'))
+        self.uiWidgets['ringBtn'] = cmds.button(l='Ring', w=70, c=extendEdgeRingSelection)
+        self.uiWidgets['loopBtn'] = cmds.button(l='Loop', w=70, c=extendEdgeLoopSelection)
 
         self.uiWidgets['mainTabLo'] = cmds.tabLayout(p=self.uiWidgets['mainColLo'], tv=False)
         self.uiWidgets['infWghtRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainTabLo'], numberOfColumns=2,
@@ -590,7 +591,31 @@ class SkinWeights(object):
         mel.eval('artAttrSkinWeightPaste;')
         cmds.select(srcVtx, add=True)
 
-def selectVtxRing(*args):
-    mel.eval('PolySelectConvert 20;')
-    mel.eval('polySelectSp -ring;')
-    mel.eval('PolySelectConvert 3;')
+
+def extendEdgeRingSelection(*args):
+    preSelEdges = cmds.ls(sl=True, fl=True)
+
+    mel.eval('ConvertSelectionToFaces;')
+    mel.eval('ConvertSelectionToEdges;')
+    faceEdges = cmds.ls(sl=True, fl=True)
+
+    ringEdges = []
+    for preSelEdge in preSelEdges:
+        cmds.select(preSelEdge, r=True)
+        mel.eval('polySelectSp -ring;')
+        ringEdges.extend(cmds.ls(sl=True, fl=True))
+
+    cmds.select(set(faceEdges) & set(ringEdges), r=True)
+
+
+def extendEdgeLoopSelection(*args):
+    preSelEdges = cmds.ls(sl=True, fl=True)
+
+    mel.eval('polySelectSp -loop;')
+    loopEdges = cmds.ls(sl=True, fl=True)
+
+    cmds.select(preSelEdges, r=True)
+    mel.eval('GrowPolygonSelectionRegion;')
+    extenedEdges = cmds.ls(sl=True, fl=True)
+
+    cmds.select(set(loopEdges) & set(extenedEdges), r=True)
