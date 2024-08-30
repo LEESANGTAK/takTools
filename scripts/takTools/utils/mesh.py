@@ -148,7 +148,7 @@ def getClosestVertices(source, target):
     return closestVertices
 
 
-def getOverlapVertices(source, target, searchDist=0.1):
+def getOverlapVertices(source, target, searchDist=1.0):
     """Get overlaped vertices of target mesh from source mesh.
 
     Args:
@@ -165,12 +165,13 @@ def getOverlapVertices(source, target, searchDist=0.1):
     srcMeshFn = om.MFnMesh(srcDagPath)
     trgGeoIt = om.MItGeometry(trgDagPath)
 
+    trgLocalToWorldMatrix = om.MFloatMatrix(trgDagPath.inclusiveMatrix())
     overlapVerticesId = []
     while not trgGeoIt.isDone():
-        trgVtxWsPnt = om.MFloatPoint(trgGeoIt.position())
-        trgVtxNormal = om.MFloatVector(trgGeoIt.normal())
+        trgVtxWsPnt = om.MFloatPoint(trgGeoIt.position()) * trgLocalToWorldMatrix
+        trgVtxWsNormal = om.MFloatVector(trgGeoIt.normal()) * trgLocalToWorldMatrix
 
-        results = srcMeshFn.closestIntersection(trgVtxWsPnt, trgVtxNormal, om.MSpace.kWorld, searchDist, True)
+        results = srcMeshFn.closestIntersection(trgVtxWsPnt, trgVtxWsNormal, om.MSpace.kWorld, searchDist, True)
         if results:
             closestPnt = results[0]
             if not closestPnt.isEquivalent(om.MFloatPoint.kOrigin):

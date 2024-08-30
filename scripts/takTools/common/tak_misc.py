@@ -418,17 +418,6 @@ def TransSkinWeights():
     cmds.select(selList)
 
 
-# Select Influences #
-def selInflu():
-    sels = cmds.ls(sl=True)
-    infs = []
-    for sel in sels:
-        skClu = mel.eval('findRelatedSkinCluster("%s");' % sel)
-        infs.extend(cmds.skinCluster(skClu, q=True, inf=True))
-    cmds.select(infs)
-    return infs
-
-
 # Attach Hairconstraint to The Joints #
 # Frits select a hair constraint and select joints
 def hairCnst():
@@ -2657,17 +2646,6 @@ def selBndJnt():
                 bndJnts.extend(chldBndJnts)
 
     cmds.select(bndJnts, r=True)
-
-
-def selAffectedVertex():
-    infs = cmds.ls(sl=True)
-    vtxs = []
-    for inf in infs:
-        vtxs.extend(skinUtil.getAffectedVertex(inf, 0.001))
-    if not vtxs:
-        print('No vertices be affected by selected infuences.')
-        return
-    pm.select(vtxs, r=True)
 
 
 def copyUvRiggedMesh(source, target):

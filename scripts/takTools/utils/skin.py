@@ -5,8 +5,9 @@ import maya.OpenMayaAnim as oma
 import pymel.core as pm
 from maya import cmds, mel
 
+from imp import reload
 from . import globalUtil
-from . import mesh as meshUtil
+from . import mesh as meshUtil; reload(meshUtil)
 from ..rigging import bSkinSaver as bsk
 
 
