@@ -338,49 +338,7 @@
         menuEditorMenuItem17;
 
         menuItem
-            -label "Vertices" 
-            -divider 0
-            -subMenu 0
-            -tearOff 0
-            -command "ToggleVertices" 
-            -optionBox 0
-            -enable 1
-            -visible 1
-            -data 0
-            -allowOptionBoxes 1
-            -postMenuCommandOnce 0
-            -enableCommandRepeat 1
-            -image "polyConvertToVertices.png" 
-            -echoCommand 0
-            -italicized 0
-            -boldFont 1
-            -sourceType "mel" 
-            -longDivider 1
-            menuEditorMenuItem8;
-
-        menuItem
-            -label "Vertex ID" 
-            -divider 0
-            -subMenu 0
-            -tearOff 0
-            -command "ToggleVertIDs;" 
-            -optionBox 0
-            -enable 1
-            -visible 1
-            -data 0
-            -allowOptionBoxes 1
-            -postMenuCommandOnce 0
-            -enableCommandRepeat 1
-            -image "reorderIDs.png" 
-            -echoCommand 0
-            -italicized 0
-            -boldFont 1
-            -sourceType "mel" 
-            -longDivider 1
-            menuEditorMenuItem4;
-
-        menuItem
-            -label "CV Vis" 
+            -label "CVs" 
             -divider 0
             -subMenu 0
             -tearOff 0
@@ -399,6 +357,27 @@
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem6;
+
+        menuItem
+            -label "Vertices" 
+            -divider 0
+            -subMenu 0
+            -tearOff 0
+            -command "ToggleVertices" 
+            -optionBox 0
+            -enable 1
+            -visible 1
+            -data 0
+            -allowOptionBoxes 1
+            -postMenuCommandOnce 0
+            -enableCommandRepeat 1
+            -image "polySelectVertex.png" 
+            -echoCommand 0
+            -italicized 0
+            -boldFont 0
+            -sourceType "mel" 
+            -longDivider 1
+            menuEditorMenuItem10;
 
         menuItem
             -label "Border Edge" 
@@ -422,6 +401,65 @@
             menuEditorMenuItem1;
 
         menuItem
+            -divider 0
+            -subMenu 0
+            -tearOff 0
+            -command "ChangeEdgeWidth;" 
+            -optionBox 1
+            -enable 1
+            -visible 0
+            -data 0
+            -allowOptionBoxes 1
+            -postMenuCommandOnce 0
+            -enableCommandRepeat 0
+            -echoCommand 0
+            -italicized 0
+            -boldFont 0
+            -sourceType "mel" 
+            -longDivider 1
+            menuEditorMenuItem14;
+
+        menuItem
+            -label "Vertex Normals" 
+            -divider 0
+            -subMenu 0
+            -tearOff 0
+            -command "ToggleVertexNormalDisplay" 
+            -optionBox 0
+            -enable 1
+            -visible 1
+            -data 0
+            -allowOptionBoxes 1
+            -postMenuCommandOnce 0
+            -enableCommandRepeat 1
+            -image "polySetVertexNormal.png" 
+            -echoCommand 0
+            -italicized 0
+            -boldFont 0
+            -sourceType "mel" 
+            -longDivider 1
+            menuEditorMenuItem9;
+
+        menuItem
+            -divider 0
+            -subMenu 0
+            -tearOff 0
+            -command "ChangeNormalSize;" 
+            -optionBox 1
+            -enable 1
+            -visible 0
+            -data 0
+            -allowOptionBoxes 1
+            -postMenuCommandOnce 0
+            -enableCommandRepeat 0
+            -echoCommand 0
+            -italicized 0
+            -boldFont 0
+            -sourceType "mel" 
+            -longDivider 1
+            menuEditorMenuItem16;
+
+        menuItem
             -label "Face Normals" 
             -divider 0
             -subMenu 0
@@ -443,6 +481,25 @@
             menuEditorMenuItem3;
 
         menuItem
+            -divider 0
+            -subMenu 0
+            -tearOff 0
+            -command "ChangeNormalSize;" 
+            -optionBox 1
+            -enable 1
+            -visible 0
+            -data 0
+            -allowOptionBoxes 1
+            -postMenuCommandOnce 0
+            -enableCommandRepeat 0
+            -echoCommand 0
+            -italicized 0
+            -boldFont 0
+            -sourceType "mel" 
+            -longDivider 1
+            menuEditorMenuItem17;
+
+        menuItem
             -label "Soft/Hard Edges" 
             -divider 0
             -subMenu 0
@@ -462,6 +519,88 @@
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem2;
+
+        menuItem
+            -label "separator" 
+            -divider 1
+            -dividerLabel "separator" 
+            -subMenu 0
+            -tearOff 0
+            -optionBox 0
+            -enable 1
+            -visible 1
+            -data 0
+            -allowOptionBoxes 1
+            -postMenuCommandOnce 0
+            -enableCommandRepeat 1
+            -italicized 0
+            -boldFont 0
+            -sourceType "mel" 
+            -longDivider 1
+            menuEditorMenuItem15;
+
+        menuItem
+            -label "Vertex ID" 
+            -divider 0
+            -subMenu 0
+            -tearOff 0
+            -command "ToggleVertIDs;" 
+            -optionBox 0
+            -enable 1
+            -visible 1
+            -data 0
+            -allowOptionBoxes 1
+            -postMenuCommandOnce 0
+            -enableCommandRepeat 1
+            -image "reorderIDs.png" 
+            -echoCommand 0
+            -italicized 0
+            -boldFont 1
+            -sourceType "mel" 
+            -longDivider 1
+            menuEditorMenuItem4;
+
+        menuItem
+            -label "Edge ID" 
+            -divider 0
+            -subMenu 0
+            -tearOff 0
+            -command "ToggleEdgeIDs" 
+            -optionBox 0
+            -enable 1
+            -visible 1
+            -data 0
+            -allowOptionBoxes 1
+            -postMenuCommandOnce 0
+            -enableCommandRepeat 1
+            -image "polySelectEdge.png" 
+            -echoCommand 0
+            -italicized 0
+            -boldFont 0
+            -sourceType "mel" 
+            -longDivider 1
+            menuEditorMenuItem12;
+
+        menuItem
+            -label "Face ID" 
+            -divider 0
+            -subMenu 0
+            -tearOff 0
+            -command "ToggleFaceIDs" 
+            -optionBox 0
+            -enable 1
+            -visible 1
+            -data 0
+            -allowOptionBoxes 1
+            -postMenuCommandOnce 0
+            -enableCommandRepeat 1
+            -image "polySelectFace.png" 
+            -echoCommand 0
+            -italicized 0
+            -boldFont 0
+            -sourceType "mel" 
+            -longDivider 1
+            menuEditorMenuItem13;
 
     setParent -m ..;
 
@@ -668,7 +807,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem24;
+        menuEditorMenuItem15;
 
     menuItem
         -label "Color Feedback" 

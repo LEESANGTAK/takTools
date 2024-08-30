@@ -273,7 +273,7 @@
         -image "pickDeformerObj.png" 
         -echoCommand 0
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem19;
@@ -317,7 +317,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem11;
+        menuEditorMenuItem25;
 
     menuItem
         -label "Controller" 
@@ -398,7 +398,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem15;
+        menuEditorMenuItem28;
 
     menuItem
         -label "Multi Constraint" 
@@ -426,7 +426,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"bfUtil.convertToCageMesh(pm.selected()[0])\");" 
+        -command "python(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"bfUtil.convertToCageMesh(pm.selected())\");" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -460,7 +460,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem16;
+        menuEditorMenuItem31;
 
     menuItem
         -label "separator" 

@@ -44,7 +44,7 @@
         menuEditorMenuItem2;
 
     menuItem
-        -label "Lasso Select Context" 
+        -label "Lasso" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -86,7 +86,7 @@
         menuEditorMenuItem4;
 
     menuItem
-        -label "Paint Select" 
+        -label "Paint" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -95,7 +95,7 @@
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "N" 
+        -radialPosition "NE" 
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
@@ -108,7 +108,7 @@
         menuEditorMenuItem5;
 
     menuItem
-        -label "Planner Select" 
+        -label "Polygon Planner" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -117,7 +117,7 @@
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "SW" 
+        -radialPosition "S" 
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
@@ -130,7 +130,7 @@
         menuEditorMenuItem6;
 
     menuItem
-        -label "Shell Select" 
+        -label "Polygon Shell" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -152,7 +152,7 @@
         menuEditorMenuItem9;
 
     menuItem
-        -label "Disable Select Constraint" 
+        -label "Disable Constraint" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -161,7 +161,7 @@
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "S" 
+        -radialPosition "N" 
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
@@ -172,28 +172,6 @@
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem7;
-
-    menuItem
-        -label "Hierarchy" 
-        -divider 0
-        -subMenu 0
-        -tearOff 0
-        -command "SelectHierarchy" 
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -radialPosition "NE" 
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -image "selectByHierarchy.png" 
-        -echoCommand 0
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem8;
 
     menuItem
         -label "Set Manager" 
@@ -208,7 +186,7 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "objectSet.svg" 
+        -image "out_objectSet.png" 
         -echoCommand 0
         -italicized 0
         -boldFont 1
@@ -236,7 +214,7 @@
         menuEditorMenuItem18;
 
     menuItem
-        -label "Select Child Joints" 
+        -label "Child Joints" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -257,7 +235,7 @@
         menuEditorMenuItem14;
 
     menuItem
-        -label "Select End Joints" 
+        -label "End Joints" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -272,13 +250,13 @@
         -image "kinJoint.png" 
         -echoCommand 0
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem15;
 
     menuItem
-        -label "Select No End Joints" 
+        -label "No End Joints" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -318,7 +296,7 @@
         menuEditorMenuItem16;
 
     menuItem
-        -label "Select Ring Vertices" 
+        -label "Ring Vertices" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -339,7 +317,7 @@
         menuEditorMenuItem12;
 
     menuItem
-        -label "Select Loop Vertices" 
+        -label "Loop Vertices" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -360,44 +338,26 @@
         menuEditorMenuItem13;
 
     menuItem
-        -label "separator" 
-        -divider 1
-        -dividerLabel "separator" 
-        -subMenu 0
-        -tearOff 0
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem19;
-
-    menuItem
-        -label "Select All Controllers" 
+        -label "UV Shell" 
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"pm.select([item.getTransform() for item in pm.ls(type='nurbsCurve')], r=True)\");" 
+        -command "changeSelectMode -component;\nsetComponentPickMask \"Facet\" true;\nselectType -ocm -alc false;\nselectType -msh true;" 
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
+        -radialPosition "SW" 
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "circle.png" 
+        -image "polySelectUVShell.png" 
         -echoCommand 0
         -italicized 0
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem11;
+        menuEditorMenuItem8;
 
 setParent -m ..;
 
