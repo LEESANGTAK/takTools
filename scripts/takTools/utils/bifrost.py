@@ -92,7 +92,7 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=1000, keepHardEdge=True
     return cageMesh
 
 
-def showConvertToCageMeshUI():
+def showConvertToCageMeshUI(parent=None, *args):
     def applyBtnCallback(*args):
         meshes = pm.filterExpand(pm.selected(), sm=12)
         detailSize = pm.floatFieldGrp('detailSizeFloatFld', q=True, v1=True)
@@ -101,7 +101,7 @@ def showConvertToCageMeshUI():
         symmetry = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
         convertToCageMesh(meshes, detailSize, faceCount, keepHardEdges, symmetry)
 
-    pm.window(title='Create Cage Mesh', mnb=False, mxb=False)
+    pm.window(title='Create Cage Mesh', mnb=False, mxb=False, p=parent)
     pm.columnLayout(adj=True, cal='left')
 
     pm.text(label='Volume Mesh Settings')

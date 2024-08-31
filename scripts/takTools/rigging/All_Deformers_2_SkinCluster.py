@@ -148,11 +148,11 @@ def convert(*args):
 
 
 # The Main Window Procedure
-def showGUI(*args):
+def showGUI(parent=None, *args):
     if cmds.window('convert2skinWin', exists=True):
         cmds.deleteUI('convert2skinWin', window=True)
 
-    cmds.window('convert2skinWin', t='All_Deformer_2_Skin', tlb=True)
+    cmds.window('convert2skinWin', t='All_Deformer_2_Skin', tlb=True, p=parent)
 
     cmds.columnLayout(adj=1)
 

@@ -184,7 +184,7 @@ def getAffectedVertex(inf, minWeight):
     inf = pm.PyNode(inf)
     skinClusters = inf.worldMatrix.listConnections()
 
-    pm.select(cl=True)
+    cmds.select(cl=True)
 
     selLs = om.MSelectionList()
     infDagPath = om.MDagPath()
@@ -225,7 +225,10 @@ def getAffectedVertex(inf, minWeight):
 
         selLs.clear()
 
-    return pm.selected()
+    selVtxs = cmds.ls(sl=True, fl=True)
+    cmds.select(cl=True)
+
+    return selVtxs
 
 
 def createSkinMeshWithJoints(joints, type='ribbon'):

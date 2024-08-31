@@ -25,6 +25,7 @@ from maya.api import OpenMayaAnim as oma
 from imp import reload
 from ..rigging import All_Deformers_2_SkinCluster as ad2sc; reload(ad2sc)
 from ..utils import skin as skinUtil; reload(skinUtil)
+from ..utils import bifrost as bfUtil; reload(bfUtil)
 from ..utils import decorators
 
 # Constants
@@ -56,7 +57,7 @@ def showUI():
 
 class SkinWeights(object):
     def __init__(self):
-        self.vtxList = []
+        self.selVertices = []
         self.uiWidgets = {}
         self.infWeightTable = {}
         self.weightInfTable = {}
@@ -73,46 +74,58 @@ class SkinWeights(object):
         if cmds.window(WIN_NAME, exists=True):
             cmds.deleteUI(WIN_NAME)
 
-        cmds.window(WIN_NAME, title='Tak Skin Weights Tool')
+        cmds.window(WIN_NAME, title='Tak Skin Weights')
 
         self.uiWidgets['mainMenuBarLo'] = cmds.menuBarLayout(p=WIN_NAME)
 
         # Menus
-        ## Edit Menu
-        self.uiWidgets['editMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Edit', tearOff=True)
-        self.uiWidgets['rebindMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Rebind', c=rebind, ann='Rebind in current state for the selected geometries.')
-        self.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy and Paste', c=SkinWeights.copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
-        self.uiWidgets['copyOverlapMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Overlaped Vertices', c=SkinWeights.copySkinOverlapVertices, ann='Copy a source mesh skin to a target mesh only for overlaped vertices.')
-        cmds.menuItem(divider=True)
-        self.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
-        self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
-        cmds.menuItem(optionBox=True, c='mel.eval("MirrorSkinWeightsOptions;")')
-        cmds.menuItem(divider=True, dividerLabel='Optimization')
-        self.uiWidgets['pruneMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Prune Small Weights', c=SkinWeights.prunSkinWeights)
-        self.uiWidgets['rmvUnusedInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Remove Unused Influences', c="mel.eval('removeUnusedInfluences;')")
-
         ## Select Menu
         self.uiWidgets['selectMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Select', tearOff=True)
         self.uiWidgets['selectInfsMenuItem'] = cmds.menuItem(p=self.uiWidgets['selectMenu'], label='Influences', c=selectInfluences, ann='Select influences with selected meshes.')
         self.uiWidgets['selectVtxsMenuItem'] = cmds.menuItem(p=self.uiWidgets['selectMenu'], label='Vertices', c=selAffectedVertex, ann='Select weighted vertices with selected joints.')
         cmds.menuItem(divider=True, dividerLabel='Modify')
-        self.uiWidgets['growEdgeLoopSelMenuItem'] = cmds.menuItem(p=self.uiWidgets['selectMenu'], label='Grow Edge Loop', c=extendEdgeLoopSelection, ann='Grow current edge loop selection.')
-        self.uiWidgets['growEdgeRingSelMenuItem'] = cmds.menuItem(p=self.uiWidgets['selectMenu'], label='Grow Edge Ring', c=extendEdgeRingSelection, ann='Grow current edge ring selection.')
         self.uiWidgets['growSelMenuItem'] = cmds.menuItem(p=self.uiWidgets['selectMenu'], label='Grow', c=lambda x: mel.eval('GrowPolygonSelectionRegion;'), ann='Grow current selection.')
         self.uiWidgets['shrinkSelMenuItem'] = cmds.menuItem(p=self.uiWidgets['selectMenu'], label='Shrink', c=lambda x: mel.eval('ShrinkPolygonSelectionRegion;'), ann='Shrink current selection.')
+        self.uiWidgets['growEdgeLoopSelMenuItem'] = cmds.menuItem(p=self.uiWidgets['selectMenu'], label='Grow Edge Loop', c=extendEdgeLoopSelection, ann='Grow current edge loop selection.')
+        self.uiWidgets['growEdgeRingSelMenuItem'] = cmds.menuItem(p=self.uiWidgets['selectMenu'], label='Grow Edge Ring', c=extendEdgeRingSelection, ann='Grow current edge ring selection.')
+
+        ## Edit Menu
+        self.uiWidgets['editMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Edit', tearOff=True)
+        self.uiWidgets['rebindMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Rebind', c=rebind, ann='Rebind in current state for the selected geometries.')
+        cmds.menuItem(divider=True, dividerLabel='Maya Native')
+        self.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
+        self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
+        cmds.menuItem(optionBox=True, c='mel.eval("MirrorSkinWeightsOptions;")')
+        cmds.menuItem(divider=True, dividerLabel='Copy')
+        self.uiWidgets['copyMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Skin', c=copySkin, ann='Copy a source mesh skin to a target meshes.\nIf components and a mesh selected copy weights from mesh to components.')
+        self.uiWidgets['copyOverlapMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Overlaped Vertices', c=SkinWeights.copySkinOverlapVertices, ann='Copy a source mesh skin to a target mesh only for overlaped vertices.')
+        self.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy and Paste', c=copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
+        cmds.menuItem(optionBox=True, c=copyPasteGUI)
+        cmds.menuItem(divider=True, dividerLabel='Optimization')
+        self.uiWidgets['pruneMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Prune Small Weights', c=SkinWeights.prunSkinWeights)
+        self.uiWidgets['rmvUnusedInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Remove Unused Influences', c="mel.eval('removeUnusedInfluences;')")
 
         ## View Menu
         self.uiWidgets['viewMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='View')
         self.uiWidgets['hideZroInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=True, label='Hide Zero Influences', c=self.loadInf)
         self.uiWidgets['sortWeightMenuItem'] = cmds.menuItem(self.uiWidgets['viewMenu'], checkBox=False, label='Sort by Weight', c=self.loadInf)
+        self.uiWidgets['colorFeedbackMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=True, label='Color Feedback', c=colorFeedback)
         self.uiWidgets['toggleCustomDagMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=True, label='Custom DAG Menu', c=self.toggleCustomDagMenu)
+
+        # Tools
+        self.uiWidgets['toolsMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Tools', tearOff=True)
+        self.uiWidgets['brSmoothWeightsMenuItem'] = cmds.menuItem(p=self.uiWidgets['toolsMenu'], label='brSmoothWeights', c=runBrSmoothWeights, ann='Run brSmoothWeights tool.')
+        self.uiWidgets['averageSkinWeightsBrushMenuItem'] = cmds.menuItem(p=self.uiWidgets['toolsMenu'], label='Average Weights Brush', c=runAverageWeightsBrush, ann='Run average weights brush tool.')
+        self.uiWidgets['weightsHammerBrushMenuItem'] = cmds.menuItem(p=self.uiWidgets['toolsMenu'], label='Weights Hammer Brush', c=runWeightsHammerBrush, ann='Run weights hammer brush tool.')
 
         ## Utils Menu
         self.uiWidgets['utilsMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Utils')
-        self.uiWidgets['SSDMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='SSD', c=lambda x: skinUtil.SSD(cmds.ls(sl=True)[0]), ann='Bake skin combined with other deforemr to a single skin cluster for a selected geometry.')
-        self.uiWidgets['convertMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Convert Deformer', c=ad2sc.showGUI, ann='Convert any deformers to a skin cluster for controllers.')
+        self.uiWidgets['skinCageMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin Cage', c=lambda x: bfUtil.showConvertToCageMeshUI(WIN_NAME), ann='Make skin cage mesh.')
+        self.uiWidgets['SSDMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='SSD', c=ssdGUI, ann='Bake skin combined with other deforemr to a single skin cluster for a selected geometry.')
+        self.uiWidgets['convertMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Converter', c=lambda x: ad2sc.showGUI(WIN_NAME), ann='Convert any deformers to a skin cluster for controllers.')
         self.uiWidgets['transferMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Transfer', c=transferWeightsGUI, ann='Transfer weights form a joint to other joint.')
-        self.uiWidgets['skinIOMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin I/O...', c=SkinWeights.showSkinIOGUI, ann='Import/Export skin weights for selected geometries.')
+        self.uiWidgets['maxInfsMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Max Influences', c=maxInfluencesGUI, ann='Manage max influences.')
+        self.uiWidgets['skinIOMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin I/O', c=showSkinIOGUI, ann='Import/Export skin weights for selected geometries.')
 
         # Main GUI
         self.uiWidgets['mainColLo'] = cmds.columnLayout(p=WIN_NAME, adj=True)
@@ -140,15 +153,6 @@ class SkinWeights(object):
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='-', c=partial(self.subAddWeight, 'sub'))
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='+', c=partial(self.subAddWeight, 'add'))
 
-        self.uiWidgets['maxInfRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=3, columnSpacing=[(1, 2), (2, 2), (3, 2)])
-        cmds.button(p=self.uiWidgets['maxInfRowColLo'], label='Max Influences', c=SkinWeights.checkMaxInfluences)
-        self.uiWidgets['maxInfsOptMenu'] = cmds.optionMenu(p=self.uiWidgets['maxInfRowColLo'], label='Max Influences:')
-        cmds.menuItem(label='4')
-        cmds.menuItem(label='8')
-        cmds.menuItem(label='12')
-        cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], e=True, v='4')
-        cmds.button(p=self.uiWidgets['maxInfRowColLo'], label='Set', c=self.fitMaxInfluence, w=50)
-
         cmds.window(WIN_NAME, e=True, w=100, h=200)
         cmds.showWindow(WIN_NAME)
 
@@ -163,24 +167,28 @@ class SkinWeights(object):
         hideZroInfOpt = cmds.menuItem(self.uiWidgets['hideZroInfMenuItem'], q=True, checkBox=True)
         weightSortOpt = cmds.menuItem(self.uiWidgets['sortWeightMenuItem'], q=True, checkBox=True)
 
-        self.vtxList = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=31)
+        self.selVertices = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=[28, 31, 46])
 
         # Check selection error
-        if not self.vtxList or not self.isMultipleGeoSelected():
-            self.userFeedback()
+        if not self.selVertices:
+            self.userFeedback('Select skined vertex(s).')
+            return
+
+        if self.isMultipleGeoSelected():
+            self.userFeedback('Select vertex(s) of one geometry.')
             return
 
         # Get skin cluster from selected vertex
-        self.getSkinClst(self.vtxList[0])
+        self.getSkinClst(self.selVertices[0])
         if not self.skinClst:
-            self.userFeedback()
+            self.userFeedback('Component(s) has no skin cluster.')
             return
 
         # Get influences
         self.infs = cmds.skinCluster(self.skinClst, q=True, inf=True)
 
         # Make influences weight value table
-        self.updateWeightTable(self.skinClst, self.vtxList, self.infs)
+        self.updateWeightTable(self.skinClst, self.selVertices, self.infs)
 
         # Hide zero weighted influences depend on option state
         if hideZroInfOpt:
@@ -203,24 +211,22 @@ class SkinWeights(object):
         geo = vtx.split('.')[0]
         self.skinClst = mel.eval('findRelatedSkinCluster "%s";' % geo)
 
-    @decorators.printElapsedTime
-    def updateWeightTable(self, skinClst, vtxList, infs):
+    def updateWeightTable(self, skinClst, vertices, infs):
         '''
         Make skin influences weight table.
         '''
         self.infWeightTable = {}
         self.weightInfTable = {}
 
-        vtxsWeights = []
-        for vtx in vtxList:
-            vtxWeights = cmds.skinPercent(skinClst, vtx, q=True, v=True)
-            vtxsWeights.append(vtxWeights)
+        verticesWeights = []
+        for vertex in vertices:
+            vtxWeights = cmds.skinPercent(skinClst, vertex, q=True, v=True)
+            verticesWeights.append(vtxWeights)
 
-        for i, item in enumerate(zip(*vtxsWeights)):
+        for i, item in enumerate(zip(*verticesWeights)):
             inf = infs[i]
-            meanWeight = sum(item) / len(vtxList)
+            meanWeight = sum(item) / len(vertices)
             weightStr = '{}               {}'.format(round(meanWeight, 4), infs)
-            self.infWeightTable[inf] = weightStr
             self.infWeightTable[inf] = weightStr
             self.weightInfTable[weightStr] = inf
 
@@ -265,11 +271,11 @@ class SkinWeights(object):
 
         for selInf in selInfList:
             if mode == 'sub':
-                cmds.skinPercent(self.skinClst, self.vtxList, transformValue=[(selInf, -weightVal)], prw=0, relative=True)
+                cmds.skinPercent(self.skinClst, self.selVertices, transformValue=[(selInf, -weightVal)], prw=0, relative=True)
             elif mode == 'add':
-                cmds.skinPercent(self.skinClst, self.vtxList, transformValue=[(selInf, weightVal)], prw=0, relative=True)
+                cmds.skinPercent(self.skinClst, self.selVertices, transformValue=[(selInf, weightVal)], prw=0, relative=True)
             else:
-                cmds.skinPercent(self.skinClst, self.vtxList, transformValue=[(selInf, weightVal)], prw=0)
+                cmds.skinPercent(self.skinClst, self.selVertices, transformValue=[(selInf, weightVal)], prw=0)
 
         self.loadInf()
         self.infTxtScrLsSelCmd()
@@ -301,102 +307,55 @@ class SkinWeights(object):
         """ Select matching weight value in weight value text scroll list """
         self._disableInfluencesColor()
 
-        selInfList = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
+        selInfs = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
         cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, deselectAll=True)
 
         toSelWeightStrs = []
 
-        for selInf in selInfList:
-            matchingWeightStr = self.infWeightTable[selInf]
-            toSelWeightStrs.append(matchingWeightStr)
-            displayObjectColor(selInf, True)
+        if selInfs:
+            for selInf in selInfs:
+                matchingWeightStr = self.infWeightTable[selInf]
+                toSelWeightStrs.append(matchingWeightStr)
+                displayObjectColor(selInf, True)
 
-        for toSelWeightStr in toSelWeightStrs:
-            cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, selectItem=toSelWeightStr)
+            for toSelWeightStr in toSelWeightStrs:
+                cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, selectItem=toSelWeightStr)
 
     def weightTxtScrLsSelCmd(self, *args):
         """ Select matching influences in influences text scroll list """
         self._disableInfluencesColor()
 
-        selWeightStrs = cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], q=True, selectItem=True)
+        selWeights = cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], q=True, selectItem=True)
         cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, deselectAll=True)
 
         selInfList = []
 
-        for selWeightStr in selWeightStrs:
-            matchingInfStr = self.weightInfTable[selWeightStr]
-            selInfList.append(matchingInfStr)
+        if selWeights:
+            for selWeightStr in selWeights:
+                matchingInfStr = self.weightInfTable[selWeightStr]
+                selInfList.append(matchingInfStr)
 
-        for selInf in selInfList:
-            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, selectItem=selInf)
-            displayObjectColor(selInf, True)
+            for selInf in selInfList:
+                cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, selectItem=selInf)
+                displayObjectColor(selInf, True)
 
     def _disableInfluencesColor(self):
         if self.infs:
             for inf in self.infs:
                 displayObjectColor(inf, False)
 
-    def userFeedback(self):
+    def userFeedback(self, message=''):
         """ Annotation when user did not select a vertex """
-
-        # Remove items in influences text scroll list
-        items = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, allItems=True)
-        if items:
-            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
-
-        # Remove items in weight value text scroll list
-        items = cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], q=True, allItems=True)
-        if items:
-            cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, removeAll=True)
+        cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
+        cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, removeAll=True)
+        cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, append=message)
 
     def isMultipleGeoSelected(self):
         '''
         Check if user select component more than two geometry.
         '''
-
-        geoList = list(set(cmds.ls(self.vtxList, objectsOnly=True)))
-
-        if len(geoList) > 1:
-            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
-            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, append='Select vertex of one object')
-            return False
-        else:
-            return True
-
-    @decorators.printElapsedTime
-    def fitMaxInfluence(self, *args):
-        for mesh in cmds.ls(sl=True):
-            meshMaxInfs = SkinWeights.getMaxInfluences(mesh)
-            targetMaxInfs = int(cmds.optionMenu(self.uiWidgets['maxInfsOptMenu'], q=True, v=True))
-            if meshMaxInfs <= targetMaxInfs:
-                print('"{}"s max influence is {} already. Skip processing.'.format(mesh, meshMaxInfs))
-                continue
-
-            # Create progress window
-            cmds.window('progWin', title='working on "{}"'.format(mesh), mnb=False, mxb=False)
-            cmds.columnLayout(adj=True)
-            cmds.progressBar('progBar', w=400, isMainProgressBar=True, beginProgress=True, isInterruptable=True)
-            cmds.showWindow('progWin')
-
-            skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
-
-            # Optimize weights and influences to speed up processing
-            SkinWeights.prunSkinWeights(skinClst, mesh)
-            cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
-
-            # Set max influences for a skin cluster
-            cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
-            cmds.setAttr("{}.maxInfluences".format(skinClst), targetMaxInfs)
-
-            infPrunedWeights = SkinWeights.pruneSkinInfluences(mesh, skinClst, targetMaxInfs)
-            SkinWeights.setWeights(mesh, skinClst, infPrunedWeights)
-            print('Fitting max influence for the "{}" is done.'.format(mesh))
-
-            # Remove zero weighted influences
-            cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
-
-            cmds.progressBar('progBar', e=True, endProgress=True)
-            cmds.deleteUI('progWin')
+        geoList = list(set(cmds.ls(self.selVertices, objectsOnly=True)))
+        return len(geoList) > 1
 
     @staticmethod
     def getMaxInfluences(mesh=None, ignoreWeight=MIN_WEIGHT):
@@ -415,12 +374,6 @@ class SkinWeights(object):
         maxInfs = max(numInfsPerVtx)
         return maxInfs
 
-    @staticmethod
-    def checkMaxInfluences(*args):
-        meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
-        for mesh in meshes:
-            maxInfs = SkinWeights.getMaxInfluences(mesh)
-            print('"{}" Max Influences: {}'.format(mesh, maxInfs))
 
     @staticmethod
     def prunSkinWeights(skinCluster=None, mesh=None, threshold=MIN_WEIGHT):
@@ -484,54 +437,37 @@ class SkinWeights(object):
         skFn.setWeights(meshDag, cpntObj, infIds, weights)
 
     @staticmethod
-    def showSkinIOGUI(*args):
-        from ..utils import skin as skUtil
-
-        def importSkin(skinDirectory, *args):
-            for skinFile in os.listdir(skinDirectory):
-                print(os.path.join(skinDirectory, skinFile))
-                skUtil.loadBSkin(os.path.join(skinDirectory, skinFile))
-
-        def exportSkin(skinDirectory, *args):
-            meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
-            if not meshes:
-                return
-            for mesh in meshes:
-                skUtil.saveBSkin(mesh, skinDirectory)
-
-        def setDirectory(*args):
-            dir = cmds.fileDialog2(fm=3)
-            if dir:
-                cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', e=True, text=dir[0])
-
-        cmds.window(title='Skin I/O', p=WIN_NAME)
-        cmds.columnLayout(adj=True)
-        cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', label='Skin Directory:', buttonLabel='...', bc=setDirectory)
-        cmds.button(label='Import', c=lambda x: importSkin(cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', q=True, text=True)))
-        cmds.button(label='Export', c=lambda x: exportSkin(cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', q=True, text=True)))
-        cmds.showWindow()
-
-    @staticmethod
-    def copyPasteWeight(*args):
-        '''
-        Copy first vertex skin weights in selection list and paste to the others.
-        '''
-        selVtxs = cmds.ls(os=True, fl=True)
-        srcVtx = selVtxs[0]
-        trgVtxs = selVtxs[1:]
-
-        cmds.select(srcVtx, r=True)
-        mel.eval('artAttrSkinWeightCopy;')
-        cmds.select(trgVtxs, r=True)
-        mel.eval('artAttrSkinWeightPaste;')
-        cmds.select(srcVtx, add=True)
-
-    @staticmethod
     def copySkinOverlapVertices(*args):
         meshes = cmds.filterExpand(cmds.ls(os=True), sm=12)
         skinUtil.copySkinOverlapVertices(meshes[0], meshes[1])
 
 
+# ------------ Utils
+def displayObjectColor(object='', use=True):
+    sels = om.MSelectionList()
+    sels = om.MGlobal.getActiveSelectionList() if not object else sels.add(object)
+    assert sels.length() != 0, 'No object given to set color.'
+
+    dagPath = sels.getDagPath(0)
+    fnDag = om.MFnDagNode(dagPath)
+    fnDag.objectColorRGB = OBJECT_COLOR
+    fnDag.objectColorType = int(use) * 2  # Use object color type RGB when True
+
+
+def rebind(*args):
+    selGeos = cmds.filterExpand(cmds.ls(sl=True), sm=[9, 10, 12])
+    for sel in selGeos:
+        skinUtil.reBind(sel)
+
+
+def colorFeedback(*args):
+    colorFeedbackState = cmds.menuItem(swInstance.uiWidgets['colorFeedbackMenuItem'], q=True, checkBox=True)
+    melStr = '''string $curCtx = `currentCtx`;\nartAttrCtx -e -colorfeedback ({}) $curCtx;'''.format(int(colorFeedbackState))
+    mel.eval(melStr)
+# ------------
+
+
+# ------------ Selection
 def extendEdgeRingSelection(*args):
     preSelEdges = cmds.ls(sl=True, fl=True)
 
@@ -583,14 +519,11 @@ def selectInfluences(*args):
         infs.extend(cmds.skinCluster(skClu, q=True, inf=True))
     cmds.select(infs)
     return infs
+# ------------
 
 
-def rebind(*args):
-    selGeos = cmds.filterExpand(cmds.ls(sl=True), sm=[9, 10, 12])
-    for sel in selGeos:
-        skinUtil.reBind(sel)
 
-
+# ------------  Transfer Weights
 def transferWeightsGUI(*args):
     cmds.window(title='Transfer Weights', p=WIN_NAME, tlb=True)
     cmds.columnLayout(adj=True)
@@ -634,14 +567,149 @@ def transferWeights(*args):
         cmds.skinPercent(skinClst, vtx, transformValue=[(srcInf, 0), (trgInf, resultSkinVal)], nrm=True)
 
     swInstance.loadInf()
+# ------------
 
 
-def displayObjectColor(object='', use=True):
-    sels = om.MSelectionList()
-    sels = om.MGlobal.getActiveSelectionList() if not object else sels.add(object)
-    assert sels.length() != 0, 'No object given to set color.'
+# ------------  Copy and Paste
+def copySkin(*args):
+    import takTools.common.tak_misc as tak_misc
+    import imp; imp.reload(tak_misc)
+    tak_misc.addInfCopySkin()
 
-    dagPath = sels.getDagPath(0)
-    fnDag = om.MFnDagNode(dagPath)
-    fnDag.objectColorRGB = OBJECT_COLOR
-    fnDag.objectColorType = int(use) * 2  # Use object color type RGB when True
+
+def copyPasteWeight(*args):
+    '''
+    Copy first vertex skin weights in selection list and paste to the others.
+    '''
+    selVtxs = cmds.ls(os=True, fl=True)
+    srcVtx = selVtxs[0]
+    trgVtxs = selVtxs[1:]
+
+    cmds.select(srcVtx, r=True)
+    mel.eval('artAttrSkinWeightCopy;')
+    cmds.select(trgVtxs, r=True)
+    mel.eval('artAttrSkinWeightPaste;')
+    cmds.select(srcVtx, add=True)
+
+
+def copyPasteGUI(*args):
+    cmds.window(title='Copy & Paste', tlb=True, p=WIN_NAME)
+    cmds.rowLayout(numberOfColumns=2)
+    cmds.button(label='Copy', c=lambda x: mel.eval('artAttrSkinWeightCopy;'))
+    cmds.button(label='Paste', c=lambda x: mel.eval('artAttrSkinWeightPaste;'))
+    cmds.showWindow()
+# ------------
+
+
+# ------------ Tools
+def runBrSmoothWeights(*args):
+    if not cmds.pluginInfo('brSmoothWeights', q=True, loaded=True):
+        cmds.loadPlugin('brSmoothWeights')
+    mel.eval('brSmoothWeightsToolCtx;')
+
+
+def runWeightsHammerBrush(*args):
+    weightHammerBrush = cmds.artSelectCtx(beforeStrokeCmd='select -cl;', afterStrokeCmd='if (size(`ls -sl`) > 0){WeightHammer;}')
+    cmds.setToolTo(weightHammerBrush)
+
+
+def runAverageWeightsBrush(*args):
+    import takTools.rigging.averageVertexSkinWeightBrush as averageVertexSkinWeightBrush
+    import imp; imp.reload(averageVertexSkinWeightBrush)
+    averageVertexSkinWeightBrush.paint()
+# ------------
+
+
+# ------------ SSD
+def ssdGUI(*args):
+    cmds.window(title='SSD(Smooth Skin Decomposition)', tlb=True, p=WIN_NAME)
+    cmds.columnLayout(adj=True)
+    cmds.button(label='Decompose Skin', c=lambda x: skinUtil.SSD(cmds.ls(sl=True)[0]))
+    cmds.showWindow()
+# ------------
+
+
+# ------------  Max Influences
+def maxInfluencesGUI(*args):
+    cmds.window(title='Max Influences Manager', h=10, tlb=True, p=WIN_NAME)
+    cmds.rowColumnLayout(numberOfColumns=3, columnSpacing=[(1, 2), (2, 2), (3, 2)])
+    cmds.button(label='Max Influences', c=checkMaxInfluences)
+    cmds.optionMenu('maxInfsOptMenu', label='Max Influences:')
+    cmds.menuItem(label='4')
+    cmds.menuItem(label='8')
+    cmds.menuItem(label='12')
+    cmds.optionMenu('maxInfsOptMenu', e=True, v='4')
+    cmds.button(label='Set', c=fitMaxInfluence, w=50)
+    cmds.showWindow()
+
+
+def checkMaxInfluences(*args):
+    meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
+    for mesh in meshes:
+        maxInfs = SkinWeights.getMaxInfluences(mesh)
+        print('"{}" Max Influences: {}'.format(mesh, maxInfs))
+
+
+@decorators.printElapsedTime
+def fitMaxInfluence(*args):
+    for mesh in cmds.ls(sl=True):
+        meshMaxInfs = SkinWeights.getMaxInfluences(mesh)
+        targetMaxInfs = int(cmds.optionMenu('maxInfsOptMenu', q=True, v=True))
+        if meshMaxInfs <= targetMaxInfs:
+            print('"{}"s max influence is {} already. Skip processing.'.format(mesh, meshMaxInfs))
+            continue
+
+        # Create progress window
+        cmds.window('progWin', title='working on "{}"'.format(mesh), mnb=False, mxb=False)
+        cmds.columnLayout(adj=True)
+        cmds.progressBar('progBar', w=400, isMainProgressBar=True, beginProgress=True, isInterruptable=True)
+        cmds.showWindow('progWin')
+
+        skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
+
+        # Optimize weights and influences to speed up processing
+        SkinWeights.prunSkinWeights(skinClst, mesh)
+        cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
+
+        # Set max influences for a skin cluster
+        cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
+        cmds.setAttr("{}.maxInfluences".format(skinClst), targetMaxInfs)
+
+        infPrunedWeights = SkinWeights.pruneSkinInfluences(mesh, skinClst, targetMaxInfs)
+        SkinWeights.setWeights(mesh, skinClst, infPrunedWeights)
+        print('Fitting max influence for the "{}" is done.'.format(mesh))
+
+        # Remove zero weighted influences
+        cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
+
+        cmds.progressBar('progBar', e=True, endProgress=True)
+        cmds.deleteUI('progWin')
+# ------------
+
+
+# ------------ Skin I/O
+def showSkinIOGUI(*args):
+    cmds.window(title='Skin I/O', tlb=True, p=WIN_NAME)
+    cmds.columnLayout(adj=True)
+    cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', label='Skin Directory:', buttonLabel='...', bc=setDirectory)
+    cmds.button(label='Import', c=lambda x: importSkin(cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', q=True, text=True)))
+    cmds.button(label='Export', c=lambda x: exportSkin(cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', q=True, text=True)))
+    cmds.showWindow()
+
+def importSkin(skinDirectory, *args):
+    for skinFile in os.listdir(skinDirectory):
+        print(os.path.join(skinDirectory, skinFile))
+        skinUtil.loadBSkin(os.path.join(skinDirectory, skinFile))
+
+def exportSkin(skinDirectory, *args):
+    meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
+    if not meshes:
+        return
+    for mesh in meshes:
+        skinUtil.saveBSkin(mesh, skinDirectory)
+
+def setDirectory(*args):
+    dir = cmds.fileDialog2(fm=3)
+    if dir:
+        cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', e=True, text=dir[0])
+# ------------
