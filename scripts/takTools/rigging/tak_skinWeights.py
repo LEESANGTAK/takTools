@@ -11,30 +11,34 @@ reload(tak_skinWeights)
 tak_skinWeights.SkinWeights()
 """
 
+# Python Modules
 import os
-import time
 from functools import partial
 
-import maya.cmds as cmds
-import maya.mel as mel
-import maya.api.OpenMaya as om
-import maya.api.OpenMayaAnim as oma
-import pymel.core as pm
+# Maya Modules
+from maya import cmds
+from maya import mel
+from maya.api import OpenMaya as om
+from maya.api import OpenMayaAnim as oma
 
+# Custom Modules
 from imp import reload
 from ..rigging import All_Deformers_2_SkinCluster as ad2sc; reload(ad2sc)
 from ..utils import skin as skinUtil; reload(skinUtil)
 from ..utils import decorators
 
-
+# Constants
 MODULE_NAME = 'takTools'
 MODULE_DIR = os.path.dirname(__file__).split(MODULE_NAME, 1)[0] + MODULE_NAME
 CUSTOM_DAG_MENU_FILE = '{}\\scripts\\mel\\dagMenuProc.mel'.format(MODULE_DIR).replace('\\', '/')
 ORIG_DAG_MENU_FILE = "C:/Program Files/Autodesk/Maya{}/scripts/others/dagMenuProc.mel".format(cmds.about(v=True))
 WIN_NAME = 'takSkinWeightsWin'
 MIN_WEIGHT = 0.00001
+OBJECT_COLOR = om.MColor([0.0, 1.0, 1.0])
 
+# Global Variables
 swInstance = None
+
 
 def showUI():
     global swInstance
@@ -57,12 +61,11 @@ class SkinWeights(object):
         self.infWeightTable = {}
         self.weightInfTable = {}
         self.skinClst = ''
+        self.infs = []
         self.infTxtScrLsCurrentAllItems = []
 
     def __del__(self):
-        if self.infTxtScrLsCurrentAllItems:
-            for inf in self.infTxtScrLsCurrentAllItems:
-                SkinWeights.unuseObjectColor(inf)
+        self._disableInfluencesColor()
         self.infTxtScrLsCurrentAllItems = []
         self.enableCustomDagMenu(False)
 
@@ -154,6 +157,8 @@ class SkinWeights(object):
         Main method.
         Populate influence and weight value text scroll list.
         '''
+        self._disableInfluencesColor()
+
         # Get options
         hideZroInfOpt = cmds.menuItem(self.uiWidgets['hideZroInfMenuItem'], q=True, checkBox=True)
         weightSortOpt = cmds.menuItem(self.uiWidgets['sortWeightMenuItem'], q=True, checkBox=True)
@@ -172,19 +177,19 @@ class SkinWeights(object):
             return
 
         # Get influences
-        infs = cmds.skinCluster(self.skinClst, q=True, inf=True)
+        self.infs = cmds.skinCluster(self.skinClst, q=True, inf=True)
 
         # Make influences weight value table
-        self.updateWeightTable(self.skinClst, self.vtxList, infs)
+        self.updateWeightTable(self.skinClst, self.vtxList, self.infs)
 
         # Hide zero weighted influences depend on option state
         if hideZroInfOpt:
-            infs = self.removeZeroWeightInfs().keys()
+            self.infs = self.removeZeroWeightInfs().keys()
 
         # Sorting
-        sortedInfs = sorted(infs)
+        sortedInfs = sorted(self.infs)
         if weightSortOpt:
-            sortedInfs = self.sortByWeight(infs)
+            sortedInfs = self.sortByWeight(self.infs)
 
         # Populate text scroll list
         self.populateInfList(sortedInfs)
@@ -288,55 +293,42 @@ class SkinWeights(object):
 
     def infTxtScrLsSelCmd(self, *args):
         """ Select matching weight value in weight value text scroll list """
+        self._disableInfluencesColor()
+
         selInfList = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
         cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, deselectAll=True)
 
         toSelWeightStrs = []
-        if selInfList:
-            for selInf in selInfList:
-                matchingWeightStr = self.infWeightTable[selInf]
-                toSelWeightStrs.append(matchingWeightStr)
 
-            for toSelWeightStr in toSelWeightStrs:
-                cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, selectItem=toSelWeightStr)
+        for selInf in selInfList:
+            matchingWeightStr = self.infWeightTable[selInf]
+            toSelWeightStrs.append(matchingWeightStr)
+            displayObjectColor(selInf, True)
 
-            self.changeSelInfCol()
+        for toSelWeightStr in toSelWeightStrs:
+            cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, selectItem=toSelWeightStr)
 
     def weightTxtScrLsSelCmd(self, *args):
         """ Select matching influences in influences text scroll list """
+        self._disableInfluencesColor()
+
         selWeightStrs = cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], q=True, selectItem=True)
         cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, deselectAll=True)
 
         selInfList = []
-        if selWeightStrs:
-            for selWeightStr in selWeightStrs:
-                matchingInfStr = self.weightInfTable[selWeightStr]
-                selInfList.append(matchingInfStr)
 
-            for selInf in selInfList:
-                cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, selectItem=selInf)
+        for selWeightStr in selWeightStrs:
+            matchingInfStr = self.weightInfTable[selWeightStr]
+            selInfList.append(matchingInfStr)
 
-            self.changeSelInfCol()
-
-    def changeSelInfCol(self):
-        allInfs = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, allItems=True)
-        self.infTxtScrLsCurrentAllItems = allInfs
-        for inf in allInfs:
-            SkinWeights.unuseObjectColor(inf)
-
-        selInfList = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
         for selInf in selInfList:
-            SkinWeights.useObjectColor(selInf)
+            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, selectItem=selInf)
+            displayObjectColor(selInf, True)
 
-    @staticmethod
-    def unuseObjectColor(inf):
-        infNode = pm.PyNode(inf)
-        infNode.setObjectColor(0)
-
-    @staticmethod
-    def useObjectColor(inf):
-        infNode = pm.PyNode(inf)
-        infNode.setObjectColor(8)
+    def _disableInfluencesColor(self):
+        if self.infs:
+            for inf in self.infs:
+                displayObjectColor(inf, False)
 
     def userFeedback(self):
         """ Annotation when user did not select a vertex """
@@ -574,7 +566,7 @@ def selAffectedVertex(*args):
     if not vtxs:
         print('No vertices be affected by selected infuences.')
         return
-    pm.select(vtxs, r=True)
+    cmds.select(vtxs, r=True)
 
 
 def selectInfluences(*args):
@@ -636,3 +628,14 @@ def transferWeights(*args):
         cmds.skinPercent(skinClst, vtx, transformValue=[(srcInf, 0), (trgInf, resultSkinVal)], nrm=True)
 
     swInstance.loadInf()
+
+
+def displayObjectColor(object='', use=True):
+    sels = om.MSelectionList()
+    sels = om.MGlobal.getActiveSelectionList() if not object else sels.add(object)
+    assert sels.length() != 0, 'No object given to set color.'
+
+    dagPath = sels.getDagPath(0)
+    fnDag = om.MFnDagNode(dagPath)
+    fnDag.objectColorRGB = OBJECT_COLOR
+    fnDag.objectColorType = int(use) * 2  # Use object color type RGB when True
