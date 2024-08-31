@@ -203,7 +203,7 @@ class SkinWeights(object):
         geo = vtx.split('.')[0]
         self.skinClst = mel.eval('findRelatedSkinCluster "%s";' % geo)
 
-    #@decorators.printElapsedTime
+    @decorators.printElapsedTime
     def updateWeightTable(self, skinClst, vtxList, infs):
         '''
         Make skin influences weight table.
@@ -211,10 +211,16 @@ class SkinWeights(object):
         self.infWeightTable = {}
         self.weightInfTable = {}
 
-        for inf in infs:
-            vtxsWeightsForInf = [cmds.skinPercent(skinClst, vtx, q=True, transform=inf) for vtx in vtxList]
-            meanWeight = sum(vtxsWeightsForInf) / len(vtxsWeightsForInf)
-            weightStr = '{}               {}'.format(round(meanWeight, 4), inf)
+        vtxsWeights = []
+        for vtx in vtxList:
+            vtxWeights = cmds.skinPercent(skinClst, vtx, q=True, v=True)
+            vtxsWeights.append(vtxWeights)
+
+        for i, item in enumerate(zip(*vtxsWeights)):
+            inf = infs[i]
+            meanWeight = sum(item) / len(vtxList)
+            weightStr = '{}               {}'.format(round(meanWeight, 4), infs)
+            self.infWeightTable[inf] = weightStr
             self.infWeightTable[inf] = weightStr
             self.weightInfTable[weightStr] = inf
 
