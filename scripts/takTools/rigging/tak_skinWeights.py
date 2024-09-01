@@ -110,13 +110,13 @@ class SkinWeights(object):
         self.uiWidgets['hideZroInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=True, label='Hide Zero Influences', c=self.loadInf)
         self.uiWidgets['sortWeightMenuItem'] = cmds.menuItem(self.uiWidgets['viewMenu'], checkBox=False, label='Sort by Weight', c=self.loadInf)
         self.uiWidgets['colorFeedbackMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=True, label='Color Feedback', c=colorFeedback)
-        self.uiWidgets['toggleCustomDagMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=True, label='Custom DAG Menu', c=self.toggleCustomDagMenu)
+        self.uiWidgets['toggleCustomDagMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=False, label='Custom DAG Menu', c=self.toggleCustomDagMenu)
 
         # Tools
         self.uiWidgets['toolsMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Tools', tearOff=True)
         self.uiWidgets['brSmoothWeightsMenuItem'] = cmds.menuItem(p=self.uiWidgets['toolsMenu'], label='brSmoothWeights', c=runBrSmoothWeights, ann='Run brSmoothWeights tool.')
         self.uiWidgets['averageSkinWeightsBrushMenuItem'] = cmds.menuItem(p=self.uiWidgets['toolsMenu'], label='Average Weights Brush', c=runAverageWeightsBrush, ann='Run average weights brush tool.')
-        self.uiWidgets['weightsHammerBrushMenuItem'] = cmds.menuItem(p=self.uiWidgets['toolsMenu'], label='Weights Hammer Brush', c=runWeightsHammerBrush, ann='Run weights hammer brush tool.')
+        self.uiWidgets['hammerWeightsBrushMenuItem'] = cmds.menuItem(p=self.uiWidgets['toolsMenu'], label='Hammer Weights Brush', c=runHammerWeightsBrush, ann='Run hammer weights brush tool.')
 
         ## Utils Menu
         self.uiWidgets['utilsMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Utils')
@@ -133,8 +133,8 @@ class SkinWeights(object):
         self.uiWidgets['mainTabLo'] = cmds.tabLayout(p=self.uiWidgets['mainColLo'], tv=False)
         self.uiWidgets['infWghtRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainTabLo'], numberOfColumns=2, columnWidth=[(1, 220), (2, 60)], columnSpacing=[(2, 5)])
         self.uiWidgets['infFrmLo'] = cmds.frameLayout(p=self.uiWidgets['infWghtRowColLo'], label='Influences')
-        self.uiWidgets['infTxtScrLs'] = cmds.textScrollList(p=self.uiWidgets['infFrmLo'], h=200, sc=self.infTxtScrLsSelCmd, allowMultiSelection=True)
-        self.uiWidgets['infPopMenu'] = cmds.popupMenu(p=self.uiWidgets['infTxtScrLs'])
+        cmds.textScrollList('infsTxtScrLs', p=self.uiWidgets['infFrmLo'], h=200, sc=self.infTxtScrLsSelCmd, vcc=self.infTxtScrLsSelCmd, allowMultiSelection=True)
+        self.uiWidgets['infPopMenu'] = cmds.popupMenu(p='infsTxtScrLs')
         self.uiWidgets['loadInfMenu'] = cmds.menuItem(p=self.uiWidgets['infPopMenu'], label='Load Influences', c=self.loadInf)
 
         self.uiWidgets['wghtFrmLo'] = cmds.frameLayout(p=self.uiWidgets['infWghtRowColLo'], label='Weights')
@@ -177,11 +177,11 @@ class SkinWeights(object):
 
         # Check selection error
         if not self.selVertices:
-            self.userFeedback('Select skined vertex(s).')
+            self.userFeedback('Select skined component(s).')
             return
 
         if self.isMultipleGeoSelected():
-            self.userFeedback('Select vertex(s) of one geometry.')
+            self.userFeedback('Select component(s) of one geometry.')
             return
 
         # Get skin cluster from selected vertex
@@ -240,12 +240,12 @@ class SkinWeights(object):
         '''
         Populate influences text scroll list.
         '''
-        items = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, allItems=True)
-        selItems = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
+        items = cmds.textScrollList('infsTxtScrLs', q=True, allItems=True)
+        selItems = cmds.textScrollList('infsTxtScrLs', q=True, selectItem=True)
         if items:
-            cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
-        cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, append=infs)
-        cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, selectItem=selItems)
+            cmds.textScrollList('infsTxtScrLs', e=True, removeAll=True)
+        cmds.textScrollList('infsTxtScrLs', e=True, append=infs)
+        cmds.textScrollList('infsTxtScrLs', e=True, selectItem=selItems)
 
     def populateWghtList(self, infs):
         '''
@@ -273,7 +273,7 @@ class SkinWeights(object):
         Set weight value with given value.
         '''
         # Get selected influence
-        selInfList = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
+        selInfList = cmds.textScrollList('infsTxtScrLs', q=True, selectItem=True)
 
         for selInf in selInfList:
             if mode == 'sub':
@@ -313,7 +313,7 @@ class SkinWeights(object):
         """ Select matching weight value in weight value text scroll list """
         self._disableInfluencesColor()
 
-        selInfs = cmds.textScrollList(self.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
+        selInfs = cmds.textScrollList('infsTxtScrLs', q=True, selectItem=True)
         cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, deselectAll=True)
 
         toSelWeightStrs = []
@@ -332,7 +332,7 @@ class SkinWeights(object):
         self._disableInfluencesColor()
 
         selWeights = cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], q=True, selectItem=True)
-        cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, deselectAll=True)
+        cmds.textScrollList('infsTxtScrLs', e=True, deselectAll=True)
 
         selInfList = []
 
@@ -342,7 +342,7 @@ class SkinWeights(object):
                 selInfList.append(matchingInfStr)
 
             for selInf in selInfList:
-                cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, selectItem=selInf)
+                cmds.textScrollList('infsTxtScrLs', e=True, selectItem=selInf)
                 displayObjectColor(selInf, True)
 
     def _disableInfluencesColor(self):
@@ -352,9 +352,9 @@ class SkinWeights(object):
 
     def userFeedback(self, message=''):
         """ Annotation when user did not select a vertex """
-        cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, removeAll=True)
+        cmds.textScrollList('infsTxtScrLs', e=True, removeAll=True)
         cmds.textScrollList(self.uiWidgets['wghtTxtScrLs'], e=True, removeAll=True)
-        cmds.textScrollList(self.uiWidgets['infTxtScrLs'], e=True, append=message)
+        cmds.textScrollList('infsTxtScrLs', e=True, append=message)
 
     def isMultipleGeoSelected(self):
         '''
@@ -614,7 +614,7 @@ def runBrSmoothWeights(*args):
     mel.eval('brSmoothWeightsToolCtx;')
 
 
-def runWeightsHammerBrush(*args):
+def runHammerWeightsBrush(*args):
     weightHammerBrush = cmds.artSelectCtx(beforeStrokeCmd='select -cl;', afterStrokeCmd='if (size(`ls -sl`) > 0){WeightHammer;}')
     cmds.setToolTo(weightHammerBrush)
 

@@ -1041,16 +1041,21 @@ global proc createSelectMenuItems(string $parent, string $item, int $defaultItem
 	    if ( $currTool != "artAttrSkin" )
 	    {
 			if (isComponentSelected()) {
-				menuItem -label ("Set weight 0.0 for \""+$item+"\"")
-					-echoCommand true
-					-c ("setSkinWeightSelect(\""+$item+"\", 0.0)")
-					-rp "W"
-					set0WeightItem;
 				menuItem -label ("Set weight 1.0 for \""+$item+"\"")
 					-echoCommand true
 					-c ("setSkinWeightSelect(\""+$item+"\", 1.0)")
 					-rp "E"
 					set1WeightItem;
+				menuItem -label ("Set weight 0.0 for \""+$item+"\"")
+					-echoCommand true
+					-c ("setSkinWeightSelect(\""+$item+"\", 0.0)")
+					-rp "W"
+					set0WeightItem;
+				menuItem -label ("Select \""+$item+"\"")
+					-echoCommand true
+					-c ("selectInfluenceInList(\""+$item+"\")")
+					-rp "S"
+					selInfItem;
 			}
 	    }
 	    else
@@ -2853,10 +2858,33 @@ global proc int isComponentSelected() {
 	return 0;
 }
 
+
 global proc setSkinWeightSelect(string $joint, float $weight) {
 	string $mesh[] = `ls -sl -objectsOnly`;
 	string $skinClst = `findRelatedSkinCluster($mesh[0])`;
 
 	string $vertices[] = `ls -sl -fl`;
 	skinPercent -transformValue $joint $weight $skinClst $vertices;
+}
+
+
+global proc selectInfluenceInList(string $influence) {
+	string $existItems[] = `textScrollList -q -allItems "infsTxtScrLs"`;
+	int $isFound = 0;
+	for ($item in $existItems) {
+		if ($item == $influence) {
+			$isFound = 1;
+			break;
+		}
+	}
+
+	if ($isFound) {
+		textScrollList -e -deselectAll "infsTxtScrLs";
+		textScrollList -e -selectItem $influence "infsTxtScrLs";
+		// Execute visible changed command to update object color and selected weights
+		textScrollList -e -vis false "infsTxtScrLs";
+		textScrollList -e -vis true "infsTxtScrLs";
+	} else {
+		warning -n ("\"" + $influence + "\"" + " is not in the list.");
+	}
 }
