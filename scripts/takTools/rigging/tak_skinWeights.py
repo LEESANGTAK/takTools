@@ -126,6 +126,7 @@ class SkinWeights(object):
         self.uiWidgets['transferMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Transfer', c=transferWeightsGUI, ann='Transfer weights form a joint to other joint.')
         self.uiWidgets['maxInfsMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Max Influences', c=maxInfluencesGUI, ann='Manage max influences.')
         self.uiWidgets['skinIOMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin I/O', c=showSkinIOGUI, ann='Import/Export skin weights for selected geometries.')
+        cmds.menuItem(optionBox=True, c=bSkinSaverGUI)
 
         # Main GUI
         self.uiWidgets['mainColLo'] = cmds.columnLayout(p=WIN_NAME, adj=True)
@@ -510,7 +511,7 @@ def selAffectedVertex(*args):
     infs = cmds.ls(sl=True)
     vtxs = []
     for inf in infs:
-        vtxs.extend(skinUtil.getAffectedVertex(inf, 0.001))
+        vtxs.extend(skinUtil.getAffectedVertex(inf, 0.00001))
     if not vtxs:
         print('No vertices be affected by selected infuences.')
         return
@@ -547,7 +548,7 @@ def transferWeightsGUI(*args):
 
 
 def loadSelInf(wgt, *arg):
-    selInfs = cmds.textScrollList(swInstance.uiWidgets['infTxtScrLs'], q=True, selectItem=True)
+    selInfs = cmds.textScrollList('infsTxtScrLs', q=True, selectItem=True)
     if selInfs:
         cmds.textField(wgt, e=True, text=selInfs[0])
 
@@ -638,8 +639,9 @@ def ssdGUI(*args):
 # ------------  Max Influences
 def maxInfluencesGUI(*args):
     cmds.window(title='Max Influences Manager', h=10, tlb=True, p=WIN_NAME)
-    cmds.rowColumnLayout(numberOfColumns=3, columnSpacing=[(1, 2), (2, 2), (3, 2)])
-    cmds.button(label='Max Influences', c=checkMaxInfluences)
+    cmds.columnLayout(adj=True)
+    cmds.button(label='Check Max Influences', c=checkMaxInfluences)
+    cmds.rowColumnLayout(numberOfColumns=2, columnSpacing=[(1, 2), (2, 2)])
     cmds.optionMenu('maxInfsOptMenu', label='Max Influences:')
     cmds.menuItem(label='4')
     cmds.menuItem(label='8')
@@ -719,3 +721,9 @@ def setDirectory(*args):
     if dir:
         cmds.textFieldButtonGrp('skinDirTxtFldBtnGrp', e=True, text=dir[0])
 # ------------
+
+
+def bSkinSaverGUI(*args):
+    import takTools.rigging.bSkinSaver as bSkinSaver
+    import imp; imp.reload(bSkinSaver)
+    bSkinSaver.showUI()
