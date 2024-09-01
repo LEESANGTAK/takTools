@@ -167,7 +167,13 @@ class SkinWeights(object):
         hideZroInfOpt = cmds.menuItem(self.uiWidgets['hideZroInfMenuItem'], q=True, checkBox=True)
         weightSortOpt = cmds.menuItem(self.uiWidgets['sortWeightMenuItem'], q=True, checkBox=True)
 
-        self.selVertices = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=[28, 31, 46])
+        # Get vertices from selection
+        selComponents = cmds.ls(sl=True, fl=True)
+        self.selVertices = cmds.filterExpand(selComponents, sm=[31, 28, 46]) or []
+        selEdgesFaces = cmds.filterExpand(selComponents, sm=[32, 34])
+        if selEdgesFaces:
+            verticesFromEdgesFaces = cmds.ls(cmds.polyListComponentConversion(selEdgesFaces, toVertex=True), fl=True)
+            self.selVertices.extend(verticesFromEdgesFaces)
 
         # Check selection error
         if not self.selVertices:
