@@ -31,11 +31,11 @@ from ..utils import decorators
 # Constants
 MODULE_NAME = 'takTools'
 MODULE_DIR = os.path.dirname(__file__).split(MODULE_NAME, 1)[0] + MODULE_NAME
-CUSTOM_DAG_MENU_FILE = '{}\\scripts\\mel\\dagMenuProc.mel'.format(MODULE_DIR).replace('\\', '/')
+CUSTOM_DAG_MENU_FILE = '{}/scripts/mel/dagMenuProc.mel'.format(MODULE_DIR.replace('\\', '/'))
 ORIG_DAG_MENU_FILE = "C:/Program Files/Autodesk/Maya{}/scripts/others/dagMenuProc.mel".format(cmds.about(v=True))
 WIN_NAME = 'takSkinWeightsWin'
 MIN_WEIGHT = 0.00001
-OBJECT_COLOR = om.MColor([0.0, 1.0, 1.0])
+OBJECT_COLOR = om.MColor([0.0, 1.0, 0.0])
 
 # Global Variables
 swInstance = None
@@ -46,7 +46,7 @@ def showUI():
     swInstance = SkinWeights()
     swInstance.ui()
     swInstance.loadInf()
-    swInstance.enableCustomDagMenu()
+    SkinWeights.enableCustomDagMenu()
 
     # Create script job to populate influence text scroll list automatically
     cmds.scriptJob(parent=WIN_NAME, event=['SelectionChanged', swInstance.loadInf])
@@ -68,7 +68,7 @@ class SkinWeights(object):
     def __del__(self):
         self._disableInfluencesColor()
         self.infTxtScrLsCurrentAllItems = []
-        self.enableCustomDagMenu(False)
+        SkinWeights.enableCustomDagMenu(False)
 
     def ui(self):
         if cmds.window(WIN_NAME, exists=True):
@@ -110,7 +110,7 @@ class SkinWeights(object):
         self.uiWidgets['hideZroInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=True, label='Hide Zero Influences', c=self.loadInf)
         self.uiWidgets['sortWeightMenuItem'] = cmds.menuItem(self.uiWidgets['viewMenu'], checkBox=False, label='Sort by Weight', c=self.loadInf)
         self.uiWidgets['colorFeedbackMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=True, label='Color Feedback', c=colorFeedback)
-        self.uiWidgets['toggleCustomDagMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=False, label='Custom DAG Menu', c=self.toggleCustomDagMenu)
+        self.uiWidgets['toggleCustomDagMenuItem'] = cmds.menuItem(p=self.uiWidgets['viewMenu'], checkBox=True, label='Custom DAG Menu', c=self.toggleCustomDagMenu)
 
         # Tools
         self.uiWidgets['toolsMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Tools', tearOff=True)
@@ -233,7 +233,7 @@ class SkinWeights(object):
         for i, item in enumerate(zip(*verticesWeights)):
             inf = infs[i]
             meanWeight = sum(item) / len(vertices)
-            weightStr = '{}               {}'.format(round(meanWeight, 4), infs)
+            weightStr = '{}               {}'.format(round(meanWeight, 4), inf)
             self.infWeightTable[inf] = weightStr
             self.weightInfTable[weightStr] = inf
 
@@ -302,9 +302,10 @@ class SkinWeights(object):
 
     def toggleCustomDagMenu(self, *args):
         loadCustomDagMenu = cmds.menuItem(self.uiWidgets['toggleCustomDagMenuItem'], q=True, checkBox=True)
-        self.enableCustomDagMenu(loadCustomDagMenu)
+        SkinWeights.enableCustomDagMenu(loadCustomDagMenu)
 
-    def enableCustomDagMenu(self, enable=True):
+    @staticmethod
+    def enableCustomDagMenu(enable=True):
         if enable:
             mel.eval('source "{}"'.format(CUSTOM_DAG_MENU_FILE))
         else:
@@ -380,7 +381,6 @@ class SkinWeights(object):
                 cmds.select(mesh, r=True)
         maxInfs = max(numInfsPerVtx)
         return maxInfs
-
 
     @staticmethod
     def prunSkinWeights(skinCluster=None, mesh=None, threshold=MIN_WEIGHT):
@@ -511,7 +511,7 @@ def selAffectedVertex(*args):
     infs = cmds.ls(sl=True)
     vtxs = []
     for inf in infs:
-        vtxs.extend(skinUtil.getAffectedVertex(inf, 0.00001))
+        vtxs.extend(skinUtil.getAffectedVertex(inf, MIN_WEIGHT))
     if not vtxs:
         print('No vertices be affected by selected infuences.')
         return
