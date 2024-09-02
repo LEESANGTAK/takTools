@@ -10,6 +10,7 @@ Description:
 
 import os
 import re
+import subprocess
 import json
 from functools import partial
 
@@ -19,9 +20,11 @@ from .utils import system as sysUtil
 
 
 MODULE_NAME = "takTools"
+MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
 WIN_NAME = "{0}Win".format(MODULE_NAME)
 CONFIG_FILENAME = "{}_config.json".format(MODULE_NAME)
 TAK_TOOLS_CONFIG_PATH = cmds.internalVar(userAppDir=True) + "config"
+SUBPROCESS_NO_WINDOW = 0x08000000
 
 SHELF_HEIGHT = 42
 
@@ -48,15 +51,17 @@ def UI():
     # Main menu section
     cmds.window(WIN_NAME)
     cmds.menuBarLayout(WIN_NAME)
-    cmds.menu('fileMenu', label = 'File', p = WIN_NAME)
-    cmds.menuItem(label = 'Save Tools', c = saveTools, p = 'fileMenu')
-    cmds.menu('editMenu', label = 'Edit', p = WIN_NAME)
-    cmds.menuItem(label = 'Add Tool', c = addToolUi, p = 'editMenu')
-    cmds.menuItem(label = 'Store Config', c = storeConfig, p = 'editMenu')
+    cmds.menu('fileMenu', label='File', p=WIN_NAME)
+    cmds.menuItem(label='Save Tools', c=saveTools, p='fileMenu')
+    cmds.menu('editMenu', label='Edit', p=WIN_NAME)
+    cmds.menuItem(label='Add Tool', c=addToolUi, p='editMenu')
+    cmds.menuItem(label='Store Config', c=storeConfig, p='editMenu')
+    cmds.menu('helpMenu', label='Help', p=WIN_NAME)
+    cmds.menuItem(label='Check Update', c=checkUpdate, p='helpMenu')
 
-    cmds.paneLayout('mainPaneLo', configuration = 'horizontal2', paneSize = [(2, 50, 50)])
+    cmds.paneLayout('mainPaneLo', configuration='horizontal2', paneSize=[(2, 50, 50)])
 
-    cmds.formLayout('mainFormLo', p = 'mainPaneLo')
+    cmds.formLayout('mainFormLo', p='mainPaneLo')
 
     # common tools section #
     cmds.tabLayout('cmnToolTabLo', tv = False, p = 'mainFormLo')
@@ -471,6 +476,8 @@ def UI():
     # Dock window to left side
     cmds.dockControl(MODULE_NAME, area='left', content=WIN_NAME, w=workspaceWidth)
 
+
+# ------------ Save Current Tools
 SHELF_LIST = ['Common',
 'Rigging_Display', 'Rigging_Edit_Model', 'Rigging_Build', 'Rigging_Deformation', 'Rigging_Extra_Tools',
 'Animation_Control_Select', 'Animation_Display', 'Animation_Animation_Curve', 'Animation_Pose', 'Animation_Refine_Shape', 'Animation_Extra_Tools',
@@ -534,8 +541,10 @@ def getBtnInfo(btn):
     shelfBtnCode = "    cmds.shelfButton(annotation = %s, width = 35, height = 35, imageOverlayLabel = '%s', image1 = '%s', command = %s, sourceType = '%s')" %(repr(str(ano)), imgLlb, img1,  repr(str(cmd)), srcType)
 
     return shelfBtnCode
+# ------------ Save Current Tools
 
 
+# ------------ Add Tool
 def addToolUi(*args):
     '''
     UI for add a new tool to the specific shelf.
@@ -577,14 +586,6 @@ def addToolUi(*args):
     cmds.showWindow(winName)
 
 
-def storeConfig(*args):
-    configInfo = {
-        'workspaceWidth': cmds.dockControl(MODULE_NAME, q=True, w=True),
-    }
-
-    with open(TAK_TOOLS_CONFIG_PATH, 'w') as f:
-        json.dump(configInfo, f, indent=4)
-
 
 def addTool(*args):
     '''
@@ -617,3 +618,69 @@ def loadImgPath(widgetName, *args):
     if iconImgPath:
         iconName = os.path.basename(iconImgPath[0])
         cmds.textFieldButtonGrp(widgetName, e = True, text = iconName)
+# ------------ Add Tool
+
+
+# ------------ Git Utils
+def checkUpdate(self):
+    if isOutdated():
+        result = cmds.confirmDialog(
+            title=MODULE_NAME,
+            message="New version is detected. Do you want to update?",
+            button=['Yes','No'],
+            defaultButton='Yes',
+            cancelButton='No',
+            dismissString='No'
+        )
+        if 'Yes' == result:
+            succeed = update()
+            if succeed:
+                import takTools.tak_tools as tt
+                import imp; imp.reload(tt)
+                tt.UI()
+    else:
+        cmds.confirmDialog(title=MODULE_NAME, message='You have latest version.\nEnjoy!')
+
+
+def isOutdated():
+    # Navigate to the specific repository
+    os.chdir(MODULE_PATH)
+
+    try:
+        # Fetch the latest commits from the remote repository
+        subprocess.call(["git", "fetch"], creationflags=SUBPROCESS_NO_WINDOW)
+
+        # Get the local and remote HEAD commit hashes
+        local_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], creationflags=SUBPROCESS_NO_WINDOW).strip()
+        remote_commit = subprocess.check_output(["git", "rev-parse", "@{u}"], creationflags=SUBPROCESS_NO_WINDOW).strip()
+
+        # Compare the local and remote commits
+        if local_commit != remote_commit:
+            return True  # Local repo is outdated
+
+    except subprocess.CalledProcessError as e:
+        print("Error: {}".format(e))
+        return False
+
+    return False  # Local repo is up-to-date
+
+
+def update():
+    try:
+        # Pull the latest changes from the remote repository
+        subprocess.call(["git", "pull"], creationflags=SUBPROCESS_NO_WINDOW)
+        print("Update is done successfully.")
+        return True
+    except subprocess.CalledProcessError as e:
+        print("Failed to update: {}".format(e))
+        return False
+# ------------ Git Utils
+
+
+def storeConfig(*args):
+    configInfo = {
+        'workspaceWidth': cmds.dockControl(MODULE_NAME, q=True, w=True),
+    }
+
+    with open(TAK_TOOLS_CONFIG_PATH, 'w') as f:
+        json.dump(configInfo, f, indent=4)
