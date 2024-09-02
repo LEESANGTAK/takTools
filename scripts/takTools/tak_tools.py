@@ -11,7 +11,6 @@ import os
 import json
 import subprocess
 from functools import partial
-import pprint
 
 from maya import cmds
 
@@ -61,7 +60,6 @@ def UI():
     cmds.menuBarLayout(WIN_NAME)
     cmds.menu('fileMenu', label='File', p=WIN_NAME)
     cmds.menuItem(label='Save', c=saveShelves, p='fileMenu')
-    cmds.menuItem(label='Load', c=loadTaskShelves, p='fileMenu')
     cmds.menu('editMenu', label='Edit', p=WIN_NAME)
     cmds.menuItem(label='Add Tool', c=addToolUi, p='editMenu')
     cmds.menuItem(label='Store Config', c=storeConfig, p='editMenu')
