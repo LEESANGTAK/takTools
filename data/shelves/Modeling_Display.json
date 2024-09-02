@@ -1,0 +1,51 @@
+{
+    "0": {
+        "annotation": "Vertex Normals",
+        "image1": "menuIconDisplay.png",
+        "imageOverlayLabel": "",
+        "command": "ToggleVertexNormalDisplay",
+        "sourceType": "mel"
+    },
+    "1": {
+        "annotation": "Face Normals",
+        "image1": "menuIconDisplay.png",
+        "imageOverlayLabel": "",
+        "command": "ToggleFaceNormalDisplay",
+        "sourceType": "mel"
+    },
+    "2": {
+        "annotation": "Normals Size...",
+        "image1": "menuIconDisplay.png",
+        "imageOverlayLabel": "",
+        "command": "ChangeNormalSize",
+        "sourceType": "mel"
+    },
+    "3": {
+        "annotation": "",
+        "image1": "polyNormalUnlock.png",
+        "imageOverlayLabel": "",
+        "command": "polyNormalPerVertex -ufn true",
+        "sourceType": "mel"
+    },
+    "4": {
+        "annotation": "Auto Smoothing Groups",
+        "image1": "polyHardEdge.png",
+        "imageOverlayLabel": "",
+        "command": "source \"dp_autoSmoothingGroups.mel\";",
+        "sourceType": "mel"
+    },
+    "5": {
+        "annotation": "",
+        "image1": "polySoftEdge.png",
+        "imageOverlayLabel": "",
+        "command": "SoftPolyEdgeElements 1",
+        "sourceType": "mel"
+    },
+    "6": {
+        "annotation": "",
+        "image1": "polyNormal.png",
+        "imageOverlayLabel": "",
+        "command": "ReversePolygonNormals",
+        "sourceType": "mel"
+    }
+}

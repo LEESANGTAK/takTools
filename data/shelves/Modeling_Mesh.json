@@ -1,0 +1,163 @@
+{
+    "0": {
+        "annotation": "Unsmooth",
+        "image1": "polyUnsmooth.png",
+        "imageOverlayLabel": "",
+        "command": "polyUnsmooth -caching 1 -constructionHistory 1 -replaceOriginal 1 -divisionLevels 1",
+        "sourceType": "mel"
+    },
+    "1": {
+        "annotation": "",
+        "image1": "delSupportEdges.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.delSupportEdgesUI()",
+        "sourceType": "python"
+    },
+    "2": {
+        "annotation": "retopoOptionItem",
+        "image1": "polyTriangulate.png",
+        "imageOverlayLabel": "",
+        "command": "PolyRetopoOptions",
+        "sourceType": "mel"
+    },
+    "3": {
+        "annotation": "",
+        "image1": "edgeRingCollapse.bmp",
+        "imageOverlayLabel": "",
+        "command": "polyConvertToRingAndCollapse;",
+        "sourceType": "mel"
+    },
+    "4": {
+        "annotation": "",
+        "image1": "deleteEdgeLoop.bmp",
+        "imageOverlayLabel": "",
+        "command": "cmds.SelectEdgeLoopSp()\ncmds.SelectEdgeLoopSp()\ncmds.DeleteEdge()",
+        "sourceType": "python"
+    },
+    "5": {
+        "annotation": "Quad Draw Tool",
+        "image1": "quadDraw_NEX32.png",
+        "imageOverlayLabel": "",
+        "command": "dR_quadDrawTool",
+        "sourceType": "mel"
+    },
+    "6": {
+        "annotation": "Sculpt a geometry object.",
+        "image1": "putty.png",
+        "imageOverlayLabel": "",
+        "command": "SculptGeometryTool",
+        "sourceType": "mel"
+    },
+    "7": {
+        "annotation": "Grab Tool",
+        "image1": "Grab.png",
+        "imageOverlayLabel": "",
+        "command": "SetMeshGrabTool",
+        "sourceType": "mel"
+    },
+    "8": {
+        "annotation": "Sculpt Tool",
+        "image1": "Sculpt.png",
+        "imageOverlayLabel": "",
+        "command": "SetMeshSculptTool",
+        "sourceType": "mel"
+    },
+    "9": {
+        "annotation": "Relax Tool",
+        "image1": "Relax.png",
+        "imageOverlayLabel": "",
+        "command": "SetMeshRelaxTool",
+        "sourceType": "mel"
+    },
+    "10": {
+        "annotation": "Pinch Tool",
+        "image1": "Pinch.png",
+        "imageOverlayLabel": "",
+        "command": "SetMeshPinchTool",
+        "sourceType": "mel"
+    },
+    "11": {
+        "annotation": "Create symmetry mesh on x axis.",
+        "image1": "pythonFamily.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.symmetry('x')",
+        "sourceType": "python"
+    },
+    "12": {
+        "annotation": "Create symmetry mesh on z axis.",
+        "image1": "pythonFamily.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.symmetry('z')",
+        "sourceType": "python"
+    },
+    "13": {
+        "annotation": "Mirror selected object.",
+        "image1": "mirrorObj.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirObjUi()",
+        "sourceType": "python"
+    },
+    "14": {
+        "annotation": "Mirror geometry across an axis",
+        "image1": "polyMirrorGeometry.png",
+        "imageOverlayLabel": "",
+        "command": "polyMirrorFace -ws 1  -direction 1 -mergeMode 1 -ch 1 -p 0 0 0 -mt 0.001;",
+        "sourceType": "mel"
+    },
+    "15": {
+        "annotation": "Select edge loops.",
+        "image1": "separateGeo.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sepGeoWithEdge()",
+        "sourceType": "python"
+    },
+    "16": {
+        "annotation": "Select faces.",
+        "image1": "sepGeo.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sepGeoWithFace()",
+        "sourceType": "python"
+    },
+    "17": {
+        "annotation": "Combine and merge vertex.",
+        "image1": "cbMrgGeo.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.cbMrgGeo()",
+        "sourceType": "python"
+    },
+    "18": {
+        "annotation": "Combine and rename with parent.",
+        "image1": "combineRenameWithParent.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.combineAndRenameWithParentName()",
+        "sourceType": "python"
+    },
+    "19": {
+        "annotation": "Combine and assign random color.",
+        "image1": "render_rampShader.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.combineAndAssignRandomMat()",
+        "sourceType": "python"
+    },
+    "20": {
+        "annotation": "Separate the selected polygon object shells or the shells of any selected faces from the object into distinct objects",
+        "image1": "polySeparate.png",
+        "imageOverlayLabel": "",
+        "command": "SeparatePolygon",
+        "sourceType": "mel"
+    },
+    "21": {
+        "annotation": "Combine the selected polygon objects into one single object to allow operations such as merges or face trims",
+        "image1": "polyUnite.png",
+        "imageOverlayLabel": "",
+        "command": "polyPerformAction polyUnite o 0",
+        "sourceType": "mel"
+    },
+    "22": {
+        "annotation": "Add polygons to the selected polygon objects to smooth them",
+        "image1": "polySmooth.png",
+        "imageOverlayLabel": "",
+        "command": "polyPerformAction \"polySmooth  -mth 0 -dv 1 -peh 0 -bnr 1 -c 1 -kb 1 -ksb 1 -khe 0 -kt 1 -kmb 1 -suv 1 -sl 1 -dpe 1 -ps 0.1 -ro 1\" f 0",
+        "sourceType": "mel"
+    }
+}

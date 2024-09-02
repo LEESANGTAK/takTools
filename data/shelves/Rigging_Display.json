@@ -1,0 +1,44 @@
+{
+    "0": {
+        "annotation": "toggle -state on -localAxis;",
+        "image1": "commandButton.png",
+        "imageOverlayLabel": "",
+        "command": "toggle -state on -localAxis;",
+        "sourceType": "mel"
+    },
+    "1": {
+        "annotation": "toggle -state off -localAxis;",
+        "image1": "commandButton.png",
+        "imageOverlayLabel": "",
+        "command": "toggle -state off -localAxis;",
+        "sourceType": "mel"
+    },
+    "2": {
+        "annotation": "Customize the joint scale",
+        "image1": "menuIconDisplay.png",
+        "imageOverlayLabel": "",
+        "command": "jdsWin",
+        "sourceType": "mel"
+    },
+    "3": {
+        "annotation": "Change the joint style",
+        "image1": "jointStyle.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.drawJntStyle()",
+        "sourceType": "python"
+    },
+    "4": {
+        "annotation": "Change display type.",
+        "image1": "displayType.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.displayType()",
+        "sourceType": "python"
+    },
+    "5": {
+        "annotation": "Display affected",
+        "image1": "pythonFamily.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.utils.display as dp\nimport imp\nimp.reload(dp)\ndp.displayAffectedToggle()",
+        "sourceType": "python"
+    }
+}

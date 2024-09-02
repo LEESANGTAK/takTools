@@ -1,0 +1,65 @@
+{
+    "0": {
+        "annotation": "Set default keyframe tangent to the step mode.",
+        "image1": "steped.png",
+        "imageOverlayLabel": "",
+        "command": "keyTangent -global -itt linear;\nkeyTangent -global -ott step;\n",
+        "sourceType": "mel"
+    },
+    "1": {
+        "annotation": "Set default keyframe tangent to the spline mode.",
+        "image1": "spline.png",
+        "imageOverlayLabel": "",
+        "command": "keyTangent -global -itt spline;\nkeyTangent -global -ott spline;",
+        "sourceType": "mel"
+    },
+    "2": {
+        "annotation": "Set default keyframe tangent to the linear mode.",
+        "image1": "linear.bmp",
+        "imageOverlayLabel": "",
+        "command": "keyTangent -global -itt linear;\nkeyTangent -global -ott linear;\n",
+        "sourceType": "mel"
+    },
+    "3": {
+        "annotation": "Convert selected animation curve to the cycle mode.",
+        "image1": "makeCycle.bmp",
+        "imageOverlayLabel": "",
+        "command": "animCurveEditor -edit -displayInfinities true graphEditor1GraphEd;\nsetInfinity -pri cycle;\nsetInfinity -poi cycle;",
+        "sourceType": "mel"
+    },
+    "4": {
+        "annotation": "Convert selected animation curve to the cycle with offset mode.",
+        "image1": "cycleOffset.bmp",
+        "imageOverlayLabel": "",
+        "command": "animCurveEditor -edit -displayInfinities true graphEditor1GraphEd;\nsetInfinity -pri cycleRelative;\nsetInfinity -poi cycleRelative;",
+        "sourceType": "mel"
+    },
+    "5": {
+        "annotation": "Convert selected animation curve to the linear mode.",
+        "image1": "makeLinear.bmp",
+        "imageOverlayLabel": "",
+        "command": "animCurveEditor -edit -displayInfinities true graphEditor1GraphEd;\nsetInfinity -pri linear;\nsetInfinity -poi linear;",
+        "sourceType": "mel"
+    },
+    "6": {
+        "annotation": "Convert selected animation curve to the constant mode.",
+        "image1": "makeConstant.bmp",
+        "imageOverlayLabel": "",
+        "command": "animCurveEditor -edit -displayInfinities false graphEditor1GraphEd;\nsetInfinity -poi constant;\nsetInfinity -pri constant;",
+        "sourceType": "mel"
+    },
+    "7": {
+        "annotation": "Set easy in and easy out.",
+        "image1": "easyEase.bmp",
+        "imageOverlayLabel": "",
+        "command": "source easyEasyEase.mel;",
+        "sourceType": "mel"
+    },
+    "8": {
+        "annotation": "Static Channels",
+        "image1": "menuIconEdit.png",
+        "imageOverlayLabel": "",
+        "command": "DeleteAllStaticChannels",
+        "sourceType": "mel"
+    }
+}

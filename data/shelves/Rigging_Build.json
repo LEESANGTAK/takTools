@@ -1,0 +1,170 @@
+{
+    "0": {
+        "annotation": "from imp import reload\nimport rigBuilder; reload(rigBuilder)\nrig...",
+        "image1": "pythonFamily.png",
+        "imageOverlayLabel": "",
+        "command": "from imp import reload\nimport rigBuilder; reload(rigBuilder)\nrigBuilder.mainWindow.show()",
+        "sourceType": "python"
+    },
+    "1": {
+        "annotation": "Tak auto rigging",
+        "image1": "takAutoRig.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.autoRigging as ar\nimport imp\nimp.reload(ar)\n\ntry:\n    arui.close()\n    arui.deleteLater()\nexcept:\n    pass\n\narui = ar.ui.mainUI.MainUI()\narui.show()",
+        "sourceType": "python"
+    },
+    "2": {
+        "annotation": "AdvancedSkeleton",
+        "image1": "AS.png",
+        "imageOverlayLabel": "",
+        "command": "source \"AdvancedSkeleton.mel\";AdvancedSkeleton;",
+        "sourceType": "mel"
+    },
+    "3": {
+        "annotation": "import takTools.rigging.advancedSkeletonHelperUI as ashUI\nimport imp\nimp.reload(ashUI)\n\n...",
+        "image1": "AS.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.advancedSkeletonHelperUI as ashUI\nimport imp\nimp.reload(ashUI)\n\ntry:\n    ashUIObj.close()\nexcept:\n    pass\n\nashUIObj = ashUI.AdvancedSkeletonHelperUI()\nashUIObj.show()\n",
+        "sourceType": "python"
+    },
+    "4": {
+        "annotation": "b1 hair dynamic tool",
+        "image1": "hairChain.bmp",
+        "imageOverlayLabel": "",
+        "command": "source IH_buildSpIkChain.mel;\nIH_buildSpIkChain();",
+        "sourceType": "mel"
+    },
+    "5": {
+        "annotation": "Additional functions for the 'IH_buildSpIkChain.mel' script.",
+        "image1": "forHairChain.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_addFuncForIHBuildSpIkChain as tak_addFuncForIHBuildSpIkChain\nimport imp\nimp.reload(tak_addFuncForIHBuildSpIkChain)\ntak_addFuncForIHBuildSpIkChain.ui()",
+        "sourceType": "python"
+    },
+    "6": {
+        "annotation": "js_createStretchSpline",
+        "image1": "scaleJoint.bmp",
+        "imageOverlayLabel": "",
+        "command": "source js_createStretchSplineUI;\njs_createStretchSplineUI;",
+        "sourceType": "mel"
+    },
+    "7": {
+        "annotation": "Stretchy Ik Creation",
+        "image1": "ikStretch.bmp",
+        "imageOverlayLabel": "",
+        "command": "source js_createIkStretchUI;\njs_createIkStretchUI",
+        "sourceType": "mel"
+    },
+    "8": {
+        "annotation": "",
+        "image1": "multiConnections.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_multiConnectAttr as tak_multiConnectAttr\nimport imp\nimp.reload(tak_multiConnectAttr)\ntak_multiConnectAttr.UI()",
+        "sourceType": "python"
+    },
+    "9": {
+        "annotation": "Constraint to multiple objects, first select driver then selcet other drivens",
+        "image1": "multiConstraint.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_mulConst as tak_mulConst\nimport imp\nimp.reload(tak_mulConst)\ntak_mulConst.UI()",
+        "sourceType": "python"
+    },
+    "10": {
+        "annotation": "Make group",
+        "image1": "group.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_group as tak_group\nimport imp\nimp.reload(tak_group)\ntak_group.UI()",
+        "sourceType": "python"
+    },
+    "11": {
+        "annotation": "Create control curves",
+        "image1": "control.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_createCtrl as tak_createCtrl\nimport imp\nimp.reload(tak_createCtrl)\ntak_createCtrl.UI()",
+        "sourceType": "python"
+    },
+    "12": {
+        "annotation": "Mirror controls",
+        "image1": "mirSelCon.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirCtrlShapeUi()",
+        "sourceType": "python"
+    },
+    "13": {
+        "annotation": "Mirror control one to one.",
+        "image1": "mirConOneToOne.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirConSel()",
+        "sourceType": "python"
+    },
+    "14": {
+        "annotation": "Mirror selected objects",
+        "image1": "mirrorObj.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirObjUi()",
+        "sourceType": "python"
+    },
+    "15": {
+        "annotation": "Copy or mirror set driven keyframes",
+        "image1": "tak_copySDK.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_copyMirrorSDK as tak_copyMirrorSDK\nimport imp\nimp.reload(tak_copyMirrorSDK)\ntak_copyMirrorSDK.UI()",
+        "sourceType": "python"
+    },
+    "16": {
+        "annotation": "Set driven key options",
+        "image1": "menuIconKeys.png",
+        "imageOverlayLabel": "",
+        "command": "SetDrivenKey",
+        "sourceType": "mel"
+    },
+    "17": {
+        "annotation": "",
+        "image1": "matchTransform.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_matchTransform as tak_matchTransform\nimport imp\nimp.reload(tak_matchTransform)\ntak_matchTransform.UI()",
+        "sourceType": "python"
+    },
+    "18": {
+        "annotation": "",
+        "image1": "attrManager.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_attrManager as tak_attrManager\nimport imp\nimp.reload(tak_attrManager)\ntak_attrManager.ui()",
+        "sourceType": "python"
+    },
+    "19": {
+        "annotation": "Transfer selected transform channel values to the parent.",
+        "image1": "zeroDepth.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.utils.transform as tu\nimport imp\nimp.reload(tu)\n\nsels = pm.selected()\nfor sel in sels:\n    tu.transferValueToParent(sel)",
+        "sourceType": "python"
+    },
+    "20": {
+        "annotation": "Set up space switching.",
+        "image1": "tak_setupSpaceSwitching.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_setupSpaceSwitching as tak_setupSpaceSwitching\nimport imp\nimp.reload(tak_setupSpaceSwitching)\ntak_setupSpaceSwitching.ui()",
+        "sourceType": "python"
+    },
+    "21": {
+        "annotation": "",
+        "image1": "attachIt.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_attachIt as tak_attachIt\nimport imp\nimp.reload(tak_attachIt)\ntak_attachIt.UI()",
+        "sourceType": "python"
+    },
+    "22": {
+        "annotation": "",
+        "image1": "pickwalkDesigner.png",
+        "imageOverlayLabel": "",
+        "command": "from takPickwalkDesigner import pdWindow\nimport imp\nimp.reload(pdWindow)\n\ntry:\n    pdWin.close()\nexcept:\n    pass\n\npdWin = pdWindow.PDWindow()\n",
+        "sourceType": "python"
+    },
+    "23": {
+        "annotation": "",
+        "image1": "cleanUpRig.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_cleanUpRig as tak_cleanUpRig\nimport imp\nimp.reload(tak_cleanUpRig)\ntak_cleanUpRig.ui()",
+        "sourceType": "python"
+    }
+}

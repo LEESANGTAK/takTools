@@ -1,0 +1,191 @@
+{
+    "0": {
+        "annotation": "Set maya preference.",
+        "image1": "setPref.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.pipeline.tak_shotSetUp as tak_shotSetUp\nimport imp\nimp.reload(tak_shotSetUp)\ntak_shotSetUp.UI()",
+        "sourceType": "python"
+    },
+    "1": {
+        "annotation": "Content Browser",
+        "image1": "teContentBrowser.png",
+        "imageOverlayLabel": "",
+        "command": "OpenContentBrowser",
+        "sourceType": "mel"
+    },
+    "2": {
+        "annotation": "Open with current working directory.",
+        "image1": "fileOpen.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.openCWD()",
+        "sourceType": "python"
+    },
+    "3": {
+        "annotation": "Save as in current working directory.",
+        "image1": "fileSave.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.saveCWD()",
+        "sourceType": "python"
+    },
+    "4": {
+        "annotation": "Edit the references for the current scene",
+        "image1": "out_reference.png",
+        "imageOverlayLabel": "",
+        "command": "ReferenceEditor",
+        "sourceType": "mel"
+    },
+    "5": {
+        "annotation": "Select all the children of the current selection",
+        "image1": "menuIconEdit.png",
+        "imageOverlayLabel": "",
+        "command": "SelectHierarchy",
+        "sourceType": "mel"
+    },
+    "6": {
+        "annotation": "Freeze Transformations",
+        "image1": "menuIconModify.png",
+        "imageOverlayLabel": "",
+        "command": "FreezeTransformations",
+        "sourceType": "mel"
+    },
+    "7": {
+        "annotation": "Center Pivot",
+        "image1": "menuIconModify.png",
+        "imageOverlayLabel": "",
+        "command": "CenterPivot",
+        "sourceType": "mel"
+    },
+    "8": {
+        "annotation": "Namespace Editor",
+        "image1": "namespaceEditor.png",
+        "imageOverlayLabel": "",
+        "command": "NamespaceEditor",
+        "sourceType": "mel"
+    },
+    "9": {
+        "annotation": "Component Editor",
+        "image1": "menuIconWindow.png",
+        "imageOverlayLabel": "",
+        "command": "ComponentEditor",
+        "sourceType": "mel"
+    },
+    "10": {
+        "annotation": "UV Texture Editor",
+        "image1": "UVEditorUV.png",
+        "imageOverlayLabel": "",
+        "command": "TextureViewWindow",
+        "sourceType": "mel"
+    },
+    "11": {
+        "annotation": "Display and edit connections in shading networks",
+        "image1": "hypershade.png",
+        "imageOverlayLabel": "",
+        "command": "HypershadeWindow",
+        "sourceType": "mel"
+    },
+    "12": {
+        "annotation": "Display relationships among nodes in your scene graphically",
+        "image1": "nodeGrapherRemoveNodes.png",
+        "imageOverlayLabel": "",
+        "command": "NodeEditorWindow",
+        "sourceType": "mel"
+    },
+    "13": {
+        "annotation": "Make connections between object attributes",
+        "image1": "mergeConnections.png",
+        "imageOverlayLabel": "",
+        "command": "ConnectionEditor",
+        "sourceType": "mel"
+    },
+    "14": {
+        "annotation": "Expression Editor",
+        "image1": "out_expression.png",
+        "imageOverlayLabel": "",
+        "command": "ExpressionEditor",
+        "sourceType": "mel"
+    },
+    "15": {
+        "annotation": "Edit animation curves",
+        "image1": "out_animCurveTA.png",
+        "imageOverlayLabel": "",
+        "command": "GraphEditor",
+        "sourceType": "mel"
+    },
+    "16": {
+        "annotation": "Toggle x-ray mode for selection.",
+        "image1": "xRay.bmp",
+        "imageOverlayLabel": "",
+        "command": "{\n    string $selection[] = `ls -sl`;  \n    \n    for ($cur in $selection){\n        \n        int $result[] = `displaySurface -q -x $cur `;\n        if ( $result[0] )\n            displaySurface -x 0 $cur ;\n        else\n            displaySurface -x 1 $cur ;\n            \n    }    \n}",
+        "sourceType": "mel"
+    },
+    "17": {
+        "annotation": "Toggle wire mode for selection.",
+        "image1": "UVTBWireFrame.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.Wire()",
+        "sourceType": "python"
+    },
+    "18": {
+        "annotation": "",
+        "image1": "hypershade.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.modeling.tak_matPreset as tak_matPreset\nimport imp\nimp.reload(tak_matPreset)\ntak_matPreset.MatPreset.ui()",
+        "sourceType": "python"
+    },
+    "19": {
+        "annotation": "",
+        "image1": "colorPresetSpectrum.png",
+        "imageOverlayLabel": "",
+        "command": "from takTools.common import tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.setShapeColorRGB()",
+        "sourceType": "python"
+    },
+    "20": {
+        "annotation": "",
+        "image1": "hairPaintSpecular.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.setJntColorUI()",
+        "sourceType": "python"
+    },
+    "21": {
+        "annotation": "Set ouliner color",
+        "image1": "hairPaintSpecular.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_outlinerColor as tc\nimport imp\nimp.reload(tc)\ntc.showUI()",
+        "sourceType": "python"
+    },
+    "22": {
+        "annotation": "Sorting selected items in outliner.",
+        "image1": "sortName.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sortOutl()",
+        "sourceType": "python"
+    },
+    "23": {
+        "annotation": "Renamer",
+        "image1": "quickRename.png",
+        "imageOverlayLabel": "",
+        "command": "from takRenamer import main;import imp;imp.reload(main);main.showUI()",
+        "sourceType": "python"
+    },
+    "24": {
+        "annotation": "Delete construction history, unlock normal, unlock attr, delete intermediate shapes, freeze transform",
+        "image1": "cleanUpMesh.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport imp\nimp.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()",
+        "sourceType": "python"
+    },
+    "25": {
+        "annotation": "Set Manager",
+        "image1": "objectSet.svg",
+        "imageOverlayLabel": "",
+        "command": "from imp import reload; import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()",
+        "sourceType": "python"
+    },
+    "26": {
+        "annotation": "Layout script editor horizontally",
+        "image1": "defaultTwoSideBySideLayout.png",
+        "imageOverlayLabel": "",
+        "command": "from takTools.utils import qtUtil;qtUtil.editScriptEditorHorizontal()",
+        "sourceType": "python"
+    }
+}

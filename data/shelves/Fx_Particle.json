@@ -1,0 +1,9 @@
+{
+    "0": {
+        "annotation": "Emit from Object",
+        "image1": "emitter.png",
+        "imageOverlayLabel": "",
+        "command": "dynExecuteEmitterCommands 0 \"emitter -type omni -r 100 -sro 0 -nuv 0 -cye none -cyi 1 -spd 1 -srn 0 -nsp 1 -tsp 0 -mxd 0 -mnd 0 -dx 1 -dy 0 -dz 0 -sp 0 \" 1",
+        "sourceType": "mel"
+    }
+}

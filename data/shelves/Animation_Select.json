@@ -1,0 +1,37 @@
+{
+    "0": {
+        "annotation": "Save controls selected",
+        "image1": "pos2Shelf.bmp",
+        "imageOverlayLabel": "",
+        "command": "pose2shelf",
+        "sourceType": "mel"
+    },
+    "1": {
+        "annotation": "Selector:biped",
+        "image1": "asBiped.png",
+        "imageOverlayLabel": "",
+        "command": "source \"biped.mel\";",
+        "sourceType": "mel"
+    },
+    "2": {
+        "annotation": "Selector:face",
+        "image1": "asFace.png",
+        "imageOverlayLabel": "",
+        "command": "source \"face.mel\";",
+        "sourceType": "mel"
+    },
+    "3": {
+        "annotation": "picker",
+        "image1": "picker.png",
+        "imageOverlayLabel": "",
+        "command": "source \"picker.mel\";",
+        "sourceType": "mel"
+    },
+    "4": {
+        "annotation": "",
+        "image1": "colorPickCursor.png",
+        "imageOverlayLabel": "",
+        "command": "\nimport ARSpicker\nARSpicker.picker.main()\n",
+        "sourceType": "python"
+    }
+}

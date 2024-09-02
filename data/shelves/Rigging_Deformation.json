@@ -1,0 +1,191 @@
+{
+    "0": {
+        "annotation": "Create a skeleton and manage skeleton poses.",
+        "image1": "takSkeleton.png",
+        "imageOverlayLabel": "",
+        "command": "import takSkeleton as ts\nimport imp\nimp.reload(ts)\nts.gui.showUI()",
+        "sourceType": "python"
+    },
+    "1": {
+        "annotation": "DNA Editor",
+        "image1": "MHC.png",
+        "imageOverlayLabel": "",
+        "command": "from imp import reload\nimport dna_editor; reload(dna_editor)\ndna_editor.gui.show()",
+        "sourceType": "python"
+    },
+    "2": {
+        "annotation": "EA's SSD(Smooth Skin Deformation) tool with custom GUI.",
+        "image1": "dembones.jpg",
+        "imageOverlayLabel": "",
+        "command": "import dem_bones\ndem_bones.showUI()",
+        "sourceType": "python"
+    },
+    "3": {
+        "annotation": "\"takRigLogic\" pose editor.",
+        "image1": "dembones.jpg",
+        "imageOverlayLabel": "",
+        "command": "import imp\nimport editPoseGUI\nimp.reload(editPoseGUI)\ngui = editPoseGUI.EditPoseGUI()\ngui.show()",
+        "sourceType": "python"
+    },
+    "4": {
+        "annotation": "",
+        "image1": "HIKCharacterToolSkeleton_100.png",
+        "imageOverlayLabel": "",
+        "command": "from imp import reload\nimport takSkelMeshManager as tsm; reload(tsm)\ntsm.showUI()\n",
+        "sourceType": "python"
+    },
+    "5": {
+        "annotation": "Set skin weights",
+        "image1": "skinWeight.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_skinWeights as tak_skinWeights\nimport imp\nimp.reload(tak_skinWeights)\ntak_skinWeights.showUI()",
+        "sourceType": "python"
+    },
+    "6": {
+        "annotation": "Select all the child joints",
+        "image1": "selChldJnt.bmp",
+        "imageOverlayLabel": "",
+        "command": "### Select Joint in Hierarchy ###\njntList = cmds.ls(sl = True, dag = True, type = 'joint')\ncmds.select(jntList)",
+        "sourceType": "python"
+    },
+    "7": {
+        "annotation": "Select surface(s) and a joint.",
+        "image1": "smoothSkin.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.smoothSkinBind()",
+        "sourceType": "python"
+    },
+    "8": {
+        "annotation": "Detach Skin",
+        "image1": "detachSkin.png",
+        "imageOverlayLabel": "",
+        "command": "DetachSkin",
+        "sourceType": "mel"
+    },
+    "9": {
+        "annotation": "Create range of motion for selected object.",
+        "image1": "ROM.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_ROM as tak_ROM\nimport imp\nimp.reload(tak_ROM)\ntak_ROM.UI()",
+        "sourceType": "python"
+    },
+    "10": {
+        "annotation": "Weight Hammer on Edge Loop",
+        "image1": "weightHammerOnEdgeLoop.bmp",
+        "imageOverlayLabel": "",
+        "command": "### Weight Hammer on Edge Loop ###\ncmds.SelectEdgeLoopSp()\nmel.eval('weightHammerVerts;')",
+        "sourceType": "python"
+    },
+    "11": {
+        "annotation": "from maya import cmds, mel\n\nweightHammerBrush = cmds.artSelectCt...",
+        "image1": "weightHammer.png",
+        "imageOverlayLabel": "",
+        "command": "from maya import cmds, mel\n\nweightHammerBrush = cmds.artSelectCtx(beforeStrokeCmd='select -cl;', afterStrokeCmd='if (size(`ls -sl`) > 0){WeightHammer;}')\ncmds.setToolTo(weightHammerBrush)",
+        "sourceType": "python"
+    },
+    "12": {
+        "annotation": "tf_smoothSkinWeight",
+        "image1": "tf_smoothSkin.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.averageVertexSkinWeightBrush as averageVertexSkinWeightBrush\nimport imp\nimp.reload(averageVertexSkinWeightBrush)\naverageVertexSkinWeightBrush.paint()",
+        "sourceType": "python"
+    },
+    "13": {
+        "annotation": "Paint Smooth Weights Tool",
+        "image1": "brSmoothWeights.svg",
+        "imageOverlayLabel": "",
+        "command": "if (! `pluginInfo -q -loaded brSmoothWeights`)\n{\n    loadPlugin brSmoothWeights;\n}\nbrSmoothWeightsToolCtx;",
+        "sourceType": "mel"
+    },
+    "14": {
+        "annotation": "Paint skin weights tool options",
+        "image1": "paintSkinWeights.png",
+        "imageOverlayLabel": "",
+        "command": "ArtPaintSkinWeightsToolOptions",
+        "sourceType": "mel"
+    },
+    "15": {
+        "annotation": "Select either a single skin or the source and the destination skin.",
+        "image1": "mirrorSkinWeight.png",
+        "imageOverlayLabel": "",
+        "command": "MirrorSkinWeights",
+        "sourceType": "mel"
+    },
+    "16": {
+        "annotation": "Select the source surface and the destination surface or component.",
+        "image1": "copySkinWeight.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.addInfCopySkin()",
+        "sourceType": "python"
+    },
+    "17": {
+        "annotation": "Separate selected faces as separated skin mesh.",
+        "image1": "polyDuplicateFacet.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.utils.skin as skinUtil\nimport imp\nimp.reload(skinUtil)\nskinUtil.duplicateSkinMesh()",
+        "sourceType": "python"
+    },
+    "18": {
+        "annotation": "Select source skin geo and target geo",
+        "image1": "polyConvertToVertices.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.utils.skin as skinUtil\nimport imp\nimp.reload(skinUtil)\nsels = cmds.ls(sl=True)\ntrg = sels.pop(-1)\nfor src in sels: skinUtil.copySkinOverlapVertices(src, trg)",
+        "sourceType": "python"
+    },
+    "19": {
+        "annotation": "Add influences. Select influences and geometry.",
+        "image1": "addWrapInfluence.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.addInfUI()",
+        "sourceType": "python"
+    },
+    "20": {
+        "annotation": "Remove Influence",
+        "image1": "removeWrapInfluence.png",
+        "imageOverlayLabel": "",
+        "command": "RemoveInfluence",
+        "sourceType": "mel"
+    },
+    "21": {
+        "annotation": "",
+        "image1": "save.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.bSkinSaver as bSkinSaver\nimport imp\nimp.reload(bSkinSaver)\nbSkinSaver.showUI()",
+        "sourceType": "python"
+    },
+    "22": {
+        "annotation": "",
+        "image1": "tak_helperJoint.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_helperJoint as tak_helperJoint\nimport imp\nimp.reload(tak_helperJoint)\ntak_helperJoint.ui()",
+        "sourceType": "python"
+    },
+    "23": {
+        "annotation": "Corrective blend shape tools.",
+        "image1": "correctiveBS.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_correctiveBS as tak_correctiveBS\nimport imp\nimp.reload(tak_correctiveBS)\nposCorObj = tak_correctiveBS.UI()",
+        "sourceType": "python"
+    },
+    "24": {
+        "annotation": "",
+        "image1": "LRTarget.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.rigging.tak_LRTarget as tak_LRTarget\nimport imp\nimp.reload(tak_LRTarget)\ntak_LRTarget.UI()",
+        "sourceType": "python"
+    },
+    "25": {
+        "annotation": "Shape Editor",
+        "image1": "blendShapeEditor.png",
+        "imageOverlayLabel": "",
+        "command": "ShapeEditor",
+        "sourceType": "mel"
+    },
+    "26": {
+        "annotation": "",
+        "image1": "editDfmMember.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.editDfmMemberUI()",
+        "sourceType": "python"
+    }
+}

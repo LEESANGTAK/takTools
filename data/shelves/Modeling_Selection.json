@@ -1,0 +1,30 @@
+{
+    "0": {
+        "annotation": "",
+        "image1": "selectSkipedEdgeRing.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.selEveryNUI()",
+        "sourceType": "python"
+    },
+    "1": {
+        "annotation": "Selects all parallel edges that form an edge ring based on the current selection",
+        "image1": "polyConvertToEdgeRing.png",
+        "imageOverlayLabel": "",
+        "command": "polySelectSp -ring;",
+        "sourceType": "mel"
+    },
+    "2": {
+        "annotation": "Selects all connected edges that form an edge loop based on the current selection",
+        "image1": "polyConvertToEdgeLoop.png",
+        "imageOverlayLabel": "",
+        "command": "polySelectSp -loop;",
+        "sourceType": "mel"
+    },
+    "3": {
+        "annotation": "",
+        "image1": "polySelectUsingConstraints.png",
+        "imageOverlayLabel": "",
+        "command": "PolygonSelectionConstraints",
+        "sourceType": "mel"
+    }
+}

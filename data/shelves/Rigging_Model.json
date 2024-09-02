@@ -1,0 +1,149 @@
+{
+    "0": {
+        "annotation": "abSymMesh;",
+        "image1": "symmetrize.png",
+        "imageOverlayLabel": "",
+        "command": "abSymMesh;",
+        "sourceType": "mel"
+    },
+    "1": {
+        "annotation": "Assign lambert with a selected texture.",
+        "image1": "lambertWithSelectedTexture.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.assignLambertWithSelectedTexture()",
+        "sourceType": "python"
+    },
+    "2": {
+        "annotation": "Assign solid color material with grabed color.",
+        "image1": "solColorMat.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.solidColMat()",
+        "sourceType": "python"
+    },
+    "3": {
+        "annotation": "Duplicate selected shader network.",
+        "image1": "out_lambert.png",
+        "imageOverlayLabel": "",
+        "command": "pm.mel.hyperShadePanelMenuCommand(\"hyperShadePanel1\", \"duplicateShadingNetwork\");",
+        "sourceType": "python"
+    },
+    "4": {
+        "annotation": "Duplicate material and assign duplicated material.",
+        "image1": "dupMatAssign.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.dupMatAndAssign()",
+        "sourceType": "python"
+    },
+    "5": {
+        "annotation": "Assign the material of first selection to the others",
+        "image1": "copyMat.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyMat()",
+        "sourceType": "python"
+    },
+    "6": {
+        "annotation": "Copy selected objects texture",
+        "image1": "copyTexture.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyTexRenameUI()",
+        "sourceType": "python"
+    },
+    "7": {
+        "annotation": "\tCut selected geometry with selected joints.\n\tUsing 'js_cutPlane.mel' script.\n\tSelect first joints and geometry last.",
+        "image1": "cutGeoWithJoints.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.cutGeoWithJnts()",
+        "sourceType": "python"
+    },
+    "8": {
+        "annotation": "Add plane for cutting polygonal geometry",
+        "image1": "addPlane.bmp",
+        "imageOverlayLabel": "",
+        "command": "source js_cutPlane;\njs_cutPlane_create;\n",
+        "sourceType": "mel"
+    },
+    "9": {
+        "annotation": "Cut selected object with planes",
+        "image1": "cutPlaneDone.bmp",
+        "imageOverlayLabel": "",
+        "command": "source js_cutPlane;\njs_cutPlane_cut 1;\n",
+        "sourceType": "mel"
+    },
+    "10": {
+        "annotation": "Sculpt a geometry object.",
+        "image1": "putty.png",
+        "imageOverlayLabel": "",
+        "command": "SculptGeometryTool",
+        "sourceType": "mel"
+    },
+    "11": {
+        "annotation": "Grab Tool",
+        "image1": "Grab.png",
+        "imageOverlayLabel": "",
+        "command": "SetMeshGrabTool",
+        "sourceType": "mel"
+    },
+    "12": {
+        "annotation": "Erase Target Tool",
+        "image1": "Erase.png",
+        "imageOverlayLabel": "",
+        "command": "SetMeshEraseTool",
+        "sourceType": "mel"
+    },
+    "13": {
+        "annotation": "Smooth Target Tool",
+        "image1": "SmoothTarget.png",
+        "imageOverlayLabel": "",
+        "command": "SetMeshSmoothTargetTool",
+        "sourceType": "mel"
+    },
+    "14": {
+        "annotation": "Assign random color lamber.",
+        "image1": "ranColLam.bmp",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.ranColLam()",
+        "sourceType": "python"
+    },
+    "15": {
+        "annotation": "Copy all uv sets and material from source to target.",
+        "image1": "copyUvMat.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyUvMat()",
+        "sourceType": "python"
+    },
+    "16": {
+        "annotation": "Copy source mesh's uv to target mesh that rigged",
+        "image1": "copyUvRiggedMesh.png",
+        "imageOverlayLabel": "",
+        "command": "import pymel.core as pm\nimport takTools.common.tak_misc as tak_misc\n\nsels = pm.ls(sl=True)\nsrc = sels[0]\ntrg = sels[1]\n\ntak_misc.copyUvRiggedMesh(src, trg)",
+        "sourceType": "python"
+    },
+    "17": {
+        "annotation": "File Texture Manager",
+        "image1": "texManger.bmp",
+        "imageOverlayLabel": "",
+        "command": "FileTextureManager;",
+        "sourceType": "mel"
+    },
+    "18": {
+        "annotation": "Reduce",
+        "image1": "polyReduce.png",
+        "imageOverlayLabel": "",
+        "command": "expandPolyGroupSelection; doPerformPolyReduceArgList 3 {\"1\",\"0\",\"0\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"0.5\",\"0.5\",\"0.5\",\"0.5\",\"0.5\",\"0.5\",\"0\",\"0.01\",\"0\",\"1\",\"0\",\"0.0\",\"1\",\"1\",\"\",\"1\",\"1\",\"50\",\"0\",\"0\",\"1\",\"0\",\"0\",\"0\",\"0\"};",
+        "sourceType": "mel"
+    },
+    "19": {
+        "annotation": "Remesh",
+        "image1": "polyRemesh.png",
+        "imageOverlayLabel": "",
+        "command": "polyRemesh -maxEdgeLength 1 -useRelativeValues 1 -collapseThreshold 20 -smoothStrength 0 -tessellateBorders 1 -interpolationType 2",
+        "sourceType": "mel"
+    },
+    "20": {
+        "annotation": "Retopologize",
+        "image1": "polyRetopo.png",
+        "imageOverlayLabel": "",
+        "command": "polyRetopo -constructionHistory 1 -replaceOriginal 1 -preserveHardEdges 0 -topologyRegularity 1.0 -faceUniformity 0 -anisotropy 0.75 -targetFaceCount 1000 -targetFaceCountTolerance 10",
+        "sourceType": "mel"
+    }
+}

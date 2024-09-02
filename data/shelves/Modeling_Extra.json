@@ -1,0 +1,184 @@
+{
+    "0": {
+        "annotation": "Export selected object to ZBrush.",
+        "image1": "GoZBrush.xpm",
+        "imageOverlayLabel": "",
+        "command": "source \"C:/Users/Public/Pixologic/GoZApps/Maya/GoZBrushFromMaya.mel\"",
+        "sourceType": "mel"
+    },
+    "1": {
+        "annotation": "uvlayout_open()",
+        "image1": "uvlayout.png",
+        "imageOverlayLabel": "",
+        "command": "uvlayout_open()",
+        "sourceType": "mel"
+    },
+    "2": {
+        "annotation": "Run phothoshop.",
+        "image1": "photoshop.bmp",
+        "imageOverlayLabel": "",
+        "command": "import subprocess\nsubprocess.Popen('C:\\Program Files\\Adobe\\Adobe Photoshop CS6 (64 Bit)\\Photoshop.exe')",
+        "sourceType": "python"
+    },
+    "3": {
+        "annotation": "Duplicate object along the path",
+        "image1": "DupAlongPathToolbox.png",
+        "imageOverlayLabel": "",
+        "command": "source DupAlongPathToolbox.mel;DupAlongPathToolbox;",
+        "sourceType": "mel"
+    },
+    "4": {
+        "annotation": "Instance Along Curve",
+        "image1": "menuIconEdit.png",
+        "imageOverlayLabel": "",
+        "command": "instanceAlongCurve",
+        "sourceType": "mel"
+    },
+    "5": {
+        "annotation": "Run spPaint3d.",
+        "image1": "spPaint3d.bmp",
+        "imageOverlayLabel": "",
+        "command": "spPaint3d",
+        "sourceType": "mel"
+    },
+    "6": {
+        "annotation": "Create a curve on the grid or live surface specifying control vertices",
+        "image1": "curveCV.png",
+        "imageOverlayLabel": "",
+        "command": "CVCurveTool",
+        "sourceType": "mel"
+    },
+    "7": {
+        "annotation": "Create a curve on the grid or live surface specifying edit points",
+        "image1": "curveEP.png",
+        "imageOverlayLabel": "",
+        "command": "EPCurveTool",
+        "sourceType": "mel"
+    },
+    "8": {
+        "annotation": "Rebuild curve options",
+        "image1": "rebuildCurve.png",
+        "imageOverlayLabel": "",
+        "command": "RebuildCurveOptions",
+        "sourceType": "mel"
+    },
+    "9": {
+        "annotation": "Polygon Edges to Curve",
+        "image1": "polyEdgeToCurves.png",
+        "imageOverlayLabel": "",
+        "command": "meshName = pm.selected()[0].node().getTransform();pm.polyToCurve(form=2, degree=3, n=meshName+\"_crv\")",
+        "sourceType": "python"
+    },
+    "10": {
+        "annotation": "",
+        "image1": "shelf_wireMeshFromCurve.png",
+        "imageOverlayLabel": "",
+        "command": "if (! `pluginInfo -q -loaded \"wire\"`)\n{\n    loadPlugin \"wire\";\n}\nwireMeshFromCurve;",
+        "sourceType": "mel"
+    },
+    "11": {
+        "annotation": "Convert nurbs curves to polygon geomtry",
+        "image1": "curveToPoly.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.modeling.tak_curveToPoly as tak_curveToPoly\nimport imp\nimp.reload(tak_curveToPoly)\ntak_curveToPoly.UI()",
+        "sourceType": "python"
+    },
+    "12": {
+        "annotation": "Convert selected curves to polygon stripe.",
+        "image1": "crvToStripe.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.crvToPolyStrp()",
+        "sourceType": "python"
+    },
+    "13": {
+        "annotation": "This script will attempt to Spherify the current selected objects or components.",
+        "image1": "spherizeSelection.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.modeling.spherize as spherize\nspherize.sphereizedSelection()",
+        "sourceType": "python"
+    },
+    "14": {
+        "annotation": "Align into circlular shape for selected edge loop.",
+        "image1": "alignCircle.bmp",
+        "imageOverlayLabel": "",
+        "command": "source _sort_circle_tool.mel;\n_sort_circle_tool;",
+        "sourceType": "mel"
+    },
+    "15": {
+        "annotation": "Flatten geometry into uv space.",
+        "image1": "mopKnit.png",
+        "imageOverlayLabel": "",
+        "command": "mopKnitOptions",
+        "sourceType": "mel"
+    },
+    "16": {
+        "annotation": "Loft",
+        "image1": "skin.png",
+        "imageOverlayLabel": "",
+        "command": "doPerformLoft(\"1\", {\"1\",\"1\",\"1\",\"0\",\"3\",\"1\",\"0\",\"1\"} )",
+        "sourceType": "mel"
+    },
+    "17": {
+        "annotation": "Creating hair guide curves from polygon tube.",
+        "image1": "hairTools.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.modeling.hairTools as hairTools\nimport imp\nimp.reload(hairTools)\nhairTools.hairballUI()",
+        "sourceType": "python"
+    },
+    "18": {
+        "annotation": "Create water drop.",
+        "image1": "waterDropGenerator_shelfIcon.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.modeling.waterDropUI as waterDropUI\nimport imp\nimp.reload(waterDropUI)",
+        "sourceType": "python"
+    },
+    "19": {
+        "annotation": "icPolyScatter;",
+        "image1": "icPolyScatter.png",
+        "imageOverlayLabel": "",
+        "command": "icPolyScatter;",
+        "sourceType": "mel"
+    },
+    "20": {
+        "annotation": "Boolean hard surface modeling",
+        "image1": "pythonFamily.png",
+        "imageOverlayLabel": "",
+        "command": "import takTools.modeling.speedCut as speedCut\nimport imp\nimp.reload(speedCut)",
+        "sourceType": "python"
+    },
+    "21": {
+        "annotation": "",
+        "image1": "commandButton.png",
+        "imageOverlayLabel": "",
+        "command": "source Voxel_Model_Generator_v4.mel;",
+        "sourceType": "mel"
+    },
+    "22": {
+        "annotation": "",
+        "image1": "takXgenManager.png",
+        "imageOverlayLabel": "",
+        "command": "\nimport takXgenManager.xgenManager as xgManager;import imp;imp.reload(xgManager)\n\nxgmg = xgManager.XGenManager()\nxgmg.show()\n",
+        "sourceType": "python"
+    },
+    "23": {
+        "annotation": "3D Cut and Sew UV Tool",
+        "image1": "CutSewUVTool.png",
+        "imageOverlayLabel": "",
+        "command": "SetCutSewUVTool",
+        "sourceType": "mel"
+    },
+    "24": {
+        "annotation": "",
+        "image1": "commandButton.png",
+        "imageOverlayLabel": "",
+        "command": "textureWindowDisplayCheckered(1, 1);",
+        "sourceType": "mel"
+    },
+    "25": {
+        "annotation": "",
+        "image1": "commandButton.png",
+        "imageOverlayLabel": "",
+        "command": "textureWindowDisplayCheckered(1, 0);",
+        "sourceType": "mel"
+    }
+}

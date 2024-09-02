@@ -1,0 +1,30 @@
+{
+    "0": {
+        "annotation": "Set interactive mode for skin clusters.",
+        "image1": "pythonFamily.png",
+        "imageOverlayLabel": "",
+        "command": "for skin in pm.ls(type='skinCluster'):\n    skin.normalizeWeights.set(1)",
+        "sourceType": "python"
+    },
+    "1": {
+        "annotation": "Set segmentScaleCompensate to false for selected skin clusters.",
+        "image1": "pythonFamily.png",
+        "imageOverlayLabel": "",
+        "command": "for jnt in pm.selected(type='joint'):\n    jnt.segmentScaleCompensate.set(False)",
+        "sourceType": "python"
+    },
+    "2": {
+        "annotation": "Set color space to raw for normal maps.",
+        "image1": "pythonFamily.png",
+        "imageOverlayLabel": "",
+        "command": "for node in pm.ls(type='bump2d'):\n    node.inputs(type='file')[0].colorSpace.set('Raw')",
+        "sourceType": "python"
+    },
+    "3": {
+        "annotation": "Set tangentSpace to Left Handed for meshes.",
+        "image1": "pythonFamily.png",
+        "imageOverlayLabel": "",
+        "command": "for mesh in pm.ls(type='mesh'):\n    mesh.tangentSpace.set(2)",
+        "sourceType": "python"
+    }
+}
