@@ -11,6 +11,7 @@ import os
 import json
 import subprocess
 from functools import partial
+from collections import OrderedDict
 
 from maya import cmds
 
@@ -25,10 +26,16 @@ MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
 CONFIG_FILENAME = "{}_config.json".format(MODULE_NAME)
 TAK_TOOLS_CONFIG_PATH = cmds.internalVar(userAppDir=True) + "config"
 
-ROW_HEIGHT = 50
-NUM_ICONS_PER_ROW = 10
-ICON_SIZE = 35
-MARGIN = 5
+# Size values are based on 4k(3840*2160) monitor
+# Caculate scale factor depend on monitor height
+DEFAULT_DISPLAY_HEIGHT = 2160
+sysObj = sysUtil.System()
+scaleFactor = sysObj.screenHeight / float(DEFAULT_DISPLAY_HEIGHT)
+
+TASK_PANE_SIZE = 700 * scaleFactor
+ROW_HEIGHT = 50  * scaleFactor
+NUM_ICONS_PER_ROW = 10  * scaleFactor
+ICON_SIZE = 35  * scaleFactor
 SHELVES = ['Common']
 START_SHELFS = ['Rigging_Display', 'Animation_Select', 'Modeling_Display', 'Fx_Particle', 'Misc_Misc']
 SHELVES_DATA_PATH = '{}/data/shelves'.format(MODULE_PATH.replace('\\', '/'))
@@ -38,16 +45,15 @@ WIN_NAME = "{0}Win".format(MODULE_NAME)
 
 def UI():
     # Load configuration info
-    config = {}
+    config = OrderedDict()
     if os.path.exists(TAK_TOOLS_CONFIG_PATH):
         with open(TAK_TOOLS_CONFIG_PATH, 'r') as f:
-            config = json.load(f)
+            config = json.load(f, object_pairs_hook=OrderedDict)
 
     # Set workspace width value
     if config:
         workspaceWidth = config['workspaceWidth']
     else:
-        sysObj = sysUtil.System()
         workspaceWidth = sysObj.screenWidth / 10.0
 
     if cmds.window(WIN_NAME, exists=True):
@@ -94,7 +100,7 @@ def UI():
 # ------------ Save & Load
 def saveShelves(*args):
     for shelf in SHELVES:
-        shelfInfo = {}
+        shelfInfo = OrderedDict()
         shelfButtons = cmds.shelfLayout(shelf, q=True, childArray=True)
         for i, shelfButton in enumerate(shelfButtons):
             shelfButtonInfo = {
@@ -114,7 +120,7 @@ def saveShelves(*args):
 def loadCommonShelf():
     commonShelfFile = '{}/Common.json'.format(SHELVES_DATA_PATH)
     with open(commonShelfFile, 'r') as f:
-        commonShelfInfo = json.load(f)
+        commonShelfInfo = json.load(f, object_pairs_hook=OrderedDict)
     for index, shelfButtonInfo in commonShelfInfo.items():
         cmds.shelfButton(
             annotation=shelfButtonInfo['annotation'],
@@ -129,14 +135,14 @@ def loadCommonShelf():
 def loadTaskShelves(*args):
     shelvesInfo = getTaskShelvesInfo()
     for tabName, frameInfo in shelvesInfo.items():
-        tabControl = cmds.scrollLayout(childResizable=True, h=500, p='taskTabLo')
+        tabControl = cmds.scrollLayout(childResizable=True, h=TASK_PANE_SIZE, p='taskTabLo')
         cmds.tabLayout('taskTabLo', e=True, tabLabel=[tabControl, tabName])
         for frameName, shelfButtonInfos in frameInfo.items():
             shelfName = '{}_{}'.format(tabName, frameName)
             SHELVES.append(shelfName)
             frameLo = cmds.frameLayout(label=frameName, collapse=False, collapsable=True, p=tabControl)
-            numRows = int(len(shelfButtonInfos) / NUM_ICONS_PER_ROW) + 1
-            shelf = cmds.shelfLayout(shelfName, h=(ICON_SIZE + MARGIN) * numRows, p=frameLo)
+            numRows = int(len(shelfButtonInfos) / NUM_ICONS_PER_ROW) + 2
+            shelf = cmds.shelfLayout(shelfName, ch=(ICON_SIZE * numRows), p=frameLo)
             for shelfButtonInfo in shelfButtonInfos:
                 cmds.shelfButton(
                     annotation=shelfButtonInfo['annotation'],
@@ -149,7 +155,7 @@ def loadTaskShelves(*args):
 
 
 def getTaskShelvesInfo():
-    shelvesInfo = {}
+    shelvesInfo = OrderedDict()
 
     shelfFiles = [shelfFile for shelfFile in os.listdir(SHELVES_DATA_PATH) if not 'Common' in shelfFile]
 
@@ -157,7 +163,7 @@ def getTaskShelvesInfo():
     for shelfFile in shelfFiles:
         shelfName = shelfFile.split('.')[0]
         tabName = shelfName.split('_')[0]
-        shelvesInfo[tabName] = {}
+        shelvesInfo[tabName] = OrderedDict()
 
     # Get frames
     for shelfFile in shelfFiles:
@@ -167,7 +173,7 @@ def getTaskShelvesInfo():
         frameName = splitedName[1] if len(splitedName) == 2 else splitedName[0]
         filePath = '{}/{}'.format(SHELVES_DATA_PATH, shelfFile)
         with open(filePath, 'r') as f:
-            shelfInfo = json.load(f)
+            shelfInfo = json.load(f, object_pairs_hook=OrderedDict)
         shelvesInfo[tabName][frameName] = [shelfData for index, shelfData in shelfInfo.items()]
 
     return shelvesInfo
