@@ -9,6 +9,7 @@ Description:
 
 import os
 import json
+import shutil
 import subprocess
 from functools import partial
 from collections import OrderedDict
@@ -18,67 +19,58 @@ from maya import cmds
 from .utils import system as sysUtil
 
 
-SUBPROCESS_NO_WINDOW = 0x08000000
-
-MODULE_NAME = "takTools"
-MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
-
-CONFIG_FILENAME = "{}_config.json".format(MODULE_NAME)
-TAK_TOOLS_CONFIG_PATH = cmds.internalVar(userAppDir=True) + "config"
-
 # Size values are based on 4k(3840*2160) monitor
 # Caculate scale factor depend on monitor height
 DEFAULT_DISPLAY_HEIGHT = 2160
 sysObj = sysUtil.System()
 scaleFactor = sysObj.screenHeight / float(DEFAULT_DISPLAY_HEIGHT)
 
-TASK_PANE_SIZE = 700 * scaleFactor
-ROW_HEIGHT = 50  * scaleFactor
-NUM_ICONS_PER_ROW = 10  * scaleFactor
+COMMON_TAB_NUM_ROWS = 3
+NUM_ICONS_PER_ROW = 10
 ICON_SIZE = 35  * scaleFactor
+ICON_MARGINE = 6 * scaleFactor
+PANE_WIDTH = ICON_SIZE * (NUM_ICONS_PER_ROW + 1)
+OUTLINER_PERCENTAGE = 60
+SCROLL_AREA_HEIGHT = sysObj.screenHeight * ((100-OUTLINER_PERCENTAGE) * 0.005)
+
 SHELVES = ['Common']
-START_SHELFS = ['Rigging_Display', 'Animation_Select', 'Modeling_Display', 'Fx_Particle', 'Misc_Misc']
+MODULE_NAME = "takTools"
+MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
 SHELVES_DATA_PATH = '{}/data/shelves'.format(MODULE_PATH.replace('\\', '/'))
+START_SHELFS = ['Rigging_Display', 'Animation_Select', 'Modeling_Display', 'Fx_Particle', 'Misc_Misc']
 
 WIN_NAME = "{0}Win".format(MODULE_NAME)
 
+SUBPROCESS_NO_WINDOW = 0x08000000
+
 
 def UI():
-    # Load configuration info
-    config = OrderedDict()
-    if os.path.exists(TAK_TOOLS_CONFIG_PATH):
-        with open(TAK_TOOLS_CONFIG_PATH, 'r') as f:
-            config = json.load(f, object_pairs_hook=OrderedDict)
-
-    # Set workspace width value
-    if config:
-        workspaceWidth = config['workspaceWidth']
-    else:
-        workspaceWidth = sysObj.screenWidth / 10.0
-
     if cmds.window(WIN_NAME, exists=True):
         cmds.deleteUI(WIN_NAME)
     if cmds.dockControl(MODULE_NAME, exists=True):
         cmds.deleteUI(MODULE_NAME)
 
-    # Main menu
     cmds.window(WIN_NAME)
+
+    # Main menu
     cmds.menuBarLayout(WIN_NAME)
     cmds.menu('fileMenu', label='File', p=WIN_NAME)
     cmds.menuItem(label='Save', c=saveShelves, p='fileMenu')
     cmds.menu('editMenu', label='Edit', p=WIN_NAME)
-    cmds.menuItem(label='Add Tool', c=addToolUi, p='editMenu')
-    cmds.menuItem(label='Store Config', c=storeConfig, p='editMenu')
+    cmds.menuItem(label='Add Tool', c=addToolGUI, p='editMenu')
+    cmds.menuItem(label='Edit Tool', c=editToolGUI, p='editMenu')
+    cmds.menuItem(divider=True)
+    cmds.menuItem(label='Preferences', c=prefsGUI, p='editMenu')
     cmds.menu('helpMenu', label='Help', p=WIN_NAME)
     cmds.menuItem(label='Check Update', c=checkUpdate, p='helpMenu')
 
-    cmds.paneLayout('mainPaneLo', configuration='horizontal2', paneSize=[(2, 50, 50)])
+    cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(2, 50, OUTLINER_PERCENTAGE)])
 
     cmds.columnLayout('mainColLo', adj=True)
 
     # Common tab
     cmds.tabLayout('cmnToolTabLo', tv=False, p='mainColLo')
-    cmds.shelfLayout('Common', h=(ROW_HEIGHT * 4), parent='cmnToolTabLo')
+    cmds.shelfLayout('Common', h=((ICON_SIZE + ICON_MARGINE) * COMMON_TAB_NUM_ROWS), parent='cmnToolTabLo')
     loadCommonShelf()
 
     cmds.separator('mainSep', style='in', p='mainColLo')
@@ -94,7 +86,7 @@ def UI():
     cmds.outlinerEditor( outliner, edit=True, mainListConnection='worldList', selectionConnection='modelList', showShapes=False, showAssignedMaterials=False, showReferenceNodes=True, showReferenceMembers=True, showAttributes=False, showConnected=False, showAnimCurvesOnly=False, autoExpand=False, showDagOnly=True, ignoreDagHierarchy=False, expandConnections=False, showCompounds=True, showNumericAttrsOnly=False, highlightActive=True, autoSelectNewObjects=False, doNotSelectNewObjects=False, transmitFilters=False, showSetMembers=True, setFilter='defaultSetFilter', ignoreHiddenAttribute=False )
 
     # Dock window to left side
-    cmds.dockControl(MODULE_NAME, area='left', content=WIN_NAME, w=workspaceWidth)
+    cmds.dockControl(MODULE_NAME, area='left', content=WIN_NAME)
 
 
 # ------------ Save & Load
@@ -135,14 +127,14 @@ def loadCommonShelf():
 def loadTaskShelves(*args):
     shelvesInfo = getTaskShelvesInfo()
     for tabName, frameInfo in shelvesInfo.items():
-        tabControl = cmds.scrollLayout(childResizable=True, h=TASK_PANE_SIZE, p='taskTabLo')
+        tabControl = cmds.scrollLayout(childResizable=True, h=SCROLL_AREA_HEIGHT, p='taskTabLo')
         cmds.tabLayout('taskTabLo', e=True, tabLabel=[tabControl, tabName])
         for frameName, shelfButtonInfos in frameInfo.items():
             shelfName = '{}_{}'.format(tabName, frameName)
             SHELVES.append(shelfName)
             frameLo = cmds.frameLayout(label=frameName, collapse=False, collapsable=True, p=tabControl)
-            numRows = int(len(shelfButtonInfos) / NUM_ICONS_PER_ROW) + 2
-            shelf = cmds.shelfLayout(shelfName, ch=(ICON_SIZE * numRows), p=frameLo)
+            numRows = int(len(shelfButtonInfos) / NUM_ICONS_PER_ROW) + 1
+            shelf = cmds.shelfLayout(shelfName, ch=((ICON_SIZE + ICON_MARGINE) * numRows), p=frameLo)
             for shelfButtonInfo in shelfButtonInfos:
                 cmds.shelfButton(
                     annotation=shelfButtonInfo['annotation'],
@@ -182,7 +174,7 @@ def getTaskShelvesInfo():
 
 
 # ------------ Add Tool
-def addToolUi(*args):
+def addToolGUI(*args):
     '''
     UI for add a new tool to the specific shelf.
     '''
@@ -257,6 +249,12 @@ def loadImgPath(widgetName, *args):
 # ------------
 
 
+# ------------ Preferences
+def prefsGUI(*args):
+    print('prefsGUI()')
+# ------------
+
+
 # ------------ Edit Tool
 def editToolGUI(shelfLayout, index):
     cmds.window(title='Edit Tool', tlb=True)
@@ -289,9 +287,9 @@ def checkUpdate(self):
         if 'Yes' == result:
             succeed = update()
             if succeed:
+                copyPreferences()
                 import takTools.tak_tools as tt
-                import imp; imp.reload(tt)
-                tt.UI()
+                import imp; imp.reload(tt); tt.UI()
     else:
         cmds.confirmDialog(title=MODULE_NAME, message='You have latest version.\nEnjoy!')
 
@@ -328,14 +326,11 @@ def update():
     except subprocess.CalledProcessError as e:
         print("Failed to update: {}".format(e))
         return False
+
+
+def copyPreferences():
+    # Copy preferences files
+    prefsDir = '{}/prefs'.format(MODULE_PATH)
+    mayaPrefDir = '{}/{}/prefs'.format(cmds.internalVar(uad=True), int(cmds.about(version=True)))
+    shutil.copytree(prefsDir, mayaPrefDir, dirs_exist_ok=True)
 # ------------
-
-
-
-def storeConfig(*args):
-    configInfo = {
-        'workspaceWidth': cmds.dockControl(MODULE_NAME, q=True, w=True),
-    }
-
-    with open(TAK_TOOLS_CONFIG_PATH, 'w') as f:
-        json.dump(configInfo, f, indent=4)

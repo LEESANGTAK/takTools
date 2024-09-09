@@ -180,7 +180,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -wireframeOnShaded $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -wireframeOnShaded true $modelPan;\n    } else {\n        modelEditor -e -wireframeOnShaded false $modelPan;\n    }\n\tpython(\"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', True)\");\n}" 
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -wireframeOnShaded $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -wireframeOnShaded true $modelPan;\n    } else {\n        modelEditor -e -wireframeOnShaded false $modelPan;\n    }\n}" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -201,7 +201,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -jointXray $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -jointXray true $modelPan;\n    } else {\n        modelEditor -e -jointXray false $modelPan;\n    }\n\tpython(\"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', True)\");\n}" 
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -jointXray $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -jointXray true $modelPan;\n    } else {\n        modelEditor -e -jointXray false $modelPan;\n    }\n}" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -216,6 +216,27 @@
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem18;
+
+    menuItem
+        -label "MultisampleAA" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    int $curState = python(\"cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')\");\n    string $cmd = `format -stringArg (1-$curState) \"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', ^1s)\"`;\n    python($cmd);\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "MultisampleAA.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem24;
 
     menuItem
         -label "Use Default Material" 
@@ -374,7 +395,7 @@
             -image "polySelectVertex.png" 
             -echoCommand 0
             -italicized 0
-            -boldFont 0
+            -boldFont 1
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem10;
@@ -401,6 +422,7 @@
             menuEditorMenuItem1;
 
         menuItem
+            -label "menuEditorMenuItem14" 
             -divider 0
             -subMenu 0
             -tearOff 0
@@ -414,7 +436,7 @@
             -enableCommandRepeat 0
             -echoCommand 0
             -italicized 0
-            -boldFont 0
+            -boldFont 1
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem14;
@@ -435,12 +457,13 @@
             -image "polySetVertexNormal.png" 
             -echoCommand 0
             -italicized 0
-            -boldFont 0
+            -boldFont 1
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem9;
 
         menuItem
+            -label "menuEditorMenuItem16" 
             -divider 0
             -subMenu 0
             -tearOff 0
@@ -454,7 +477,7 @@
             -enableCommandRepeat 0
             -echoCommand 0
             -italicized 0
-            -boldFont 0
+            -boldFont 1
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem16;
@@ -481,6 +504,7 @@
             menuEditorMenuItem3;
 
         menuItem
+            -label "menuEditorMenuItem17" 
             -divider 0
             -subMenu 0
             -tearOff 0
@@ -494,7 +518,7 @@
             -enableCommandRepeat 0
             -echoCommand 0
             -italicized 0
-            -boldFont 0
+            -boldFont 1
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem17;
@@ -534,7 +558,7 @@
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
             -italicized 0
-            -boldFont 0
+            -boldFont 1
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem15;
@@ -576,7 +600,7 @@
             -image "polySelectEdge.png" 
             -echoCommand 0
             -italicized 0
-            -boldFont 0
+            -boldFont 1
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem12;
@@ -597,7 +621,7 @@
             -image "polySelectFace.png" 
             -echoCommand 0
             -italicized 0
-            -boldFont 0
+            -boldFont 1
             -sourceType "mel" 
             -longDivider 1
             menuEditorMenuItem13;
@@ -807,7 +831,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem15;
+        menuEditorMenuItem22;
 
     menuItem
         -label "Color Feedback" 
