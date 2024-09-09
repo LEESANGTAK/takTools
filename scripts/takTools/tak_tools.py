@@ -21,19 +21,24 @@ from .pipeline import takMayaResourceBrowser as tmrb; reload(tmrb)
 from .utils import system as sysUtil
 
 
+# Preferences
+ICON_SIZE = 32
+NUM_ICONS_PER_ROW = 10
+COMMON_TAB_NUM_ROWS = 3
+OUTLINER_PERCENTAGE = 60
+
 # Size values are based on 4k(3840*2160) monitor
 # Caculate scale factor depend on monitor height
 DEFAULT_DISPLAY_HEIGHT = 2160
 sysObj = sysUtil.System()
 scaleFactor = sysObj.screenHeight / float(DEFAULT_DISPLAY_HEIGHT)
 
-COMMON_TAB_NUM_ROWS = 3
-NUM_ICONS_PER_ROW = 10
-ICON_SIZE = 35  * scaleFactor
 ICON_MARGINE = 6 * scaleFactor
 PANE_WIDTH = ICON_SIZE * (NUM_ICONS_PER_ROW + 1)
-OUTLINER_PERCENTAGE = 60
-SCROLL_AREA_HEIGHT = sysObj.screenHeight * ((100-OUTLINER_PERCENTAGE) * 0.005)
+COMMON_TAB_HEIGHT = (ICON_SIZE + ICON_MARGINE) * COMMON_TAB_NUM_ROWS
+COMMON_TAB_PERCENTAGE = (COMMON_TAB_HEIGHT / float(sysObj.screenHeight)) * 100
+ADAPTED_OULINER_PERCENTAGE = OUTLINER_PERCENTAGE + COMMON_TAB_PERCENTAGE
+SCROLL_AREA_HEIGHT = (sysObj.screenHeight - COMMON_TAB_HEIGHT) * ((100-ADAPTED_OULINER_PERCENTAGE) * 0.01)
 
 SHELVES = ['Common']
 MODULE_NAME = "takTools"
@@ -65,13 +70,13 @@ def UI():
     cmds.menu('helpMenu', label='Help', p=WIN_NAME)
     cmds.menuItem(label='Check Update', c=checkUpdate, p='helpMenu')
 
-    cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(2, 50, OUTLINER_PERCENTAGE)])
+    cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(2, 50, ADAPTED_OULINER_PERCENTAGE)])
 
     cmds.columnLayout('mainColLo', adj=True)
 
     # Common tab
     cmds.tabLayout('cmnToolTabLo', tv=False, p='mainColLo')
-    cmds.shelfLayout('Common', h=((ICON_SIZE + ICON_MARGINE) * COMMON_TAB_NUM_ROWS), parent='cmnToolTabLo')
+    cmds.shelfLayout('Common', h=COMMON_TAB_HEIGHT, parent='cmnToolTabLo')
     loadCommonShelf()
 
     cmds.separator('mainSep', style='in', p='mainColLo')
