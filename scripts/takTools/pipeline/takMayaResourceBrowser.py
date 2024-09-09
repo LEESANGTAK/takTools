@@ -1,7 +1,6 @@
 """
 Author: Tak
-Mail: chst27@gmail.com
-Website: https://tak.ta-note.com
+Website: https://ta-note.com
 Description: Searching maya resource images.
 """
 
@@ -72,9 +71,18 @@ class TakMayaResourceBrowser(QtWidgets.QDialog):
     def connectWidgets(self):
         self.searchLe.editingFinished.connect(self.showMatchingImages)
         self.imageList.currentItemChanged.connect(self.printImagename)
+        self.imageList.itemDoubleClicked.connect(self.setTakToolsAddToolImageTextField)
 
     def printImagename(self, item):
-        print(item.text())
+        clipboard = QtGui.QClipboard()
+        text = item.text()
+        clipboard.setText(text)
+        print('Copied a text of the selected image "{}" to the clipboard.'.format(text))
+
+    def setTakToolsAddToolImageTextField(self, item):
+        if cmds.textFieldButtonGrp('imgTxtFldBtnGrp', ex=True):
+            cmds.textFieldButtonGrp('imgTxtFldBtnGrp', e=True, text=item.text())
+            self.close()
 
     def showMatchingImages(self):
         text = self.searchLe.text()
@@ -103,7 +111,7 @@ class TakMayaResourceBrowser(QtWidgets.QDialog):
         return images
 
     @classmethod
-    def showUI(cls):
+    def showUI(cls, *args):
         if not cls.instance:
             cls.instance = TakMayaResourceBrowser()
         if cls.instance.isHidden():

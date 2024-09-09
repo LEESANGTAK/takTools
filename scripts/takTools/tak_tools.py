@@ -16,6 +16,8 @@ from collections import OrderedDict
 
 from maya import cmds
 
+from imp import reload
+from .pipeline import takMayaResourceBrowser as tmrb; reload(tmrb)
 from .utils import system as sysUtil
 
 
@@ -37,7 +39,6 @@ SHELVES = ['Common']
 MODULE_NAME = "takTools"
 MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
 SHELVES_DATA_PATH = '{}/data/shelves'.format(MODULE_PATH.replace('\\', '/'))
-START_SHELFS = ['Rigging_Display', 'Animation_Select', 'Modeling_Display', 'Fx_Particle', 'Misc_Misc']
 
 WIN_NAME = "{0}Win".format(MODULE_NAME)
 
@@ -185,7 +186,7 @@ def addToolGUI(*args):
         cmds.deleteUI(winName)
 
     # Create window
-    cmds.window(winName, title='Add Tool')
+    cmds.window(winName, title='Add Tool', tlb=True)
 
     # Widgets
 
@@ -195,11 +196,14 @@ def addToolGUI(*args):
 
     cmds.optionMenu('shlfOptMenu', label='Shelf: ')
     for shelf in SHELVES:
-        if shelf in START_SHELFS:
-            cmds.menuItem(divider=True)
         cmds.menuItem(label=shelf, p='shlfOptMenu')
     cmds.textFieldGrp('annoTxtFldGrp', columnWidth=[(1, 110), (2, 100)], label='Annotation: ')
+
+    cmds.rowLayout(numberOfColumns=2)
     cmds.textFieldButtonGrp('imgTxtFldBtnGrp', columnWidth=[(1, 110), (2, 100)], label='Image: ', buttonLabel='...', bc=partial(loadImgPath, 'imgTxtFldBtnGrp'))
+    cmds.symbolButton(image='imageDisplay.png', c=tmrb.TakMayaResourceBrowser.showUI)
+
+    cmds.setParent('..')
     cmds.textFieldGrp('imgOverLblTxtFldGrp', columnWidth=[(1, 110), (2, 100)], label='Image Overlay Label: ')
     cmds.textFieldGrp('cmdTxtFldGrp', columnWidth=[(1, 110), (2, 100)], label='Command: ')
     cmds.optionMenu('srcTypeOptMenu', label='Source Type: ')
