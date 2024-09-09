@@ -220,22 +220,28 @@ def addTool(*args):
     Add tool with options.
     '''
     # Get options
-    shlf = cmds.optionMenu('shlfOptMenu', q=True, value=True)
-    anno = cmds.textFieldGrp('annoTxtFldGrp', q=True, text=True)
-    img = cmds.textFieldButtonGrp('imgTxtFldBtnGrp', q=True, text=True)
-    imgOverLbl = cmds.textFieldGrp('imgOverLblTxtFldGrp', q=True, text=True)
-    cmd = cmds.textFieldGrp('cmdTxtFldGrp', q=True, text=True)
-    srcType = cmds.optionMenu('srcTypeOptMenu', q=True, value=True)
+    shelf = cmds.optionMenu('shlfOptMenu', q=True, value=True)
+    annotation = cmds.textFieldGrp('annoTxtFldGrp', q=True, text=True)
+    image1 = cmds.textFieldButtonGrp('imgTxtFldBtnGrp', q=True, text=True)
+    imageOverlayLabel = cmds.textFieldGrp('imgOverLblTxtFldGrp', q=True, text=True)
+    command = cmds.textFieldGrp('cmdTxtFldGrp', q=True, text=True)
+    sourcType = cmds.optionMenu('srcTypeOptMenu', q=True, value=True)
 
     # Set default image when user do not define image
-    if not img:
-        if srcType == 'mel':
-            img = 'commandButton.png'
-        elif srcType == 'python':
-            img = 'pythonFamily.png'
+    if not image1:
+        if sourcType == 'mel':
+            image1 = 'commandButton.png'
+        elif sourcType == 'python':
+            image1 = 'pythonFamily.png'
 
     # Evaluate command string
-    eval("cmds.shelfButton(annotation='%s', width=35, height=35, image1='%s', imageOverlayLabel='%s', command='%s', sourceType='%s', p='%s')".format(anno, img, imgOverLbl, cmd, srcType, shlf))
+    cmds.shelfButton(
+        annotation=annotation,
+        width=ICON_SIZE, height=ICON_SIZE,
+        image1=image1, imageOverlayLabel=imageOverlayLabel,
+        command=command, sourceType=sourcType,
+        p=shelf
+    )
 
     # Close popup window
     cmds.deleteUI('addToolWin')
