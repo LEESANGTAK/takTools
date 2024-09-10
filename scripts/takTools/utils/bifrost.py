@@ -81,7 +81,7 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=1000, keepHardEdge=True
         preprocessMesh=True,
         preserveHardEdges=keepHardEdge,
         topologyRegularity=1.0,
-        faceUniformity=0.0,
+        faceUniformity=1.0,
         anisotropy=0.75,
         targetFaceCount=faceCount,
         targetFaceCountTolerance=10,
@@ -101,7 +101,9 @@ def showConvertToCageMeshUI(parent=None, *args):
         symmetry = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
         convertToCageMesh(meshes, detailSize, faceCount, keepHardEdges, symmetry)
 
-    pm.window(title='Create Cage Mesh', mnb=False, mxb=False, p=parent)
+    pm.window('cageMeshWin', title='Create Cage Mesh', mnb=False, mxb=False)
+    if parent:
+        pm.window('cageMeshWin', e=True, p=parent)
     pm.columnLayout(adj=True, cal='left')
 
     pm.text(label='Volume Mesh Settings')

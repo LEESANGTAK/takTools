@@ -2077,65 +2077,69 @@ def addInfCopySkin(source=None, targets=None):
     srcSkinClst = mel.eval('findRelatedSkinCluster("%s");' % source)
     srcInfs = cmds.skinCluster(srcSkinClst, q=True, inf=True)
 
-    skinClsts = []
+    print('srcInfs: ', srcInfs)
+
+    trgSkinClsts = []
     if '.' in str(targets):
         trgSkinGeo = targets[0].split('.')[0]
 
-        skinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
+        trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
 
-        if not skinClst:
+        if not trgSkinClst:
             cmds.skinCluster(srcInfs, trgSkinGeo, mi=4, dr=4, tsb=True, omi=False, nw=1)
-            skinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
+            trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
 
         cmds.select(trgSkinGeo, r=True)
-        trgInfs = cmds.skinCluster(srcSkinClst, q=True, inf=True)
+        trgInfs = cmds.skinCluster(trgSkinClst, q=True, inf=True)
+        print('trgInfs: ', trgInfs)
 
         for inf in srcInfs:
             if inf in trgInfs:
                 continue
             else:
-                cmds.skinCluster(skinClst, e=True, dr=4, lw=True, wt=0, ai=inf)
+                cmds.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ai=inf)
                 cmds.setAttr('%s.liw' % inf, False)
 
         cmds.select(source, targets, r=True)
         cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
-        skinClsts.append(skinClst)
+        trgSkinClsts.append(trgSkinClst)
     elif cmds.objectType(targets[0]) == 'objectSet':
         print('copy skin to sets')
     else:
         for trgSkinGeo in targets:
-            skinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
+            trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
 
-            if not skinClst:
+            if not trgSkinClst:
                 cmds.skinCluster(srcInfs, trgSkinGeo, mi=4, dr=4, tsb=True, omi=False, nw=1)
-                skinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
+                trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
 
             cmds.select(trgSkinGeo, r=True)
-            trgInfs = cmds.skinCluster(srcSkinClst, q=True, inf=True)
+            trgInfs = cmds.skinCluster(trgSkinClst, q=True, inf=True)
+            print('trgInfs: ', trgInfs)
 
             for inf in srcInfs:
                 if inf in trgInfs:
                     continue
                 else:
-                    cmds.skinCluster(skinClst, e=True, dr=4, lw=True, wt=0, ai=inf)
+                    cmds.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ai=inf)
                     cmds.setAttr('%s.liw' % inf, False)
 
             cmds.select(source, trgSkinGeo, r=True)
             cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
 
-            skinClsts.append(skinClst)
+            trgSkinClsts.append(trgSkinClst)
 
-    for skinClst in skinClsts:
+    for trgSkinClst in trgSkinClsts:
         srcSkinMethod = cmds.getAttr('%s.skinningMethod' % srcSkinClst)
-        cmds.setAttr('%s.skinningMethod' % skinClst, srcSkinMethod)
+        cmds.setAttr('%s.skinningMethod' % trgSkinClst, srcSkinMethod)
         srcUseComponent = cmds.getAttr('%s.useComponents' % srcSkinClst)
-        cmds.setAttr('%s.useComponents' % skinClst, srcUseComponent)
+        cmds.setAttr('%s.useComponents' % trgSkinClst, srcUseComponent)
         srcNormalize = cmds.getAttr('%s.normalizeWeights' % srcSkinClst)
-        cmds.setAttr('%s.normalizeWeights' % skinClst, srcNormalize)
+        cmds.setAttr('%s.normalizeWeights' % trgSkinClst, srcNormalize)
         srcMaintainMI = cmds.getAttr('%s.maintainMaxInfluences' % srcSkinClst)
-        cmds.setAttr('%s.maintainMaxInfluences' % skinClst, srcMaintainMI)
+        cmds.setAttr('%s.maintainMaxInfluences' % trgSkinClst, srcMaintainMI)
         srcMI = cmds.getAttr('%s.maxInfluences' % srcSkinClst)
-        cmds.setAttr('%s.maxInfluences' % skinClst, srcMI)
+        cmds.setAttr('%s.maxInfluences' % trgSkinClst, srcMI)
 
     cmds.select(source, targets, r=True)
 

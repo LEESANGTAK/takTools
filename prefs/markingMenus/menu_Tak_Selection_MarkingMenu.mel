@@ -48,7 +48,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\nchangeSelectMode -component;\nsetToolTo lassoSelectContext;\n}" 
+        -command "polySelectConstraint -dis;\nchangeSelectMode -component;\nselectType -msh false;\nsetToolTo lassoSelectContext;\n" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -90,7 +90,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"cmds.artSelectCtx(n = 'weightHammerBrush')\");\npython(\"cmds.setToolTo('weightHammerBrush')\");\npython(\"cmds.artSelectCtx('weightHammerBrush', edit=True, r=1.0, lr=0.01, ual = True, ads = False, asc = '')\");" 
+        -command "polySelectConstraint -dis;\nchangeSelectMode -component;\nselectType -msh false;\nsetToolTo artSelectContext;\n" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -112,7 +112,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -facet 1;\npolySelectConstraint -m 0 -type 0x0008 -ap 1 -at 20;" 
+        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -facet 1;\nselectType -msh false;\npolySelectConstraint -m 0 -type 0x0008 -ap 1 -at 20;\nsetToolTo selectSuperContext;" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -134,7 +134,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -facet 1;\npolySelectConstraint -m 0 -type 0x0008 -sh 1;" 
+        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -msh false;\npolySelectConstraint -m 0 -type 0x0008 -sh 1;\nsetToolTo selectSuperContext;\n\n" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -156,7 +156,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;" 
+        -command "polySelectConstraint -dis;\nselectType -msh false;\nselectMode -object;\nsetToolTo selectSuperContext;" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -174,11 +174,54 @@
         menuEditorMenuItem7;
 
     menuItem
+        -label "UV Shell" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "polySelectConstraint -dis;\nchangeSelectMode -component;\nsetComponentPickMask \"Facet\" true;\nselectType -ocm -alc false;\nselectType -msh true;\nsetToolTo selectSuperContext;" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "SW" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "polySelectUVShell.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem8;
+
+    menuItem
+        -label "Hierarchy" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "changeSelectMode -object;\nsetToolTo selectSuperContext;\nSelectHierarchy;\n" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "menuIconSelect.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem11;
+
+    menuItem
         -label "Set Manager" 
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import setManager as sm; reload(sm)\");\npython(\"smGUI = sm.gui.ManagerGUI()\");\npython(\"smGUI.show()\");" 
+        -command "python(\"from imp import reload\");\npython(\"import setManager as sm; reload(sm)\");\npython(\"smGUI = sm.gui.ManagerGUI()\");\npython(\"smGUI.show()\");" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -336,28 +379,6 @@
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem13;
-
-    menuItem
-        -label "UV Shell" 
-        -divider 0
-        -subMenu 0
-        -tearOff 0
-        -command "changeSelectMode -component;\nsetComponentPickMask \"Facet\" true;\nselectType -ocm -alc false;\nselectType -msh true;" 
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -radialPosition "SW" 
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -image "polySelectUVShell.png" 
-        -echoCommand 0
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem8;
 
 setParent -m ..;
 

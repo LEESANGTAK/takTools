@@ -23,9 +23,10 @@ from .utils import system as sysUtil
 
 # Preferences
 ICON_SIZE = 32
+ICON_MARGINE = 6
 NUM_ICONS_PER_ROW = 10
 COMMON_TAB_NUM_ROWS = 3
-OUTLINER_PERCENTAGE = 60
+OUTLINER_PERCENTAGE = 50
 
 # Size values are based on 4k(3840*2160) monitor
 # Caculate scale factor depend on monitor height
@@ -33,12 +34,11 @@ DEFAULT_DISPLAY_HEIGHT = 2160
 sysObj = sysUtil.System()
 scaleFactor = sysObj.screenHeight / float(DEFAULT_DISPLAY_HEIGHT)
 
-ICON_MARGINE = 6 * scaleFactor
 PANE_WIDTH = ICON_SIZE * (NUM_ICONS_PER_ROW + 1)
 COMMON_TAB_HEIGHT = (ICON_SIZE + ICON_MARGINE) * COMMON_TAB_NUM_ROWS
 COMMON_TAB_PERCENTAGE = (COMMON_TAB_HEIGHT / float(sysObj.screenHeight)) * 100
 ADAPTED_OULINER_PERCENTAGE = OUTLINER_PERCENTAGE + COMMON_TAB_PERCENTAGE
-SCROLL_AREA_HEIGHT = (sysObj.screenHeight - COMMON_TAB_HEIGHT) * ((100-ADAPTED_OULINER_PERCENTAGE) * 0.01)
+SCROLL_AREA_HEIGHT = sysObj.screenHeight * ((100-ADAPTED_OULINER_PERCENTAGE) * 0.01) * 0.5
 
 SHELVES = ['Common']
 MODULE_NAME = "takTools"
