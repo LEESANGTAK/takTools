@@ -1,37 +1,47 @@
 {
-    "0": {
+    "keyframe -tds on;...keyframe -tds on;": {
+        "label": "keyframe -tds on;...keyframe -tds on;",
         "annotation": "Convert selected keyframe(s) into breakdown tick(s).",
         "image1": "breakdown.png",
         "imageOverlayLabel": "",
         "command": "keyframe -tds on;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "1": {
+    "keyframe -tds off;...keyframe -tds off;": {
+        "label": "keyframe -tds off;...keyframe -tds off;",
         "annotation": "Convert selected keyframe(s) into key tick(s).",
         "image1": "key.png",
         "imageOverlayLabel": "",
         "command": "keyframe -tds off;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "2": {
+    "source bhGhost.mel;\n...hGhost.mel;\nbhGhost;": {
+        "label": "source bhGhost.mel;\n...hGhost.mel;\nbhGhost;",
         "annotation": "Create ouline.",
         "image1": "bhGhostIcon.png",
         "imageOverlayLabel": "",
         "command": "source bhGhost.mel;\nbhGhost;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "3": {
+    "doMotionTrail 2 { \"s...\"0\",\"0\",\"1\",\"1\",\"1\"}": {
+        "label": "doMotionTrail 2 { \"s...\"0\",\"0\",\"1\",\"1\",\"1\"}",
         "annotation": "Select object(s) to generate a motion trail over time.",
         "image1": "motionTrail.png",
         "imageOverlayLabel": "",
         "command": "doMotionTrail 2 { \"snapshot  -motionTrail 1  -increment 1 -startTime `playbackOptions -query -min` -endTime `playbackOptions -query -max`\", \"1\",\"0\",\"0\",\"1\",\"1\",\"1\"}",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "4": {
+    "import takTools.util...ameRangeHUDToggle();": {
+        "label": "import takTools.util...ameRangeHUDToggle();",
         "annotation": "Frame Range HUD Toggle",
         "image1": "eye.png",
         "imageOverlayLabel": "",
         "command": "import takTools.utils.display as dpUtil;import imp;imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     }
 }

@@ -1,30 +1,38 @@
 {
-    "0": {
-        "annotation": "",
+    "import takTools.comm...k_misc.selEveryNUI()": {
+        "label": "import takTools.comm...k_misc.selEveryNUI()",
+        "annotation": "import takTools.comm...k_misc.selEveryNUI()",
         "image1": "selectSkipedEdgeRing.bmp",
         "imageOverlayLabel": "",
         "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.selEveryNUI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "1": {
+    "polySelectSp -ring;...polySelectSp -ring;": {
+        "label": "polySelectSp -ring;...polySelectSp -ring;",
         "annotation": "Selects all parallel edges that form an edge ring based on the current selection",
         "image1": "polyConvertToEdgeRing.png",
         "imageOverlayLabel": "",
         "command": "polySelectSp -ring;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "2": {
+    "polySelectSp -loop;...polySelectSp -loop;": {
+        "label": "polySelectSp -loop;...polySelectSp -loop;",
         "annotation": "Selects all connected edges that form an edge loop based on the current selection",
         "image1": "polyConvertToEdgeLoop.png",
         "imageOverlayLabel": "",
         "command": "polySelectSp -loop;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "3": {
-        "annotation": "",
+    "PolygonSelectionCons...SelectionConstraints": {
+        "label": "PolygonSelectionCons...SelectionConstraints",
+        "annotation": "PolygonSelectionCons...SelectionConstraints",
         "image1": "polySelectUsingConstraints.png",
         "imageOverlayLabel": "",
         "command": "PolygonSelectionConstraints",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     }
 }

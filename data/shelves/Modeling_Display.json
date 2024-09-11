@@ -1,51 +1,65 @@
 {
-    "0": {
+    "ToggleVertexNormalDi...eVertexNormalDisplay": {
+        "label": "ToggleVertexNormalDi...eVertexNormalDisplay",
         "annotation": "Vertex Normals",
         "image1": "menuIconDisplay.png",
         "imageOverlayLabel": "",
         "command": "ToggleVertexNormalDisplay",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "1": {
+    "ToggleFaceNormalDisp...gleFaceNormalDisplay": {
+        "label": "ToggleFaceNormalDisp...gleFaceNormalDisplay",
         "annotation": "Face Normals",
         "image1": "menuIconDisplay.png",
         "imageOverlayLabel": "",
         "command": "ToggleFaceNormalDisplay",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "2": {
+    "ChangeNormalSize...ChangeNormalSize": {
+        "label": "ChangeNormalSize...ChangeNormalSize",
         "annotation": "Normals Size...",
         "image1": "menuIconDisplay.png",
         "imageOverlayLabel": "",
         "command": "ChangeNormalSize",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "3": {
-        "annotation": "",
+    "polyNormalPerVertex ...lPerVertex -ufn true": {
+        "label": "polyNormalPerVertex ...lPerVertex -ufn true",
+        "annotation": "polyNormalPerVertex ...lPerVertex -ufn true",
         "image1": "polyNormalUnlock.png",
         "imageOverlayLabel": "",
         "command": "polyNormalPerVertex -ufn true",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "4": {
+    "source \"dp_autoSmoot...moothingGroups.mel\";": {
+        "label": "source \"dp_autoSmoot...moothingGroups.mel\";",
         "annotation": "Auto Smoothing Groups",
         "image1": "polyHardEdge.png",
         "imageOverlayLabel": "",
         "command": "source \"dp_autoSmoothingGroups.mel\";",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "5": {
-        "annotation": "",
+    "SoftPolyEdgeElements...ftPolyEdgeElements 1": {
+        "label": "SoftPolyEdgeElements...ftPolyEdgeElements 1",
+        "annotation": "SoftPolyEdgeElements...ftPolyEdgeElements 1",
         "image1": "polySoftEdge.png",
         "imageOverlayLabel": "",
         "command": "SoftPolyEdgeElements 1",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "6": {
-        "annotation": "",
+    "ReversePolygonNormal...eversePolygonNormals": {
+        "label": "ReversePolygonNormal...eversePolygonNormals",
+        "annotation": "ReversePolygonNormal...eversePolygonNormals",
         "image1": "polyNormal.png",
         "imageOverlayLabel": "",
         "command": "ReversePolygonNormals",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     }
 }

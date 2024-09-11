@@ -1,184 +1,236 @@
 {
-    "0": {
+    "source \"C:/Users/Pub...oZBrushFromMaya.mel\"": {
+        "label": "source \"C:/Users/Pub...oZBrushFromMaya.mel\"",
         "annotation": "Export selected object to ZBrush.",
         "image1": "GoZBrush.xpm",
         "imageOverlayLabel": "",
         "command": "source \"C:/Users/Public/Pixologic/GoZApps/Maya/GoZBrushFromMaya.mel\"",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "1": {
+    "uvlayout_open()...uvlayout_open()": {
+        "label": "uvlayout_open()...uvlayout_open()",
         "annotation": "uvlayout_open()",
         "image1": "uvlayout.png",
         "imageOverlayLabel": "",
         "command": "uvlayout_open()",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "2": {
+    "import subprocess\nsu...Bit)\\Photoshop.exe')": {
+        "label": "import subprocess\nsu...Bit)\\Photoshop.exe')",
         "annotation": "Run phothoshop.",
         "image1": "photoshop.bmp",
         "imageOverlayLabel": "",
         "command": "import subprocess\nsubprocess.Popen('C:\\Program Files\\Adobe\\Adobe Photoshop CS6 (64 Bit)\\Photoshop.exe')",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "3": {
+    "source DupAlongPathT...DupAlongPathToolbox;": {
+        "label": "source DupAlongPathT...DupAlongPathToolbox;",
         "annotation": "Duplicate object along the path",
         "image1": "DupAlongPathToolbox.png",
         "imageOverlayLabel": "",
         "command": "source DupAlongPathToolbox.mel;DupAlongPathToolbox;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "4": {
+    "instanceAlongCurve...instanceAlongCurve": {
+        "label": "instanceAlongCurve...instanceAlongCurve",
         "annotation": "Instance Along Curve",
         "image1": "menuIconEdit.png",
         "imageOverlayLabel": "",
         "command": "instanceAlongCurve",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "5": {
+    "spPaint3d...spPaint3d": {
+        "label": "spPaint3d...spPaint3d",
         "annotation": "Run spPaint3d.",
         "image1": "spPaint3d.bmp",
         "imageOverlayLabel": "",
         "command": "spPaint3d",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "6": {
+    "CVCurveTool...CVCurveTool": {
+        "label": "CVCurveTool...CVCurveTool",
         "annotation": "Create a curve on the grid or live surface specifying control vertices",
         "image1": "curveCV.png",
         "imageOverlayLabel": "",
         "command": "CVCurveTool",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "7": {
+    "EPCurveTool...EPCurveTool": {
+        "label": "EPCurveTool...EPCurveTool",
         "annotation": "Create a curve on the grid or live surface specifying edit points",
         "image1": "curveEP.png",
         "imageOverlayLabel": "",
         "command": "EPCurveTool",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "8": {
+    "RebuildCurveOptions...RebuildCurveOptions": {
+        "label": "RebuildCurveOptions...RebuildCurveOptions",
         "annotation": "Rebuild curve options",
         "image1": "rebuildCurve.png",
         "imageOverlayLabel": "",
         "command": "RebuildCurveOptions",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "9": {
+    "meshName = pm.select..., n=meshName+\"_crv\")": {
+        "label": "meshName = pm.select..., n=meshName+\"_crv\")",
         "annotation": "Polygon Edges to Curve",
         "image1": "polyEdgeToCurves.png",
         "imageOverlayLabel": "",
         "command": "meshName = pm.selected()[0].node().getTransform();pm.polyToCurve(form=2, degree=3, n=meshName+\"_crv\")",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "10": {
-        "annotation": "",
+    "if (! `pluginInfo -q...}\nwireMeshFromCurve;": {
+        "label": "if (! `pluginInfo -q...}\nwireMeshFromCurve;",
+        "annotation": "if (! `pluginInfo -q...}\nwireMeshFromCurve;",
         "image1": "shelf_wireMeshFromCurve.png",
         "imageOverlayLabel": "",
         "command": "if (! `pluginInfo -q -loaded \"wire\"`)\n{\n    loadPlugin \"wire\";\n}\nwireMeshFromCurve;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "11": {
+    "import takTools.mode...tak_curveToPoly.UI()": {
+        "label": "import takTools.mode...tak_curveToPoly.UI()",
         "annotation": "Convert nurbs curves to polygon geomtry",
         "image1": "curveToPoly.png",
         "imageOverlayLabel": "",
         "command": "import takTools.modeling.tak_curveToPoly as tak_curveToPoly\nimport imp\nimp.reload(tak_curveToPoly)\ntak_curveToPoly.UI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "12": {
+    "import takTools.comm...misc.crvToPolyStrp()": {
+        "label": "import takTools.comm...misc.crvToPolyStrp()",
         "annotation": "Convert selected curves to polygon stripe.",
         "image1": "crvToStripe.png",
         "imageOverlayLabel": "",
         "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.crvToPolyStrp()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "13": {
+    "import takTools.mode...phereizedSelection()": {
+        "label": "import takTools.mode...phereizedSelection()",
         "annotation": "This script will attempt to Spherify the current selected objects or components.",
         "image1": "spherizeSelection.png",
         "imageOverlayLabel": "",
         "command": "import takTools.modeling.spherize as spherize\nspherize.sphereizedSelection()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "14": {
+    "source _sort_circle_...;\n_sort_circle_tool;": {
+        "label": "source _sort_circle_...;\n_sort_circle_tool;",
         "annotation": "Align into circlular shape for selected edge loop.",
         "image1": "alignCircle.bmp",
         "imageOverlayLabel": "",
         "command": "source _sort_circle_tool.mel;\n_sort_circle_tool;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "15": {
+    "mopKnitOptions...mopKnitOptions": {
+        "label": "mopKnitOptions...mopKnitOptions",
         "annotation": "Flatten geometry into uv space.",
         "image1": "mopKnit.png",
         "imageOverlayLabel": "",
         "command": "mopKnitOptions",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "16": {
+    "doPerformLoft(\"1\", {...\",\"3\",\"1\",\"0\",\"1\"} )": {
+        "label": "doPerformLoft(\"1\", {...\",\"3\",\"1\",\"0\",\"1\"} )",
         "annotation": "Loft",
         "image1": "skin.png",
         "imageOverlayLabel": "",
         "command": "doPerformLoft(\"1\", {\"1\",\"1\",\"1\",\"0\",\"3\",\"1\",\"0\",\"1\"} )",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "17": {
+    "import takTools.mode...irTools.hairballUI()": {
+        "label": "import takTools.mode...irTools.hairballUI()",
         "annotation": "Creating hair guide curves from polygon tube.",
         "image1": "hairTools.png",
         "imageOverlayLabel": "",
         "command": "import takTools.modeling.hairTools as hairTools\nimport imp\nimp.reload(hairTools)\nhairTools.hairballUI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "18": {
+    "import takTools.mode....reload(waterDropUI)": {
+        "label": "import takTools.mode....reload(waterDropUI)",
         "annotation": "Create water drop.",
         "image1": "waterDropGenerator_shelfIcon.png",
         "imageOverlayLabel": "",
         "command": "import takTools.modeling.waterDropUI as waterDropUI\nimport imp\nimp.reload(waterDropUI)",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "19": {
+    "icPolyScatter;...icPolyScatter;": {
+        "label": "icPolyScatter;...icPolyScatter;",
         "annotation": "icPolyScatter;",
         "image1": "icPolyScatter.png",
         "imageOverlayLabel": "",
         "command": "icPolyScatter;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "20": {
+    "import takTools.mode...imp.reload(speedCut)": {
+        "label": "import takTools.mode...imp.reload(speedCut)",
         "annotation": "Boolean hard surface modeling",
         "image1": "pythonFamily.png",
         "imageOverlayLabel": "",
         "command": "import takTools.modeling.speedCut as speedCut\nimport imp\nimp.reload(speedCut)",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "21": {
-        "annotation": "",
+    "source Voxel_Model_G...el_Generator_v4.mel;": {
+        "label": "source Voxel_Model_G...el_Generator_v4.mel;",
+        "annotation": "source Voxel_Model_G...el_Generator_v4.mel;",
         "image1": "commandButton.png",
         "imageOverlayLabel": "",
         "command": "source Voxel_Model_Generator_v4.mel;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "22": {
-        "annotation": "",
+    "\nimport takXgenManag...nager()\nxgmg.show()\n": {
+        "label": "\nimport takXgenManag...nager()\nxgmg.show()\n",
+        "annotation": "\nimport takXgenManag...nager()\nxgmg.show()\n",
         "image1": "takXgenManager.png",
         "imageOverlayLabel": "",
         "command": "\nimport takXgenManager.xgenManager as xgManager;import imp;imp.reload(xgManager)\n\nxgmg = xgManager.XGenManager()\nxgmg.show()\n",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "23": {
+    "SetCutSewUVTool...SetCutSewUVTool": {
+        "label": "SetCutSewUVTool...SetCutSewUVTool",
         "annotation": "3D Cut and Sew UV Tool",
         "image1": "CutSewUVTool.png",
         "imageOverlayLabel": "",
         "command": "SetCutSewUVTool",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "24": {
-        "annotation": "",
+    "textureWindowDisplay...playCheckered(1, 1);": {
+        "label": "textureWindowDisplay...playCheckered(1, 1);",
+        "annotation": "textureWindowDisplay...playCheckered(1, 1);",
         "image1": "commandButton.png",
         "imageOverlayLabel": "",
         "command": "textureWindowDisplayCheckered(1, 1);",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "25": {
-        "annotation": "",
+    "textureWindowDisplay...playCheckered(1, 0);": {
+        "label": "textureWindowDisplay...playCheckered(1, 0);",
+        "annotation": "textureWindowDisplay...playCheckered(1, 0);",
         "image1": "commandButton.png",
         "imageOverlayLabel": "",
         "command": "textureWindowDisplayCheckered(1, 0);",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     }
 }

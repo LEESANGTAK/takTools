@@ -70,18 +70,19 @@ class TakMayaResourceBrowser(QtWidgets.QDialog):
 
     def connectWidgets(self):
         self.searchLe.editingFinished.connect(self.showMatchingImages)
-        self.imageList.currentItemChanged.connect(self.printImagename)
+        self.imageList.currentItemChanged.connect(self.copyImageName)
         self.imageList.itemDoubleClicked.connect(self.setTakToolsAddToolImageTextField)
 
-    def printImagename(self, item):
+    def copyImageName(self, item):
         clipboard = QtGui.QClipboard()
-        text = item.text()
-        clipboard.setText(text)
-        print('Copied a text of the selected image "{}" to the clipboard.'.format(text))
+        if item:
+            text = item.text()
+            clipboard.setText(text)
+            print('The name "{}" has been copied.'.format(text))
 
     def setTakToolsAddToolImageTextField(self, item):
-        if cmds.textFieldButtonGrp('imgTxtFldBtnGrp', ex=True):
-            cmds.textFieldButtonGrp('imgTxtFldBtnGrp', e=True, text=item.text())
+        if cmds.textFieldGrp('imgTxtFldGrp', ex=True):
+            cmds.textFieldGrp('imgTxtFldGrp', e=True, text=item.text())
             self.close()
 
     def showMatchingImages(self):

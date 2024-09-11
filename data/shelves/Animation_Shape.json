@@ -1,16 +1,20 @@
 {
-    "0": {
+    "SculptGeometryTool...SculptGeometryTool": {
+        "label": "SculptGeometryTool...SculptGeometryTool",
         "annotation": "Sculpt a geometry object.",
         "image1": "putty.png",
         "imageOverlayLabel": "",
         "command": "SculptGeometryTool",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "1": {
+    "import takTools.anim...)\ntak_aniSculpt.UI()": {
+        "label": "import takTools.anim...)\ntak_aniSculpt.UI()",
         "annotation": "Correct problematic shape of animated geometry.",
         "image1": "aniSculpt.bmp",
         "imageOverlayLabel": "",
         "command": "import takTools.animation.tak_aniSculpt as tak_aniSculpt\nimport imp\nimp.reload(tak_aniSculpt)\ntak_aniSculpt.UI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     }
 }

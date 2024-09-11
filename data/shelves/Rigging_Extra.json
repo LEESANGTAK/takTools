@@ -1,149 +1,191 @@
 {
-    "0": {
+    "InteractivePlayback...InteractivePlayback": {
+        "label": "InteractivePlayback...InteractivePlayback",
         "annotation": "Allows interaction with objects during playback",
         "image1": "interactivePlayback.png",
         "imageOverlayLabel": "",
         "command": "InteractivePlayback",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "1": {
-        "annotation": "",
+    "import takTools.fx.q...ation_manager.main()": {
+        "label": "import takTools.fx.q...ation_manager.main()",
+        "annotation": "import takTools.fx.q...ation_manager.main()",
         "image1": "qualoth_icon.png",
         "imageOverlayLabel": "",
         "command": "import takTools.fx.qualoth_simulation_manager as qualoth_simulation_manager\nimport imp\nimp.reload(qualoth_simulation_manager)\nqualoth_simulation_manager.main()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "2": {
+    "import takTools.rigg...hSetUp.nClothSetUp()": {
+        "label": "import takTools.rigg...hSetUp.nClothSetUp()",
         "annotation": "nCloth set up with skined geometry.",
         "image1": "nClothSetUp.png",
         "imageOverlayLabel": "",
         "command": "import takTools.rigging.tak_nClothSetUp as tak_nClothSetUp\nimport imp\nimp.reload(tak_nClothSetUp)\ntak_nClothSetUp.nClothSetUp()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "3": {
+    "import takTools.comm...)\ntak_misc.plcHldr()": {
+        "label": "import takTools.comm...)\ntak_misc.plcHldr()",
         "annotation": "Create locator to keep place for selected items.",
         "image1": "placeHolder.bmp",
         "imageOverlayLabel": "",
         "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.plcHldr()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "4": {
+    "import takTools.comm...misc.crvFromSelsUi()": {
+        "label": "import takTools.comm...misc.crvFromSelsUi()",
         "annotation": "Create curve with selected objects.",
         "image1": "crvFromSels.bmp",
         "imageOverlayLabel": "",
         "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.crvFromSelsUi()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "5": {
+    "from imp import relo...eFromSelectedEdges()": {
+        "label": "from imp import relo...eFromSelectedEdges()",
         "annotation": "Extract a curve for selected polygon edges.",
         "image1": "polyEdgeToCurves.png",
         "imageOverlayLabel": "",
         "command": "from imp import reload\nfrom takTools.utils import curve as crvUtil; reload(crvUtil)\ncrvUtil.extractCurveFromSelectedEdges()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "6": {
+    "import takTools.util...().getTransform()))\n": {
+        "label": "import takTools.util...().getTransform()))\n",
         "annotation": "Create curve from edge ring with an selected edge.",
         "image1": "curveFromEdgeRing.png",
         "imageOverlayLabel": "",
         "command": "import takTools.utils.mesh as meshUtil\nimport imp\nimp.reload(meshUtil)\nselEdge = pm.selected()[0]\nmeshUtil.curveFromEdgeRing(selEdge, \"{0}_crv\".format(selEdge.node().getTransform()))\n",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "7": {
+    "CVCurveTool...CVCurveTool": {
+        "label": "CVCurveTool...CVCurveTool",
         "annotation": "CV Curve Tool",
         "image1": "curveCV.png",
         "imageOverlayLabel": "",
         "command": "CVCurveTool",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "8": {
+    "EPCurveTool...EPCurveTool": {
+        "label": "EPCurveTool...EPCurveTool",
         "annotation": "EP Curve Tool.",
         "image1": "curveEP.png",
         "imageOverlayLabel": "",
         "command": "EPCurveTool",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "9": {
+    "RebuildCurveOptions...RebuildCurveOptions": {
+        "label": "RebuildCurveOptions...RebuildCurveOptions",
         "annotation": "Rebuild Curve Options",
         "image1": "rebuildCurve.png",
         "imageOverlayLabel": "",
         "command": "RebuildCurveOptions",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "10": {
+    "from imp import relo...pDriveLocators(crv)\n": {
+        "label": "from imp import relo...pDriveLocators(crv)\n",
         "annotation": "Set up driver locators for a selected curve.",
         "image1": "locator.png",
         "imageOverlayLabel": "",
         "command": "from imp import reload\nfrom takTools.utils import curve as crvUtil; reload(crvUtil)\ncrv = cmds.filterExpand(cmds.ls(sl=True), sm=9)[0]\ncrvUtil.setupDriveLocators(crv)\n",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "11": {
+    "from imp import relo...cmds.ls(sl=True)[0])": {
+        "label": "from imp import relo...cmds.ls(sl=True)[0])",
         "annotation": "Set up clusters for a selected curve.",
         "image1": "selectCluster.png",
         "imageOverlayLabel": "",
         "command": "from imp import reload\nfrom takTools.utils import curve as crvUtil; reload(crvUtil)\ncrvUtil.setupDriveClusters(cmds.ls(sl=True)[0])",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "12": {
+    "import takTools.comm...tm.arrangeObjectUI()": {
+        "label": "import takTools.comm...tm.arrangeObjectUI()",
         "annotation": "Arrange selected object in grid",
         "image1": "arrangeObjs.png",
         "imageOverlayLabel": "",
         "command": "import takTools.common.tak_misc as tm\nimport imp\nimp.reload(tm)\n\ntm.arrangeObjectUI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "13": {
+    "from maya import cmd...Cube, mesh + '_OBB')": {
+        "label": "from maya import cmd...Cube, mesh + '_OBB')",
         "annotation": "OBB_BoundingBox",
         "image1": "OBB_boundingBox.png",
         "imageOverlayLabel": "",
         "command": "from maya import cmds\nfrom takTools.rigging.OBB.api import OBB\nmeshes = cmds.ls(selection=True)\nif len(meshes) == 0:\n   raise RuntimeError(\"Nothing selected!\")\nfor mesh in meshes:\n    obbBoundBoxPnts = OBB.from_points(mesh)\n    obbCube = cmds.polyCube(ch=False, name=\"pointMethod_GEO\")[0]\n    cmds.xform(obbCube, matrix=obbBoundBoxPnts.matrix)\n    cmds.rename(obbCube, mesh + '_OBB')",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "14": {
+    "from maya import cmd...BoundBoxPnts.matrix)": {
+        "label": "from maya import cmd...BoundBoxPnts.matrix)",
         "annotation": "OBB_Lattice",
         "image1": "OBB_lattice.png",
         "imageOverlayLabel": "",
         "command": "from maya import cmds\nfrom takTools.rigging.OBB.api import OBB\nmesh = cmds.ls(selection=True)\nif len(mesh) == 0:\n   raise RuntimeError(\"Nothing selected!\")\nobbBoundBoxPnts = OBB.from_points(mesh)\nlattice = cmds.lattice(dv=(2, 2, 2),\n                       objectCentered=True,\n                       name=\"pointMethod_LATTICE\t\")\ncmds.xform(lattice[1], matrix=obbBoundBoxPnts.matrix)\ncmds.xform(lattice[2], matrix=obbBoundBoxPnts.matrix)",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "15": {
+    "import takTools.comm...c.setupSoftModCtrl()": {
+        "label": "import takTools.comm...c.setupSoftModCtrl()",
         "annotation": "Create sliding softMod control for selected geometry.",
         "image1": "softMod.png",
         "imageOverlayLabel": "",
         "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\n\ntak_misc.setupSoftModCtrl()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "16": {
+    "import takTools.util...SelectionToCluster()": {
+        "label": "import takTools.util...SelectionToCluster()",
         "annotation": "Convert soft selection to cluster.",
         "image1": "cluster.png",
         "imageOverlayLabel": "",
         "command": "import takTools.utils.cluster as clusterUtils\nimport imp\nimp.reload(clusterUtils)\n\nclusterUtils.softSelectionToCluster()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "17": {
+    "from maya import cmd...Mesh(waiter, joints)": {
+        "label": "from maya import cmd...Mesh(waiter, joints)",
         "annotation": "Convert mash to joints",
         "image1": "pythonFamily.png",
         "imageOverlayLabel": "",
         "command": "from maya import cmds\nfrom takTools.utils import MASH as mashUtil\nimport imp\nimp.reload(mashUtil)\n\nwaiter = cmds.ls(sl=True)[0]\njoints = mashUtil.buildJoints(waiter)\nmashUtil.buildSkinMesh(waiter, joints)",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "18": {
+    "source makeFoldingRi... makeFoldingRig.mel;": {
+        "label": "source makeFoldingRi... makeFoldingRig.mel;",
         "annotation": "Build folding rig like a paper.",
         "image1": "commandButton.png",
         "imageOverlayLabel": "",
         "command": "source makeFoldingRig.mel;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "19": {
+    "import takTools.rigg...m)\ntak_autoSwim.UI()": {
+        "label": "import takTools.rigg...m)\ntak_autoSwim.UI()",
         "annotation": "Set up auto swim feature for FK controllers.",
         "image1": "autoSwim.bmp",
         "imageOverlayLabel": "",
         "command": "import takTools.rigging.tak_autoSwim as tak_autoSwim\nimport imp\nimp.reload(tak_autoSwim)\ntak_autoSwim.UI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "20": {
+    "source \"js_rotationO..._rotationOrderWin();": {
+        "label": "source \"js_rotationO..._rotationOrderWin();",
         "annotation": "Show js_rotationOrderWin",
         "image1": "rotate_M.png",
         "imageOverlayLabel": "",
         "command": "source \"js_rotationOrderWin.mel\";\njs_rotationOrderWin();",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     }
 }

@@ -42,12 +42,21 @@ SCROLL_AREA_HEIGHT = sysObj.screenHeight * ((100-ADAPTED_OULINER_PERCENTAGE) * 0
 
 SHELVES = ['Common']
 MODULE_NAME = "takTools"
+TOOL_NAME = 'Tak Tools'
 MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
 SHELVES_DATA_PATH = '{}/data/shelves'.format(MODULE_PATH.replace('\\', '/'))
 
 WIN_NAME = "{0}Win".format(MODULE_NAME)
 
 SUBPROCESS_NO_WINDOW = 0x08000000
+
+SOURCE_TYPE_MAPPING = {'mel': 1, 'python': 2}
+
+
+# Global variables
+commonShelfInfo = {}
+taskShelvesInfo = {}
+allShelfButtons = {}
 
 
 def UI():
@@ -56,16 +65,13 @@ def UI():
     if cmds.dockControl(MODULE_NAME, exists=True):
         cmds.deleteUI(MODULE_NAME)
 
-    cmds.window(WIN_NAME)
+    cmds.window(WIN_NAME, title=TOOL_NAME, tlb=True)
 
     # Main menu
     cmds.menuBarLayout(WIN_NAME)
-    cmds.menu('fileMenu', label='File', p=WIN_NAME)
-    cmds.menuItem(label='Save', c=saveShelves, p='fileMenu')
     cmds.menu('editMenu', label='Edit', p=WIN_NAME)
-    cmds.menuItem(label='Add Tool', c=addToolGUI, p='editMenu')
-    cmds.menuItem(label='Edit Tool', c=editToolGUI, p='editMenu')
-    cmds.menuItem(divider=True)
+    cmds.menuItem(label='Add...', c=addToolGUI, p='editMenu')
+    cmds.menuItem(label='Editor...', c=editorGUI, p='editMenu')
     cmds.menuItem(label='Preferences', c=prefsGUI, p='editMenu')
     cmds.menu('helpMenu', label='Help', p=WIN_NAME)
     cmds.menuItem(label='Check Update', c=checkUpdate, p='helpMenu')
@@ -92,7 +98,7 @@ def UI():
     cmds.outlinerEditor( outliner, edit=True, mainListConnection='worldList', selectionConnection='modelList', showShapes=False, showAssignedMaterials=False, showReferenceNodes=True, showReferenceMembers=True, showAttributes=False, showConnected=False, showAnimCurvesOnly=False, autoExpand=False, showDagOnly=True, ignoreDagHierarchy=False, expandConnections=False, showCompounds=True, showNumericAttrsOnly=False, highlightActive=True, autoSelectNewObjects=False, doNotSelectNewObjects=False, transmitFilters=False, showSetMembers=True, setFilter='defaultSetFilter', ignoreHiddenAttribute=False )
 
     # Dock window to left side
-    cmds.dockControl(MODULE_NAME, area='left', content=WIN_NAME)
+    cmds.dockControl(MODULE_NAME, label=TOOL_NAME, area='left', content=WIN_NAME)
 
 
 # ------------ Save & Load
@@ -100,15 +106,18 @@ def saveShelves(*args):
     for shelf in SHELVES:
         shelfInfo = OrderedDict()
         shelfButtons = cmds.shelfLayout(shelf, q=True, childArray=True)
-        for i, shelfButton in enumerate(shelfButtons):
+        for shelfButton in shelfButtons:
+            label = cmds.shelfButton(shelfButton, q=True, label=True) or cmds.shelfButton(shelfButton, q=True, command=True)[:20] + '...' + cmds.shelfButton(shelfButton, q=True, command=True)[-20:]
             shelfButtonInfo = {
+                'label': label,
                 'annotation': cmds.shelfButton(shelfButton, q=True, ann=True),
                 'image1': cmds.shelfButton(shelfButton, q=True, image1=True),
                 'imageOverlayLabel': cmds.shelfButton(shelfButton, q=True, imageOverlayLabel=True),
                 'command': cmds.shelfButton(shelfButton, q=True, command=True),
-                'sourceType': cmds.shelfButton(shelfButton, q=True, sourceType=True)
+                'sourceType': cmds.shelfButton(shelfButton, q=True, sourceType=True),
+                'noDefaultPopup': True
             }
-            shelfInfo[i] = shelfButtonInfo
+            shelfInfo[label] = shelfButtonInfo
 
         filePath = '{}/{}.json'.format(SHELVES_DATA_PATH, shelf)
         with open(filePath, 'w') as f:
@@ -116,52 +125,64 @@ def saveShelves(*args):
 
 
 def loadCommonShelf():
+    global allShelfButtons
+    global commonShelfInfo
+
     commonShelfFile = '{}/Common.json'.format(SHELVES_DATA_PATH)
     with open(commonShelfFile, 'r') as f:
         commonShelfInfo = json.load(f, object_pairs_hook=OrderedDict)
-    for index, shelfButtonInfo in commonShelfInfo.items():
-        cmds.shelfButton(
+    for shelfButtonLabel, shelfButtonInfo in commonShelfInfo.items():
+        shelfBtn = cmds.shelfButton(
+            label=shelfButtonLabel,
             annotation=shelfButtonInfo['annotation'],
             width=ICON_SIZE, height=ICON_SIZE,
             image1=shelfButtonInfo['image1'],
             imageOverlayLabel=shelfButtonInfo['imageOverlayLabel'],
             command=shelfButtonInfo['command'],
             sourceType=shelfButtonInfo['sourceType'],
+            noDefaultPopup=shelfButtonInfo['noDefaultPopup'],
             p='Common')
+        allShelfButtons[shelfButtonLabel] = shelfBtn
 
 
 def loadTaskShelves(*args):
-    shelvesInfo = getTaskShelvesInfo()
-    for tabName, frameInfo in shelvesInfo.items():
+    global allShelfButtons
+    global taskShelvesInfo
+
+    taskShelvesInfo = getTaskShelvesInfo()
+    for tabName, frameInfo in taskShelvesInfo.items():
         tabControl = cmds.scrollLayout(childResizable=True, h=SCROLL_AREA_HEIGHT, p='taskTabLo')
         cmds.tabLayout('taskTabLo', e=True, tabLabel=[tabControl, tabName])
-        for frameName, shelfButtonInfos in frameInfo.items():
+        for frameName, shelfInfo in frameInfo.items():
             shelfName = '{}_{}'.format(tabName, frameName)
             SHELVES.append(shelfName)
             frameLo = cmds.frameLayout(label=frameName, collapse=False, collapsable=True, p=tabControl)
-            numRows = int(len(shelfButtonInfos) / NUM_ICONS_PER_ROW) + 1
+            numRows = int(len(shelfInfo) / NUM_ICONS_PER_ROW) + 1
             shelf = cmds.shelfLayout(shelfName, ch=((ICON_SIZE + ICON_MARGINE) * numRows), p=frameLo)
-            for shelfButtonInfo in shelfButtonInfos:
-                cmds.shelfButton(
+            for shelfButtonLabel, shelfButtonInfo in shelfInfo.items():
+                shelfBtn = cmds.shelfButton(
+                    label=shelfButtonLabel,
                     annotation=shelfButtonInfo['annotation'],
                     width=ICON_SIZE, height=ICON_SIZE,
                     image1=shelfButtonInfo['image1'],
                     imageOverlayLabel=shelfButtonInfo['imageOverlayLabel'],
                     command=shelfButtonInfo['command'],
                     sourceType=shelfButtonInfo['sourceType'],
+                    noDefaultPopup=shelfButtonInfo['noDefaultPopup'],
                     p=shelf)
+
+                allShelfButtons[shelfButtonLabel] = shelfBtn
 
 
 def getTaskShelvesInfo():
-    shelvesInfo = OrderedDict()
-
+    taskShelvesInfo = OrderedDict()
     shelfFiles = [shelfFile for shelfFile in os.listdir(SHELVES_DATA_PATH) if not 'Common' in shelfFile]
 
     # Get tabs
     for shelfFile in shelfFiles:
         shelfName = shelfFile.split('.')[0]
         tabName = shelfName.split('_')[0]
-        shelvesInfo[tabName] = OrderedDict()
+        taskShelvesInfo[tabName] = OrderedDict()
 
     # Get frames
     for shelfFile in shelfFiles:
@@ -172,9 +193,9 @@ def getTaskShelvesInfo():
         filePath = '{}/{}'.format(SHELVES_DATA_PATH, shelfFile)
         with open(filePath, 'r') as f:
             shelfInfo = json.load(f, object_pairs_hook=OrderedDict)
-        shelvesInfo[tabName][frameName] = [shelfData for index, shelfData in shelfInfo.items()]
+        taskShelvesInfo[tabName][frameName] = shelfInfo
 
-    return shelvesInfo
+    return taskShelvesInfo
 
 # ------------
 
@@ -202,15 +223,17 @@ def addToolGUI(*args):
     cmds.optionMenu('shlfOptMenu', label='Shelf: ')
     for shelf in SHELVES:
         cmds.menuItem(label=shelf, p='shlfOptMenu')
-    cmds.textFieldGrp('annoTxtFldGrp', columnWidth=[(1, 110), (2, 100)], label='Annotation: ')
+    cmds.textFieldGrp('labelTxtFldGrp', cw=[(1, 100), (2, 100)], label='label: ')
+    cmds.textFieldGrp('annoTxtFldGrp', cw=[(1, 100), (2, 100)], label='Annotation: ')
 
-    cmds.rowLayout(numberOfColumns=2)
-    cmds.textFieldButtonGrp('imgTxtFldBtnGrp', columnWidth=[(1, 110), (2, 100)], label='Image: ', buttonLabel='...', bc=partial(loadImgPath, 'imgTxtFldBtnGrp'))
-    cmds.symbolButton(image='imageDisplay.png', c=tmrb.TakMayaResourceBrowser.showUI)
+    cmds.rowLayout(numberOfColumns=3)
+    cmds.textFieldGrp('imgTxtFldGrp', cw=[(1, 100), (2, 100)], label='Image: ')
+    cmds.symbolButton(image='fileOpen.png', c=partial(loadImgPath, 'imgTxtFldGrp'))
+    cmds.symbolButton(image='factoryIcon.png', c=tmrb.TakMayaResourceBrowser.showUI)
 
     cmds.setParent('..')
-    cmds.textFieldGrp('imgOverLblTxtFldGrp', columnWidth=[(1, 110), (2, 100)], label='Image Overlay Label: ')
-    cmds.textFieldGrp('cmdTxtFldGrp', columnWidth=[(1, 110), (2, 100)], label='Command: ')
+    cmds.textFieldGrp('imgOverLblTxtFldGrp', cw=[(1, 100), (2, 100)], label='Image Overlay Label: ')
+    cmds.textFieldGrp('cmdTxtFldGrp', cw=[(1, 100), (2, 100)], label='Command: ')
     cmds.optionMenu('srcTypeOptMenu', label='Source Type: ')
     cmds.menuItem(label='python', p='srcTypeOptMenu')
     cmds.menuItem(label='mel', p='srcTypeOptMenu')
@@ -220,7 +243,7 @@ def addToolGUI(*args):
     cmds.button(label='Apply', h=50, c=addTool)
 
     # Show window
-    cmds.window(winName, e=True, w=100, h=100)
+    cmds.window(winName, e=True, w=10, h=10)
     cmds.showWindow(winName)
 
 
@@ -229,12 +252,13 @@ def addTool(*args):
     Add tool with options.
     '''
     # Get options
-    shelf = cmds.optionMenu('shlfOptMenu', q=True, value=True)
+    label = cmds.textFieldGrp('labelTxtFldGrp', q=True, text=True)
     annotation = cmds.textFieldGrp('annoTxtFldGrp', q=True, text=True)
-    image1 = cmds.textFieldButtonGrp('imgTxtFldBtnGrp', q=True, text=True)
+    image1 = cmds.textFieldGrp('imgTxtFldGrp', q=True, text=True)
     imageOverlayLabel = cmds.textFieldGrp('imgOverLblTxtFldGrp', q=True, text=True)
     command = cmds.textFieldGrp('cmdTxtFldGrp', q=True, text=True)
     sourcType = cmds.optionMenu('srcTypeOptMenu', q=True, value=True)
+    shelf = cmds.optionMenu('shlfOptMenu', q=True, value=True)
 
     # Set default image when user do not define image
     if not image1:
@@ -245,6 +269,7 @@ def addTool(*args):
 
     # Evaluate command string
     cmds.shelfButton(
+        label=label,
         annotation=annotation,
         width=ICON_SIZE, height=ICON_SIZE,
         image1=image1, imageOverlayLabel=imageOverlayLabel,
@@ -260,7 +285,7 @@ def loadImgPath(widgetName, *args):
     iconImgPath = cmds.fileDialog2(fileMode=1, caption='Select a Image')
     if iconImgPath:
         iconName = os.path.basename(iconImgPath[0])
-        cmds.textFieldButtonGrp(widgetName, e=True, text=iconName)
+        cmds.textFieldGrp(widgetName, e=True, text=iconName)
 # ------------
 
 
@@ -271,20 +296,153 @@ def prefsGUI(*args):
 
 
 # ------------ Edit Tool
-def editToolGUI(shelfLayout, index):
-    cmds.window(title='Edit Tool', tlb=True)
+COLUMN_WIDTH = 200
+def editorGUI(*args):
+    winName = 'editorWin'
+    if cmds.window(winName, exists=True):
+        cmds.deleteUI(winName)
+    cmds.window(winName, title='Tak Tools Editor', tlb=True)
+
+    cmds.tabLayout(tv=False)
+    cmds.columnLayout('mainColLo', adj=True)
+
+    # Shelves and Shelf Contents
+    cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1, COLUMN_WIDTH), (3, COLUMN_WIDTH)])
+
+    cmds.frameLayout(label='Shelves')
     cmds.columnLayout(adj=True)
-    cmds.textFieldGrp('annoTxtFldGrp', columnWidth=[(1, 110), (2, 100)], label='Annotation: ', text=annotation)
-    cmds.textFieldButtonGrp('imgTxtFldBtnGrp', columnWidth=[(1, 110), (2, 100)], label='Image: ', buttonLabel='...', bc=partial(loadImgPath, 'imgTxtFldBtnGrp'), text=image)
-    cmds.textFieldGrp('imgOverLblTxtFldGrp', columnWidth=[(1, 110), (2, 100)], label='Image Overlay Label: ', text=imageOverlayLabel)
-    cmds.textFieldGrp('cmdTxtFldGrp', columnWidth=[(1, 110), (2, 100)], label='Command: ', text=command)
-    cmds.optionMenu('srcTypeOptMenu', label='Source Type: ')
-    cmds.menuItem(label='python', p='srcTypeOptMenu')
-    cmds.menuItem(label='mel', p='srcTypeOptMenu')
-    cmds.separator(h=5, style='none')
-    cmds.button(label='Apply', h=50, c='')
-    cmds.showWindow()
-    cmds.optionMenu('srcTypeOptMenu', e=True, value=sourceType)
+    cmds.rowColumnLayout(numberOfColumns=4)
+    cmds.symbolButton(image='moveLayerUp.png')
+    cmds.symbolButton(image='moveLayerDown.png')
+    cmds.symbolButton(image='newLayerEmpty.png')
+    cmds.symbolButton(image='delete.png')
+    cmds.setParent('..')
+    cmds.textFieldGrp('shelfNameTxtFldGrp', columnWidth=[(1, 45), (2, COLUMN_WIDTH*0.5)], label='Rename: ')
+    cmds.textScrollList('shevesTxtScrLs', sc=shelvesSelectCallback)
+
+    cmds.setParent('..')
+    cmds.setParent('..')
+    cmds.separator(w=5, style='none')
+
+    cmds.frameLayout(label='Shelf Contents')
+    cmds.columnLayout(adj=True)
+    cmds.rowColumnLayout(numberOfColumns=4)
+    cmds.symbolButton(image='moveLayerUp.png')
+    cmds.symbolButton(image='moveLayerDown.png')
+    cmds.symbolButton(image='newLayerEmpty.png')
+    cmds.symbolButton(image='delete.png')
+    cmds.setParent('..')
+    cmds.textFieldGrp('shelfBtnLabelTxtFldGrp', columnWidth=[(1, 45), (2, COLUMN_WIDTH*0.5)], label='Rename: ')
+    cmds.textScrollList('shelfContentsTxtScrLs', sc=shelfContentsSelectCallback)
+
+    # Contents of a Shelf Button
+    cmds.setParent('mainColLo')
+    cmds.rowColumnLayout(numberOfColumns=2, columnAlign=[(1, 'right')])
+
+    cmds.text(label='Icon Preview: ')
+    cmds.shelfButton('iconPrevShelfBtn', w=ICON_SIZE, h=ICON_SIZE)
+
+    cmds.text(label='Icon Name: ')
+    cmds.rowColumnLayout(numberOfColumns=3)
+    cmds.textField('iconNameTxtFld', w=(COLUMN_WIDTH*2)-110, cc=updateIcon)
+    cmds.symbolButton(image='fileOpen.png')
+    cmds.symbolButton(image='factoryIcon.png')
+
+    cmds.setParent('..')
+    cmds.text('Icon Label: ')
+    cmds.textField('iconLabelTxtFld')
+
+    cmds.text(label='Tooltip: ')
+    cmds.textField('tooltipTxtFld')
+
+    cmds.text('Command: ')
+    cmds.columnLayout(adj=True)
+    cmds.radioButtonGrp('langRadioBtnGrp', label='Language: ', labelArray2=['MEL', 'Python'], numberOfRadioButtons=2, select=2, columnWidth=[(1, 50), (2, 50)])
+    cmds.scrollField('cmdScrFld', w=(COLUMN_WIDTH*2)-110, h=100)
+
+    # Buttons
+    cmds.setParent('mainColLo')
+    cmds.rowColumnLayout(numberOfColumns=2, columnOffset=[(2, 'left', 5)])
+    cmds.button(label='Save All Shelves', w=COLUMN_WIDTH, c=saveShelves)
+    cmds.button(label='Close', w=COLUMN_WIDTH, c=lambda x: cmds.deleteUI(winName))
+
+    cmds.window(winName, e=True, w=10, h=10)
+    cmds.showWindow(winName)
+
+    populateShelvesTextScrollList()
+
+
+def populateShelvesTextScrollList():
+    for shelf in SHELVES:
+        cmds.textScrollList('shevesTxtScrLs', e=True, append=shelf)
+
+
+def shelvesSelectCallback(*args):
+    # Populate shelf contents text scroll list
+    cmds.textScrollList('shelfContentsTxtScrLs', e=True, removeAll=True)
+
+    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
+
+    shelfContents = None
+    if selShelf == 'Common':
+        shelfContents = commonShelfInfo.keys()
+    else:
+        tabName, frameName = selShelf.split('_')
+        shelfContents = taskShelvesInfo[tabName][frameName].keys()
+
+    for shelfContent in shelfContents:
+        cmds.textScrollList('shelfContentsTxtScrLs', e=True, append=shelfContent)
+
+    # Fill shelves rename text field
+    cmds.textFieldGrp('shelfNameTxtFldGrp', e=True, text=selShelf)
+
+
+def shelfContentsSelectCallback(*args):
+    # Populate shelf button GUIs
+    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('shelfContentsTxtScrLs', q=True, selectItem=True)[0]
+
+    shelfBtnInfo = None
+    if selShelf == 'Common':
+        shelfBtnInfo = commonShelfInfo.get(selShelfBtnLabel)
+    else:
+        taskShelfInfo = _getTaskShelfInfo(selShelf)
+        shelfBtnInfo = taskShelfInfo.get(selShelfBtnLabel)
+
+    cmds.shelfButton('iconPrevShelfBtn', e=True, image=shelfBtnInfo.get('image1'), imageOverlayLabel=shelfBtnInfo.get('imageOverlayLabel'))
+    cmds.textField('iconNameTxtFld', e=True, text=shelfBtnInfo.get('image1'))
+    cmds.textField('iconLabelTxtFld', e=True, text=shelfBtnInfo.get('imageOverlayLabel'))
+    cmds.textField('tooltipTxtFld', e=True, text=shelfBtnInfo.get('annotation'))
+    cmds.radioButtonGrp('langRadioBtnGrp', e=True, select=SOURCE_TYPE_MAPPING[shelfBtnInfo.get('sourceType')])
+    cmds.scrollField('cmdScrFld', e=True, text=shelfBtnInfo.get('command'))
+
+    # Fill shelf contents rename text field
+    cmds.textFieldGrp('shelfBtnLabelTxtFldGrp', e=True, text=selShelfBtnLabel)
+
+
+def updateIcon(*args):
+    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('shelfContentsTxtScrLs', q=True, selectItem=True)[0]
+    image1 = cmds.textField('iconNameTxtFld', q=True, text=True)
+
+    # Update data
+    if selShelf == 'Common':
+        commonShelfInfo[selShelfBtnLabel]['image1'] = image1
+    else:
+        taskShelfInfo = _getTaskShelfInfo(selShelf)
+        taskShelfInfo[selShelfBtnLabel]['image1'] = image1
+
+    # Update Editor
+    cmds.shelfButton('iconPrevShelfBtn', e=True, image1=image1)
+
+    # Update shelf button
+    shelfBtn = allShelfButtons.get(selShelfBtnLabel)
+    cmds.shelfButton(shelfBtn, e=True, image1=image1)
+
+
+def _getTaskShelfInfo(taskShelf=''):
+    tabName, frameName = taskShelf.split('_')
+    return taskShelvesInfo[tabName][frameName]
 # ------------
 
 

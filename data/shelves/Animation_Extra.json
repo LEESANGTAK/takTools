@@ -1,128 +1,164 @@
 {
-    "0": {
+    "source \"makePlayblas...\";\nmakePlayblastMov;": {
+        "label": "source \"makePlayblas...\";\nmakePlayblastMov;",
         "annotation": "Quicktime playblast with Pdplayer",
         "image1": "playblastMov.png",
         "imageOverlayLabel": "",
         "command": "source \"makePlayblastMov.mel\";\nmakePlayblastMov;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "1": {
+    "import takTools.comm...misc.delKeySetDflt()": {
+        "label": "import takTools.comm...misc.delKeySetDflt()",
         "annotation": "Delete keys and set default value",
         "image1": "deleteKeys.bmp",
         "imageOverlayLabel": "",
         "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.delKeySetDflt()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "2": {
+    "import takTools.comm...c)\ntak_misc.delKey()": {
+        "label": "import takTools.comm...c)\ntak_misc.delKey()",
         "annotation": "Delete keys for selected controls",
         "image1": "deleteKeys.bmp",
         "imageOverlayLabel": "",
         "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.delKey()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "3": {
+    "DeleteConstraints...DeleteConstraints": {
+        "label": "DeleteConstraints...DeleteConstraints",
         "annotation": "Delete constraints on the selected object(s)",
         "image1": "deleteConstraints.bmp",
         "imageOverlayLabel": "",
         "command": "DeleteConstraints",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "4": {
+    "import takTools.anim..._offsetKeyframe.UI()": {
+        "label": "import takTools.anim..._offsetKeyframe.UI()",
         "annotation": "Offset keyframe for selected object(s).",
         "image1": "offsetKey.bmp",
         "imageOverlayLabel": "",
         "command": "import takTools.animation.tak_offsetKeyframe as tak_offsetKeyframe\nimport imp\nimp.reload(tak_offsetKeyframe)\ntak_offsetKeyframe.UI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "5": {
+    "SMO_RandomOffsetKeys...SMO_RandomOffsetKeys": {
+        "label": "SMO_RandomOffsetKeys...SMO_RandomOffsetKeys",
         "annotation": "Random offset keyframe for selected object(s).",
         "image1": "SMO_RandomOffsetKeysIcon.png",
         "imageOverlayLabel": "",
         "command": "SMO_RandomOffsetKeys",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "6": {
+    "import takTools.anim..._oscillateMaker.UI()": {
+        "label": "import takTools.anim..._oscillateMaker.UI()",
         "annotation": "Create procedure oscillate animation.",
         "image1": "oscillateMaker.bmp",
         "imageOverlayLabel": "",
         "command": "import takTools.animation.tak_oscillateMaker as tak_oscillateMaker\nimport imp\nimp.reload(tak_oscillateMaker)\ntak_oscillateMaker.UI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "7": {
+    "source \"D40clothTool... \"D40clothTool.mel\";": {
+        "label": "source \"D40clothTool... \"D40clothTool.mel\";",
         "annotation": "b1 nCloth tool",
         "image1": "b1nCloth.bmp",
         "imageOverlayLabel": "",
         "command": "source \"D40clothTool.mel\";",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "8": {
+    "IH_BakeHairChain;...IH_BakeHairChain;": {
+        "label": "IH_BakeHairChain;...IH_BakeHairChain;",
         "annotation": "Bake IH_HairChain tool.",
         "image1": "bakeHairChain.png",
         "imageOverlayLabel": "",
         "command": "IH_BakeHairChain;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "9": {
+    "import takTools.anim...DynamicSplineBaker()": {
+        "label": "import takTools.anim...DynamicSplineBaker()",
         "annotation": "Hair Chain Baker",
         "image1": "hairChainBaker.png",
         "imageOverlayLabel": "",
         "command": "import takTools.animation.dynamicSplineBaker as dsb\nimport imp\nimp.reload(dsb)\ndsb.DynamicSplineBaker()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "10": {
+    "InteractivePlayback...InteractivePlayback": {
+        "label": "InteractivePlayback...InteractivePlayback",
         "annotation": "Interactive Playback",
         "image1": "interactivePlayback.png",
         "imageOverlayLabel": "",
         "command": "InteractivePlayback",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "11": {
+    "import takTools.anim...cleanUpAniScene.ui()": {
+        "label": "import takTools.anim...cleanUpAniScene.ui()",
         "annotation": "Clean up animation scene.",
         "image1": "tak_cleanUpAniScene.png",
         "imageOverlayLabel": "",
         "command": "import takTools.animation.tak_cleanUpAniScene as tak_cleanUpAniScene\nimport imp\nimp.reload(tak_cleanUpAniScene)\ntak_cleanUpAniScene.ui()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "12": {
+    "import takRetargeter...eterUI()\ntrUI.show()": {
+        "label": "import takRetargeter...eterUI()\ntrUI.show()",
         "annotation": "Retargeting source animation to target.",
         "image1": "takRetargeterIcon.png",
         "imageOverlayLabel": "",
         "command": "import takRetargeter.ui as tru\nimport imp\nimp.reload(tru)\n\ntry:\n    trUI.close()\nexcept:\n    pass\n\ntrUI = tru.takRetargeterUI.TakRetargeterUI()\ntrUI.show()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "13": {
+    "from takMaxAniTools ...traintUI()\nui.show()": {
+        "label": "from takMaxAniTools ...traintUI()\nui.show()",
         "annotation": "Link Constraint",
         "image1": "out_parentConstraint.png",
         "imageOverlayLabel": "",
         "command": "from takMaxAniTools import linkConstraintUI as linkCnstUI\nimport imp\nimp.reload(linkCnstUI)\n\nui = linkCnstUI.LinkConstraintUI()\nui.show()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "14": {
+    "import takAniPublish...rl()\napCtrl.showUI()": {
+        "label": "import takAniPublish...rl()\napCtrl.showUI()",
         "annotation": "Publish animation.",
         "image1": "out_timeEditorAnimSource.png",
         "imageOverlayLabel": "",
         "command": "import takAniPublisher.aniPublisherCtrl as apctrl\nimport imp\nimp.reload(apctrl)\n\napCtrl = apctrl.AniPublisherCtrl()\napCtrl.showUI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "15": {
-        "annotation": "",
+    "execfile(r'C:\\Google...gic\\springMagic.py')": {
+        "label": "execfile(r'C:\\Google...gic\\springMagic.py')",
+        "annotation": "execfile(r'C:\\Google...gic\\springMagic.py')",
         "image1": "springMagic.png",
         "imageOverlayLabel": "",
         "command": "execfile(r'C:\\GoogleDrive\\programs_env\\maya\\modules\\SpringMagic\\springMagic.py')",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "16": {
+    "source \"Overlapper r...\";OverlapperRelease;": {
+        "label": "source \"Overlapper r...\";OverlapperRelease;",
         "annotation": "Create overlap animation easily.",
         "image1": "play_hover.png",
         "imageOverlayLabel": "",
         "command": "source \"Overlapper release 1-1.mel\";OverlapperRelease;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "17": {
+    "BookmarkManager;...BookmarkManager;": {
+        "label": "BookmarkManager;...BookmarkManager;",
         "annotation": "BookmarkManager;",
         "image1": "Bookmark.png",
         "imageOverlayLabel": "",
         "command": "BookmarkManager;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     }
 }

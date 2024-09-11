@@ -1,23 +1,29 @@
 {
-    "0": {
-        "annotation": "",
+    "import os\nimport sys...tudiolibrary.main()\n": {
+        "label": "import os\nimport sys...tudiolibrary.main()\n",
+        "annotation": "import os\nimport sys...tudiolibrary.main()\n",
         "image1": "studioLibrary.png",
         "imageOverlayLabel": "",
         "command": "import os\nimport sys\n    \nimport studiolibrary\nstudiolibrary.main()\n",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     },
-    "1": {
+    "source tweenMachine....e.mel;\ntweenMachine;": {
+        "label": "source tweenMachine....e.mel;\ntweenMachine;",
         "annotation": "tweenMachine",
         "image1": "tweenMachine.xpm",
         "imageOverlayLabel": "",
         "command": "source tweenMachine.mel;\ntweenMachine;",
-        "sourceType": "mel"
+        "sourceType": "mel",
+        "noDefaultPopup": true
     },
-    "2": {
+    "import takTools.comm...misc.mirrorCtrlsUI()": {
+        "label": "import takTools.comm...misc.mirrorCtrlsUI()",
         "annotation": "Mirror selected controls",
         "image1": "mirrorCtrl.png",
         "imageOverlayLabel": "",
         "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirrorCtrlsUI()",
-        "sourceType": "python"
+        "sourceType": "python",
+        "noDefaultPopup": true
     }
 }
