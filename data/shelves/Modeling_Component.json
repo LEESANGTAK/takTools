@@ -1,209 +1,214 @@
 {
-    "import takTools.comm...)\ntak_misc.zeroVtx()": {
-        "label": "import takTools.comm...)\ntak_misc.zeroVtx()",
-        "annotation": "Snap to X 0 for selected vertex(s).",
-        "image1": "zeroVtx.png",
-        "imageOverlayLabel": "",
-        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.zeroVtx()",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "import takTools.comm...misc.snapToBrdrVtx()": {
-        "label": "import takTools.comm...misc.snapToBrdrVtx()",
-        "annotation": "Snap selected vertices to the target geometry's closest border vertex.",
-        "image1": "snapToClosestBorderVtx.png",
-        "imageOverlayLabel": "",
-        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.snapToBrdrVtx()",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "DeletePolyElements;...DeletePolyElements;": {
-        "label": "DeletePolyElements;...DeletePolyElements;",
-        "annotation": "Delete the selected Vertices / Edges.",
-        "image1": "polyDelEdgeVertex.png",
-        "imageOverlayLabel": "",
-        "command": "DeletePolyElements;",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "performPolyCollapse ...rformPolyCollapse 0;": {
-        "label": "performPolyCollapse ...rformPolyCollapse 0;",
-        "annotation": "Collapse the selected edges or faces.",
-        "image1": "polyCollapseEdge.png",
-        "imageOverlayLabel": "",
-        "command": "performPolyCollapse 0;",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "polyMergeVertex  -d ...d 0.001 -am 1 -ch 1;": {
-        "label": "polyMergeVertex  -d ...d 0.001 -am 1 -ch 1;",
-        "annotation": "Merge vertices / border edges based on selection.",
-        "image1": "polyMerge.png",
-        "imageOverlayLabel": "",
-        "command": "polyMergeVertex  -d 0.001 -am 1 -ch 1;",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "MergeVertexTool...MergeVertexTool": {
-        "label": "MergeVertexTool...MergeVertexTool",
-        "annotation": "Interactively select and merge vertices",
-        "image1": "polyMergeVertex.png",
-        "imageOverlayLabel": "",
-        "command": "MergeVertexTool",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "performPolyExtrude 0...performPolyExtrude 0": {
-        "label": "performPolyExtrude 0...performPolyExtrude 0",
-        "annotation": "Extrude the selected component",
-        "image1": "polyExtrudeFacet.png",
-        "imageOverlayLabel": "",
-        "command": "performPolyExtrude 0",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "FillHole...FillHole": {
-        "label": "FillHole...FillHole",
-        "annotation": "Fill Hole",
-        "image1": "polyCloseBorder.png",
-        "imageOverlayLabel": "",
-        "command": "FillHole",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "setToolTo polyAppend...lyAppendFacetContext": {
-        "label": "setToolTo polyAppend...lyAppendFacetContext",
-        "annotation": "Append to Polygon Tool",
-        "image1": "polyAppendFacet.png",
-        "imageOverlayLabel": "",
-        "command": "setToolTo polyAppendFacetContext ; polyAppendFacetCtx -e -pc `optionVar -q polyKeepFacetsPlanar` polyAppendFacetContext",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "polyBridgeEdge -ch 1... -smoothingAngle 30;": {
-        "label": "polyBridgeEdge -ch 1... -smoothingAngle 30;",
-        "annotation": "Create a bridge between two sets of edges or faces",
-        "image1": "polyBridge.png",
-        "imageOverlayLabel": "",
-        "command": "polyBridgeEdge -ch 1 -divisions 0 -twist 0 -taper 1 -curveType 0 -smoothingAngle 30;",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "cmds.polySewEdge(tol...wEdge(tolerance = 1)": {
-        "label": "cmds.polySewEdge(tol...wEdge(tolerance = 1)",
-        "annotation": "Merge selected edge(s)",
-        "image1": "polySewEdge.png",
-        "imageOverlayLabel": "",
-        "command": "cmds.polySewEdge(tolerance = 1)",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "cmds.DetachEdgeCompo...etachEdgeComponent()": {
-        "label": "cmds.DetachEdgeCompo...etachEdgeComponent()",
-        "annotation": "Detach selected edge(s).",
-        "image1": "detachEdges.png",
-        "imageOverlayLabel": "",
-        "command": "cmds.DetachEdgeComponent()",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "dR_multiCutTool...dR_multiCutTool": {
-        "label": "dR_multiCutTool...dR_multiCutTool",
-        "annotation": "Multi-Cut Tool",
-        "image1": "multiCut_NEX32.png",
-        "imageOverlayLabel": "",
-        "command": "dR_multiCutTool",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "dR_connectTool...dR_connectTool": {
-        "label": "dR_connectTool...dR_connectTool",
-        "annotation": "Connect Tool",
-        "image1": "connect_NEX32.png",
-        "imageOverlayLabel": "",
-        "command": "dR_connectTool",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "SplitEdgeRingTool;...SplitEdgeRingTool;": {
-        "label": "SplitEdgeRingTool;...SplitEdgeRingTool;",
-        "annotation": "Split selected edge ring.",
-        "image1": "polySplitEdgeRing.png",
-        "imageOverlayLabel": "",
-        "command": "SplitEdgeRingTool;",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "performPolyDuplicate...mPolyDuplicateEdge 0": {
-        "label": "performPolyDuplicate...mPolyDuplicateEdge 0",
-        "annotation": "Offset Edge Loop Tool",
-        "image1": "polyDuplicateEdgeLoop.png",
-        "imageOverlayLabel": "",
-        "command": "performPolyDuplicateEdge 0",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "cmds.SelectEdgeLoopS...s.polyEditEdgeFlow()": {
-        "label": "cmds.SelectEdgeLoopS...s.polyEditEdgeFlow()",
-        "annotation": "Convert to edge loop and set edge flow.",
-        "image1": "edgeFlow.bmp",
-        "imageOverlayLabel": "",
-        "command": "cmds.SelectEdgeLoopSp()\ncmds.polyEditEdgeFlow()",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "SlideEdgeTool...SlideEdgeTool": {
-        "label": "SlideEdgeTool...SlideEdgeTool",
-        "annotation": "Slide edge loops or paths along their neighbouring edges",
-        "image1": "slideEdgeTool.png",
-        "imageOverlayLabel": "",
-        "command": "SlideEdgeTool",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "polyPerformAction \"p...leTolerance 180\" e 0": {
-        "label": "polyPerformAction \"p...leTolerance 180\" e 0",
-        "annotation": "Create a bevel along the selected edges",
-        "image1": "polyBevel.png",
-        "imageOverlayLabel": "",
-        "command": "polyPerformAction \"polyBevel -offset 0.5 -offsetAsFraction 1 -autoFit 1 -segments 1 -worldSpace 1 -uvAssignment 1 -fillNgons 1 -mergeVertices 1 -mergeVertexTolerance 0.0001 -smoothingAngle 30 -miteringAngle 180 -angleTolerance 180\" e 0",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "polyChamferVtx 1 0.2...ChamferVtx 1 0.25 0;": {
-        "label": "polyChamferVtx 1 0.2...ChamferVtx 1 0.25 0;",
-        "annotation": "Chamfer the selected vertices",
-        "image1": "polyChamfer.png",
-        "imageOverlayLabel": "",
-        "command": "polyChamferVtx 1 0.25 0;",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "import takTools.util...hUtils.extractFace()": {
-        "label": "import takTools.util...hUtils.extractFace()",
-        "annotation": "Extract the currently selected faces from their shell and shows a manipulator to adjust their offset",
-        "image1": "polyChipOff.png",
-        "imageOverlayLabel": "",
-        "command": "import takTools.utils.mesh as meshUtils;import imp;imp.reload(meshUtils);meshUtils.extractFace()",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "import takTools.util...tils.duplicateFace()": {
-        "label": "import takTools.util...tils.duplicateFace()",
-        "annotation": "Duplicate the currently selected faces in a new shell and shows a manipulator to adjust their offset",
-        "image1": "polyDuplicateFacet.png",
-        "imageOverlayLabel": "",
-        "command": "import takTools.utils.mesh as meshUtils;import imp;imp.reload(meshUtils);meshUtils.duplicateFace()",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "python \"from maya.ap...owCreaseSetEditor()\"": {
-        "label": "python \"from maya.ap...owCreaseSetEditor()\"",
-        "annotation": "Crease Set Editor...",
-        "image1": "polyCrease.png",
-        "imageOverlayLabel": "",
-        "command": "python \"from maya.app.general import creaseSetEditor; creaseSetEditor.showCreaseSetEditor()\"",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    }
+    "tabName": "Modeling", 
+    "frameName": "Component", 
+    "order": "13", 
+    "shelfButtonInfos": [
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import takTools.comm...)\ntak_misc.zeroVtx()", 
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.zeroVtx()", 
+            "image1": "zeroVtx.png", 
+            "annotation": "Snap to X 0 for selected vertex(s)."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import takTools.comm...misc.snapToBrdrVtx()", 
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.snapToBrdrVtx()", 
+            "image1": "snapToClosestBorderVtx.png", 
+            "annotation": "Snap selected vertices to the target geometry's closest border vertex."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "DeletePolyElements;...DeletePolyElements;", 
+            "command": "DeletePolyElements;", 
+            "image1": "polyDelEdgeVertex.png", 
+            "annotation": "Delete the selected Vertices / Edges."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "performPolyCollapse ...rformPolyCollapse 0;", 
+            "command": "performPolyCollapse 0;", 
+            "image1": "polyCollapseEdge.png", 
+            "annotation": "Collapse the selected edges or faces."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "polyMergeVertex  -d ...d 0.001 -am 1 -ch 1;", 
+            "command": "polyMergeVertex  -d 0.001 -am 1 -ch 1;", 
+            "image1": "polyMerge.png", 
+            "annotation": "Merge vertices / border edges based on selection."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "MergeVertexTool...MergeVertexTool", 
+            "command": "MergeVertexTool", 
+            "image1": "polyMergeVertex.png", 
+            "annotation": "Interactively select and merge vertices"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "performPolyExtrude 0...performPolyExtrude 0", 
+            "command": "performPolyExtrude 0", 
+            "image1": "polyExtrudeFacet.png", 
+            "annotation": "Extrude the selected component"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "FillHole...FillHole", 
+            "command": "FillHole", 
+            "image1": "polyCloseBorder.png", 
+            "annotation": "Fill Hole"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "setToolTo polyAppend...lyAppendFacetContext", 
+            "command": "setToolTo polyAppendFacetContext ; polyAppendFacetCtx -e -pc `optionVar -q polyKeepFacetsPlanar` polyAppendFacetContext", 
+            "image1": "polyAppendFacet.png", 
+            "annotation": "Append to Polygon Tool"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "polyBridgeEdge -ch 1... -smoothingAngle 30;", 
+            "command": "polyBridgeEdge -ch 1 -divisions 0 -twist 0 -taper 1 -curveType 0 -smoothingAngle 30;", 
+            "image1": "polyBridge.png", 
+            "annotation": "Create a bridge between two sets of edges or faces"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "cmds.polySewEdge(tol...wEdge(tolerance = 1)", 
+            "command": "cmds.polySewEdge(tolerance = 1)", 
+            "image1": "polySewEdge.png", 
+            "annotation": "Merge selected edge(s)"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "cmds.DetachEdgeCompo...etachEdgeComponent()", 
+            "command": "cmds.DetachEdgeComponent()", 
+            "image1": "detachEdges.png", 
+            "annotation": "Detach selected edge(s)."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "dR_multiCutTool...dR_multiCutTool", 
+            "command": "dR_multiCutTool", 
+            "image1": "multiCut_NEX32.png", 
+            "annotation": "Multi-Cut Tool"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "dR_connectTool...dR_connectTool", 
+            "command": "dR_connectTool", 
+            "image1": "connect_NEX32.png", 
+            "annotation": "Connect Tool"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "SplitEdgeRingTool;...SplitEdgeRingTool;", 
+            "command": "SplitEdgeRingTool;", 
+            "image1": "polySplitEdgeRing.png", 
+            "annotation": "Split selected edge ring."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "performPolyDuplicate...mPolyDuplicateEdge 0", 
+            "command": "performPolyDuplicateEdge 0", 
+            "image1": "polyDuplicateEdgeLoop.png", 
+            "annotation": "Offset Edge Loop Tool"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "cmds.SelectEdgeLoopS...s.polyEditEdgeFlow()", 
+            "command": "cmds.SelectEdgeLoopSp()\ncmds.polyEditEdgeFlow()", 
+            "image1": "edgeFlow.bmp", 
+            "annotation": "Convert to edge loop and set edge flow."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "SlideEdgeTool...SlideEdgeTool", 
+            "command": "SlideEdgeTool", 
+            "image1": "slideEdgeTool.png", 
+            "annotation": "Slide edge loops or paths along their neighbouring edges"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "polyPerformAction \"p...leTolerance 180\" e 0", 
+            "command": "polyPerformAction \"polyBevel -offset 0.5 -offsetAsFraction 1 -autoFit 1 -segments 1 -worldSpace 1 -uvAssignment 1 -fillNgons 1 -mergeVertices 1 -mergeVertexTolerance 0.0001 -smoothingAngle 30 -miteringAngle 180 -angleTolerance 180\" e 0", 
+            "image1": "polyBevel.png", 
+            "annotation": "Create a bevel along the selected edges"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "polyChamferVtx 1 0.2...ChamferVtx 1 0.25 0;", 
+            "command": "polyChamferVtx 1 0.25 0;", 
+            "image1": "polyChamfer.png", 
+            "annotation": "Chamfer the selected vertices"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import takTools.util...hUtils.extractFace()", 
+            "command": "import takTools.utils.mesh as meshUtils;import imp;imp.reload(meshUtils);meshUtils.extractFace()", 
+            "image1": "polyChipOff.png", 
+            "annotation": "Extract the currently selected faces from their shell and shows a manipulator to adjust their offset"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import takTools.util...tils.duplicateFace()", 
+            "command": "import takTools.utils.mesh as meshUtils;import imp;imp.reload(meshUtils);meshUtils.duplicateFace()", 
+            "image1": "polyDuplicateFacet.png", 
+            "annotation": "Duplicate the currently selected faces in a new shell and shows a manipulator to adjust their offset"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "python \"from maya.ap...owCreaseSetEditor()\"", 
+            "command": "python \"from maya.app.general import creaseSetEditor; creaseSetEditor.showCreaseSetEditor()\"", 
+            "image1": "polyCrease.png", 
+            "annotation": "Crease Set Editor..."
+        }
+    ]
 }

@@ -1,38 +1,43 @@
 {
-    "for skin in pm.ls(ty...malizeWeights.set(1)": {
-        "label": "for skin in pm.ls(ty...malizeWeights.set(1)",
-        "annotation": "Set interactive mode for skin clusters.",
-        "image1": "pythonFamily.png",
-        "imageOverlayLabel": "",
-        "command": "for skin in pm.ls(type='skinCluster'):\n    skin.normalizeWeights.set(1)",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "for jnt in pm.select...ompensate.set(False)": {
-        "label": "for jnt in pm.select...ompensate.set(False)",
-        "annotation": "Set segmentScaleCompensate to false for selected skin clusters.",
-        "image1": "pythonFamily.png",
-        "imageOverlayLabel": "",
-        "command": "for jnt in pm.selected(type='joint'):\n    jnt.segmentScaleCompensate.set(False)",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "for node in pm.ls(ty...olorSpace.set('Raw')": {
-        "label": "for node in pm.ls(ty...olorSpace.set('Raw')",
-        "annotation": "Set color space to raw for normal maps.",
-        "image1": "pythonFamily.png",
-        "imageOverlayLabel": "",
-        "command": "for node in pm.ls(type='bump2d'):\n    node.inputs(type='file')[0].colorSpace.set('Raw')",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "for mesh in pm.ls(ty....tangentSpace.set(2)": {
-        "label": "for mesh in pm.ls(ty....tangentSpace.set(2)",
-        "annotation": "Set tangentSpace to Left Handed for meshes.",
-        "image1": "pythonFamily.png",
-        "imageOverlayLabel": "",
-        "command": "for mesh in pm.ls(type='mesh'):\n    mesh.tangentSpace.set(2)",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    }
+    "tabName": "Misc", 
+    "frameName": "Temp", 
+    "order": "12", 
+    "shelfButtonInfos": [
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "for skin in pm.ls(ty...malizeWeights.set(1)", 
+            "command": "for skin in pm.ls(type='skinCluster'):\n    skin.normalizeWeights.set(1)", 
+            "image1": "pythonFamily.png", 
+            "annotation": "Set interactive mode for skin clusters."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "for jnt in pm.select...ompensate.set(False)", 
+            "command": "for jnt in pm.selected(type='joint'):\n    jnt.segmentScaleCompensate.set(False)", 
+            "image1": "pythonFamily.png", 
+            "annotation": "Set segmentScaleCompensate to false for selected skin clusters."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "for node in pm.ls(ty...olorSpace.set('Raw')", 
+            "command": "for node in pm.ls(type='bump2d'):\n    node.inputs(type='file')[0].colorSpace.set('Raw')", 
+            "image1": "pythonFamily.png", 
+            "annotation": "Set color space to raw for normal maps."
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "for mesh in pm.ls(ty....tangentSpace.set(2)", 
+            "command": "for mesh in pm.ls(type='mesh'):\n    mesh.tangentSpace.set(2)", 
+            "image1": "pythonFamily.png", 
+            "annotation": "Set tangentSpace to Left Handed for meshes."
+        }
+    ]
 }

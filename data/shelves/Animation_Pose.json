@@ -1,29 +1,34 @@
 {
-    "import os\nimport sys...tudiolibrary.main()\n": {
-        "label": "import os\nimport sys...tudiolibrary.main()\n",
-        "annotation": "import os\nimport sys...tudiolibrary.main()\n",
-        "image1": "studioLibrary.png",
-        "imageOverlayLabel": "",
-        "command": "import os\nimport sys\n    \nimport studiolibrary\nstudiolibrary.main()\n",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    },
-    "source tweenMachine....e.mel;\ntweenMachine;": {
-        "label": "source tweenMachine....e.mel;\ntweenMachine;",
-        "annotation": "tweenMachine",
-        "image1": "tweenMachine.xpm",
-        "imageOverlayLabel": "",
-        "command": "source tweenMachine.mel;\ntweenMachine;",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "import takTools.comm...misc.mirrorCtrlsUI()": {
-        "label": "import takTools.comm...misc.mirrorCtrlsUI()",
-        "annotation": "Mirror selected controls",
-        "image1": "mirrorCtrl.png",
-        "imageOverlayLabel": "",
-        "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirrorCtrlsUI()",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    }
+    "tabName": "Animation", 
+    "frameName": "Pose", 
+    "order": "03", 
+    "shelfButtonInfos": [
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import os\nimport sys...tudiolibrary.main()\n", 
+            "command": "import os\nimport sys\n    \nimport studiolibrary\nstudiolibrary.main()\n", 
+            "image1": "studioLibrary.png", 
+            "annotation": "import os\nimport sys...tudiolibrary.main()\n"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "source tweenMachine....e.mel;\ntweenMachine;", 
+            "command": "source tweenMachine.mel;\ntweenMachine;", 
+            "image1": "tweenMachine.xpm", 
+            "annotation": "tweenMachine"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import takTools.comm...misc.mirrorCtrlsUI()", 
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirrorCtrlsUI()", 
+            "image1": "mirrorCtrl.png", 
+            "annotation": "Mirror selected controls"
+        }
+    ]
 }

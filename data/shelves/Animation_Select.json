@@ -1,47 +1,52 @@
 {
-    "pose2shelf...pose2shelf": {
-        "label": "pose2shelf...pose2shelf",
-        "annotation": "Save controls selected",
-        "image1": "pos2Shelf.bmp",
-        "imageOverlayLabel": "",
-        "command": "pose2shelf",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "source \"biped.mel\";...source \"biped.mel\";": {
-        "label": "source \"biped.mel\";...source \"biped.mel\";",
-        "annotation": "Selector:biped",
-        "image1": "asBiped.png",
-        "imageOverlayLabel": "",
-        "command": "source \"biped.mel\";",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "source \"face.mel\";...source \"face.mel\";": {
-        "label": "source \"face.mel\";...source \"face.mel\";",
-        "annotation": "Selector:face",
-        "image1": "asFace.png",
-        "imageOverlayLabel": "",
-        "command": "source \"face.mel\";",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "source \"picker.mel\";...source \"picker.mel\";": {
-        "label": "source \"picker.mel\";...source \"picker.mel\";",
-        "annotation": "picker",
-        "image1": "picker.png",
-        "imageOverlayLabel": "",
-        "command": "source \"picker.mel\";",
-        "sourceType": "mel",
-        "noDefaultPopup": true
-    },
-    "\nimport ARSpicker\nAR...icker.picker.main()\n": {
-        "label": "\nimport ARSpicker\nAR...icker.picker.main()\n",
-        "annotation": "\nimport ARSpicker\nAR...icker.picker.main()\n",
-        "image1": "colorPickCursor.png",
-        "imageOverlayLabel": "",
-        "command": "\nimport ARSpicker\nARSpicker.picker.main()\n",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    }
+    "tabName": "Animation", 
+    "frameName": "Select", 
+    "order": "04", 
+    "shelfButtonInfos": [
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "pose2shelf...pose2shelf", 
+            "command": "pose2shelf", 
+            "image1": "pos2Shelf.bmp", 
+            "annotation": "Save controls selected"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "source \"biped.mel\";...source \"biped.mel\";", 
+            "command": "source \"biped.mel\";", 
+            "image1": "asBiped.png", 
+            "annotation": "Selector:biped"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "source \"face.mel\";...source \"face.mel\";", 
+            "command": "source \"face.mel\";", 
+            "image1": "asFace.png", 
+            "annotation": "Selector:face"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "source \"picker.mel\";...source \"picker.mel\";", 
+            "command": "source \"picker.mel\";", 
+            "image1": "picker.png", 
+            "annotation": "picker"
+        }, 
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "\nimport ARSpicker\nAR...icker.picker.main()\n", 
+            "command": "\nimport ARSpicker\nARSpicker.picker.main()\n", 
+            "image1": "colorPickCursor.png", 
+            "annotation": "\nimport ARSpicker\nAR...icker.picker.main()\n"
+        }
+    ]
 }

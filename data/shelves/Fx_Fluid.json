@@ -1,11 +1,16 @@
 {
-    "import takTools.mode...reload(tdc)\ntdc.UI()": {
-        "label": "import takTools.mode...reload(tdc)\ntdc.UI()",
-        "annotation": "import takTools.mode...reload(tdc)\ntdc.UI()",
-        "image1": "droplet.png",
-        "imageOverlayLabel": "",
-        "command": "import takTools.modeling.tak_dropletCreator as tdc\nimport imp\nimp.reload(tdc)\ntdc.UI()",
-        "sourceType": "python",
-        "noDefaultPopup": true
-    }
+    "tabName": "Fx", 
+    "frameName": "Fluid", 
+    "order": "10", 
+    "shelfButtonInfos": [
+        {
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import takTools.mode...reload(tdc)\ntdc.UI()", 
+            "command": "import takTools.modeling.tak_dropletCreator as tdc\nimport imp\nimp.reload(tdc)\ntdc.UI()", 
+            "image1": "droplet.png", 
+            "annotation": "import takTools.mode...reload(tdc)\ntdc.UI()"
+        }
+    ]
 }

@@ -9,7 +9,7 @@ Description:
 
 import os
 import json
-import shutil
+import pprint
 from distutils.dir_util import copy_tree
 import subprocess
 from functools import partial
@@ -117,18 +117,18 @@ def loadCommonShelf():
     commonShelfFile = '{}/Common.json'.format(SHELVES_DATA_PATH)
     with open(commonShelfFile, 'r') as f:
         commonShelfInfo = json.load(f, object_pairs_hook=OrderedDict)
-    for shelfButtonLabel, shelfButtonInfo in commonShelfInfo.items():
+    for shelfButtonInfo in commonShelfInfo.get('shelfButtonInfos'):
         shelfBtn = cmds.shelfButton(
-            label=shelfButtonLabel,
-            annotation=shelfButtonInfo['annotation'],
+            label=shelfButtonInfo.get('label'),
+            annotation=shelfButtonInfo.get('annotation'),
             width=ICON_SIZE, height=ICON_SIZE,
-            image1=shelfButtonInfo['image1'],
-            imageOverlayLabel=shelfButtonInfo['imageOverlayLabel'],
-            command=shelfButtonInfo['command'],
-            sourceType=shelfButtonInfo['sourceType'],
-            noDefaultPopup=shelfButtonInfo['noDefaultPopup'],
+            image1=shelfButtonInfo.get('image1'),
+            imageOverlayLabel=shelfButtonInfo.get('imageOverlayLabel'),
+            command=shelfButtonInfo.get('command'),
+            sourceType=shelfButtonInfo.get('sourceType'),
+            noDefaultPopup=shelfButtonInfo.get('noDefaultPopup'),
             p='Common')
-        allShelfButtons[shelfButtonLabel] = shelfBtn
+        allShelfButtons[shelfButtonInfo.get('label')] = shelfBtn
 
 
 def loadTaskShelves(*args):
@@ -139,54 +139,65 @@ def loadTaskShelves(*args):
     for tabName, frameInfo in taskShelvesInfo.items():
         tabControl = cmds.scrollLayout(childResizable=True, h=SCROLL_AREA_HEIGHT, p='taskTabLo')
         cmds.tabLayout('taskTabLo', e=True, tabLabel=[tabControl, tabName])
-        for frameName, shelfInfo in frameInfo.items():
+        for frameName, shelfButtonInfos in frameInfo.items():
             shelfName = '{}_{}'.format(tabName, frameName)
             SHELVES.append(shelfName)
             frameLo = cmds.frameLayout(label=frameName, collapse=False, collapsable=True, p=tabControl)
-            numRows = int(len(shelfInfo) / NUM_ICONS_PER_ROW) + 1
+            numRows = int(len(shelfButtonInfos) / NUM_ICONS_PER_ROW) + 1
             shelf = cmds.shelfLayout(shelfName, ch=((ICON_SIZE + ICON_MARGINE) * numRows), p=frameLo)
-            for shelfButtonLabel, shelfButtonInfo in shelfInfo.items():
+            for shelfButtonInfo in shelfButtonInfos:
                 shelfBtn = cmds.shelfButton(
-                    label=shelfButtonLabel,
-                    annotation=shelfButtonInfo['annotation'],
+                    label=shelfButtonInfo.get('label'),
+                    annotation=shelfButtonInfo.get('annotation'),
                     width=ICON_SIZE, height=ICON_SIZE,
-                    image1=shelfButtonInfo['image1'],
-                    imageOverlayLabel=shelfButtonInfo['imageOverlayLabel'],
-                    command=shelfButtonInfo['command'],
-                    sourceType=shelfButtonInfo['sourceType'],
-                    noDefaultPopup=shelfButtonInfo['noDefaultPopup'],
+                    image1=shelfButtonInfo.get('image1'),
+                    imageOverlayLabel=shelfButtonInfo.get('imageOverlayLabel'),
+                    command=shelfButtonInfo.get('command'),
+                    sourceType=shelfButtonInfo.get('sourceType'),
+                    noDefaultPopup=shelfButtonInfo.get('noDefaultPopup'),
                     p=shelf)
 
-                allShelfButtons[shelfButtonLabel] = shelfBtn
+                allShelfButtons[shelfButtonInfo.get('label')] = shelfBtn
 
 
 def getTaskShelvesInfo():
     taskShelvesInfo = OrderedDict()
-    shelfFiles = [shelfFile for shelfFile in os.listdir(SHELVES_DATA_PATH) if not 'Common' in shelfFile]
+    taskShelfFiles = [shelfFile for shelfFile in os.listdir(SHELVES_DATA_PATH) if not 'Common' in shelfFile]
+
+    # Read shelves info in order
+    taksShelvesInfo = []
+    for taskShelfFile in taskShelfFiles:
+        filePath = '{}/{}'.format(SHELVES_DATA_PATH, taskShelfFile)
+        with open(filePath, 'r') as f:
+            shelfInfo = json.load(f, object_pairs_hook=OrderedDict)
+            taksShelvesInfo.append(shelfInfo)
+    orderedTaskShlvesInfos = sorted(taksShelvesInfo, key=lambda item: item.get('order'))
 
     # Get tabs
-    for shelfFile in shelfFiles:
-        shelfName = shelfFile.split('.')[0]
-        tabName = shelfName.split('_')[0]
+    for taskShelfInfo in orderedTaskShlvesInfos:
+        tabName = taskShelfInfo.get('tabName')
         taskShelvesInfo[tabName] = OrderedDict()
 
     # Get frames
-    for shelfFile in shelfFiles:
-        shelfName = shelfFile.split('.')[0]
-        splitedName = shelfName.split('_')
-        tabName = splitedName[0]
-        frameName = splitedName[1] if len(splitedName) == 2 else splitedName[0]
-        filePath = '{}/{}'.format(SHELVES_DATA_PATH, shelfFile)
-        with open(filePath, 'r') as f:
-            shelfInfo = json.load(f, object_pairs_hook=OrderedDict)
-        taskShelvesInfo[tabName][frameName] = shelfInfo
+    for taskShelfInfo in orderedTaskShlvesInfos:
+        tabName = taskShelfInfo.get('tabName')
+        frameName = taskShelfInfo.get('frameName')
+        taskShelvesInfo[tabName][frameName] = taskShelfInfo.get('shelfButtonInfos')
 
     return taskShelvesInfo
 
 
 def saveShelves(*args):
-    for shelf in SHELVES:
+    for i, shelf in enumerate(SHELVES):
         shelfInfo = OrderedDict()
+
+        if not shelf == 'Common':
+            tabName, frameName = shelf.split('_')
+            shelfInfo['tabName'] = tabName
+            shelfInfo['frameName'] = frameName
+            shelfInfo['order'] = str(i).zfill(2)
+
+        shelfButtonInfos = []
         shelfButtons = cmds.shelfLayout(shelf, q=True, childArray=True)
         for shelfButton in shelfButtons:
             label = cmds.shelfButton(shelfButton, q=True, label=True) or cmds.shelfButton(shelfButton, q=True, command=True)[:20] + '...' + cmds.shelfButton(shelfButton, q=True, command=True)[-20:]
@@ -199,7 +210,8 @@ def saveShelves(*args):
                 'sourceType': cmds.shelfButton(shelfButton, q=True, sourceType=True),
                 'noDefaultPopup': True
             }
-            shelfInfo[label] = shelfButtonInfo
+            shelfButtonInfos.append(shelfButtonInfo)
+        shelfInfo['shelfButtonInfos'] = shelfButtonInfos
 
         filePath = '{}/{}.json'.format(SHELVES_DATA_PATH, shelf)
         with open(filePath, 'w') as f:
@@ -392,10 +404,10 @@ def shelvesSelectCallback(*args):
 
     shelfContents = None
     if selShelf == 'Common':
-        shelfContents = commonShelfInfo.keys()
+        shelfContents = [shelfButtonInfo.get('label') for shelfButtonInfo in commonShelfInfo.get('shelfButtonInfos')]
     else:
         tabName, frameName = selShelf.split('_')
-        shelfContents = taskShelvesInfo[tabName][frameName].keys()
+        shelfContents = [shelfButtonInfo.get('label') for shelfButtonInfo in taskShelvesInfo.get(tabName).get(frameName)]
 
     for shelfContent in shelfContents:
         cmds.textScrollList('shelfContentsTxtScrLs', e=True, append=shelfContent)
@@ -411,10 +423,9 @@ def shelfContentsSelectCallback(*args):
 
     shelfBtnInfo = None
     if selShelf == 'Common':
-        shelfBtnInfo = commonShelfInfo.get(selShelfBtnLabel)
+        shelfBtnInfo = _findShelfButtonInfo('Common', selShelf, selShelfBtnLabel)
     else:
-        taskShelfInfo = _getTaskShelfInfo(selShelf)
-        shelfBtnInfo = taskShelfInfo.get(selShelfBtnLabel)
+        shelfBtnInfo = _findShelfButtonInfo('Task', selShelf, selShelfBtnLabel)
 
     cmds.shelfButton('iconPrevShelfBtn', e=True, image=shelfBtnInfo.get('image1'), imageOverlayLabel=shelfBtnInfo.get('imageOverlayLabel'))
     cmds.textField('iconNameTxtFld', e=True, text=shelfBtnInfo.get('image1'))
@@ -434,10 +445,10 @@ def updateIcon(*args):
 
     # Update data
     if selShelf == 'Common':
-        commonShelfInfo[selShelfBtnLabel]['image1'] = image1
+        shelfButtonInfo = _findShelfButtonInfo('Common', selShelf, selShelfBtnLabel)
     else:
-        taskShelfInfo = _getTaskShelfInfo(selShelf)
-        taskShelfInfo[selShelfBtnLabel]['image1'] = image1
+        shelfButtonInfo = _findShelfButtonInfo('Task', selShelf, selShelfBtnLabel)
+    shelfButtonInfo['image1'] = image1
 
     # Update Editor
     cmds.shelfButton('iconPrevShelfBtn', e=True, image1=image1)
@@ -447,9 +458,18 @@ def updateIcon(*args):
     cmds.shelfButton(shelfBtn, e=True, image1=image1)
 
 
-def _getTaskShelfInfo(taskShelf=''):
-    tabName, frameName = taskShelf.split('_')
-    return taskShelvesInfo[tabName][frameName]
+def _findShelfButtonInfo(type='', taskShelf='', shelfButtonLabel=''):
+    shelfButtonInfos = None
+    if type == 'Common':
+        shelfButtonInfos = commonShelfInfo.get('shelfButtonInfos')
+    elif type == 'Task':
+        tabName, frameName = taskShelf.split('_')
+        shelfButtonInfos = taskShelvesInfo.get(tabName).get(frameName)
+
+    for shelfButtonInfo in shelfButtonInfos:
+        if shelfButtonLabel == shelfButtonInfo.get('label'):
+            return shelfButtonInfo
+    return None
 # ------------
 
 
