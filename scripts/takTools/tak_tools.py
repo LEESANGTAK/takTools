@@ -70,7 +70,7 @@ def UI():
     cmds.menu('helpMenu', label='Help', p=WIN_NAME)
     cmds.menuItem(label='Check Update', c=checkUpdate, p='helpMenu')
 
-    cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(2, 50, ADAPTED_OULINER_PERCENTAGE)])
+    cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(2, 50, 90)])
 
     cmds.columnLayout('mainColLo', adj=True)
 
