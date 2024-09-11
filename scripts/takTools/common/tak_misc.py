@@ -2472,8 +2472,11 @@ def cleanupTransform():
         for at in ['translate', 'rotate', 'scale']:
             sel.attr(at).disconnect(inputs=True, outputs=False)
             for axis in ['X', 'Y', 'Z']:
-                sel.attr(at+axis).disconnect()
-        sel.scale.set(1, 1, 1)
+                sel.attr(at+axis).disconnect(inputs=True, outputs=False)
+        try:
+            sel.scale.set(1, 1, 1)
+        except:
+            pass
 
 
 def prntLoc():
