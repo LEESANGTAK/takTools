@@ -10,6 +10,7 @@ Description:
 import os
 import json
 import shutil
+from distutils.dir_util import copy_tree
 import subprocess
 from functools import partial
 from collections import OrderedDict
@@ -21,18 +22,23 @@ from .pipeline import takMayaResourceBrowser as tmrb; reload(tmrb)
 from .utils import system as sysUtil
 
 
-# Preferences
-ICON_SIZE = 32
-ICON_MARGINE = 6
-NUM_ICONS_PER_ROW = 10
-COMMON_TAB_NUM_ROWS = 3
-OUTLINER_PERCENTAGE = 50
+# Version constants
+VERSION_MAJOR = 2
+VERSION_MINOR = 0
+VERSION_MICRO = 0
 
 # Size values are based on 4k(3840*2160) monitor
 # Caculate scale factor depend on monitor height
 DEFAULT_DISPLAY_HEIGHT = 2160
 sysObj = sysUtil.System()
 scaleFactor = sysObj.screenHeight / float(DEFAULT_DISPLAY_HEIGHT)
+
+# Preferences
+ICON_SIZE = 32
+ICON_MARGINE = 6
+NUM_ICONS_PER_ROW = 10
+COMMON_TAB_NUM_ROWS = 3
+OUTLINER_PERCENTAGE = 50 * scaleFactor
 
 PANE_WIDTH = ICON_SIZE * (NUM_ICONS_PER_ROW + 1)
 COMMON_TAB_HEIGHT = (ICON_SIZE + ICON_MARGINE) * COMMON_TAB_NUM_ROWS
@@ -47,6 +53,7 @@ MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
 SHELVES_DATA_PATH = '{}/data/shelves'.format(MODULE_PATH.replace('\\', '/'))
 
 WIN_NAME = "{0}Win".format(MODULE_NAME)
+WIN_TITLE = '{} {}.{}.{}'.format(TOOL_NAME, VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO)
 
 SUBPROCESS_NO_WINDOW = 0x08000000
 
@@ -65,7 +72,7 @@ def UI():
     if cmds.dockControl(MODULE_NAME, exists=True):
         cmds.deleteUI(MODULE_NAME)
 
-    cmds.window(WIN_NAME, title=TOOL_NAME, tlb=True)
+    cmds.window(WIN_NAME, title=WIN_TITLE, tlb=True)
 
     # Main menu
     cmds.menuBarLayout(WIN_NAME)
@@ -75,6 +82,7 @@ def UI():
     cmds.menuItem(label='Preferences', c=prefsGUI, p='editMenu')
     cmds.menu('helpMenu', label='Help', p=WIN_NAME)
     cmds.menuItem(label='Check Update', c=checkUpdate, p='helpMenu')
+    cmds.menuItem(label='About', c='', p='helpMenu')
 
     cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(2, 50, 90)])
 
@@ -98,32 +106,10 @@ def UI():
     cmds.outlinerEditor( outliner, edit=True, mainListConnection='worldList', selectionConnection='modelList', showShapes=False, showAssignedMaterials=False, showReferenceNodes=True, showReferenceMembers=True, showAttributes=False, showConnected=False, showAnimCurvesOnly=False, autoExpand=False, showDagOnly=True, ignoreDagHierarchy=False, expandConnections=False, showCompounds=True, showNumericAttrsOnly=False, highlightActive=True, autoSelectNewObjects=False, doNotSelectNewObjects=False, transmitFilters=False, showSetMembers=True, setFilter='defaultSetFilter', ignoreHiddenAttribute=False )
 
     # Dock window to left side
-    cmds.dockControl(MODULE_NAME, label=TOOL_NAME, area='left', content=WIN_NAME)
+    cmds.dockControl(MODULE_NAME, label=WIN_TITLE, area='left', content=WIN_NAME)
 
 
 # ------------ Save & Load
-def saveShelves(*args):
-    for shelf in SHELVES:
-        shelfInfo = OrderedDict()
-        shelfButtons = cmds.shelfLayout(shelf, q=True, childArray=True)
-        for shelfButton in shelfButtons:
-            label = cmds.shelfButton(shelfButton, q=True, label=True) or cmds.shelfButton(shelfButton, q=True, command=True)[:20] + '...' + cmds.shelfButton(shelfButton, q=True, command=True)[-20:]
-            shelfButtonInfo = {
-                'label': label,
-                'annotation': cmds.shelfButton(shelfButton, q=True, ann=True),
-                'image1': cmds.shelfButton(shelfButton, q=True, image1=True),
-                'imageOverlayLabel': cmds.shelfButton(shelfButton, q=True, imageOverlayLabel=True),
-                'command': cmds.shelfButton(shelfButton, q=True, command=True),
-                'sourceType': cmds.shelfButton(shelfButton, q=True, sourceType=True),
-                'noDefaultPopup': True
-            }
-            shelfInfo[label] = shelfButtonInfo
-
-        filePath = '{}/{}.json'.format(SHELVES_DATA_PATH, shelf)
-        with open(filePath, 'w') as f:
-            json.dump(shelfInfo, f, indent=4)
-
-
 def loadCommonShelf():
     global allShelfButtons
     global commonShelfInfo
@@ -197,6 +183,27 @@ def getTaskShelvesInfo():
 
     return taskShelvesInfo
 
+
+def saveShelves(*args):
+    for shelf in SHELVES:
+        shelfInfo = OrderedDict()
+        shelfButtons = cmds.shelfLayout(shelf, q=True, childArray=True)
+        for shelfButton in shelfButtons:
+            label = cmds.shelfButton(shelfButton, q=True, label=True) or cmds.shelfButton(shelfButton, q=True, command=True)[:20] + '...' + cmds.shelfButton(shelfButton, q=True, command=True)[-20:]
+            shelfButtonInfo = {
+                'label': label,
+                'annotation': cmds.shelfButton(shelfButton, q=True, ann=True),
+                'image1': cmds.shelfButton(shelfButton, q=True, image1=True),
+                'imageOverlayLabel': cmds.shelfButton(shelfButton, q=True, imageOverlayLabel=True),
+                'command': cmds.shelfButton(shelfButton, q=True, command=True),
+                'sourceType': cmds.shelfButton(shelfButton, q=True, sourceType=True),
+                'noDefaultPopup': True
+            }
+            shelfInfo[label] = shelfButtonInfo
+
+        filePath = '{}/{}.json'.format(SHELVES_DATA_PATH, shelf)
+        with open(filePath, 'w') as f:
+            json.dump(shelfInfo, f, indent=4)
 # ------------
 
 
@@ -502,8 +509,7 @@ def update():
 
 
 def copyPreferences():
-    # Copy preferences files
     prefsDir = '{}/prefs'.format(MODULE_PATH)
-    mayaPrefDir = '{}/{}/prefs'.format(cmds.internalVar(uad=True), int(cmds.about(version=True)))
-    shutil.copytree(prefsDir, mayaPrefDir, dirs_exist_ok=True)
+    mayaPrefDir = '{}{}/prefs'.format(cmds.internalVar(uad=True), int(cmds.about(version=True)))
+    copy_tree(prefsDir, mayaPrefDir)
 # ------------
