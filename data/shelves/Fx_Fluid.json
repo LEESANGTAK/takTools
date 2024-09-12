@@ -1,8 +1,8 @@
 {
-    "order": "10",
+    "order": "09",
     "tabName": "Fx",
     "frameName": "Fluid",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "import takTools.mode...reload(tdc)\ntdc.UI()",

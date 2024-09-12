@@ -1,8 +1,8 @@
 {
-    "order": "17",
+    "order": "16",
     "tabName": "Modeling",
     "frameName": "Mesh",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "polyUnsmooth -cachin... 1 -divisionLevels 1",

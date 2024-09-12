@@ -37,6 +37,7 @@ ICON_SIZE = 32
 ICON_MARGINE = 6
 ICON_DEFAULT = 'commandButton.png'
 LABEL_DEFAULT = 'User_Script'
+DEFAULT_TASK_TAB = 'Rigging'
 NUM_ICONS_PER_ROW = 10
 COMMON_TAB_NUM_ROWS = 3
 OUTLINER_PERCENTAGE = 50 * scaleFactor
@@ -48,10 +49,10 @@ ADAPTED_OULINER_PERCENTAGE = OUTLINER_PERCENTAGE + COMMON_TAB_PERCENTAGE
 SCROLL_AREA_HEIGHT = sysObj.screenHeight * ((100-ADAPTED_OULINER_PERCENTAGE) * 0.01) * 0.5
 
 WIN_NAME = "{0}Win".format(MODULE_NAME)
-SHELVES = ['Common']
 SOURCE_TYPE_MAPPING = {'mel': 1, 'python': 2, 1: 'mel', 2: 'python'}
 
 # Global variables
+shelves = ['Common']
 commonShelfInfo = {}
 taskShelvesInfo = {}
 allShelfButtons = {}
@@ -84,13 +85,15 @@ def UI():
     # Common tab
     cmds.tabLayout('cmnToolTabLo', tv=False, p='mainColLo')
     cmds.shelfLayout('Common', h=COMMON_TAB_HEIGHT, parent='cmnToolTabLo')
-    loadCommonShelf()
+    readCommonShelfInfo()
+    rebuildCommonShelf()
 
     cmds.separator('mainSep', style='in', p='mainColLo')
 
     # Task tabs
     cmds.tabLayout('taskTabLo', p='mainColLo')
-    loadTaskShelves()
+    readTaskShelvesInfo()
+    rebuildTaskShelves()
 
     # Outliner
     cmds.frameLayout('olFrameLo', labelVisible=False, p='mainPaneLo')
@@ -103,10 +106,14 @@ def UI():
 
 
 # ------------ Load & Save
-def loadCommonShelf():
+def rebuildCommonShelf():
     global allShelfButtons
 
-    readCommonShelfInfo()
+    # Remove existing tabs
+    commonShelfButtons = cmds.shelfLayout('Common', query=True, childArray=True)
+    if commonShelfButtons:
+        for commonshelfButton in commonShelfButtons:
+            cmds.shelfLayout('Common', edit=True, remove=commonshelfButton)
 
     for shelfButtonInfo in commonShelfInfo.get('shelfButtonInfos'):
         shelfBtn = cmds.shelfButton(
@@ -133,14 +140,20 @@ def readCommonShelfInfo(fromGUI=False):
             commonShelfInfo = json.load(f, object_pairs_hook=OrderedDict)
 
 
-def loadTaskShelves(*args):
+def rebuildTaskShelves(selectTab=DEFAULT_TASK_TAB, *args):
     global allShelfButtons
+    global shelves
 
-    readTaskShelvesInfo()
+    # Remove existing tab
+    if cmds.tabLayout('taskTabLo', exists=True):
+        cmds.deleteUI('taskTabLo')
 
+    # Build tabs
+    cmds.tabLayout('taskTabLo', p='mainColLo')
+    shelves = ['Common']
     for tabName, frameInfo in taskShelvesInfo.items():
         # Create tab for shelves
-        tabControl = cmds.scrollLayout(childResizable=True, h=SCROLL_AREA_HEIGHT, p='taskTabLo')
+        tabControl = cmds.scrollLayout(tabName, childResizable=True, h=SCROLL_AREA_HEIGHT, p='taskTabLo')
         cmds.tabLayout('taskTabLo', e=True, tabLabel=[tabControl, tabName])
 
         for frameName, frameData in frameInfo.items():
@@ -166,7 +179,10 @@ def loadTaskShelves(*args):
                     p=shelf)
                 allShelfButtons[shelfButtonInfo.get('label')] = shelfBtn
 
-            SHELVES.append(shelfName)
+            shelves.append(shelfName)
+
+    if selectTab:
+        cmds.tabLayout('taskTabLo', e=True, selectTab=selectTab)
 
 
 def readTaskShelvesInfo(fromGUI=False):
@@ -176,7 +192,7 @@ def readTaskShelvesInfo(fromGUI=False):
     rawTaskShelvesInfos = []
 
     if fromGUI:
-        for i, shelf in enumerate(SHELVES):
+        for i, shelf in enumerate(shelves):
             if shelf == 'Common':
                 continue
             shelfInfo = getShelfInfoFromGUI(i, shelf)
@@ -206,7 +222,7 @@ def readTaskShelvesInfo(fromGUI=False):
 
 
 def writeShelvesToFile(*args):
-    for i, shelf in enumerate(SHELVES):
+    for i, shelf in enumerate(shelves):
         shelfInfo = getShelfInfoFromGUI(i, shelf)
         filePath = '{}/{}.json'.format(SHELVES_DATA_PATH, shelf)
         with open(filePath, 'w') as f:
@@ -265,7 +281,7 @@ def editorGUI(*args):
     cmds.window(winName, title='Tak Tools Editor', tlb=True, p=WIN_NAME)
 
     cmds.tabLayout(tv=False)
-    cmds.columnLayout('mainColLo', adj=True)
+    cmds.columnLayout('editorMainColLo', adj=True)
 
     # Shelves and Shelf Contents
     cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1, COLUMN_WIDTH), (3, COLUMN_WIDTH)])
@@ -273,8 +289,8 @@ def editorGUI(*args):
     cmds.frameLayout(label='Shelves')
     cmds.columnLayout(adj=True)
     cmds.rowColumnLayout(numberOfColumns=4)
-    cmds.symbolButton(image='moveLayerUp.png')
-    cmds.symbolButton(image='moveLayerDown.png')
+    cmds.symbolButton(image='moveLayerUp.png', c=lambda x: reorderShelf('up'))
+    cmds.symbolButton(image='moveLayerDown.png', c=lambda x: reorderShelf('down'))
     cmds.symbolButton(image='newLayerEmpty.png')
     cmds.symbolButton(image='delete.png')
     cmds.setParent('..')
@@ -297,7 +313,7 @@ def editorGUI(*args):
     cmds.textScrollList('shelfContentsTxtScrLs', sc=shelfContentsSelectCallback)
 
     # Contents of a Shelf Button
-    cmds.setParent('mainColLo')
+    cmds.setParent('editorMainColLo')
     cmds.rowColumnLayout(numberOfColumns=2, columnAlign=[(1, 'right')])
 
     cmds.text(label='Icon Preview: ')
@@ -322,7 +338,7 @@ def editorGUI(*args):
     cmds.scrollField('cmdScrFld', w=(COLUMN_WIDTH*2)-110, h=100, cc=setCommand)
 
     # Buttons
-    cmds.setParent('mainColLo')
+    cmds.setParent('editorMainColLo')
     cmds.rowColumnLayout(numberOfColumns=2, columnOffset=[(2, 'left', 5)])
     cmds.button(label='Save All Shelves', w=COLUMN_WIDTH, c=writeShelvesToFile)
     cmds.button(label='Close', w=COLUMN_WIDTH, c=lambda x: cmds.deleteUI(winName))
@@ -337,8 +353,23 @@ def editorGUI(*args):
 
 def populateShelvesTextScrollList():
     cmds.textScrollList('shevesTxtScrLs', e=True, removeAll=True)
-    for shelf in SHELVES:
+    for shelf in shelves:
         cmds.textScrollList('shevesTxtScrLs', e=True, append=shelf)
+
+
+def reorderShelf(direction='up', *args):
+    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
+    if selShelf == 'Common':
+        return
+
+    selShelfIndex = shelves.index(selShelf)
+    if direction == 'up':
+        shelves[selShelfIndex], shelves[selShelfIndex-1] = shelves[selShelfIndex-1], shelves[selShelfIndex]
+    elif direction == 'down':
+        shelves[selShelfIndex+1], shelves[selShelfIndex]  = shelves[selShelfIndex], shelves[selShelfIndex+1]
+
+    refreshShelves(selShelf)
+    rebuildTaskShelves(selShelf.split('_')[0])
 
 
 def shelvesSelectCallback(*args):
@@ -520,7 +551,7 @@ def prefsGUI(*args):
 def checkUpdate(self):
     if isOutdated():
         result = cmds.confirmDialog(
-            title=MODULE_NAME,
+            title=TOOL_NAME,
             message="New version is detected. Do you want to update?",
             button=['Yes','No'],
             defaultButton='Yes',
@@ -534,7 +565,7 @@ def checkUpdate(self):
                 import takTools.tak_tools as tt
                 import imp; imp.reload(tt); tt.UI()
     else:
-        cmds.confirmDialog(title=MODULE_NAME, message='You have latest version.\nEnjoy!')
+        cmds.confirmDialog(title=TOOL_NAME, message='You have latest version.\nEnjoy!')
 
 
 def isOutdated():

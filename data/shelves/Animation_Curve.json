@@ -1,8 +1,8 @@
 {
-    "order": "06",
+    "order": "04",
     "tabName": "Animation",
     "frameName": "Curve",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "keyTangent -global -... -global -ott step;\n",

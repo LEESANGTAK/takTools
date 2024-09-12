@@ -1,8 +1,8 @@
 {
-    "order": "07",
+    "order": "10",
     "tabName": "Fx",
     "frameName": "Volume",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "create3DFluid 10 10 ...id 10 10 10 10 10 10",

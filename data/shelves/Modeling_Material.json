@@ -1,8 +1,8 @@
 {
-    "order": "16",
+    "order": "15",
     "tabName": "Modeling",
     "frameName": "Material",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "import takTools.comm...)\ntak_misc.copyMat()",

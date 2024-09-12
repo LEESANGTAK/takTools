@@ -2,7 +2,7 @@
     "order": "03",
     "tabName": "Animation",
     "frameName": "Pose",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "import os\nimport sys...tudiolibrary.main()\n",

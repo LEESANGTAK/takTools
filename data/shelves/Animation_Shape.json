@@ -2,7 +2,7 @@
     "order": "05",
     "tabName": "Animation",
     "frameName": "Shape",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "SculptGeometryTool...SculptGeometryTool",
