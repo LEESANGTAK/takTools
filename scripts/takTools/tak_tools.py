@@ -618,7 +618,7 @@ Created: 12/22/2015
 Version: {}.{}.{}
 
 Custom shelf tool to organize shelf buttons more efficiently.
-ⓒ {} Sangtak Lee, All rights reserved.
+{} Sangtak Lee, All rights reserved.
 '''.format(
     VERSION_MAJOR, VERSION_MINOR, VERSION_MICRO,
     time.localtime().tm_year,
