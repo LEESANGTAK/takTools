@@ -3,7 +3,6 @@ import json
 import time
 from distutils.dir_util import copy_tree
 import subprocess
-from functools import partial
 from collections import OrderedDict
 
 from maya import cmds
