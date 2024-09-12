@@ -1,16 +1,17 @@
 {
-    "tabName": "Fx", 
-    "frameName": "Volume", 
-    "order": "07", 
+    "order": "07",
+    "tabName": "Fx",
+    "frameName": "Volume",
+    "collapse": true,
     "shelfButtonInfos": [
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "create3DFluid 10 10 ...id 10 10 10 10 10 10", 
-            "command": "create3DFluid 10 10 10 10 10 10", 
-            "image1": "fluidCreate3D.png", 
-            "annotation": "Create 3D Container"
+            "label": "create3DFluid 10 10 ...id 10 10 10 10 10 10",
+            "annotation": "Create 3D Container",
+            "image1": "fluidCreate3D.png",
+            "imageOverlayLabel": "",
+            "command": "create3DFluid 10 10 10 10 10 10",
+            "sourceType": "mel",
+            "noDefaultPopup": true
         }
     ]
 }

@@ -1,25 +1,26 @@
 {
-    "tabName": "Animation", 
-    "frameName": "Shape", 
-    "order": "05", 
+    "order": "05",
+    "tabName": "Animation",
+    "frameName": "Shape",
+    "collapse": true,
     "shelfButtonInfos": [
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "SculptGeometryTool...SculptGeometryTool", 
-            "command": "SculptGeometryTool", 
-            "image1": "putty.png", 
-            "annotation": "Sculpt a geometry object."
-        }, 
+            "label": "SculptGeometryTool...SculptGeometryTool",
+            "annotation": "Sculpt a geometry object.",
+            "image1": "putty.png",
+            "imageOverlayLabel": "",
+            "command": "SculptGeometryTool",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "python", 
-            "label": "import takTools.anim...)\ntak_aniSculpt.UI()", 
-            "command": "import takTools.animation.tak_aniSculpt as tak_aniSculpt\nimport imp\nimp.reload(tak_aniSculpt)\ntak_aniSculpt.UI()", 
-            "image1": "aniSculpt.bmp", 
-            "annotation": "Correct problematic shape of animated geometry."
+            "label": "import takTools.anim...)\ntak_aniSculpt.UI()",
+            "annotation": "Correct problematic shape of animated geometry.",
+            "image1": "aniSculpt.bmp",
+            "imageOverlayLabel": "",
+            "command": "import takTools.animation.tak_aniSculpt as tak_aniSculpt\nimport imp\nimp.reload(tak_aniSculpt)\ntak_aniSculpt.UI()",
+            "sourceType": "python",
+            "noDefaultPopup": true
         }
     ]
 }

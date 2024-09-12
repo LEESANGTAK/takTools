@@ -1,43 +1,44 @@
 {
-    "tabName": "Modeling", 
-    "frameName": "Selection", 
-    "order": "18", 
+    "order": "18",
+    "tabName": "Modeling",
+    "frameName": "Selection",
+    "collapse": false,
     "shelfButtonInfos": [
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "python", 
-            "label": "import takTools.comm...k_misc.selEveryNUI()", 
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.selEveryNUI()", 
-            "image1": "selectSkipedEdgeRing.bmp", 
-            "annotation": "import takTools.comm...k_misc.selEveryNUI()"
-        }, 
+            "label": "import takTools.comm...k_misc.selEveryNUI()",
+            "annotation": "import takTools.comm...k_misc.selEveryNUI()",
+            "image1": "selectSkipedEdgeRing.bmp",
+            "imageOverlayLabel": "",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.selEveryNUI()",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "polySelectSp -ring;...polySelectSp -ring;", 
-            "command": "polySelectSp -ring;", 
-            "image1": "polyConvertToEdgeRing.png", 
-            "annotation": "Selects all parallel edges that form an edge ring based on the current selection"
-        }, 
+            "label": "polySelectSp -ring;...polySelectSp -ring;",
+            "annotation": "Selects all parallel edges that form an edge ring based on the current selection",
+            "image1": "polyConvertToEdgeRing.png",
+            "imageOverlayLabel": "",
+            "command": "polySelectSp -ring;",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "polySelectSp -loop;...polySelectSp -loop;", 
-            "command": "polySelectSp -loop;", 
-            "image1": "polyConvertToEdgeLoop.png", 
-            "annotation": "Selects all connected edges that form an edge loop based on the current selection"
-        }, 
+            "label": "polySelectSp -loop;...polySelectSp -loop;",
+            "annotation": "Selects all connected edges that form an edge loop based on the current selection",
+            "image1": "polyConvertToEdgeLoop.png",
+            "imageOverlayLabel": "",
+            "command": "polySelectSp -loop;",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "PolygonSelectionCons...SelectionConstraints", 
-            "command": "PolygonSelectionConstraints", 
-            "image1": "polySelectUsingConstraints.png", 
-            "annotation": "PolygonSelectionCons...SelectionConstraints"
+            "label": "PolygonSelectionCons...SelectionConstraints",
+            "annotation": "PolygonSelectionCons...SelectionConstraints",
+            "image1": "polySelectUsingConstraints.png",
+            "imageOverlayLabel": "",
+            "command": "PolygonSelectionConstraints",
+            "sourceType": "mel",
+            "noDefaultPopup": true
         }
     ]
 }

@@ -136,13 +136,20 @@ def loadTaskShelves(*args):
     global taskShelvesInfo
 
     taskShelvesInfo = getTaskShelvesInfo()
+
     for tabName, frameInfo in taskShelvesInfo.items():
+        # Create tab for shelves
         tabControl = cmds.scrollLayout(childResizable=True, h=SCROLL_AREA_HEIGHT, p='taskTabLo')
         cmds.tabLayout('taskTabLo', e=True, tabLabel=[tabControl, tabName])
-        for frameName, shelfButtonInfos in frameInfo.items():
+
+        for frameName, frameData in frameInfo.items():
             shelfName = '{}_{}'.format(tabName, frameName)
-            SHELVES.append(shelfName)
-            frameLo = cmds.frameLayout(label=frameName, collapse=False, collapsable=True, p=tabControl)
+
+            # Create frame layout with frame data
+            frameLo = cmds.frameLayout(shelfName, label=frameName, collapsable=True, collapse=frameData.get('collapse'), p=tabControl)
+
+            # Add shelf buttons to the shelf layout in the frame layout
+            shelfButtonInfos = frameData.get('shelfButtonInfos')
             numRows = int(len(shelfButtonInfos) / NUM_ICONS_PER_ROW) + 1
             shelf = cmds.shelfLayout(shelfName, ch=((ICON_SIZE + ICON_MARGINE) * numRows), p=frameLo)
             for shelfButtonInfo in shelfButtonInfos:
@@ -156,8 +163,9 @@ def loadTaskShelves(*args):
                     sourceType=shelfButtonInfo.get('sourceType'),
                     noDefaultPopup=shelfButtonInfo.get('noDefaultPopup'),
                     p=shelf)
-
                 allShelfButtons[shelfButtonInfo.get('label')] = shelfBtn
+
+            SHELVES.append(shelfName)
 
 
 def getTaskShelvesInfo():
@@ -173,16 +181,18 @@ def getTaskShelvesInfo():
             taksShelvesInfo.append(shelfInfo)
     orderedTaskShlvesInfos = sorted(taksShelvesInfo, key=lambda item: item.get('order'))
 
-    # Get tabs
+    # Get tab data
     for taskShelfInfo in orderedTaskShlvesInfos:
         tabName = taskShelfInfo.get('tabName')
         taskShelvesInfo[tabName] = OrderedDict()
 
-    # Get frames
+    # Get frame data
     for taskShelfInfo in orderedTaskShlvesInfos:
         tabName = taskShelfInfo.get('tabName')
         frameName = taskShelfInfo.get('frameName')
-        taskShelvesInfo[tabName][frameName] = taskShelfInfo.get('shelfButtonInfos')
+        taskShelvesInfo[tabName][frameName] = OrderedDict()
+        taskShelvesInfo[tabName][frameName]['collapse'] = taskShelfInfo.get('collapse')
+        taskShelvesInfo[tabName][frameName]['shelfButtonInfos'] = taskShelfInfo.get('shelfButtonInfos')
 
     return taskShelvesInfo
 
@@ -193,9 +203,10 @@ def saveShelves(*args):
 
         if not shelf == 'Common':
             tabName, frameName = shelf.split('_')
+            shelfInfo['order'] = str(i).zfill(2)
             shelfInfo['tabName'] = tabName
             shelfInfo['frameName'] = frameName
-            shelfInfo['order'] = str(i).zfill(2)
+            shelfInfo['collapse'] = cmds.frameLayout(shelf, q=True, collapse=True)
 
         shelfButtonInfos = []
         shelfButtons = cmds.shelfLayout(shelf, q=True, childArray=True)
@@ -320,7 +331,7 @@ def editorGUI(*args):
     winName = 'editorWin'
     if cmds.window(winName, exists=True):
         cmds.deleteUI(winName)
-    cmds.window(winName, title='Tak Tools Editor', tlb=True)
+    cmds.window(winName, title='Tak Tools Editor', tlb=True, p=WIN_NAME)
 
     cmds.tabLayout(tv=False)
     cmds.columnLayout('mainColLo', adj=True)
@@ -407,7 +418,7 @@ def shelvesSelectCallback(*args):
         shelfContents = [shelfButtonInfo.get('label') for shelfButtonInfo in commonShelfInfo.get('shelfButtonInfos')]
     else:
         tabName, frameName = selShelf.split('_')
-        shelfContents = [shelfButtonInfo.get('label') for shelfButtonInfo in taskShelvesInfo.get(tabName).get(frameName)]
+        shelfContents = [shelfButtonInfo.get('label') for shelfButtonInfo in taskShelvesInfo.get(tabName).get(frameName).get('shelfButtonInfos')]
 
     for shelfContent in shelfContents:
         cmds.textScrollList('shelfContentsTxtScrLs', e=True, append=shelfContent)
@@ -464,7 +475,7 @@ def _findShelfButtonInfo(type='', taskShelf='', shelfButtonLabel=''):
         shelfButtonInfos = commonShelfInfo.get('shelfButtonInfos')
     elif type == 'Task':
         tabName, frameName = taskShelf.split('_')
-        shelfButtonInfos = taskShelvesInfo.get(tabName).get(frameName)
+        shelfButtonInfos = taskShelvesInfo.get(tabName).get(frameName).get('shelfButtonInfos')
 
     for shelfButtonInfo in shelfButtonInfos:
         if shelfButtonLabel == shelfButtonInfo.get('label'):
