@@ -2,7 +2,7 @@
     "order": "23",
     "tabName": "Rigging",
     "frameName": "Model",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "abSymMesh;...abSymMesh;",

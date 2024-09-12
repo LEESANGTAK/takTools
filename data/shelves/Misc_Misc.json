@@ -2,7 +2,7 @@
     "order": "11",
     "tabName": "Misc",
     "frameName": "Misc",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "from takTools.utils ...l.cleanupMayaScene()",

@@ -81,8 +81,8 @@ class TakMayaResourceBrowser(QtWidgets.QDialog):
             print('The name "{}" has been copied.'.format(text))
 
     def setTakToolsAddToolImageTextField(self, item):
-        if cmds.textFieldGrp('imgTxtFldGrp', ex=True):
-            cmds.textFieldGrp('imgTxtFldGrp', e=True, text=item.text())
+        if cmds.textField('iconNameTxtFld', ex=True):
+            cmds.textField('iconNameTxtFld', e=True, text=item.text())
             self.close()
 
     def showMatchingImages(self):

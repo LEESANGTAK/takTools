@@ -2,7 +2,7 @@
     "order": "21",
     "tabName": "Rigging",
     "frameName": "Display",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "toggle -state on -lo...state on -localAxis;",

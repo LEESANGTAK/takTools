@@ -2,7 +2,7 @@
     "order": "20",
     "tabName": "Rigging",
     "frameName": "Deformation",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "import takSkeleton a...(ts)\nts.gui.showUI()",

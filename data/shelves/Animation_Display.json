@@ -2,7 +2,7 @@
     "order": "01",
     "tabName": "Animation",
     "frameName": "Display",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
             "label": "keyframe -tds on;...keyframe -tds on;",

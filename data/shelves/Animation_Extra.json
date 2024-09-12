@@ -5,15 +5,6 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "source \"makePlayblas...\";\nmakePlayblastMov;",
-            "annotation": "Quicktime playblast with Pdplayer",
-            "image1": "playblastMov.png",
-            "imageOverlayLabel": "",
-            "command": "source \"makePlayblastMov.mel\";\nmakePlayblastMov;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
             "label": "import takTools.comm...misc.delKeySetDflt()",
             "annotation": "Delete keys and set default value",
             "image1": "deleteKeys.bmp",
@@ -163,6 +154,15 @@
             "image1": "Bookmark.png",
             "imageOverlayLabel": "",
             "command": "BookmarkManager;",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
+        {
+            "label": "B1 Playblast",
+            "annotation": "Quicktime playblast with Pdplayer",
+            "image1": "playblastMov.png",
+            "imageOverlayLabel": "",
+            "command": "source \"makePlayblastMov.mel\";\nmakePlayblastMov;",
             "sourceType": "mel",
             "noDefaultPopup": true
         }

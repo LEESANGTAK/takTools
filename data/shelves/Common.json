@@ -1,7 +1,7 @@
 {
     "shelfButtonInfos": [
         {
-            "label": "import takTools.pipe...)\ntak_shotSetUp.UI()",
+            "label": "Shot Setup",
             "annotation": "Set maya preference.",
             "image1": "setPref.bmp",
             "imageOverlayLabel": "",
