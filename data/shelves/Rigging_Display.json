@@ -7,8 +7,8 @@
         {
             "label": "toggle -state on -lo...state on -localAxis;",
             "annotation": "toggle -state on -localAxis;",
-            "image1": "commandButton.png",
-            "imageOverlayLabel": "",
+            "image1": "menuIconModify.png",
+            "imageOverlayLabel": "LAO",
             "command": "toggle -state on -localAxis;",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -16,8 +16,8 @@
         {
             "label": "toggle -state off -l...tate off -localAxis;",
             "annotation": "toggle -state off -localAxis;",
-            "image1": "commandButton.png",
-            "imageOverlayLabel": "",
+            "image1": "menuIconModify.png",
+            "imageOverlayLabel": "LAF",
             "command": "toggle -state off -localAxis;",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -25,8 +25,8 @@
         {
             "label": "jdsWin...jdsWin",
             "annotation": "Customize the joint scale",
-            "image1": "menuIconDisplay.png",
-            "imageOverlayLabel": "",
+            "image1": "kinJoint.png",
+            "imageOverlayLabel": "JS",
             "command": "jdsWin",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -53,7 +53,7 @@
             "label": "import takTools.util...playAffectedToggle()",
             "annotation": "Display affected",
             "image1": "pythonFamily.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "DA",
             "command": "import takTools.utils.display as dp\nimport imp\nimp.reload(dp)\ndp.displayAffectedToggle()",
             "sourceType": "python",
             "noDefaultPopup": true

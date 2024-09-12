@@ -49,7 +49,7 @@
             "label": "SelectHierarchy...SelectHierarchy",
             "annotation": "Select all the children of the current selection",
             "image1": "menuIconEdit.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "SH",
             "command": "SelectHierarchy",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -58,7 +58,7 @@
             "label": "FreezeTransformation...reezeTransformations",
             "annotation": "Freeze Transformations",
             "image1": "menuIconModify.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "FT",
             "command": "FreezeTransformations",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -67,7 +67,7 @@
             "label": "CenterPivot...CenterPivot",
             "annotation": "Center Pivot",
             "image1": "menuIconModify.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "CP",
             "command": "CenterPivot",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -85,7 +85,7 @@
             "label": "ComponentEditor...ComponentEditor",
             "annotation": "Component Editor",
             "image1": "menuIconWindow.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "CE",
             "command": "ComponentEditor",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -184,7 +184,7 @@
             "label": "import takTools.comm...misc.setJntColorUI()",
             "annotation": "import takTools.comm...misc.setJntColorUI()",
             "image1": "hairPaintSpecular.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "JC",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.setJntColorUI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -193,7 +193,7 @@
             "label": "import takTools.comm...load(tc)\ntc.showUI()",
             "annotation": "Set ouliner color",
             "image1": "hairPaintSpecular.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "OC",
             "command": "import takTools.common.tak_outlinerColor as tc\nimport imp\nimp.reload(tc)\ntc.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -229,7 +229,7 @@
             "label": "from imp import relo...erGUI()\nsmGUI.show()",
             "annotation": "Set Manager",
             "image1": "objectSet.svg",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "SM",
             "command": "from imp import reload; import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -238,7 +238,7 @@
             "label": "from takTools.utils ...ptEditorHorizontal()",
             "annotation": "Layout script editor horizontally",
             "image1": "defaultTwoSideBySideLayout.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "SE",
             "command": "from takTools.utils import qtUtil;qtUtil.editScriptEditorHorizontal()",
             "sourceType": "python",
             "noDefaultPopup": true

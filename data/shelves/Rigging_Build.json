@@ -5,10 +5,10 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "from imp import relo...er.mainWindow.show()",
-            "annotation": "from imp import reload\nimport rigBuilder; reload(rigBuilder)\nrig...",
-            "image1": "pythonFamily.png",
-            "imageOverlayLabel": "",
+            "label": "Rig Builder",
+            "annotation": "Show rig builder GUI.",
+            "image1": "HIKcreateControlRig.png",
+            "imageOverlayLabel": "RB",
             "command": "from imp import reload\nimport rigBuilder; reload(rigBuilder)\nrigBuilder.mainWindow.show()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -149,10 +149,10 @@
             "noDefaultPopup": true
         },
         {
-            "label": "SetDrivenKey...SetDrivenKey",
+            "label": "Set Driven key",
             "annotation": "Set driven key options",
             "image1": "menuIconKeys.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "SDK",
             "command": "SetDrivenKey",
             "sourceType": "mel",
             "noDefaultPopup": true

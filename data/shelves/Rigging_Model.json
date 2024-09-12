@@ -8,7 +8,7 @@
             "label": "abSymMesh;...abSymMesh;",
             "annotation": "abSymMesh;",
             "image1": "symmetrize.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "AS",
             "command": "abSymMesh;",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -35,7 +35,7 @@
             "label": "pm.mel.hyperShadePan...ateShadingNetwork\");",
             "annotation": "Duplicate selected shader network.",
             "image1": "out_lambert.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "DS",
             "command": "pm.mel.hyperShadePanelMenuCommand(\"hyperShadePanel1\", \"duplicateShadingNetwork\");",
             "sourceType": "python",
             "noDefaultPopup": true

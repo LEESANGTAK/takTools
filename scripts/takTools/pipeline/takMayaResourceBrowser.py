@@ -52,6 +52,7 @@ class TakMayaResourceBrowser(QtWidgets.QDialog):
 
         self.searchLe = QtWidgets.QLineEdit()
         self.searchLe.setPlaceholderText('Search...')
+        self.searchLe.setClearButtonEnabled(True)
         mainLayout.addWidget(self.searchLe)
 
         self.imageList = QtWidgets.QListWidget()
@@ -69,7 +70,7 @@ class TakMayaResourceBrowser(QtWidgets.QDialog):
             self.imageList.addItem(imageItem)
 
     def connectWidgets(self):
-        self.searchLe.editingFinished.connect(self.showMatchingImages)
+        self.searchLe.textChanged.connect(self.showMatchingImages)
         self.imageList.currentItemChanged.connect(self.copyImageName)
         self.imageList.itemDoubleClicked.connect(self.setTakToolsAddToolImageTextField)
 

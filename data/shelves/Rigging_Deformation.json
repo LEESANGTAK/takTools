@@ -194,8 +194,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...\nbSkinSaver.showUI()",
-            "annotation": "import takTools.rigg...\nbSkinSaver.showUI()",
+            "label": "bSkinSaver",
+            "annotation": "Show bSkinSaver GUI.",
             "image1": "save.png",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.bSkinSaver as bSkinSaver\nimport imp\nimp.reload(bSkinSaver)\nbSkinSaver.showUI()",
