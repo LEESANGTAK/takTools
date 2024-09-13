@@ -1,35 +1,35 @@
 {
-    "order": "15",
-    "tabName": "Modeling",
-    "frameName": "Material",
-    "collapse": false,
+    "order": "15", 
+    "tabName": "Modeling", 
+    "frameName": "Material", 
+    "collapse": false, 
     "shelfButtonInfos": [
         {
-            "label": "Copy Material",
-            "annotation": "Assign the material of first selection to the others",
-            "image1": "copyMat.bmp",
-            "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyMat()",
-            "sourceType": "python",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "Copy Material", 
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyMat()", 
+            "image1": "copyMat.bmp", 
+            "annotation": "Assign the material of first selection to the others"
+        }, 
         {
-            "label": "Random Color Material",
-            "annotation": "Assign random color lamber.",
-            "image1": "ranColLam.bmp",
-            "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.ranColLam()",
-            "sourceType": "python",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "Random Color Material", 
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.ranColLam()", 
+            "image1": "ranColLam.bmp", 
+            "annotation": "Assign random color lamber."
+        }, 
         {
-            "label": "Solid Color Material",
-            "annotation": "Assign solid color material with grabed color.",
-            "image1": "solColorMat.bmp",
-            "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.solidColMat()",
-            "sourceType": "python",
-            "noDefaultPopup": true
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "Solid Color Material", 
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.solidColMat()", 
+            "image1": "solColorMat.bmp", 
+            "annotation": "Assign solid color material with grabed color."
         }
     ]
 }

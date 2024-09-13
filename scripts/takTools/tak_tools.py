@@ -5,18 +5,28 @@ import subprocess
 from collections import OrderedDict
 from distutils.dir_util import copy_tree
 
-from maya import cmds
+from maya import cmds, mel
 
 from imp import reload
 from .pipeline import takMayaResourceBrowser as tmrb; reload(tmrb)
 from .utils import system as sysUtil
+
+
+def getAllIcons():
+    allIcons = []
+    iconPaths = mel.eval('getenv "XBMLANGPATH";').split(';')
+    for iconPath in iconPaths:
+        if os.path.exists(iconPath):
+            allIcons.extend(os.listdir(iconPath))
+    allIcons.extend(cmds.resourceManager(nameFilter='*.png'))
+    return list(set(allIcons))
+
 
 MAYA_VERSION = int(cmds.about(version=True))
 if MAYA_VERSION >= 2022:
     from configparser import ConfigParser
 else:
     from ConfigParser import ConfigParser
-
 
 SUBPROCESS_NO_WINDOW = 0x08000000
 
@@ -26,6 +36,7 @@ MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
 PREFERENCES_FILE_PATH = '{}/data/preferences.ini'.format(MODULE_PATH)
 SHELVES_DATA_PATH = '{}/data/shelves'.format(MODULE_PATH.replace('\\', '/'))
 DEFAULT_ICONS_DIR = '{}/icons'.format(MODULE_PATH)
+ALL_ICONS = getAllIcons()
 
 # Version constants
 VERSION_MAJOR = 2
@@ -177,18 +188,23 @@ def rebuildTaskShelves(selectTab=DEFAULT_TASK_TAB, *args):
             shelfButtonInfos = frameData.get('shelfButtonInfos')
             numRows = int(len(shelfButtonInfos) / NUM_ICONS_PER_ROW) + 1
             shelf = cmds.shelfLayout(shelfName, ch=((ICON_SIZE + ICON_MARGINE) * numRows), p=frameLayout)
+
             for shelfButtonInfo in shelfButtonInfos:
+                image = shelfButtonInfo.get('image1')
+                if not image in ALL_ICONS:
+                    image = 'noPreview.png'
+
                 shelfBtn = cmds.shelfButton(
                     label=shelfButtonInfo.get('label'),
                     annotation=shelfButtonInfo.get('annotation'),
                     width=ICON_SIZE, height=ICON_SIZE,
-                    image1=shelfButtonInfo.get('image1'),
+                    image1=image,
                     imageOverlayLabel=shelfButtonInfo.get('imageOverlayLabel'),
                     command=shelfButtonInfo.get('command'),
                     sourceType=shelfButtonInfo.get('sourceType'),
                     noDefaultPopup=shelfButtonInfo.get('noDefaultPopup'),
                     p=shelf)
-                allShelfButtons[shelfButtonInfo.get('label')] = shelfBtn
+                allShelfButtons[_getShelfButtonKey(shelfName, shelfButtonInfo.get('label'))] = shelfBtn
 
             shelves.append(shelfName)
 
@@ -278,7 +294,7 @@ def getShelfInfoFromGUI(index=0, shelfName=''):
             }
             shelfButtonInfos.append(shelfButtonInfo)
 
-            allShelfButtons[label] = shelfButton
+            allShelfButtons[_getShelfButtonKey(shelfName, shelfButtonInfo.get('label'))] = shelfButton
 
     shelfInfo['shelfButtonInfos'] = shelfButtonInfos
 
@@ -446,7 +462,7 @@ def addShelfButton(*args):
     if cmds.shelfButton(shelfButtonName, exists=True):
         shelfButtonName = _getValidShelfButtonName(shelfButtonName)
     cmds.shelfButton(shelfButtonName, label=shelfButtonName, width=ICON_SIZE, height=ICON_SIZE, image1=ICON_DEFAULT, ann=SHELF_BUTTON_DEFAULT_LABEL, p=selShelf)
-    allShelfButtons[shelfButtonName] = shelfButtonName
+    allShelfButtons[_getShelfButtonKey(selShelf, shelfButtonName)] = shelfButtonName
 
     refreshEditorShelves(selShelf, shelfButtonName)
 
@@ -454,7 +470,7 @@ def addShelfButton(*args):
 def deleteShelfButton(*args):
     selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
     selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
-    shelfButton = allShelfButtons.get(selShelfBtnLabel)
+    shelfButton = allShelfButtons.get(_getShelfButtonKey(selShelf, selShelfBtnLabel))
     cmds.deleteUI(shelfButton)
 
     refreshEditorShelves(selShelf)
@@ -560,11 +576,11 @@ def renameShelf(*args):
 def renameShelfButton(*args):
     selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
     selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
-    shelfButton = allShelfButtons.get(selShelfBtnLabel)
+    shelfButton = allShelfButtons.get(_getShelfButtonKey(selShelf, selShelfBtnLabel))
     label = cmds.textFieldGrp('shelfBtnLabelTxtFldGrp', q=True, text=True)
     cmds.shelfButton(shelfButton, e=True, label=label)
 
-    refreshEditorShelves(selShelf)
+    refreshEditorShelves(selShelf, label)
 
 
 def setIcon(useMayaResource=False, *args):
@@ -586,7 +602,7 @@ def updateIcon(*args):
     selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     image1 = cmds.textField('iconNameTxtFld', q=True, text=True) or ICON_DEFAULT
 
-    shelfButton = allShelfButtons.get(selShelfBtnLabel)
+    shelfButton = allShelfButtons.get(_getShelfButtonKey(selShelf, selShelfBtnLabel))
     cmds.shelfButton(shelfButton, e=True, image1=image1)
 
     refreshEditorShelves(selShelf, selShelfBtnLabel)
@@ -597,7 +613,7 @@ def setIconLabel(*args):
     selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     iconLabel = cmds.textField('iconLabelTxtFld', q=True, text=True)
 
-    shelfButton = allShelfButtons.get(selShelfBtnLabel)
+    shelfButton = allShelfButtons.get(_getShelfButtonKey(selShelf, selShelfBtnLabel))
     cmds.shelfButton(shelfButton, e=True, imageOverlayLabel=iconLabel)
 
     refreshEditorShelves(selShelf, selShelfBtnLabel)
@@ -608,7 +624,7 @@ def setToolTip(*args):
     selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     tooltip = cmds.textField('tooltipTxtFld', q=True, text=True)
 
-    shelfButton = allShelfButtons.get(selShelfBtnLabel)
+    shelfButton = allShelfButtons.get(_getShelfButtonKey(selShelf, selShelfBtnLabel))
     cmds.shelfButton(shelfButton, e=True, annotation=tooltip)
 
     refreshEditorShelves(selShelf, selShelfBtnLabel)
@@ -620,7 +636,7 @@ def setCommand(*args):
     language = SOURCE_TYPE_MAPPING.get(cmds.radioButtonGrp('langRadioBtnGrp', q=True, select=True))
     command = cmds.scrollField('cmdScrFld', q=True, text=True)
 
-    shelfButton = allShelfButtons.get(selShelfBtnLabel)
+    shelfButton = allShelfButtons.get(_getShelfButtonKey(selShelf, selShelfBtnLabel))
     cmds.shelfButton(shelfButton, e=True, command=command, sourceType=language)
 
     refreshEditorShelves(selShelf, selShelfBtnLabel)
@@ -656,6 +672,10 @@ def _findShelfButtonInfo(type='', taskShelf='', shelfButtonLabel=''):
         if shelfButtonLabel == shelfButtonInfo.get('label'):
             return shelfButtonInfo
     return None
+
+def _getShelfButtonKey(shelfName, shelfButtonName):
+    # This prevent error when same shelf button exists in the another shelf
+    return '{}{}'.format(shelfName, shelfButtonName)
 # ------------
 
 
@@ -689,21 +709,30 @@ def applyPreferences(*args):
     iconSize = cmds.intFieldGrp('iconSizeIntFldGrp', q=True, v1=True)
     numIconsPerRow = cmds.intFieldGrp('numIconsPerRowIntFldGrp', q=True, v1=True)
 
-    config = configparser.ConfigParser()
+    config = ConfigParser()
+    if MAYA_VERSION >= 2022:
+        config['Panel'] = {
+            'outlinerPercentage': outlinerPercentage
+        }
 
-    config['Panel'] = {
-        'outlinerPercentage': outlinerPercentage
-    }
+        config['Tab'] = {
+            'commonTabNumRows': commonTabNumRows,
+            'defaultTaskTab': defaultTaskTab
+        }
 
-    config['Tab'] = {
-        'commonTabNumRows': commonTabNumRows,
-        'defaultTaskTab': defaultTaskTab
-    }
-
-    config['Icon'] = {
-        'iconSize': iconSize,
-        'numIconsPerRow': numIconsPerRow
-    }
+        config['Icon'] = {
+            'iconSize': iconSize,
+            'numIconsPerRow': numIconsPerRow
+        }
+    else:
+        config.add_section('Panel')
+        config.set('Panel', 'outlinerPercentage', outlinerPercentage)
+        config.add_section('Tab')
+        config.set('Tab', 'commonTabNumRows', commonTabNumRows)
+        config.set('Tab', 'defaultTaskTab', defaultTaskTab)
+        config.add_section('Icon')
+        config.set('Icon', 'iconSize', iconSize)
+        config.set('Icon', 'numIconsPerRow', numIconsPerRow)
 
     with open(PREFERENCES_FILE_PATH, 'w') as f:
         config.write(f)

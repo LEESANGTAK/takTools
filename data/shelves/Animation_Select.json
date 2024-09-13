@@ -1,53 +1,53 @@
 {
-    "order": "02",
-    "tabName": "Animation",
-    "frameName": "Select",
-    "collapse": false,
+    "order": "02", 
+    "tabName": "Animation", 
+    "frameName": "Select", 
+    "collapse": false, 
     "shelfButtonInfos": [
         {
-            "label": "Pose 2 Shelf",
-            "annotation": "Save controls selected",
-            "image1": "pos2Shelf.bmp",
-            "imageOverlayLabel": "",
-            "command": "pose2shelf",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "Pose 2 Shelf", 
+            "command": "pose2shelf", 
+            "image1": "pos2Shelf.bmp", 
+            "annotation": "Save controls selected"
+        }, 
         {
-            "label": "AS Biped Selector",
-            "annotation": "Advanced Skeleton biped selector",
-            "image1": "asBiped.png",
-            "imageOverlayLabel": "",
-            "command": "source \"biped.mel\";",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "AS Biped Selector", 
+            "command": "source \"biped.mel\";", 
+            "image1": "asBiped.png", 
+            "annotation": "Advanced Skeleton biped selector"
+        }, 
         {
-            "label": "AS Face Selector",
-            "annotation": "Advanced Skeleton face selector",
-            "image1": "asFace.png",
-            "imageOverlayLabel": "",
-            "command": "source \"face.mel\";",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "AS Face Selector", 
+            "command": "source \"face.mel\";", 
+            "image1": "asFace.png", 
+            "annotation": "Advanced Skeleton face selector"
+        }, 
         {
-            "label": "AS Picker",
-            "annotation": "Advanced Skeleton picker",
-            "image1": "picker.png",
-            "imageOverlayLabel": "",
-            "command": "source \"picker.mel\";",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "AS Picker", 
+            "command": "source \"picker.mel\";", 
+            "image1": "picker.png", 
+            "annotation": "Advanced Skeleton picker"
+        }, 
         {
-            "label": "ARS Picker",
-            "annotation": "ARSpicker",
-            "image1": "colorPickCursor.png",
-            "imageOverlayLabel": "",
-            "command": "\nimport ARSpicker\nARSpicker.picker.main()\n",
-            "sourceType": "python",
-            "noDefaultPopup": true
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "ARS Picker", 
+            "command": "\nimport ARSpicker\nARSpicker.picker.main()\n", 
+            "image1": "colorPickCursor.png", 
+            "annotation": "ARSpicker"
         }
     ]
 }

@@ -1,71 +1,71 @@
 {
-    "order": "13",
-    "tabName": "Modeling",
-    "frameName": "Display",
-    "collapse": false,
+    "order": "13", 
+    "tabName": "Modeling", 
+    "frameName": "Display", 
+    "collapse": false, 
     "shelfButtonInfos": [
         {
-            "label": "Vertex Normal",
-            "annotation": "Vertex Normals",
-            "image1": "polySetVertexNormal.png",
-            "imageOverlayLabel": "Vertex",
-            "command": "ToggleVertexNormalDisplay",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "Vertex", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "Vertex Normal", 
+            "command": "ToggleVertexNormalDisplay", 
+            "image1": "polySetVertexNormal.png", 
+            "annotation": "Vertex Normals"
+        }, 
         {
-            "label": "Face Normal",
-            "annotation": "Face Normals",
-            "image1": "polyNormalsConform.png",
-            "imageOverlayLabel": "Face",
-            "command": "ToggleFaceNormalDisplay",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "Face", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "Face Normal", 
+            "command": "ToggleFaceNormalDisplay", 
+            "image1": "polyNormalsConform.png", 
+            "annotation": "Face Normals"
+        }, 
         {
-            "label": "Normal Size",
-            "annotation": "Normals Size...",
-            "image1": "polyNormalsPropagate.png",
-            "imageOverlayLabel": "Size",
-            "command": "ChangeNormalSize",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "Size", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "Normal Size", 
+            "command": "ChangeNormalSize", 
+            "image1": "polyNormalsPropagate.png", 
+            "annotation": "Normals Size..."
+        }, 
         {
-            "label": "Unlock Normal",
-            "annotation": "Unlock Normal",
-            "image1": "polyNormalUnlock.png",
-            "imageOverlayLabel": "",
-            "command": "polyNormalPerVertex -ufn true",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "Unlock Normal", 
+            "command": "polyNormalPerVertex -ufn true", 
+            "image1": "polyNormalUnlock.png", 
+            "annotation": "Unlock Normal"
+        }, 
         {
-            "label": "Auto Smoothing Group",
-            "annotation": "Auto Smoothing Groups",
-            "image1": "polyHardEdge.png",
-            "imageOverlayLabel": "",
-            "command": "source \"dp_autoSmoothingGroups.mel\";",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "Auto Smoothing Group", 
+            "command": "source \"dp_autoSmoothingGroups.mel\";", 
+            "image1": "polyHardEdge.png", 
+            "annotation": "Auto Smoothing Groups"
+        }, 
         {
-            "label": "Soft Normal",
-            "annotation": "Soft Normal",
-            "image1": "polySoftEdge.png",
-            "imageOverlayLabel": "",
-            "command": "SoftPolyEdgeElements 1",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "Soft Normal", 
+            "command": "SoftPolyEdgeElements 1", 
+            "image1": "polySoftEdge.png", 
+            "annotation": "Soft Normal"
+        }, 
         {
-            "label": "Reverse Normal",
-            "annotation": "Reverse Polygon Normal",
-            "image1": "polyNormal.png",
-            "imageOverlayLabel": "",
-            "command": "ReversePolygonNormals",
-            "sourceType": "mel",
-            "noDefaultPopup": true
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "Reverse Normal", 
+            "command": "ReversePolygonNormals", 
+            "image1": "polyNormal.png", 
+            "annotation": "Reverse Polygon Normal"
         }
     ]
 }

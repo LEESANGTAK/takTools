@@ -1,62 +1,62 @@
 {
-    "order": "19",
-    "tabName": "Rigging",
-    "frameName": "Display",
-    "collapse": false,
+    "order": "19", 
+    "tabName": "Rigging", 
+    "frameName": "Display", 
+    "collapse": false, 
     "shelfButtonInfos": [
         {
-            "label": "toggle -state on -lo...state on -localAxis;",
-            "annotation": "toggle -state on -localAxis;",
-            "image1": "menuIconModify.png",
-            "imageOverlayLabel": "LAO",
-            "command": "toggle -state on -localAxis;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "LAO", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "toggle -state on -lo...state on -localAxis;", 
+            "command": "toggle -state on -localAxis;", 
+            "image1": "menuIconModify.png", 
+            "annotation": "toggle -state on -localAxis;"
+        }, 
         {
-            "label": "toggle -state off -l...tate off -localAxis;",
-            "annotation": "toggle -state off -localAxis;",
-            "image1": "menuIconModify.png",
-            "imageOverlayLabel": "LAF",
-            "command": "toggle -state off -localAxis;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "LAF", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "toggle -state off -l...tate off -localAxis;", 
+            "command": "toggle -state off -localAxis;", 
+            "image1": "menuIconModify.png", 
+            "annotation": "toggle -state off -localAxis;"
+        }, 
         {
-            "label": "jdsWin...jdsWin",
-            "annotation": "Customize the joint scale",
-            "image1": "kinJoint.png",
-            "imageOverlayLabel": "JS",
-            "command": "jdsWin",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "JS", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "jdsWin...jdsWin", 
+            "command": "jdsWin", 
+            "image1": "kinJoint.png", 
+            "annotation": "Customize the joint scale"
+        }, 
         {
-            "label": "import takTools.comm..._misc.drawJntStyle()",
-            "annotation": "Change the joint style",
-            "image1": "jointStyle.bmp",
-            "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.drawJntStyle()",
-            "sourceType": "python",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import takTools.comm..._misc.drawJntStyle()", 
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.drawJntStyle()", 
+            "image1": "jointStyle.bmp", 
+            "annotation": "Change the joint style"
+        }, 
         {
-            "label": "import takTools.comm...k_misc.displayType()",
-            "annotation": "Change display type.",
-            "image1": "displayType.png",
-            "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.displayType()",
-            "sourceType": "python",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import takTools.comm...k_misc.displayType()", 
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.displayType()", 
+            "image1": "displayType.png", 
+            "annotation": "Change display type."
+        }, 
         {
-            "label": "import takTools.util...playAffectedToggle()",
-            "annotation": "Display affected",
-            "image1": "pythonFamily.png",
-            "imageOverlayLabel": "DA",
-            "command": "import takTools.utils.display as dp\nimport imp\nimp.reload(dp)\ndp.displayAffectedToggle()",
-            "sourceType": "python",
-            "noDefaultPopup": true
+            "imageOverlayLabel": "DA", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "import takTools.util...playAffectedToggle()", 
+            "command": "import takTools.utils.display as dp\nimport imp\nimp.reload(dp)\ndp.displayAffectedToggle()", 
+            "image1": "pythonFamily.png", 
+            "annotation": "Display affected"
         }
     ]
 }

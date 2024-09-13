@@ -1,35 +1,35 @@
 {
-    "order": "03",
-    "tabName": "Animation",
-    "frameName": "Pose",
-    "collapse": false,
+    "order": "03", 
+    "tabName": "Animation", 
+    "frameName": "Pose", 
+    "collapse": false, 
     "shelfButtonInfos": [
         {
-            "label": "Studio Library",
-            "annotation": "Studio Library",
-            "image1": "studioLibrary.png",
-            "imageOverlayLabel": "",
-            "command": "import os\nimport sys\n    \nimport studiolibrary\nstudiolibrary.main()\n",
-            "sourceType": "python",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "Studio Library", 
+            "command": "import os\nimport sys\n    \nimport studiolibrary\nstudiolibrary.main()\n", 
+            "image1": "studioLibrary.png", 
+            "annotation": "Studio Library"
+        }, 
         {
-            "label": "Tween Machine",
-            "annotation": "Tween Machine",
-            "image1": "tweenMachine.xpm",
-            "imageOverlayLabel": "",
-            "command": "source tweenMachine.mel;\ntweenMachine;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "mel", 
+            "label": "Tween Machine", 
+            "command": "source tweenMachine.mel;\ntweenMachine;", 
+            "image1": "tweenMachine.xpm", 
+            "annotation": "Tween Machine"
+        }, 
         {
-            "label": "Mirror Controller",
-            "annotation": "Mirror selected controls",
-            "image1": "mirrorCtrl.png",
-            "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirrorCtrlsUI()",
-            "sourceType": "python",
-            "noDefaultPopup": true
+            "imageOverlayLabel": "", 
+            "noDefaultPopup": true, 
+            "sourceType": "python", 
+            "label": "Mirror Controller", 
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirrorCtrlsUI()", 
+            "image1": "mirrorCtrl.png", 
+            "annotation": "Mirror selected controls"
         }
     ]
 }
