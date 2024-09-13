@@ -35,7 +35,8 @@ scaleFactor = sysObj.screenHeight / float(DEFAULT_DISPLAY_HEIGHT)
 ICON_SIZE = 32
 ICON_MARGINE = 6
 ICON_DEFAULT = 'commandButton.png'
-LABEL_DEFAULT = 'User_Script'
+SHELF_DEFAULT_NAME = 'Tab_Frame'
+SHELF_BUTTON_DEFAULT_LABEL = 'User_Script'
 DEFAULT_TASK_TAB = 'Rigging'
 NUM_ICONS_PER_ROW = 10
 COMMON_TAB_NUM_ROWS = 3
@@ -55,6 +56,7 @@ shelves = ['Common']
 commonShelfInfo = {}
 taskShelvesInfo = {}
 allShelfButtons = {}
+maxOrderNum = 0
 
 
 def UI():
@@ -71,7 +73,7 @@ def UI():
     cmds.menuItem(label='Save', image='save.png', c=writeShelvesToFile, p='fileMenu')
     cmds.menuItem(label='Restore', image='refresh.png', c=restore, p='fileMenu')
     cmds.menu('editMenu', label='Edit', p=WIN_NAME)
-    cmds.menuItem(label='Editor', image='shelfTab.png', c=editorGUI, p='editMenu')
+    cmds.menuItem(label='Editor', image='passSetRelationEditor.png', c=editorGUI, p='editMenu')
     cmds.menuItem(label='Preferences', image='shelfOptions.png', c=prefsGUI, p='editMenu')
     cmds.menu('helpMenu', label='Help', p=WIN_NAME)
     cmds.menuItem(label='Check Update', image='teDownArrow.png', c=checkUpdate, p='helpMenu')
@@ -186,6 +188,7 @@ def rebuildTaskShelves(selectTab=DEFAULT_TASK_TAB, *args):
 
 def readTaskShelvesInfo(fromGUI=False):
     global taskShelvesInfo
+    global maxOrderNum
 
     taskShelvesInfo = OrderedDict()
     rawTaskShelvesInfos = []
@@ -204,7 +207,8 @@ def readTaskShelvesInfo(fromGUI=False):
                 shelfInfo = json.load(f, object_pairs_hook=OrderedDict)
                 rawTaskShelvesInfos.append(shelfInfo)
 
-    orderedTaskShlvesInfos = sorted(rawTaskShelvesInfos, key=lambda item: item.get('order'))
+    orderedTaskShlvesInfos = sorted(rawTaskShelvesInfos, key=lambda item: int(item.get('order')))
+    maxOrderNum = int(orderedTaskShlvesInfos[-1].get('order'))
 
     # Get tab data
     for taskShelfInfo in orderedTaskShlvesInfos:
@@ -250,20 +254,21 @@ def getShelfInfoFromGUI(index=0, shelfName=''):
 
     shelfButtonInfos = []
     shelfButtons = cmds.shelfLayout(shelfName, q=True, childArray=True)
-    for shelfButton in shelfButtons:
-        label = cmds.shelfButton(shelfButton, q=True, label=True) or cmds.shelfButton(shelfButton, q=True, command=True)[:20] + '...' + cmds.shelfButton(shelfButton, q=True, command=True)[-20:]
-        shelfButtonInfo = {
-            'label': label,
-            'annotation': cmds.shelfButton(shelfButton, q=True, ann=True),
-            'image1': cmds.shelfButton(shelfButton, q=True, image1=True),
-            'imageOverlayLabel': cmds.shelfButton(shelfButton, q=True, imageOverlayLabel=True),
-            'command': cmds.shelfButton(shelfButton, q=True, command=True),
-            'sourceType': cmds.shelfButton(shelfButton, q=True, sourceType=True),
-            'noDefaultPopup': True
-        }
-        shelfButtonInfos.append(shelfButtonInfo)
+    if shelfButtons:
+        for shelfButton in shelfButtons:
+            label = cmds.shelfButton(shelfButton, q=True, label=True) or cmds.shelfButton(shelfButton, q=True, command=True)[:20] + '...' + cmds.shelfButton(shelfButton, q=True, command=True)[-20:]
+            shelfButtonInfo = {
+                'label': label,
+                'annotation': cmds.shelfButton(shelfButton, q=True, ann=True),
+                'image1': cmds.shelfButton(shelfButton, q=True, image1=True),
+                'imageOverlayLabel': cmds.shelfButton(shelfButton, q=True, imageOverlayLabel=True),
+                'command': cmds.shelfButton(shelfButton, q=True, command=True),
+                'sourceType': cmds.shelfButton(shelfButton, q=True, sourceType=True),
+                'noDefaultPopup': True
+            }
+            shelfButtonInfos.append(shelfButtonInfo)
 
-        allShelfButtons[label] = shelfButton
+            allShelfButtons[label] = shelfButton
 
     shelfInfo['shelfButtonInfos'] = shelfButtonInfos
 
@@ -290,11 +295,11 @@ def editorGUI(*args):
     cmds.rowColumnLayout(numberOfColumns=4)
     cmds.symbolButton(image='moveLayerUp.png', c=lambda x: reorderShelf('up'))
     cmds.symbolButton(image='moveLayerDown.png', c=lambda x: reorderShelf('down'))
-    cmds.symbolButton(image='newLayerEmpty.png')
-    cmds.symbolButton(image='delete.png')
+    cmds.symbolButton(image='newLayerEmpty.png', c=addShelf)
+    cmds.symbolButton(image='delete.png', c=deleteShelf)
     cmds.setParent('..')
-    cmds.textFieldGrp('shelfNameTxtFldGrp', columnWidth=[(1, 45), (2, COLUMN_WIDTH*0.5)], label='Rename: ')
-    cmds.textScrollList('shevesTxtScrLs', sc=shelvesSelectCallback)
+    cmds.textFieldGrp('shelfNameTxtFldGrp', columnWidth=[(1, 45), (2, COLUMN_WIDTH*0.5)], label='Rename: ', cc=renameShelf)
+    cmds.textScrollList('editorShevesTxtScrLs', sc=shelvesSelectCallback)
 
     cmds.setParent('..')
     cmds.setParent('..')
@@ -302,14 +307,12 @@ def editorGUI(*args):
 
     cmds.frameLayout(label='Shelf Contents')
     cmds.columnLayout(adj=True)
-    cmds.rowColumnLayout(numberOfColumns=4)
-    cmds.symbolButton(image='moveLayerUp.png')
-    cmds.symbolButton(image='moveLayerDown.png')
+    cmds.rowColumnLayout(numberOfColumns=2)
     cmds.symbolButton(image='newLayerEmpty.png', c=addShelfButton)
     cmds.symbolButton(image='delete.png', c=deleteShelfButton)
     cmds.setParent('..')
     cmds.textFieldGrp('shelfBtnLabelTxtFldGrp', columnWidth=[(1, 45), (2, COLUMN_WIDTH*0.5)], label='Rename: ', cc=renameShelfButton)
-    cmds.textScrollList('shelfContentsTxtScrLs', sc=shelfContentsSelectCallback)
+    cmds.textScrollList('editorShelfContentsTxtScrLs', sc=shelfContentsSelectCallback)
 
     # Contents of a Shelf Button
     cmds.setParent('editorMainColLo')
@@ -333,7 +336,7 @@ def editorGUI(*args):
 
     cmds.text('Command: ')
     cmds.columnLayout(adj=True)
-    cmds.radioButtonGrp('langRadioBtnGrp', label='Language: ', labelArray2=['MEL', 'Python'], numberOfRadioButtons=2, select=2, columnWidth=[(1, 50), (2, 50)])
+    cmds.radioButtonGrp('langRadioBtnGrp', label='Language: ', labelArray2=['MEL', 'Python'], numberOfRadioButtons=2, select=2, columnWidth=[(1, 50), (2, 50)], cc=setCommand)
     cmds.scrollField('cmdScrFld', w=(COLUMN_WIDTH*2)-110, h=100, cc=setCommand)
 
     # Buttons
@@ -351,13 +354,13 @@ def editorGUI(*args):
 
 
 def populateShelvesTextScrollList():
-    cmds.textScrollList('shevesTxtScrLs', e=True, removeAll=True)
+    cmds.textScrollList('editorShevesTxtScrLs', e=True, removeAll=True)
     for shelf in shelves:
-        cmds.textScrollList('shevesTxtScrLs', e=True, append=shelf)
+        cmds.textScrollList('editorShevesTxtScrLs', e=True, append=shelf)
 
 
 def reorderShelf(direction='up', *args):
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
     if selShelf == 'Common':
         return
 
@@ -367,15 +370,17 @@ def reorderShelf(direction='up', *args):
     elif direction == 'down':
         shelves[selShelfIndex+1], shelves[selShelfIndex]  = shelves[selShelfIndex], shelves[selShelfIndex+1]
 
-    refreshShelves(selShelf)
+    refreshEditorShelves(selShelf)
     rebuildTaskShelves(selShelf.split('_')[0])
 
 
 def shelvesSelectCallback(*args):
     # Populate shelf contents text scroll list
-    cmds.textScrollList('shelfContentsTxtScrLs', e=True, removeAll=True)
+    cmds.textScrollList('editorShelfContentsTxtScrLs', e=True, removeAll=True)
+    cmds.textFieldGrp('shelfBtnLabelTxtFldGrp', e=True, text='')
 
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    tabName = None
 
     shelfContents = None
     if selShelf == 'Common':
@@ -385,16 +390,19 @@ def shelvesSelectCallback(*args):
         shelfContents = [shelfButtonInfo.get('label') for shelfButtonInfo in taskShelvesInfo.get(tabName).get(frameName).get('shelfButtonInfos')]
 
     for shelfContent in shelfContents:
-        cmds.textScrollList('shelfContentsTxtScrLs', e=True, append=shelfContent)
+        cmds.textScrollList('editorShelfContentsTxtScrLs', e=True, append=shelfContent)
 
     # Fill shelves rename text field
     cmds.textFieldGrp('shelfNameTxtFldGrp', e=True, text=selShelf)
 
+    if tabName:
+        cmds.tabLayout('taskTabLo', e=True, selectTab=tabName)
+
 
 def shelfContentsSelectCallback(*args):
     # Populate shelf button GUIs
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
-    selShelfBtnLabel = cmds.textScrollList('shelfContentsTxtScrLs', q=True, selectItem=True)[0]
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
 
     shelfBtnInfo = None
     if selShelf == 'Common':
@@ -414,8 +422,8 @@ def shelfContentsSelectCallback(*args):
 
 
 def addShelfButton(*args):
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
-    shelfButtonName = LABEL_DEFAULT
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    shelfButtonName = SHELF_BUTTON_DEFAULT_LABEL
 
     def _getValidShelfButtonName(shelfButtonName=''):
         index = 0
@@ -427,29 +435,126 @@ def addShelfButton(*args):
 
     if cmds.shelfButton(shelfButtonName, exists=True):
         shelfButtonName = _getValidShelfButtonName(shelfButtonName)
-    cmds.shelfButton(shelfButtonName, label=shelfButtonName, width=ICON_SIZE, height=ICON_SIZE, image1=ICON_DEFAULT, ann=LABEL_DEFAULT, p=selShelf)
+    cmds.shelfButton(shelfButtonName, label=shelfButtonName, width=ICON_SIZE, height=ICON_SIZE, image1=ICON_DEFAULT, ann=SHELF_BUTTON_DEFAULT_LABEL, p=selShelf)
     allShelfButtons[shelfButtonName] = shelfButtonName
 
-    refreshShelves(selShelf, shelfButtonName)
+    refreshEditorShelves(selShelf, shelfButtonName)
 
 
 def deleteShelfButton(*args):
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
-    selShelfBtnLabel = cmds.textScrollList('shelfContentsTxtScrLs', q=True, selectItem=True)[0]
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     shelfButton = allShelfButtons.get(selShelfBtnLabel)
     cmds.deleteUI(shelfButton)
 
-    refreshShelves(selShelf)
+    refreshEditorShelves(selShelf)
+
+
+def addShelf(*args):
+    newShelfName = SHELF_DEFAULT_NAME
+
+    def _getValidShelfName(shelfName=''):
+        index = 0
+        validShelfName = shelfName
+        while os.path.exists('{}/{}.json'.format(SHELVES_DATA_PATH, validShelfName)):
+            validShelfName = '{}{}'.format(shelfName, index)
+            index += 1
+        return validShelfName
+
+    newShelfFilePath = '{}/{}.json'.format(SHELVES_DATA_PATH, newShelfName)
+    if os.path.exists(newShelfFilePath):
+        newShelfName = _getValidShelfName(newShelfName)
+
+    newShelfFilePath = '{}/{}.json'.format(SHELVES_DATA_PATH, newShelfName)
+    tabName, frameName = newShelfName.split('_')
+    defaultShelfInfo = {
+        'order': str(maxOrderNum+1).zfill(2),
+        'tabName': tabName,
+        'frameName': frameName,
+        'collapse': False,
+        'shelfButtonInfos': []
+    }
+    with open(newShelfFilePath, 'w') as f:
+        json.dump(defaultShelfInfo, f, indent=4)
+
+    readTaskShelvesInfo(fromGUI=False)
+    rebuildTaskShelves(tabName)
+    refreshEditorShelves(newShelfName)
+
+
+def deleteShelf(*args):
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+
+    if selShelf == 'Common':
+        cmds.warning('"Common" shelf can not be deleted.')
+        return
+
+    answer = cmds.confirmDialog(title='Warning', message='Unsaved data will be lost. And this can not be undo.\nAre you sure?', button=['Yes','No'], defaultButton='Yes', cancelButton='No', dismissString='No')
+    if answer == 'No':
+        return
+
+    os.remove('{}/{}.json'.format(SHELVES_DATA_PATH, selShelf))
+
+    readTaskShelvesInfo(fromGUI=False)
+    rebuildTaskShelves()
+    refreshEditorShelves()
+    cmds.textFieldGrp('shelfNameTxtFldGrp', e=True, text='')
+
+
+def renameShelf(*args):
+    oldShelfName = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    newShelfName = cmds.textFieldGrp('shelfNameTxtFldGrp', q=True, text=True)
+
+    # Error checks
+    if oldShelfName == newShelfName:
+        return
+
+    if oldShelfName == 'Common':
+        cmds.warning('"Common" shelf can not be renamed.')
+        cmds.textFieldGrp('shelfNameTxtFldGrp', e=True, text='Common')
+        return
+
+    splitedNewShelfName = newShelfName.split('_')
+    if len(splitedNewShelfName) != 2:
+        cmds.error('Shelf name should be in form with "TabName_FrameName".')
+        return
+
+    # Start renaming process
+    answer = cmds.confirmDialog(title='Warning', message='Unsaved data will be lost.\nAre you sure?', button=['Yes','No'], defaultButton='Yes', cancelButton='No', dismissString='No')
+    if answer == 'No':
+        return
+
+    oldShelfFilePath = '{}/{}.json'.format(SHELVES_DATA_PATH, oldShelfName)
+    newShelfFilePath = '{}/{}.json'.format(SHELVES_DATA_PATH, newShelfName)
+
+    # Read old shelf file
+    with open(oldShelfFilePath, 'r') as f:
+        shelfInfo = json.load(f)
+
+    # Replace tab and frame name value
+    shelfInfo['tabName'] = splitedNewShelfName[0]
+    shelfInfo['frameName'] = splitedNewShelfName[1]
+
+    # Write new shelf file
+    with open(newShelfFilePath, 'w') as f:
+        json.dump(shelfInfo, f, indent=4)
+
+    # Remove old shelf file
+    os.remove(oldShelfFilePath)
+
+    readTaskShelvesInfo(fromGUI=False)
+    rebuildTaskShelves(splitedNewShelfName[0])
+    refreshEditorShelves(newShelfName)
 
 
 def renameShelfButton(*args):
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
-    selShelfBtnLabel = cmds.textScrollList('shelfContentsTxtScrLs', q=True, selectItem=True)[0]
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     shelfButton = allShelfButtons.get(selShelfBtnLabel)
     label = cmds.textFieldGrp('shelfBtnLabelTxtFldGrp', q=True, text=True)
     cmds.shelfButton(shelfButton, e=True, label=label)
 
-    refreshShelves(selShelf, label)
+    refreshEditorShelves(selShelf, label)
 
 
 def setIcon(useMayaResource=False, *args):
@@ -467,61 +572,65 @@ def getFromIconsFolder(widgetName, *args):
 
 
 def updateIcon(*args):
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
-    selShelfBtnLabel = cmds.textScrollList('shelfContentsTxtScrLs', q=True, selectItem=True)[0]
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     image1 = cmds.textField('iconNameTxtFld', q=True, text=True) or ICON_DEFAULT
 
     shelfButton = allShelfButtons.get(selShelfBtnLabel)
     cmds.shelfButton(shelfButton, e=True, image1=image1)
 
-    refreshShelves(selShelf, selShelfBtnLabel)
+    refreshEditorShelves(selShelf, selShelfBtnLabel)
 
 
 def setIconLabel(*args):
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
-    selShelfBtnLabel = cmds.textScrollList('shelfContentsTxtScrLs', q=True, selectItem=True)[0]
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     iconLabel = cmds.textField('iconLabelTxtFld', q=True, text=True)
 
     shelfButton = allShelfButtons.get(selShelfBtnLabel)
     cmds.shelfButton(shelfButton, e=True, imageOverlayLabel=iconLabel)
 
-    refreshShelves(selShelf, selShelfBtnLabel)
+    refreshEditorShelves(selShelf, selShelfBtnLabel)
 
 
 def setToolTip(*args):
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
-    selShelfBtnLabel = cmds.textScrollList('shelfContentsTxtScrLs', q=True, selectItem=True)[0]
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     tooltip = cmds.textField('tooltipTxtFld', q=True, text=True)
 
     shelfButton = allShelfButtons.get(selShelfBtnLabel)
     cmds.shelfButton(shelfButton, e=True, annotation=tooltip)
 
-    refreshShelves(selShelf, selShelfBtnLabel)
+    refreshEditorShelves(selShelf, selShelfBtnLabel)
 
 
 def setCommand(*args):
-    selShelf = cmds.textScrollList('shevesTxtScrLs', q=True, selectItem=True)[0]
-    selShelfBtnLabel = cmds.textScrollList('shelfContentsTxtScrLs', q=True, selectItem=True)[0]
+    selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     language = SOURCE_TYPE_MAPPING.get(cmds.radioButtonGrp('langRadioBtnGrp', q=True, select=True))
     command = cmds.scrollField('cmdScrFld', q=True, text=True)
 
     shelfButton = allShelfButtons.get(selShelfBtnLabel)
     cmds.shelfButton(shelfButton, e=True, command=command, sourceType=language)
 
-    refreshShelves(selShelf, selShelfBtnLabel)
+    refreshEditorShelves(selShelf, selShelfBtnLabel)
 
 
-def refreshShelves(shelfName='', shelfButtonLabel=''):
-    readCommonShelfInfo(fromGUI=True)
-    readTaskShelvesInfo(fromGUI=True)
+def refreshEditorShelves(shelfName='', shelfButtonLabel='', fromGUI=True):
+    if fromGUI:
+        readCommonShelfInfo(fromGUI=True)
+        readTaskShelvesInfo(fromGUI=True)
+    else:
+        readCommonShelfInfo(fromGUI=False)
+        readTaskShelvesInfo(fromGUI=False)
 
     populateShelvesTextScrollList()
 
     if shelfName:
-        cmds.textScrollList('shevesTxtScrLs', e=True, selectItem=shelfName)
+        cmds.textScrollList('editorShevesTxtScrLs', e=True, selectItem=shelfName)
         shelvesSelectCallback()
     if shelfButtonLabel:
-        cmds.textScrollList('shelfContentsTxtScrLs', e=True, selectItem=shelfButtonLabel)
+        cmds.textScrollList('editorShelfContentsTxtScrLs', e=True, selectItem=shelfButtonLabel)
         shelfContentsSelectCallback()
 
 

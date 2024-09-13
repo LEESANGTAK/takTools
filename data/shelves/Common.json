@@ -10,7 +10,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "OpenContentBrowser...OpenContentBrowser",
+            "label": "Content Browser",
             "annotation": "Content Browser",
             "image1": "teContentBrowser.png",
             "imageOverlayLabel": "",
@@ -19,7 +19,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...)\ntak_misc.openCWD()",
+            "label": "Open Scene",
             "annotation": "Open with current working directory.",
             "image1": "fileOpen.png",
             "imageOverlayLabel": "",
@@ -28,7 +28,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...)\ntak_misc.saveCWD()",
+            "label": "Save Scene",
             "annotation": "Save as in current working directory.",
             "image1": "fileSave.png",
             "imageOverlayLabel": "",
@@ -37,7 +37,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "ReferenceEditor...ReferenceEditor",
+            "label": "Reference Editor",
             "annotation": "Edit the references for the current scene",
             "image1": "out_reference.png",
             "imageOverlayLabel": "",
@@ -46,7 +46,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "SelectHierarchy...SelectHierarchy",
+            "label": "Select Hierarchy",
             "annotation": "Select all the children of the current selection",
             "image1": "menuIconEdit.png",
             "imageOverlayLabel": "SH",
@@ -55,7 +55,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "FreezeTransformation...reezeTransformations",
+            "label": "Freeze Transform",
             "annotation": "Freeze Transformations",
             "image1": "menuIconModify.png",
             "imageOverlayLabel": "FT",
@@ -64,7 +64,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "CenterPivot...CenterPivot",
+            "label": "Center Pivot",
             "annotation": "Center Pivot",
             "image1": "menuIconModify.png",
             "imageOverlayLabel": "CP",
@@ -73,7 +73,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "NamespaceEditor...NamespaceEditor",
+            "label": "Namespace Editor",
             "annotation": "Namespace Editor",
             "image1": "namespaceEditor.png",
             "imageOverlayLabel": "",
@@ -82,7 +82,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "ComponentEditor...ComponentEditor",
+            "label": "Component Editor",
             "annotation": "Component Editor",
             "image1": "menuIconWindow.png",
             "imageOverlayLabel": "CE",
@@ -91,7 +91,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "TextureViewWindow...TextureViewWindow",
+            "label": "UV Texture Editor",
             "annotation": "UV Texture Editor",
             "image1": "UVEditorUV.png",
             "imageOverlayLabel": "",
@@ -100,16 +100,16 @@
             "noDefaultPopup": true
         },
         {
-            "label": "HypershadeWindow...HypershadeWindow",
+            "label": "Hypershade Window",
             "annotation": "Display and edit connections in shading networks",
             "image1": "hypershade.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "HS",
             "command": "HypershadeWindow",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
-            "label": "NodeEditorWindow...NodeEditorWindow",
+            "label": "Node Editor",
             "annotation": "Display relationships among nodes in your scene graphically",
             "image1": "nodeGrapherRemoveNodes.png",
             "imageOverlayLabel": "",
@@ -118,7 +118,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "ConnectionEditor...ConnectionEditor",
+            "label": "Connection Editor",
             "annotation": "Make connections between object attributes",
             "image1": "mergeConnections.png",
             "imageOverlayLabel": "",
@@ -127,7 +127,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "ExpressionEditor...ExpressionEditor",
+            "label": "Expression Editor",
             "annotation": "Expression Editor",
             "image1": "out_expression.png",
             "imageOverlayLabel": "",
@@ -136,7 +136,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "GraphEditor...GraphEditor",
+            "label": "Graph Editor",
             "annotation": "Edit animation curves",
             "image1": "out_animCurveTA.png",
             "imageOverlayLabel": "",
@@ -145,7 +145,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "{\n    string $select...        \n    }    \n}",
+            "label": "Xray Mode",
             "annotation": "Toggle x-ray mode for selection.",
             "image1": "xRay.bmp",
             "imageOverlayLabel": "",
@@ -154,7 +154,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...isc)\ntak_misc.Wire()",
+            "label": "Wire Mode",
             "annotation": "Toggle wire mode for selection.",
             "image1": "UVTBWireFrame.png",
             "imageOverlayLabel": "",
@@ -163,17 +163,17 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.mode...reset.MatPreset.ui()",
-            "annotation": "import takTools.mode...reset.MatPreset.ui()",
+            "label": "Material Preset",
+            "annotation": "Show material preset GUI.",
             "image1": "hypershade.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "MP",
             "command": "import takTools.modeling.tak_matPreset as tak_matPreset\nimport imp\nimp.reload(tak_matPreset)\ntak_matPreset.MatPreset.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "from takTools.common...c.setShapeColorRGB()",
-            "annotation": "from takTools.common...c.setShapeColorRGB()",
+            "label": "Shape Color RGB",
+            "annotation": "Set a rgb color for selected shape.",
             "image1": "colorPresetSpectrum.png",
             "imageOverlayLabel": "",
             "command": "from takTools.common import tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.setShapeColorRGB()",
@@ -181,16 +181,16 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...misc.setJntColorUI()",
-            "annotation": "import takTools.comm...misc.setJntColorUI()",
+            "label": "Shape Color Index",
+            "annotation": "Set a indexed color for selected shape.",
             "image1": "hairPaintSpecular.png",
-            "imageOverlayLabel": "JC",
+            "imageOverlayLabel": "SC",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.setJntColorUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...load(tc)\ntc.showUI()",
+            "label": "Outliner Color",
             "annotation": "Set ouliner color",
             "image1": "hairPaintSpecular.png",
             "imageOverlayLabel": "OC",
@@ -199,7 +199,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...\ntak_misc.sortOutl()",
+            "label": "Sort Outliner",
             "annotation": "Sorting selected items in outliner.",
             "image1": "sortName.png",
             "imageOverlayLabel": "",
@@ -208,7 +208,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from takRenamer impo...(main);main.showUI()",
+            "label": "Renamer",
             "annotation": "Renamer",
             "image1": "quickRename.png",
             "imageOverlayLabel": "",
@@ -217,8 +217,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.mode...ak_cleanUpModel.UI()",
-            "annotation": "Delete construction history, unlock normal, unlock attr, delete intermediate shapes, freeze transform",
+            "label": "Clean Up Model",
+            "annotation": "Clean up model.",
             "image1": "cleanUpMesh.bmp",
             "imageOverlayLabel": "",
             "command": "import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport imp\nimp.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()",
@@ -226,16 +226,16 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from imp import relo...erGUI()\nsmGUI.show()",
+            "label": "Set Manager",
             "annotation": "Set Manager",
             "image1": "objectSet.svg",
-            "imageOverlayLabel": "SM",
+            "imageOverlayLabel": "",
             "command": "from imp import reload; import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "from takTools.utils ...ptEditorHorizontal()",
+            "label": "Horizontal Layout Script Eitor",
             "annotation": "Layout script editor horizontally",
             "image1": "defaultTwoSideBySideLayout.png",
             "imageOverlayLabel": "SE",
