@@ -1,9 +1,10 @@
 import os
 import json
 import time
-from distutils.dir_util import copy_tree
 import subprocess
+import configparser
 from collections import OrderedDict
+from distutils.dir_util import copy_tree
 
 from maya import cmds
 
@@ -17,12 +18,13 @@ SUBPROCESS_NO_WINDOW = 0x08000000
 MODULE_NAME = "takTools"
 TOOL_NAME = 'Tak Tools'
 MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
+PREFERENCES_FILE_PATH = '{}/data/preferences.ini'.format(MODULE_PATH)
 SHELVES_DATA_PATH = '{}/data/shelves'.format(MODULE_PATH.replace('\\', '/'))
 DEFAULT_ICONS_DIR = '{}/icons'.format(MODULE_PATH)
 
 # Version constants
 VERSION_MAJOR = 2
-VERSION_MINOR = 0
+VERSION_MINOR = 1
 VERSION_MICRO = 0
 
 # Size values are based on 4k(3840*2160) monitor
@@ -32,15 +34,18 @@ sysObj = sysUtil.System()
 scaleFactor = sysObj.screenHeight / float(DEFAULT_DISPLAY_HEIGHT)
 
 # Preferences
-ICON_SIZE = 32
+config = configparser.ConfigParser()
+config.read(PREFERENCES_FILE_PATH)
+
+ICON_SIZE = config.getint('Icon', 'iconSize')
 ICON_MARGINE = 6
 ICON_DEFAULT = 'commandButton.png'
 SHELF_DEFAULT_NAME = 'Tab_Frame'
 SHELF_BUTTON_DEFAULT_LABEL = 'User_Script'
-DEFAULT_TASK_TAB = 'Rigging'
-NUM_ICONS_PER_ROW = 10
-COMMON_TAB_NUM_ROWS = 3
-OUTLINER_PERCENTAGE = 50 * scaleFactor
+DEFAULT_TASK_TAB = config.get('Tab', 'defaultTaskTab')
+NUM_ICONS_PER_ROW = config.getint('Icon', 'numIconsPerRow')
+COMMON_TAB_NUM_ROWS = config.getint('Tab', 'commonTabNumRows')
+OUTLINER_PERCENTAGE = config.getint('Panel', 'outlinerPercentage') * scaleFactor
 
 PANE_WIDTH = ICON_SIZE * (NUM_ICONS_PER_ROW + 1)
 COMMON_TAB_HEIGHT = (ICON_SIZE + ICON_MARGINE) * COMMON_TAB_NUM_ROWS
@@ -651,7 +656,54 @@ def _findShelfButtonInfo(type='', taskShelf='', shelfButtonLabel=''):
 
 # ------------ Preferences
 def prefsGUI(*args):
-    print('prefsGUI()')
+    prefWinName = '{}PrefWin'.format(MODULE_NAME)
+    if cmds.window(prefWinName, ex=True):
+        cmds.deleteUI(prefWinName)
+    cmds.window(prefWinName, title='Preferences'.format(TOOL_NAME), tlb=True, p=WIN_NAME)
+    cmds.tabLayout(tv=False)
+    cmds.columnLayout(adj=True)
+    cmds.intFieldGrp('outlinerPercentageIntFldGrp', label='Outliner Percentage: ', v1=config.getint('Panel', 'outlinerPercentage'))
+    cmds.intFieldGrp('commonTabNumRowsIntFldGrp', label='Common Tab Number of Rows: ', v1=COMMON_TAB_NUM_ROWS)
+    cmds.optionMenuGrp('defaultTaskTabOptMenuGrp', label='Default Task Tab: ')
+    for tab in taskShelvesInfo.keys():
+        cmds.menuItem(label=tab)
+    cmds.optionMenuGrp('defaultTaskTabOptMenuGrp', e=True, value=DEFAULT_TASK_TAB)
+    cmds.intFieldGrp('iconSizeIntFldGrp', label='Icon Size: ', v1=ICON_SIZE)
+    cmds.intFieldGrp('numIconsPerRowIntFldGrp', label='Number of Icons Per Row: ', v1=NUM_ICONS_PER_ROW)
+    cmds.rowColumnLayout(numberOfColumns=2, columnOffset=[(2, 'left', 5)])
+    cmds.button(label='Apply', w=110, c=applyPreferences)
+    cmds.button(label='Close', w=110, c=lambda x: cmds.deleteUI(prefWinName))
+    cmds.window(prefWinName, e=True, w=10, h=10)
+    cmds.showWindow(prefWinName)
+
+
+def applyPreferences(*args):
+    outlinerPercentage = cmds.intFieldGrp('outlinerPercentageIntFldGrp', q=True, v1=True)
+    commonTabNumRows = cmds.intFieldGrp('commonTabNumRowsIntFldGrp', q=True, v1=True)
+    defaultTaskTab = cmds.optionMenuGrp('defaultTaskTabOptMenuGrp', q=True, value=True)
+    iconSize = cmds.intFieldGrp('iconSizeIntFldGrp', q=True, v1=True)
+    numIconsPerRow = cmds.intFieldGrp('numIconsPerRowIntFldGrp', q=True, v1=True)
+
+    config = configparser.ConfigParser()
+
+    config['Panel'] = {
+        'outlinerPercentage': outlinerPercentage
+    }
+
+    config['Tab'] = {
+        'commonTabNumRows': commonTabNumRows,
+        'defaultTaskTab': defaultTaskTab
+    }
+
+    config['Icon'] = {
+        'iconSize': iconSize,
+        'numIconsPerRow': numIconsPerRow
+    }
+
+    with open(PREFERENCES_FILE_PATH, 'w') as f:
+        config.write(f)
+
+    restore()
 # ------------
 
 
@@ -669,7 +721,7 @@ def checkUpdate(self):
         if 'Yes' == result:
             succeed = update()
             if succeed:
-                copyPreferences()
+                copyMayaPreferences()
                 import takTools.tak_tools as tt
                 import imp; imp.reload(tt); tt.UI()
     else:
@@ -710,7 +762,7 @@ def update():
         return False
 
 
-def copyPreferences():
+def copyMayaPreferences():
     prefsDir = '{}/prefs'.format(MODULE_PATH)
     mayaPrefDir = '{}{}/prefs'.format(cmds.internalVar(uad=True), int(cmds.about(version=True)))
     copy_tree(prefsDir, mayaPrefDir)
