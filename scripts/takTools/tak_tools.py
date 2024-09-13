@@ -2,7 +2,6 @@ import os
 import json
 import time
 import subprocess
-import configparser
 from collections import OrderedDict
 from distutils.dir_util import copy_tree
 
@@ -11,6 +10,12 @@ from maya import cmds
 from imp import reload
 from .pipeline import takMayaResourceBrowser as tmrb; reload(tmrb)
 from .utils import system as sysUtil
+
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION >= 2022:
+    from configparser import ConfigParser
+else:
+    from ConfigParser import ConfigParser
 
 
 SUBPROCESS_NO_WINDOW = 0x08000000
@@ -34,7 +39,7 @@ sysObj = sysUtil.System()
 scaleFactor = sysObj.screenHeight / float(DEFAULT_DISPLAY_HEIGHT)
 
 # Preferences
-config = configparser.ConfigParser()
+config = ConfigParser()
 config.read(PREFERENCES_FILE_PATH)
 
 ICON_SIZE = config.getint('Icon', 'iconSize')
