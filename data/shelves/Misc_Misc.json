@@ -5,7 +5,7 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "from takTools.utils ...l.cleanupMayaScene()",
+            "label": "Cleanup Scene",
             "annotation": "Remove unknown nodes, plugins, callbacks, scriptjobs",
             "image1": "cleanupScene.png",
             "imageOverlayLabel": "",
@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from takTools.utils ....clearOutputWindow()",
+            "label": "Clear Output Window",
             "annotation": "Clear output window",
             "image1": "menuIconWindow.png",
             "imageOverlayLabel": "",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.pipe...rceBrowser.showUI()\n",
+            "label": "Icon Browser",
             "annotation": "Search maya resource images.",
             "image1": "imageDisplay.png",
             "imageOverlayLabel": "",
@@ -32,7 +32,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from takTools.common...akerGUI()\ngui.show()",
+            "label": "Icon Maker",
             "annotation": "Create an icon image",
             "image1": "UVEditorSnapshot.png",
             "imageOverlayLabel": "",
@@ -41,7 +41,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.pipe...k_saveSceneInfo.ui()",
+            "label": "Save Scene Info",
             "annotation": "Save specific scene information as a file.",
             "image1": "saveSceneInfo.png",
             "imageOverlayLabel": "",
@@ -50,7 +50,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.pipe..._prjFolderSetup.UI()",
+            "label": "Project Folder Setup",
             "annotation": "Create folder structure.",
             "image1": "prjFldSet.bmp",
             "imageOverlayLabel": "",
@@ -59,7 +59,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.pipe...ef)\ntak_fileRef.UI()",
+            "label": "Reference Manager",
             "annotation": "Load or reload or delete references.",
             "image1": "fileRef.png",
             "imageOverlayLabel": "",
@@ -68,7 +68,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...misc.renameRefNode()",
+            "label": "Rename Reference Node",
             "annotation": "Rename refrence node and namespace.",
             "image1": "renameRefNode.bmp",
             "imageOverlayLabel": "",
@@ -77,7 +77,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...tak_misc.lineWidth()",
+            "label": "Line Width",
             "annotation": "Change line width.",
             "image1": "lineWidth.bmp",
             "imageOverlayLabel": "",
@@ -86,16 +86,16 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.util...ls.shakeCamera(cam)\n",
+            "label": "Shake Camera",
             "annotation": "Shake selected camera.",
             "image1": "Camera.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "Shake",
             "command": "import takTools.utils.camera as camUtils\nimport imp\nimp.reload(camUtils)\n\ncam = pm.selected()[0]\ncamUtils.shakeCamera(cam)\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...)\ntak_misc.bakeCam()",
+            "label": "Bake Camera",
             "annotation": "Bake selected camera",
             "image1": "bakeCam.png",
             "imageOverlayLabel": "",
@@ -104,7 +104,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.pipe...tak_mayaCamToAE.ui()",
+            "label": "Bake Camera for AE",
             "annotation": "Bake selected camera to use in AE.",
             "image1": "mayaCamToAE.png",
             "imageOverlayLabel": "",
@@ -113,7 +113,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.pipe...ToMax.mayaCamToMax()",
+            "label": "Bake Camera for Max",
             "annotation": "Export selected camera for using in 3ds Max.",
             "image1": "mayaCamToMax.png",
             "imageOverlayLabel": "",
@@ -122,7 +122,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm..._misc.followingCam()",
+            "label": "Following Camera",
             "annotation": "Create camera following selected object.",
             "image1": "followingCam.bmp",
             "imageOverlayLabel": "",
@@ -131,7 +131,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...k_misc.trackingLoc()",
+            "label": "Track Locators",
             "annotation": "Create locators per frame with selected object.",
             "image1": "trackingLoc.bmp",
             "imageOverlayLabel": "",
@@ -140,7 +140,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source ikas_renderVi...ce ikas_renderViewBr",
+            "label": "Viewport Render",
             "annotation": "Render viewport.",
             "image1": "ikasRenderView.bmp",
             "imageOverlayLabel": "",
@@ -149,7 +149,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...c.attachSpecSphere()",
+            "label": "Eye Mesh Specular",
             "annotation": "Attach specular sphere to selected vertex(s) or selected two edges.",
             "image1": "specSphere.png",
             "imageOverlayLabel": "",
@@ -158,7 +158,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.pipe...ak_batchPB.batchPB()",
+            "label": "Batch Playblast",
             "annotation": "Batch playblast.",
             "image1": "batchPB.png",
             "imageOverlayLabel": "",
@@ -167,7 +167,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.pipe...)\nrenLyrSaveObj.UI()",
+            "label": "Save Render Layer",
             "annotation": "Save and load render layer set up.",
             "image1": "saveRenderLayer.png",
             "imageOverlayLabel": "",
@@ -176,7 +176,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.pipe...itMayaAsciiFile.ui()",
+            "label": "Edit Maya Ascii",
             "annotation": "Edit maya ascii file contents.",
             "image1": "editMayaAscii.png",
             "imageOverlayLabel": "",
@@ -185,7 +185,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from imp import relo....fbxCleanerUI.show()",
+            "label": "Cleanup FBX",
             "annotation": "Clean up a fbx file.",
             "image1": "fbxReview.png",
             "imageOverlayLabel": "",
@@ -194,10 +194,10 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from takTools.utils ...d(dfc)\n\ndfc.showUI()",
+            "label": "Visual Function Curve",
             "annotation": "from takTools.utils import drawingFuncCurves as dfc\nimport imp\nimp.reload(dfc)\n...",
             "image1": "sineCurveProfile.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "f(x)",
             "command": "from takTools.utils import drawingFuncCurves as dfc\nimport imp\nimp.reload(dfc)\n\ndfc.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true

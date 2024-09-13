@@ -5,7 +5,7 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "dynExecuteEmitterCom...dy 0 -dz 0 -sp 0 \" 1",
+            "label": "Emit Object",
             "annotation": "Emit from Object",
             "image1": "emitter.png",
             "imageOverlayLabel": "",

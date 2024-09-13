@@ -131,7 +131,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...\ntak_misc.mirObjUi()",
+            "label": "Mirror Object",
             "annotation": "Mirror selected objects",
             "image1": "mirrorObj.bmp",
             "imageOverlayLabel": "",

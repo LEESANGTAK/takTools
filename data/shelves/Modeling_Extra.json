@@ -5,7 +5,7 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "source \"C:/Users/Pub...oZBrushFromMaya.mel\"",
+            "label": "Go Z",
             "annotation": "Export selected object to ZBrush.",
             "image1": "GoZBrush.xpm",
             "imageOverlayLabel": "",
@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "uvlayout_open()...uvlayout_open()",
+            "label": "Headus UV Layout",
             "annotation": "uvlayout_open()",
             "image1": "uvlayout.png",
             "imageOverlayLabel": "",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import subprocess\nsu...Bit)\\Photoshop.exe')",
+            "label": "Run Photoshop",
             "annotation": "Run phothoshop.",
             "image1": "photoshop.bmp",
             "imageOverlayLabel": "",
@@ -32,7 +32,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source DupAlongPathT...DupAlongPathToolbox;",
+            "label": "Dup Along Path",
             "annotation": "Duplicate object along the path",
             "image1": "DupAlongPathToolbox.png",
             "imageOverlayLabel": "",
@@ -41,16 +41,16 @@
             "noDefaultPopup": true
         },
         {
-            "label": "instanceAlongCurve...instanceAlongCurve",
+            "label": "Instance Along Curve",
             "annotation": "Instance Along Curve",
-            "image1": "menuIconEdit.png",
-            "imageOverlayLabel": "",
+            "image1": "curveEP.png",
+            "imageOverlayLabel": "IAC",
             "command": "instanceAlongCurve",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
-            "label": "spPaint3d...spPaint3d",
+            "label": "SP Paint",
             "annotation": "Run spPaint3d.",
             "image1": "spPaint3d.bmp",
             "imageOverlayLabel": "",
@@ -59,7 +59,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "CVCurveTool...CVCurveTool",
+            "label": "CV Curve",
             "annotation": "Create a curve on the grid or live surface specifying control vertices",
             "image1": "curveCV.png",
             "imageOverlayLabel": "",

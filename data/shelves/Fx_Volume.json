@@ -5,7 +5,7 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "create3DFluid 10 10 ...id 10 10 10 10 10 10",
+            "label": "Volume Container",
             "annotation": "Create 3D Container",
             "image1": "fluidCreate3D.png",
             "imageOverlayLabel": "",

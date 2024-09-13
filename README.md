@@ -33,6 +33,9 @@ But you have to save tools to keep shelf icons you add.
 ![takToolsEditor](./images/takToolsEditor.png)\
 You can edit the shelves with the editor that similar to Maya's native shelf editor.
 
+![takToolsEditorMayaIcon](./images/takToolsMayaIcon.gif)\
+You can set a Maya icon by double click in the Maya Resource Browser.
+
 ### Preferences
 ![takToolsPreferences](./images/takToolsPreferences.png)\
 You can change the default settings of the tool.

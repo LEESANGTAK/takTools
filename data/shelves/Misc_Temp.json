@@ -2,40 +2,40 @@
     "order": "12",
     "tabName": "Misc",
     "frameName": "Temp",
-    "collapse": true,
+    "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "for skin in pm.ls(ty...malizeWeights.set(1)",
+            "label": "Interactive Skin",
             "annotation": "Set interactive mode for skin clusters.",
-            "image1": "pythonFamily.png",
-            "imageOverlayLabel": "",
+            "image1": "smoothSkin.png",
+            "imageOverlayLabel": "IS",
             "command": "for skin in pm.ls(type='skinCluster'):\n    skin.normalizeWeights.set(1)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "for jnt in pm.select...ompensate.set(False)",
+            "label": "SegmentScale False",
             "annotation": "Set segmentScaleCompensate to false for selected skin clusters.",
-            "image1": "pythonFamily.png",
-            "imageOverlayLabel": "",
+            "image1": "UVTkScale.png",
+            "imageOverlayLabel": "SSF",
             "command": "for jnt in pm.selected(type='joint'):\n    jnt.segmentScaleCompensate.set(False)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "for node in pm.ls(ty...olorSpace.set('Raw')",
+            "label": "Raw Normal Map",
             "annotation": "Set color space to raw for normal maps.",
-            "image1": "pythonFamily.png",
-            "imageOverlayLabel": "",
+            "image1": "render_bump2d.png",
+            "imageOverlayLabel": "RN",
             "command": "for node in pm.ls(type='bump2d'):\n    node.inputs(type='file')[0].colorSpace.set('Raw')",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "for mesh in pm.ls(ty....tangentSpace.set(2)",
+            "label": "Mesh Tangent Space",
             "annotation": "Set tangentSpace to Left Handed for meshes.",
-            "image1": "pythonFamily.png",
-            "imageOverlayLabel": "",
+            "image1": "out_mesh.png",
+            "imageOverlayLabel": "MT",
             "command": "for mesh in pm.ls(type='mesh'):\n    mesh.tangentSpace.set(2)",
             "sourceType": "python",
             "noDefaultPopup": true

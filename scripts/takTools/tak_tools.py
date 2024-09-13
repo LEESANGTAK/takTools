@@ -559,7 +559,7 @@ def renameShelfButton(*args):
     label = cmds.textFieldGrp('shelfBtnLabelTxtFldGrp', q=True, text=True)
     cmds.shelfButton(shelfButton, e=True, label=label)
 
-    refreshEditorShelves(selShelf, label)
+    refreshEditorShelves(selShelf)
 
 
 def setIcon(useMayaResource=False, *args):

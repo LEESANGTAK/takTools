@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...k_misc.solidColMat()",
+            "label": "Solid color",
             "annotation": "Assign solid color material with grabed color.",
             "image1": "solColorMat.bmp",
             "imageOverlayLabel": "",
@@ -50,7 +50,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...)\ntak_misc.copyMat()",
+            "label": "Copy Material",
             "annotation": "Assign the material of first selection to the others",
             "image1": "copyMat.bmp",
             "imageOverlayLabel": "",
@@ -95,7 +95,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "SculptGeometryTool...SculptGeometryTool",
+            "label": "SculptGeometryTool...Sculpt Geometry Tool",
             "annotation": "Sculpt a geometry object.",
             "image1": "putty.png",
             "imageOverlayLabel": "",
@@ -104,7 +104,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "SetMeshGrabTool...SetMeshGrabTool",
+            "label": "Grab Tool",
             "annotation": "Grab Tool",
             "image1": "Grab.png",
             "imageOverlayLabel": "",
@@ -131,7 +131,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...tak_misc.ranColLam()",
+            "label": "Random Color Material",
             "annotation": "Assign random color lamber.",
             "image1": "ranColLam.bmp",
             "imageOverlayLabel": "",

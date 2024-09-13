@@ -5,8 +5,8 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "import os\nimport sys...tudiolibrary.main()\n",
-            "annotation": "import os\nimport sys...tudiolibrary.main()\n",
+            "label": "Studio Library",
+            "annotation": "Studio Library",
             "image1": "studioLibrary.png",
             "imageOverlayLabel": "",
             "command": "import os\nimport sys\n    \nimport studiolibrary\nstudiolibrary.main()\n",
@@ -14,8 +14,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source tweenMachine....e.mel;\ntweenMachine;",
-            "annotation": "tweenMachine",
+            "label": "Tween Machine",
+            "annotation": "Tween Machine",
             "image1": "tweenMachine.xpm",
             "imageOverlayLabel": "",
             "command": "source tweenMachine.mel;\ntweenMachine;",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...misc.mirrorCtrlsUI()",
+            "label": "Mirror Controller",
             "annotation": "Mirror selected controls",
             "image1": "mirrorCtrl.png",
             "imageOverlayLabel": "",

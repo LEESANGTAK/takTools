@@ -5,7 +5,7 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "pose2shelf...pose2shelf",
+            "label": "Pose 2 Shelf",
             "annotation": "Save controls selected",
             "image1": "pos2Shelf.bmp",
             "imageOverlayLabel": "",
@@ -14,8 +14,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source \"biped.mel\";...source \"biped.mel\";",
-            "annotation": "Selector:biped",
+            "label": "AS Biped Selector",
+            "annotation": "Advanced Skeleton biped selector",
             "image1": "asBiped.png",
             "imageOverlayLabel": "",
             "command": "source \"biped.mel\";",
@@ -23,8 +23,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source \"face.mel\";...source \"face.mel\";",
-            "annotation": "Selector:face",
+            "label": "AS Face Selector",
+            "annotation": "Advanced Skeleton face selector",
             "image1": "asFace.png",
             "imageOverlayLabel": "",
             "command": "source \"face.mel\";",
@@ -32,8 +32,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source \"picker.mel\";...source \"picker.mel\";",
-            "annotation": "picker",
+            "label": "AS Picker",
+            "annotation": "Advanced Skeleton picker",
             "image1": "picker.png",
             "imageOverlayLabel": "",
             "command": "source \"picker.mel\";",
@@ -41,8 +41,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "\nimport ARSpicker\nAR...icker.picker.main()\n",
-            "annotation": "\nimport ARSpicker\nAR...icker.picker.main()\n",
+            "label": "ARS Picker",
+            "annotation": "ARSpicker",
             "image1": "colorPickCursor.png",
             "imageOverlayLabel": "",
             "command": "\nimport ARSpicker\nARSpicker.picker.main()\n",

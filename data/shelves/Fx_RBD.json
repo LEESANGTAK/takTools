@@ -5,26 +5,8 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "source yd_crackut.me...kut.mel;\nyd_crackut;",
-            "annotation": "source yd_crackut.me...kut.mel;\nyd_crackut;",
-            "image1": "yd_crackut.bmp",
-            "imageOverlayLabel": "",
-            "command": "source yd_crackut.mel;\nyd_crackut;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "source crackMe175.me...kMe175.mel;\ncrackMe;",
-            "annotation": "source crackMe175.me...kMe175.mel;\ncrackMe;",
-            "image1": "crackMe.bmp",
-            "imageOverlayLabel": "",
-            "command": "source crackMe175.mel;\ncrackMe;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "source AxCrack.mel;\n...xCrack.mel;\nAxCrack;",
-            "annotation": "source AxCrack.mel;\n...xCrack.mel;\nAxCrack;",
+            "label": "Ax Crack",
+            "annotation": "AxCrack",
             "image1": "AxCrack.bmp",
             "imageOverlayLabel": "",
             "command": "source AxCrack.mel;\nAxCrack;",

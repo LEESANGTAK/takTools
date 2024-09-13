@@ -5,35 +5,35 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "ToggleVertexNormalDi...eVertexNormalDisplay",
+            "label": "Vertex Normal",
             "annotation": "Vertex Normals",
-            "image1": "menuIconDisplay.png",
-            "imageOverlayLabel": "",
+            "image1": "polySetVertexNormal.png",
+            "imageOverlayLabel": "Vertex",
             "command": "ToggleVertexNormalDisplay",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
-            "label": "ToggleFaceNormalDisp...gleFaceNormalDisplay",
+            "label": "Face Normal",
             "annotation": "Face Normals",
-            "image1": "menuIconDisplay.png",
-            "imageOverlayLabel": "",
+            "image1": "polyNormalsConform.png",
+            "imageOverlayLabel": "Face",
             "command": "ToggleFaceNormalDisplay",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
-            "label": "ChangeNormalSize...ChangeNormalSize",
+            "label": "Normal Size",
             "annotation": "Normals Size...",
-            "image1": "menuIconDisplay.png",
-            "imageOverlayLabel": "",
+            "image1": "polyNormalsPropagate.png",
+            "imageOverlayLabel": "Size",
             "command": "ChangeNormalSize",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
-            "label": "polyNormalPerVertex ...lPerVertex -ufn true",
-            "annotation": "polyNormalPerVertex ...lPerVertex -ufn true",
+            "label": "Unlock Normal",
+            "annotation": "Unlock Normal",
             "image1": "polyNormalUnlock.png",
             "imageOverlayLabel": "",
             "command": "polyNormalPerVertex -ufn true",
@@ -41,7 +41,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source \"dp_autoSmoot...moothingGroups.mel\";",
+            "label": "Auto Smoothing Group",
             "annotation": "Auto Smoothing Groups",
             "image1": "polyHardEdge.png",
             "imageOverlayLabel": "",
@@ -50,8 +50,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "SoftPolyEdgeElements...ftPolyEdgeElements 1",
-            "annotation": "SoftPolyEdgeElements...ftPolyEdgeElements 1",
+            "label": "Soft Normal",
+            "annotation": "Soft Normal",
             "image1": "polySoftEdge.png",
             "imageOverlayLabel": "",
             "command": "SoftPolyEdgeElements 1",
@@ -59,8 +59,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "ReversePolygonNormal...eversePolygonNormals",
-            "annotation": "ReversePolygonNormal...eversePolygonNormals",
+            "label": "Reverse Normal",
+            "annotation": "Reverse Polygon Normal",
             "image1": "polyNormal.png",
             "imageOverlayLabel": "",
             "command": "ReversePolygonNormals",

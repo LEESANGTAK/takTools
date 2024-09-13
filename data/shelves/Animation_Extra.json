@@ -5,16 +5,16 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "import takTools.comm...misc.delKeySetDflt()",
+            "label": "Delete Keys Default",
             "annotation": "Delete keys and set default value",
             "image1": "deleteKeys.bmp",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "Default",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.delKeySetDflt()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...c)\ntak_misc.delKey()",
+            "label": "Delete Keys",
             "annotation": "Delete keys for selected controls",
             "image1": "deleteKeys.bmp",
             "imageOverlayLabel": "",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "DeleteConstraints...DeleteConstraints",
+            "label": "Delete Constraints",
             "annotation": "Delete constraints on the selected object(s)",
             "image1": "deleteConstraints.bmp",
             "imageOverlayLabel": "",
@@ -32,7 +32,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.anim..._offsetKeyframe.UI()",
+            "label": "Offset Keyframe",
             "annotation": "Offset keyframe for selected object(s).",
             "image1": "offsetKey.bmp",
             "imageOverlayLabel": "",
@@ -41,7 +41,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "SMO_RandomOffsetKeys...SMO_RandomOffsetKeys",
+            "label": "Random Offset Keyframe",
             "annotation": "Random offset keyframe for selected object(s).",
             "image1": "SMO_RandomOffsetKeysIcon.png",
             "imageOverlayLabel": "",
@@ -50,7 +50,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.anim..._oscillateMaker.UI()",
+            "label": "Oscillate Maker",
             "annotation": "Create procedure oscillate animation.",
             "image1": "oscillateMaker.bmp",
             "imageOverlayLabel": "",
@@ -59,7 +59,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source \"D40clothTool... \"D40clothTool.mel\";",
+            "label": "B1 nCloth",
             "annotation": "b1 nCloth tool",
             "image1": "b1nCloth.bmp",
             "imageOverlayLabel": "",
@@ -68,7 +68,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "IH_BakeHairChain;...IH_BakeHairChain;",
+            "label": "IH Hair Chain",
             "annotation": "Bake IH_HairChain tool.",
             "image1": "bakeHairChain.png",
             "imageOverlayLabel": "",
@@ -77,7 +77,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.anim...DynamicSplineBaker()",
+            "label": "Hair Chain Baker",
             "annotation": "Hair Chain Baker",
             "image1": "hairChainBaker.png",
             "imageOverlayLabel": "",
@@ -86,7 +86,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "InteractivePlayback...InteractivePlayback",
+            "label": "Interactive Playback",
             "annotation": "Interactive Playback",
             "image1": "interactivePlayback.png",
             "imageOverlayLabel": "",
@@ -95,7 +95,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.anim...cleanUpAniScene.ui()",
+            "label": "Clean Up Ani Scene",
             "annotation": "Clean up animation scene.",
             "image1": "tak_cleanUpAniScene.png",
             "imageOverlayLabel": "",
@@ -104,7 +104,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takRetargeter...eterUI()\ntrUI.show()",
+            "label": "Retargeter",
             "annotation": "Retargeting source animation to target.",
             "image1": "takRetargeterIcon.png",
             "imageOverlayLabel": "",
@@ -113,7 +113,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from takMaxAniTools ...traintUI()\nui.show()",
+            "label": "Link Constraint",
             "annotation": "Link Constraint",
             "image1": "out_parentConstraint.png",
             "imageOverlayLabel": "",
@@ -122,7 +122,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takAniPublish...rl()\napCtrl.showUI()",
+            "label": "Animation Publisher",
             "annotation": "Publish animation.",
             "image1": "out_timeEditorAnimSource.png",
             "imageOverlayLabel": "",
@@ -131,8 +131,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "execfile(r'C:\\Google...gic\\springMagic.py')",
-            "annotation": "execfile(r'C:\\Google...gic\\springMagic.py')",
+            "label": "Spring Magic",
+            "annotation": "Spring magic",
             "image1": "springMagic.png",
             "imageOverlayLabel": "",
             "command": "execfile(r'C:\\GoogleDrive\\programs_env\\maya\\modules\\SpringMagic\\springMagic.py')",
@@ -140,7 +140,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source \"Overlapper r...\";OverlapperRelease;",
+            "label": "Overlapper",
             "annotation": "Create overlap animation easily.",
             "image1": "play_hover.png",
             "imageOverlayLabel": "",
@@ -149,7 +149,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "BookmarkManager;...BookmarkManager;",
+            "label": "Bookmark Manager",
             "annotation": "BookmarkManager;",
             "image1": "Bookmark.png",
             "imageOverlayLabel": "",

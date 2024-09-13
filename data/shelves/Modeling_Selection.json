@@ -5,8 +5,8 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "import takTools.comm...k_misc.selEveryNUI()",
-            "annotation": "import takTools.comm...k_misc.selEveryNUI()",
+            "label": "Select Nth Edge",
+            "annotation": "Select every Nth edge",
             "image1": "selectSkipedEdgeRing.bmp",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.selEveryNUI()",
@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "polySelectSp -ring;...polySelectSp -ring;",
+            "label": "To Edge Ring",
             "annotation": "Selects all parallel edges that form an edge ring based on the current selection",
             "image1": "polyConvertToEdgeRing.png",
             "imageOverlayLabel": "",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "polySelectSp -loop;...polySelectSp -loop;",
+            "label": "To Edge Loop",
             "annotation": "Selects all connected edges that form an edge loop based on the current selection",
             "image1": "polyConvertToEdgeLoop.png",
             "imageOverlayLabel": "",
@@ -32,7 +32,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "PolygonSelectionCons...SelectionConstraints",
+            "label": "Select Constraint",
             "annotation": "PolygonSelectionCons...SelectionConstraints",
             "image1": "polySelectUsingConstraints.png",
             "imageOverlayLabel": "",

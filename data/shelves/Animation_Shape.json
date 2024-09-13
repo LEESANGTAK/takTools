@@ -5,7 +5,7 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "SculptGeometryTool...SculptGeometryTool",
+            "label": "Sculpt Geometry",
             "annotation": "Sculpt a geometry object.",
             "image1": "putty.png",
             "imageOverlayLabel": "",
@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.anim...)\ntak_aniSculpt.UI()",
+            "label": "Animation Sculpt",
             "annotation": "Correct problematic shape of animated geometry.",
             "image1": "aniSculpt.bmp",
             "imageOverlayLabel": "",

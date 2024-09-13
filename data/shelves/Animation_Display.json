@@ -5,7 +5,7 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "keyframe -tds on;...keyframe -tds on;",
+            "label": "Break Down key",
             "annotation": "Convert selected keyframe(s) into breakdown tick(s).",
             "image1": "breakdown.png",
             "imageOverlayLabel": "",
@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "keyframe -tds off;...keyframe -tds off;",
+            "label": "Key Tick",
             "annotation": "Convert selected keyframe(s) into key tick(s).",
             "image1": "key.png",
             "imageOverlayLabel": "",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source bhGhost.mel;\n...hGhost.mel;\nbhGhost;",
+            "label": "BH Ghost",
             "annotation": "Create ouline.",
             "image1": "bhGhostIcon.png",
             "imageOverlayLabel": "",
@@ -32,7 +32,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "doMotionTrail 2 { \"s...\"0\",\"0\",\"1\",\"1\",\"1\"}",
+            "label": "Motion Trail",
             "annotation": "Select object(s) to generate a motion trail over time.",
             "image1": "motionTrail.png",
             "imageOverlayLabel": "",
@@ -41,9 +41,9 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.util...ameRangeHUDToggle();",
+            "label": "Frame Range",
             "annotation": "Frame Range HUD Toggle",
-            "image1": "eye.png",
+            "image1": "out_frameCache.png",
             "imageOverlayLabel": "",
             "command": "import takTools.utils.display as dpUtil;import imp;imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();",
             "sourceType": "python",

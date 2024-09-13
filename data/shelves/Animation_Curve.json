@@ -5,7 +5,7 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "keyTangent -global -... -global -ott step;\n",
+            "label": "Step Tangent",
             "annotation": "Set default keyframe tangent to the step mode.",
             "image1": "steped.png",
             "imageOverlayLabel": "",
@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "keyTangent -global -...-global -ott spline;",
+            "label": "Spline Tangent",
             "annotation": "Set default keyframe tangent to the spline mode.",
             "image1": "spline.png",
             "imageOverlayLabel": "",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "keyTangent -global -...global -ott linear;\n",
+            "label": "Linear Tangent",
             "annotation": "Set default keyframe tangent to the linear mode.",
             "image1": "linear.bmp",
             "imageOverlayLabel": "",
@@ -32,7 +32,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "animCurveEditor -edi...Infinity -poi cycle;",
+            "label": "Cycle Infinity",
             "annotation": "Convert selected animation curve to the cycle mode.",
             "image1": "makeCycle.bmp",
             "imageOverlayLabel": "",
@@ -41,7 +41,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "animCurveEditor -edi... -poi cycleRelative;",
+            "label": "Cycle Offset Infinity",
             "annotation": "Convert selected animation curve to the cycle with offset mode.",
             "image1": "cycleOffset.bmp",
             "imageOverlayLabel": "",
@@ -50,16 +50,16 @@
             "noDefaultPopup": true
         },
         {
-            "label": "animCurveEditor -edi...nfinity -poi linear;",
+            "label": "Linear Infinity",
             "annotation": "Convert selected animation curve to the linear mode.",
-            "image1": "makeLinear.bmp",
+            "image1": "linear.bmp",
             "imageOverlayLabel": "",
             "command": "animCurveEditor -edit -displayInfinities true graphEditor1GraphEd;\nsetInfinity -pri linear;\nsetInfinity -poi linear;",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
-            "label": "animCurveEditor -edi...inity -pri constant;",
+            "label": "Constant Infinity",
             "annotation": "Convert selected animation curve to the constant mode.",
             "image1": "makeConstant.bmp",
             "imageOverlayLabel": "",
@@ -68,7 +68,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source easyEasyEase....ce easyEasyEase.mel;",
+            "label": "Easy In Easy Out",
             "annotation": "Set easy in and easy out.",
             "image1": "easyEase.bmp",
             "imageOverlayLabel": "",
@@ -77,9 +77,9 @@
             "noDefaultPopup": true
         },
         {
-            "label": "DeleteAllStaticChann...eteAllStaticChannels",
-            "annotation": "Static Channels",
-            "image1": "menuIconEdit.png",
+            "label": "Delete Static Channel",
+            "annotation": "Delete keyframes for static channels",
+            "image1": "nClothCacheDelete.png",
             "imageOverlayLabel": "",
             "command": "DeleteAllStaticChannels",
             "sourceType": "mel",

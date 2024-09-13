@@ -5,7 +5,7 @@
     "collapse": true,
     "shelfButtonInfos": [
         {
-            "label": "InteractivePlayback...InteractivePlayback",
+            "label": "Interactive Playback",
             "annotation": "Allows interaction with objects during playback",
             "image1": "interactivePlayback.png",
             "imageOverlayLabel": "",
@@ -68,7 +68,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "CVCurveTool...CVCurveTool",
+            "label": "CV Curve",
             "annotation": "CV Curve Tool",
             "image1": "curveCV.png",
             "imageOverlayLabel": "",
