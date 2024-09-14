@@ -1,5 +1,5 @@
 # Tak Tools
-![takTools](./images/takTools.png)
+![takTools](https://github.com/LEESANGTAK/takTools/blob/main/images/takTools.png)
 
 ![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)\
 A toolset module for the Autodesk Maya.\
