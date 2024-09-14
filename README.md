@@ -3,7 +3,7 @@
 
 ![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
 
-A toolset module for the Autodesk Maya.\
+A toolset module for the Autodesk Maya.
 You can try it, But all risk is yours.
 
 > Test Environments
