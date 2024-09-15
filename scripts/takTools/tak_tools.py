@@ -41,7 +41,7 @@ ALL_ICONS = getAllIcons()
 # Version constants
 VERSION_MAJOR = 2
 VERSION_MINOR = 1
-VERSION_MICRO = 0
+VERSION_MICRO = 1
 
 # Size values are based on 4k(3840*2160) monitor
 # Caculate scale factor depend on monitor height
@@ -208,7 +208,8 @@ def rebuildTaskShelves(selectTab=DEFAULT_TASK_TAB, *args):
 
             shelves.append(shelfName)
 
-    if selectTab:
+    tabs = cmds.tabLayout('taskTabLo', q=True, tabLabel=True)
+    if tabs and selectTab in tabs:
         cmds.tabLayout('taskTabLo', e=True, selectTab=selectTab)
 
 
@@ -692,7 +693,6 @@ def prefsGUI(*args):
     cmds.optionMenuGrp('defaultTaskTabOptMenuGrp', label='Default Task Tab: ')
     for tab in taskShelvesInfo.keys():
         cmds.menuItem(label=tab)
-    cmds.optionMenuGrp('defaultTaskTabOptMenuGrp', e=True, value=DEFAULT_TASK_TAB)
     cmds.intFieldGrp('iconSizeIntFldGrp', label='Icon Size: ', v1=ICON_SIZE)
     cmds.intFieldGrp('numIconsPerRowIntFldGrp', label='Number of Icons Per Row: ', v1=NUM_ICONS_PER_ROW)
     cmds.rowColumnLayout(numberOfColumns=2, columnOffset=[(2, 'left', 5)])
