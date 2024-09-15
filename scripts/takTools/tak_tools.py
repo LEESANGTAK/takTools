@@ -234,6 +234,9 @@ def readTaskShelvesInfo(fromGUI=False):
                 shelfInfo = json.load(f, object_pairs_hook=OrderedDict)
                 rawTaskShelvesInfos.append(shelfInfo)
 
+    if not rawTaskShelvesInfos:
+        return
+
     orderedTaskShlvesInfos = sorted(rawTaskShelvesInfos, key=lambda item: int(item.get('order')))
     maxOrderNum = int(orderedTaskShlvesInfos[-1].get('order'))
 
