@@ -9,12 +9,14 @@ Description:
 import os
 import sys
 import imp
+import shutil
 
 from maya import cmds, mel
 
 
-MODULE_NAME = os.path.dirname(__file__).rsplit('/', 1)[-1]
-MODULE_PATH = os.path.dirname(__file__).replace('\\', '/')
+MODULE_NAME = 'takTools'
+RAW_MODULE_PATH = os.path.dirname(__file__).replace('\\', '/')
+MODULE_PATH = '{}scripts/{}'.format(cmds.internalVar(userAppDir=True), MODULE_NAME)
 MAYA_VERSION = int(cmds.about(version=True))
 # Need to modify below depend on module
 AVAILABLE_VERSIONS = [2020, 2022, 2024]
@@ -23,9 +25,9 @@ MODULE_VERSION = 'any'
 
 def onMayaDroppedPythonFile(*args, **kwargs):
     removeOldInstallModule()
-    runScripts()
+    copyModuleFiles()
     addEnvPaths()
-    # addShelfButtons()
+    runScripts()
     createModuleFile()
     cmds.confirmDialog(title='Info', message='"{}" module installed successfully.'.format(MODULE_NAME))
 
@@ -38,6 +40,18 @@ def removeOldInstallModule():
             break
     if foundOldInstall:
         del(sys.modules[modName])
+
+
+def copyModuleFiles():
+    for item in os.listdir(RAW_MODULE_PATH):
+        if item == '.gitignore':
+            continue
+        rawPath = '{}/{}'.format(RAW_MODULE_PATH, item)
+        userPath = '{}/{}'.format(MODULE_PATH, item)
+        try:
+            shutil.copytree(rawPath, userPath)
+        except:
+            shutil.copyfile(rawPath, userPath)
 
 
 def runScripts():

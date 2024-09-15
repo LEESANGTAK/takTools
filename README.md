@@ -19,7 +19,7 @@ You can try it, But all risk is yours.
 ## Install and Uninstall
 Just drag and drop `install.py` file to the Maya viewport.
 
-You can uninstall just delete a file `C:\Users\<UserName>\Documents\maya\modules\takTools.mod` and restart Maya.
+You can uninstall by deleting `C:\Users\<UserName>\Documents\maya\modules\takTools.mod` file and `C:\Users\<UserName>\Documents\maya\scrips\takTools` folder.
 
 ## Features
 ### Shelf Button
