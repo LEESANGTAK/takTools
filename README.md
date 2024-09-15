@@ -18,7 +18,7 @@ You can try it, But all risk is yours.
 - **Reordering shelf** only works in the **same task tab** for now
 
 ## Install and Uninstall
-Just drag and drop `install.py` file to the Maya viewport. During installation you can decide whether to install hotkeys and marking menu.
+Just drag and drop `install.py` file to the Maya viewport.
 
 You can uninstall just delete a file `C:\Users\<UserName>\Documents\maya\modules\takTools.mod` and restart Maya.
 
@@ -45,12 +45,3 @@ You can set a Maya icon by double click in the Maya Resource Browser.
 ![takToolsPreferences](https://ta-note.com/wp-content/uploads/2024/09/takToolsPreferences.png)
 
 You can change the default settings of the tool.
-
-### Marking Menu
-![takToolsMarkingMenu](https://ta-note.com/wp-content/uploads/2024/09/takTools_markingMenu.gif)
-
-You can use marking menu with Hotkey **Shift + 1~4**.
-> - Shift + 1: Display Tools
-> - Shift + 2: Selection Tools
-> - Shift + 3: Rigging Tools
-> - Shift + 4: Skinning Tools
