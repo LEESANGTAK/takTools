@@ -9,7 +9,7 @@ Description:
 import os
 import sys
 import imp
-import shutil
+from distutils.dir_util import copy_tree
 
 from maya import cmds, mel
 
@@ -28,13 +28,14 @@ MODULE_VERSION = 'any'
 
 def onMayaDroppedPythonFile(*args, **kwargs):
     removeOldInstallModule()
+
+    addEnvPaths()
     runScripts()
 
     result = cmds.confirmDialog(title='Choose Option', message='Do you want to install marking menu and hotkey?\nShift + 1~4 will be used.', button=['Yes', 'No'], defaultButton='Yes', cancelButton='No', dismissString='No')
     if result == 'Yes':
         copyFiles()
 
-    addEnvPaths()
     # addShelfButtons()
     createModuleFile()
     cmds.confirmDialog(title='Info', message='"{}" module installed successfully.'.format(MODULE_NAME))
@@ -62,7 +63,7 @@ def copyFiles():
     # Copy preferences files
     prefsDir = '{}/prefs'.format(MODULE_PATH)
     mayaPrefDir = '{}/{}/prefs'.format(cmds.internalVar(uad=True), MAYA_VERSION)
-    shutil.copytree(prefsDir, mayaPrefDir, dirs_exist_ok=True)
+    copy_tree(prefsDir, mayaPrefDir)
 
     if not 'Tak' in cmds.hotkeySet(q=True, current=True):
         cmds.hotkeySet(e=True, ip='{}/hotkeys/Tak.mhk'.format(mayaPrefDir))
