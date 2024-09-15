@@ -11,7 +11,6 @@ You can try it, But all risk is yours.
 > * Maya 2020, 2024
 
 ## Requirements
-- [Git](https://git-scm.com/downloads)
 - [Python](https://www.python.org/downloads/)
 
 ## Caveats

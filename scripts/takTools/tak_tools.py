@@ -1,9 +1,7 @@
 import os
 import json
 import time
-import subprocess
 from collections import OrderedDict
-from distutils.dir_util import copy_tree
 
 from maya import cmds, mel
 
@@ -97,7 +95,6 @@ def UI():
     cmds.menuItem(label='Editor', image='passSetRelationEditor.png', c=editorGUI, p='editMenu')
     cmds.menuItem(label='Preferences', image='shelfOptions.png', c=prefsGUI, p='editMenu')
     cmds.menu('helpMenu', label='Help', p=WIN_NAME)
-    cmds.menuItem(label='Check Update', image='teDownArrow.png', c=checkUpdate, p='helpMenu')
     cmds.menuItem(label='About Tak Tools', image='info.png', c=aboutGUI, p='helpMenu')
 
     cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(2, 50, 90)])
@@ -741,68 +738,6 @@ def applyPreferences(*args):
         config.write(f)
 
     restore()
-# ------------
-
-
-# ------------ Git Utils
-def checkUpdate(self):
-    if isOutdated():
-        result = cmds.confirmDialog(
-            title=TOOL_NAME,
-            message="New version is detected. Do you want to update?",
-            button=['Yes','No'],
-            defaultButton='Yes',
-            cancelButton='No',
-            dismissString='No'
-        )
-        if 'Yes' == result:
-            succeed = update()
-            if succeed:
-                copyMayaPreferences()
-                import takTools.tak_tools as tt
-                import imp; imp.reload(tt); tt.UI()
-    else:
-        cmds.confirmDialog(title=TOOL_NAME, message='You have latest version.\nEnjoy!')
-
-
-def isOutdated():
-    # Navigate to the specific repository
-    os.chdir(MODULE_PATH)
-
-    try:
-        # Fetch the latest commits from the remote repository
-        subprocess.call(["git", "fetch"], creationflags=SUBPROCESS_NO_WINDOW)
-
-        # Get the local and remote HEAD commit hashes
-        local_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], creationflags=SUBPROCESS_NO_WINDOW).strip()
-        remote_commit = subprocess.check_output(["git", "rev-parse", "@{u}"], creationflags=SUBPROCESS_NO_WINDOW).strip()
-
-        # Compare the local and remote commits
-        if local_commit != remote_commit:
-            return True  # Local repo is outdated
-
-    except subprocess.CalledProcessError as e:
-        print("Error: {}".format(e))
-        return False
-
-    return False  # Local repo is up-to-date
-
-
-def update():
-    try:
-        # Pull the latest changes from the remote repository
-        subprocess.call(["git", "pull"], creationflags=SUBPROCESS_NO_WINDOW)
-        print("Update is done successfully.")
-        return True
-    except subprocess.CalledProcessError as e:
-        print("Failed to update: {}".format(e))
-        return False
-
-
-def copyMayaPreferences():
-    prefsDir = '{}/prefs'.format(MODULE_PATH)
-    mayaPrefDir = '{}{}/prefs'.format(cmds.internalVar(uad=True), int(cmds.about(version=True)))
-    copy_tree(prefsDir, mayaPrefDir)
 # ------------
 
 
