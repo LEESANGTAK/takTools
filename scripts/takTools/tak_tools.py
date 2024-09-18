@@ -342,7 +342,7 @@ def editorGUI(*args):
     cmds.symbolButton(image='delete.png', c=deleteShelfButton)
     cmds.setParent('..')
     cmds.textFieldGrp('shelfBtnLabelTxtFldGrp', columnWidth=[(1, 45), (2, COLUMN_WIDTH*0.5)], label='Rename: ', cc=renameShelfButton)
-    cmds.textScrollList('editorShelfContentsTxtScrLs', sc=shelfContentsSelectCallback)
+    cmds.textScrollList('editorShelfContentsTxtScrLs', ams=True, sc=shelfContentsSelectCallback)
 
     # Contents of a Shelf Button
     cmds.setParent('editorMainColLo')
@@ -473,9 +473,10 @@ def addShelfButton(*args):
 
 def deleteShelfButton(*args):
     selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
-    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
-    shelfButton = allShelfButtons.get(_getShelfButtonKey(selShelf, selShelfBtnLabel))
-    cmds.deleteUI(shelfButton)
+    selShelfBtnLabels = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)
+    for selShelfBtnLabel in selShelfBtnLabels:
+        shelfButton = allShelfButtons.get(_getShelfButtonKey(selShelf, selShelfBtnLabel))
+        cmds.deleteUI(shelfButton)
 
     refreshEditorShelves(selShelf)
 
