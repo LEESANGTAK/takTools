@@ -1,44 +1,44 @@
 {
-    "order": "12", 
-    "tabName": "Misc", 
-    "frameName": "Temp", 
-    "collapse": false, 
+    "order": "12",
+    "tabName": "Misc",
+    "frameName": "Temp",
+    "collapse": false,
     "shelfButtonInfos": [
         {
-            "imageOverlayLabel": "IS", 
-            "noDefaultPopup": true, 
-            "sourceType": "python", 
-            "label": "Interactive Skin", 
-            "command": "for skin in pm.ls(type='skinCluster'):\n    skin.normalizeWeights.set(1)", 
-            "image1": "smoothSkin.png", 
-            "annotation": "Set interactive mode for skin clusters."
-        }, 
+            "label": "Interactive Skin",
+            "annotation": "Set interactive mode for skin clusters.",
+            "image1": "smoothSkin.png",
+            "imageOverlayLabel": "IS",
+            "command": "for skin in pm.ls(type='skinCluster'):\n    skin.normalizeWeights.set(1)",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "SSF", 
-            "noDefaultPopup": true, 
-            "sourceType": "python", 
-            "label": "SegmentScale False", 
-            "command": "for jnt in pm.selected(type='joint'):\n    jnt.segmentScaleCompensate.set(False)", 
-            "image1": "UVTkScale.png", 
-            "annotation": "Set segmentScaleCompensate to false for selected skin clusters."
-        }, 
+            "label": "SegmentScale False",
+            "annotation": "Set segmentScaleCompensate to false for selected skin clusters.",
+            "image1": "UVTkScale.png",
+            "imageOverlayLabel": "SSF",
+            "command": "for jnt in pm.selected(type='joint'):\n    jnt.segmentScaleCompensate.set(False)",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "RN", 
-            "noDefaultPopup": true, 
-            "sourceType": "python", 
-            "label": "Raw Normal Map", 
-            "command": "for node in pm.ls(type='bump2d'):\n    node.inputs(type='file')[0].colorSpace.set('Raw')", 
-            "image1": "render_bump2d.png", 
-            "annotation": "Set color space to raw for normal maps."
-        }, 
+            "label": "Raw Normal Map",
+            "annotation": "Set color space to raw for normal maps.",
+            "image1": "render_bump2d.png",
+            "imageOverlayLabel": "RN",
+            "command": "for node in pm.ls(type='bump2d'):\n    node.inputs(type='file')[0].colorSpace.set('Raw')",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "MT", 
-            "noDefaultPopup": true, 
-            "sourceType": "python", 
-            "label": "Mesh Tangent Space", 
-            "command": "for mesh in pm.ls(type='mesh'):\n    mesh.tangentSpace.set(2)", 
-            "image1": "out_mesh.png", 
-            "annotation": "Set tangentSpace to Left Handed for meshes."
+            "label": "Mesh Tangent Space",
+            "annotation": "Set tangentSpace to Left Handed for meshes.",
+            "image1": "out_mesh.png",
+            "imageOverlayLabel": "MT",
+            "command": "for mesh in pm.ls(type='mesh'):\n    mesh.tangentSpace.set(2)",
+            "sourceType": "python",
+            "noDefaultPopup": true
         }
     ]
 }

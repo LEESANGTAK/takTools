@@ -1,53 +1,53 @@
 {
-    "order": "01", 
-    "tabName": "Animation", 
-    "frameName": "Display", 
-    "collapse": false, 
+    "order": "01",
+    "tabName": "Animation",
+    "frameName": "Display",
+    "collapse": false,
     "shelfButtonInfos": [
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "Break Down key", 
-            "command": "keyframe -tds on;", 
-            "image1": "breakdown.png", 
-            "annotation": "Convert selected keyframe(s) into breakdown tick(s)."
-        }, 
+            "label": "Break Down key",
+            "annotation": "Convert selected keyframe(s) into breakdown tick(s).",
+            "image1": "breakdown.png",
+            "imageOverlayLabel": "",
+            "command": "keyframe -tds on;",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "Key Tick", 
-            "command": "keyframe -tds off;", 
-            "image1": "key.png", 
-            "annotation": "Convert selected keyframe(s) into key tick(s)."
-        }, 
+            "label": "Key Tick",
+            "annotation": "Convert selected keyframe(s) into key tick(s).",
+            "image1": "key.png",
+            "imageOverlayLabel": "",
+            "command": "keyframe -tds off;",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "BH Ghost", 
-            "command": "source bhGhost.mel;\nbhGhost;", 
-            "image1": "bhGhostIcon.png", 
-            "annotation": "Create ouline."
-        }, 
+            "label": "BH Ghost",
+            "annotation": "Create ouline.",
+            "image1": "bhGhostIcon.png",
+            "imageOverlayLabel": "",
+            "command": "source bhGhost.mel;\nbhGhost;",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "Motion Trail", 
-            "command": "doMotionTrail 2 { \"snapshot  -motionTrail 1  -increment 1 -startTime `playbackOptions -query -min` -endTime `playbackOptions -query -max`\", \"1\",\"0\",\"0\",\"1\",\"1\",\"1\"}", 
-            "image1": "motionTrail.png", 
-            "annotation": "Select object(s) to generate a motion trail over time."
-        }, 
+            "label": "Motion Trail",
+            "annotation": "Select object(s) to generate a motion trail over time.",
+            "image1": "motionTrail.png",
+            "imageOverlayLabel": "",
+            "command": "doMotionTrail 2 { \"snapshot  -motionTrail 1  -increment 1 -startTime `playbackOptions -query -min` -endTime `playbackOptions -query -max`\", \"1\",\"0\",\"0\",\"1\",\"1\",\"1\"}",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "python", 
-            "label": "Frame Range", 
-            "command": "import takTools.utils.display as dpUtil;import imp;imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();", 
-            "image1": "out_frameCache.png", 
-            "annotation": "Frame Range HUD Toggle"
+            "label": "Frame Range",
+            "annotation": "Frame Range HUD Toggle",
+            "image1": "out_frameCache.png",
+            "imageOverlayLabel": "",
+            "command": "import takTools.utils.display as dpUtil;import imp;imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();",
+            "sourceType": "python",
+            "noDefaultPopup": true
         }
     ]
 }

@@ -191,8 +191,8 @@ def rebuildTaskShelves(selectTab=DEFAULT_TASK_TAB, *args):
 
             for shelfButtonInfo in shelfButtonInfos:
                 image = shelfButtonInfo.get('image1')
-                if not image in ALL_ICONS:
-                    image = 'noPreview.png'
+                # if not image in ALL_ICONS:
+                #     image = 'noPreview.png'
 
                 shelfBtn = cmds.shelfButton(
                     label=shelfButtonInfo.get('label'),

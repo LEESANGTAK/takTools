@@ -1,17 +1,17 @@
 {
-    "order": "08", 
-    "tabName": "Fx", 
-    "frameName": "RBD", 
-    "collapse": false, 
+    "order": "08",
+    "tabName": "Fx",
+    "frameName": "RBD",
+    "collapse": false,
     "shelfButtonInfos": [
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "mel", 
-            "label": "Ax Crack", 
-            "command": "source AxCrack.mel;\nAxCrack;", 
-            "image1": "AxCrack.bmp", 
-            "annotation": "AxCrack"
+            "label": "Ax Crack",
+            "annotation": "AxCrack",
+            "image1": "AxCrack.bmp",
+            "imageOverlayLabel": "",
+            "command": "source AxCrack.mel;\nAxCrack;",
+            "sourceType": "mel",
+            "noDefaultPopup": true
         }
     ]
 }

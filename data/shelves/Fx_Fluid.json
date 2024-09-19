@@ -1,17 +1,17 @@
 {
-    "order": "09", 
-    "tabName": "Fx", 
-    "frameName": "Fluid", 
-    "collapse": false, 
+    "order": "09",
+    "tabName": "Fx",
+    "frameName": "Fluid",
+    "collapse": false,
     "shelfButtonInfos": [
         {
-            "imageOverlayLabel": "", 
-            "noDefaultPopup": true, 
-            "sourceType": "python", 
-            "label": "Droplet Creator", 
-            "command": "import takTools.modeling.tak_dropletCreator as tdc\nimport imp\nimp.reload(tdc)\ntdc.UI()", 
-            "image1": "droplet.png", 
-            "annotation": "Droplet Creator"
+            "label": "Droplet Creator",
+            "annotation": "Droplet Creator",
+            "image1": "droplet.png",
+            "imageOverlayLabel": "",
+            "command": "import takTools.modeling.tak_dropletCreator as tdc\nimport imp\nimp.reload(tdc)\ntdc.UI()",
+            "sourceType": "python",
+            "noDefaultPopup": true
         }
     ]
 }
