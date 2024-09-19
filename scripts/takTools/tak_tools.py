@@ -9,6 +9,7 @@ from maya import cmds, mel
 
 from imp import reload
 from .pipeline import takMayaResourceBrowser as tmrb; reload(tmrb)
+from .common import iconMaker as im; reload(im)
 from .utils import system as sysUtil
 
 
@@ -352,10 +353,11 @@ def editorGUI(*args):
     cmds.shelfButton('iconPrevShelfBtn', w=ICON_SIZE, h=ICON_SIZE)
 
     cmds.text(label='Icon Name: ')
-    cmds.rowColumnLayout(numberOfColumns=3)
-    cmds.textField('iconNameTxtFld', w=(COLUMN_WIDTH*2)-110, tcc=updateIcon)
-    cmds.symbolButton(image='fileOpen.png', c=setIcon)
+    cmds.rowColumnLayout(numberOfColumns=4)
+    cmds.textField('iconNameTxtFld', w=(COLUMN_WIDTH*2)-130, tcc=updateIcon)
     cmds.symbolButton(image='factoryIcon.png', c=lambda x: setIcon(useMayaResource=True))
+    cmds.symbolButton(image='UVEditorSnapshot.png', c=lambda x: setIcon(iconMaker=True))
+    cmds.symbolButton(image='fileOpen.png', c=setIcon)
 
     cmds.setParent('..')
     cmds.text('Icon Label: ')
@@ -588,9 +590,12 @@ def renameShelfButton(*args):
     refreshEditorShelves(selShelf, label)
 
 
-def setIcon(useMayaResource=False, *args):
+def setIcon(useMayaResource=False, iconMaker=False, *args):
     if useMayaResource:
         tmrb.TakMayaResourceBrowser.showUI()
+    elif iconMaker:
+        gui = im.IconMakerGUI()
+        gui.show()
     else:
         getFromIconsFolder('iconNameTxtFld')
 

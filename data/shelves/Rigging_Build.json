@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...MainUI()\narui.show()",
+            "label": "Auto Rigger",
             "annotation": "Tak auto rigging",
             "image1": "takAutoRig.png",
             "imageOverlayLabel": "",
@@ -23,8 +23,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source \"AdvancedSkel...l\";AdvancedSkeleton;",
-            "annotation": "AdvancedSkeleton",
+            "label": "Advanced Skeleton",
+            "annotation": "Advanced Skeleton",
             "image1": "AS.png",
             "imageOverlayLabel": "",
             "command": "source \"AdvancedSkeleton.mel\";AdvancedSkeleton;",
@@ -32,16 +32,16 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...I()\nashUIObj.show()\n",
-            "annotation": "import takTools.rigging.advancedSkeletonHelperUI as ashUI\nimport imp\nimp.reload(ashUI)\n\n...",
+            "label": "AS Utils",
+            "annotation": "Advanced skeleton utils",
             "image1": "AS.png",
-            "imageOverlayLabel": "",
-            "command": "import takTools.rigging.advancedSkeletonHelperUI as ashUI\nimport imp\nimp.reload(ashUI)\n\ntry:\n    ashUIObj.close()\nexcept:\n    pass\n\nashUIObj = ashUI.AdvancedSkeletonHelperUI()\nashUIObj.show()\n",
+            "imageOverlayLabel": "Utils",
+            "command": "from AdvancedSkeleton import advancedSkeletonHelperUI as ashUI\nimport imp\nimp.reload(ashUI)\n\ntry:\n    ashUIObj.close()\nexcept:\n    pass\n\nashUIObj = ashUI.AdvancedSkeletonHelperUI()\nashUIObj.show()\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "source IH_buildSpIkC...IH_buildSpIkChain();",
+            "label": "B1Hair Chain",
             "annotation": "b1 hair dynamic tool",
             "image1": "hairChain.bmp",
             "imageOverlayLabel": "",
@@ -50,16 +50,16 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...HBuildSpIkChain.ui()",
+            "label": "B1Hair Chain Utils",
             "annotation": "Additional functions for the 'IH_buildSpIkChain.mel' script.",
             "image1": "forHairChain.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "Utils",
             "command": "import takTools.rigging.tak_addFuncForIHBuildSpIkChain as tak_addFuncForIHBuildSpIkChain\nimport imp\nimp.reload(tak_addFuncForIHBuildSpIkChain)\ntak_addFuncForIHBuildSpIkChain.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "source js_createStre...eateStretchSplineUI;",
+            "label": "Stretch Spline",
             "annotation": "js_createStretchSpline",
             "image1": "scaleJoint.bmp",
             "imageOverlayLabel": "",
@@ -68,7 +68,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source js_createIkSt...js_createIkStretchUI",
+            "label": "Stretch IK",
             "annotation": "Stretchy Ik Creation",
             "image1": "ikStretch.bmp",
             "imageOverlayLabel": "",
@@ -77,8 +77,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...ultiConnectAttr.UI()",
-            "annotation": "import takTools.rigg...ultiConnectAttr.UI()",
+            "label": "Multi Connect",
+            "annotation": "Multi connect",
             "image1": "multiConnections.png",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_multiConnectAttr as tak_multiConnectAttr\nimport imp\nimp.reload(tak_multiConnectAttr)\ntak_multiConnectAttr.UI()",
@@ -86,7 +86,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...t)\ntak_mulConst.UI()",
+            "label": "Multi Constraint",
             "annotation": "Constraint to multiple objects, first select driver then selcet other drivens",
             "image1": "multiConstraint.bmp",
             "imageOverlayLabel": "",
@@ -95,7 +95,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...roup)\ntak_group.UI()",
+            "label": "Tak Group",
             "annotation": "Make group",
             "image1": "group.bmp",
             "imageOverlayLabel": "",
@@ -104,8 +104,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...\ntak_createCtrl.UI()",
-            "annotation": "Create control curves",
+            "label": "Create Controllers",
+            "annotation": "Create controllers",
             "image1": "control.bmp",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_createCtrl as tak_createCtrl\nimport imp\nimp.reload(tak_createCtrl)\ntak_createCtrl.UI()",
@@ -113,8 +113,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...isc.mirCtrlShapeUi()",
-            "annotation": "Mirror controls",
+            "label": "Mirror Controllers",
+            "annotation": "Mirror selected controllers",
             "image1": "mirSelCon.bmp",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirCtrlShapeUi()",
@@ -122,8 +122,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...tak_misc.mirConSel()",
-            "annotation": "Mirror control one to one.",
+            "label": "Mirror Controller",
+            "annotation": "Mirror selected controller one to one.",
             "image1": "mirConOneToOne.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirConSel()",
@@ -140,7 +140,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...k_copyMirrorSDK.UI()",
+            "label": "Copy SDK",
             "annotation": "Copy or mirror set driven keyframes",
             "image1": "tak_copySDK.bmp",
             "imageOverlayLabel": "",
@@ -158,8 +158,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg..._matchTransform.UI()",
-            "annotation": "import takTools.rigg..._matchTransform.UI()",
+            "label": "Match Transform",
+            "annotation": "Match transform",
             "image1": "matchTransform.bmp",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_matchTransform as tak_matchTransform\nimport imp\nimp.reload(tak_matchTransform)\ntak_matchTransform.UI()",
@@ -167,8 +167,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...tak_attrManager.ui()",
-            "annotation": "import takTools.rigg...tak_attrManager.ui()",
+            "label": "Attribute Manager",
+            "annotation": "Attribute manager",
             "image1": "attrManager.png",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_attrManager as tak_attrManager\nimport imp\nimp.reload(tak_attrManager)\ntak_attrManager.ui()",
@@ -176,7 +176,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.util...erValueToParent(sel)",
+            "label": "Transfer Values Parent",
             "annotation": "Transfer selected transform channel values to the parent.",
             "image1": "zeroDepth.png",
             "imageOverlayLabel": "",
@@ -185,7 +185,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...pSpaceSwitching.ui()",
+            "label": "Space Switch",
             "annotation": "Set up space switching.",
             "image1": "tak_setupSpaceSwitching.png",
             "imageOverlayLabel": "",
@@ -194,8 +194,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...t)\ntak_attachIt.UI()",
-            "annotation": "import takTools.rigg...t)\ntak_attachIt.UI()",
+            "label": "Tak Attach It",
+            "annotation": "Show GUI for attaching objects to a surface",
             "image1": "attachIt.png",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_attachIt as tak_attachIt\nimport imp\nimp.reload(tak_attachIt)\ntak_attachIt.UI()",
@@ -203,8 +203,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from takPickwalkDesi...pdWindow.PDWindow()\n",
-            "annotation": "from takPickwalkDesi...pdWindow.PDWindow()\n",
+            "label": "Pickwalk Designer",
+            "annotation": "Show pickwalk designer GUI",
             "image1": "pickwalkDesigner.png",
             "imageOverlayLabel": "",
             "command": "from takPickwalkDesigner import pdWindow\nimport imp\nimp.reload(pdWindow)\n\ntry:\n    pdWin.close()\nexcept:\n    pass\n\npdWin = pdWindow.PDWindow()\n",
@@ -212,8 +212,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...\ntak_cleanUpRig.ui()",
-            "annotation": "import takTools.rigg...\ntak_cleanUpRig.ui()",
+            "label": "Claen Up Rig",
+            "annotation": "Show clean up rig GUI",
             "image1": "cleanUpRig.png",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_cleanUpRig as tak_cleanUpRig\nimport imp\nimp.reload(tak_cleanUpRig)\ntak_cleanUpRig.ui()",

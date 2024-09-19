@@ -5,8 +5,8 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "toggle -state on -lo...state on -localAxis;",
-            "annotation": "toggle -state on -localAxis;",
+            "label": "Local Axis On",
+            "annotation": "Local axis on",
             "image1": "menuIconModify.png",
             "imageOverlayLabel": "LAO",
             "command": "toggle -state on -localAxis;",
@@ -14,8 +14,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "toggle -state off -l...tate off -localAxis;",
-            "annotation": "toggle -state off -localAxis;",
+            "label": "Local Axis Off",
+            "annotation": "Local axis off",
             "image1": "menuIconModify.png",
             "imageOverlayLabel": "LAF",
             "command": "toggle -state off -localAxis;",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "jdsWin...jdsWin",
+            "label": "Joint Scale",
             "annotation": "Customize the joint scale",
             "image1": "kinJoint.png",
             "imageOverlayLabel": "JS",
@@ -32,7 +32,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm..._misc.drawJntStyle()",
+            "label": "Joint Style",
             "annotation": "Change the joint style",
             "image1": "jointStyle.bmp",
             "imageOverlayLabel": "",
@@ -41,7 +41,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...k_misc.displayType()",
+            "label": "Display Type",
             "annotation": "Change display type.",
             "image1": "displayType.png",
             "imageOverlayLabel": "",
@@ -50,9 +50,9 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.util...playAffectedToggle()",
-            "annotation": "Display affected",
-            "image1": "pythonFamily.png",
+            "label": "Affected Objects",
+            "annotation": "Display affected objects",
+            "image1": "eye.png",
             "imageOverlayLabel": "DA",
             "command": "import takTools.utils.display as dp\nimport imp\nimp.reload(dp)\ndp.displayAffectedToggle()",
             "sourceType": "python",

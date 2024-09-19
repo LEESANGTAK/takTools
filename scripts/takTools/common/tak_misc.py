@@ -1,6 +1,6 @@
 """
-Author: Sang-tak Lee
-Contact: chst27@gmail.com
+Author: Sangtak Lee
+Contact: https://ta-note.com
 
 Description:
 This module is the library that relatively simple functions.
@@ -28,6 +28,10 @@ from . import tak_lib
 from ..modeling import tak_cleanUpModel
 from ..utils import skin as skinUtil; reload(skinUtil)
 from ..rigging.autoRigging.base import controller as control
+
+
+MODULE_NAME = 'takTools'
+MODULE_PATH = __file__.split(MODULE_NAME, 1)[0] + MODULE_NAME
 
 
 
@@ -2288,7 +2292,6 @@ def copyTexRename(*args):
 
     finalFileNodeLs = []
     for selObj in selObjLs:
-        print(selObj)
         selObjMat = tak_lib.getMatFromSel(selObj)
         if selObjMat:
             fileNodes = cmds.ls(cmds.listHistory(selObjMat), type='file')
@@ -2308,7 +2311,7 @@ def copyTexRename(*args):
 
     cmds.deleteUI('copyTexWin')
     return subprocess.call(
-        ['C:/Python27/python.exe', 'C:/GoogleDrive/Projects/Tool/CommandLine/python_scripts/cliResizeImage.py', trgDir,
+        ['C:/Python27/python.exe', '{}/scripts/{}/utils/cliResizeImage.py'.format(MODULE_PATH, MODULE_NAME), trgDir,
          scale])
 
 
@@ -2337,7 +2340,7 @@ def cutGeoWithJnts():
     Select first joints and geometry last.
     '''
 
-    mel.eval('source "C:/GoogleDrive/programs_env/maya/scripts/mel/js_cutPlane";')
+    mel.eval('source "js_cutPlane";')
 
     selLs = cmds.ls(sl=True)
     bndJntLs = selLs[0:-1]

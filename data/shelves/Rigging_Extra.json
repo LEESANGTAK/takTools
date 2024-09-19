@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.fx.q...ation_manager.main()",
+            "label": "Qualoth Manager",
             "annotation": "import takTools.fx.q...ation_manager.main()",
             "image1": "qualoth_icon.png",
             "imageOverlayLabel": "",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...hSetUp.nClothSetUp()",
+            "label": "nCloth Set up",
             "annotation": "nCloth set up with skined geometry.",
             "image1": "nClothSetUp.png",
             "imageOverlayLabel": "",
@@ -32,7 +32,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...)\ntak_misc.plcHldr()",
+            "label": "Placeholder Locators",
             "annotation": "Create locator to keep place for selected items.",
             "image1": "placeHolder.bmp",
             "imageOverlayLabel": "",
@@ -41,7 +41,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...misc.crvFromSelsUi()",
+            "label": "Curve from Selection",
             "annotation": "Create curve with selected objects.",
             "image1": "crvFromSels.bmp",
             "imageOverlayLabel": "",
@@ -50,7 +50,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from imp import relo...eFromSelectedEdges()",
+            "label": "Loop to Curve",
             "annotation": "Extract a curve for selected polygon edges.",
             "image1": "polyEdgeToCurves.png",
             "imageOverlayLabel": "",
@@ -59,7 +59,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.util...().getTransform()))\n",
+            "label": "Ring to Curve",
             "annotation": "Create curve from edge ring with an selected edge.",
             "image1": "curveFromEdgeRing.png",
             "imageOverlayLabel": "",
@@ -86,7 +86,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "RebuildCurveOptions...RebuildCurveOptions",
+            "label": "Rebuild Curve",
             "annotation": "Rebuild Curve Options",
             "image1": "rebuildCurve.png",
             "imageOverlayLabel": "",
@@ -95,35 +95,35 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from imp import relo...pDriveLocators(crv)\n",
+            "label": "Setup Curve Locators",
             "annotation": "Set up driver locators for a selected curve.",
-            "image1": "locator.png",
+            "image1": "curveLocators.png",
             "imageOverlayLabel": "",
             "command": "from imp import reload\nfrom takTools.utils import curve as crvUtil; reload(crvUtil)\ncrv = cmds.filterExpand(cmds.ls(sl=True), sm=9)[0]\ncrvUtil.setupDriveLocators(crv)\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "from imp import relo...cmds.ls(sl=True)[0])",
+            "label": "Setup Curve Clusters",
             "annotation": "Set up clusters for a selected curve.",
-            "image1": "selectCluster.png",
+            "image1": "curveClusters.png",
             "imageOverlayLabel": "",
             "command": "from imp import reload\nfrom takTools.utils import curve as crvUtil; reload(crvUtil)\ncrvUtil.setupDriveClusters(cmds.ls(sl=True)[0])",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...tm.arrangeObjectUI()",
+            "label": "Arrange Objects",
             "annotation": "Arrange selected object in grid",
-            "image1": "arrangeObjs.png",
+            "image1": "hsRearrange.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tm\nimport imp\nimp.reload(tm)\n\ntm.arrangeObjectUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "from maya import cmd...Cube, mesh + '_OBB')",
-            "annotation": "OBB_BoundingBox",
+            "label": "OBB",
+            "annotation": "Oriented bounding box",
             "image1": "OBB_boundingBox.png",
             "imageOverlayLabel": "",
             "command": "from maya import cmds\nfrom takTools.rigging.OBB.api import OBB\nmeshes = cmds.ls(selection=True)\nif len(meshes) == 0:\n   raise RuntimeError(\"Nothing selected!\")\nfor mesh in meshes:\n    obbBoundBoxPnts = OBB.from_points(mesh)\n    obbCube = cmds.polyCube(ch=False, name=\"pointMethod_GEO\")[0]\n    cmds.xform(obbCube, matrix=obbBoundBoxPnts.matrix)\n    cmds.rename(obbCube, mesh + '_OBB')",
@@ -131,8 +131,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from maya import cmd...BoundBoxPnts.matrix)",
-            "annotation": "OBB_Lattice",
+            "label": "OBB Lattice",
+            "annotation": "Oriented bounding box lattice",
             "image1": "OBB_lattice.png",
             "imageOverlayLabel": "",
             "command": "from maya import cmds\nfrom takTools.rigging.OBB.api import OBB\nmesh = cmds.ls(selection=True)\nif len(mesh) == 0:\n   raise RuntimeError(\"Nothing selected!\")\nobbBoundBoxPnts = OBB.from_points(mesh)\nlattice = cmds.lattice(dv=(2, 2, 2),\n                       objectCentered=True,\n                       name=\"pointMethod_LATTICE\t\")\ncmds.xform(lattice[1], matrix=obbBoundBoxPnts.matrix)\ncmds.xform(lattice[2], matrix=obbBoundBoxPnts.matrix)",
@@ -140,7 +140,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...c.setupSoftModCtrl()",
+            "label": "Soft Mod Controller",
             "annotation": "Create sliding softMod control for selected geometry.",
             "image1": "softMod.png",
             "imageOverlayLabel": "",
@@ -149,7 +149,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.util...SelectionToCluster()",
+            "label": "Soft Selection Cluster",
             "annotation": "Convert soft selection to cluster.",
             "image1": "cluster.png",
             "imageOverlayLabel": "",
@@ -158,25 +158,25 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from maya import cmd...Mesh(waiter, joints)",
+            "label": "MASH to Joints",
             "annotation": "Convert mash to joints",
-            "image1": "pythonFamily.png",
+            "image1": "mashToJoints.png",
             "imageOverlayLabel": "",
             "command": "from maya import cmds\nfrom takTools.utils import MASH as mashUtil\nimport imp\nimp.reload(mashUtil)\n\nwaiter = cmds.ls(sl=True)[0]\njoints = mashUtil.buildJoints(waiter)\nmashUtil.buildSkinMesh(waiter, joints)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
-            "label": "source makeFoldingRi... makeFoldingRig.mel;",
+            "label": "Fold Rig Builder",
             "annotation": "Build folding rig like a paper.",
-            "image1": "commandButton.png",
+            "image1": "UV_Unfold_BrushLarge.png",
             "imageOverlayLabel": "",
             "command": "source makeFoldingRig.mel;",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...m)\ntak_autoSwim.UI()",
+            "label": "Auto Swim Builder",
             "annotation": "Set up auto swim feature for FK controllers.",
             "image1": "autoSwim.bmp",
             "imageOverlayLabel": "",
@@ -185,7 +185,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "source \"js_rotationO..._rotationOrderWin();",
+            "label": "Rotate Order",
             "annotation": "Show js_rotationOrderWin",
             "image1": "rotate_M.png",
             "imageOverlayLabel": "",

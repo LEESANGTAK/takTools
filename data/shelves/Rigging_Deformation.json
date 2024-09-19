@@ -5,7 +5,7 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "import takSkeleton a...(ts)\nts.gui.showUI()",
+            "label": "Tak Skeleton",
             "annotation": "Create a skeleton and manage skeleton poses.",
             "image1": "takSkeleton.png",
             "imageOverlayLabel": "",
@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from imp import relo...na_editor.gui.show()",
+            "label": "DNA Editor",
             "annotation": "DNA Editor",
             "image1": "MHC.png",
             "imageOverlayLabel": "",
@@ -23,7 +23,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import dem_bones\ndem...s\ndem_bones.showUI()",
+            "label": "Dem Bones",
             "annotation": "EA's SSD(Smooth Skin Deformation) tool with custom GUI.",
             "image1": "dembones.jpg",
             "imageOverlayLabel": "",
@@ -32,7 +32,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import imp\nimport ed...PoseGUI()\ngui.show()",
+            "label": "Rig Logic Editor",
             "annotation": "\"takRigLogic\" pose editor.",
             "image1": "noPreview.png",
             "imageOverlayLabel": "",
@@ -41,7 +41,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from imp import relo...d(tsm)\ntsm.showUI()\n",
+            "label": "SkelMesh Manager",
             "annotation": "from imp import relo...d(tsm)\ntsm.showUI()\n",
             "image1": "HIKCharacterToolSkeleton_100.png",
             "imageOverlayLabel": "",
@@ -50,7 +50,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...skinWeights.showUI()",
+            "label": "Tak Skin Weights",
             "annotation": "Set skin weights",
             "image1": "skinWeight.png",
             "imageOverlayLabel": "",
@@ -59,7 +59,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "### Select Joint in ...cmds.select(jntList)",
+            "label": "Select Child Joints",
             "annotation": "Select all the child joints",
             "image1": "selChldJnt.bmp",
             "imageOverlayLabel": "",
@@ -68,7 +68,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...isc.smoothSkinBind()",
+            "label": "Smooth Skin Bind",
             "annotation": "Select surface(s) and a joint.",
             "image1": "smoothSkin.png",
             "imageOverlayLabel": "",
@@ -77,7 +77,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "DetachSkin...DetachSkin",
+            "label": "Detach Skin",
             "annotation": "Detach Skin",
             "image1": "detachSkin.png",
             "imageOverlayLabel": "",
@@ -86,7 +86,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...ak_ROM)\ntak_ROM.UI()",
+            "label": "Range of Motion",
             "annotation": "Create range of motion for selected object.",
             "image1": "ROM.png",
             "imageOverlayLabel": "",
@@ -95,7 +95,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "### Weight Hammer on...weightHammerVerts;')",
+            "label": "Weight Hammer Loop",
             "annotation": "Weight Hammer on Edge Loop",
             "image1": "weightHammerOnEdgeLoop.bmp",
             "imageOverlayLabel": "",
@@ -104,8 +104,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "from maya import cmd...o(weightHammerBrush)",
-            "annotation": "from maya import cmds, mel\n\nweightHammerBrush = cmds.artSelectCt...",
+            "label": "Weight Hammer Brush",
+            "annotation": "Weight Hammer Brush",
             "image1": "weightHammer.png",
             "imageOverlayLabel": "",
             "command": "from maya import cmds, mel\n\nweightHammerBrush = cmds.artSelectCtx(beforeStrokeCmd='select -cl;', afterStrokeCmd='if (size(`ls -sl`) > 0){WeightHammer;}')\ncmds.setToolTo(weightHammerBrush)",
@@ -113,7 +113,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...nWeightBrush.paint()",
+            "label": "Smooth Weight Brush",
             "annotation": "tf_smoothSkinWeight",
             "image1": "tf_smoothSkin.bmp",
             "imageOverlayLabel": "",
@@ -122,7 +122,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "if (! `pluginInfo -q...moothWeightsToolCtx;",
+            "label": "brSmooth Weights",
             "annotation": "Paint Smooth Weights Tool",
             "image1": "brSmoothWeights.svg",
             "imageOverlayLabel": "",
@@ -131,7 +131,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "ArtPaintSkinWeightsT...inWeightsToolOptions",
+            "label": "Paint Skin Weights",
             "annotation": "Paint skin weights tool options",
             "image1": "paintSkinWeights.png",
             "imageOverlayLabel": "",
@@ -140,7 +140,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "MirrorSkinWeights...MirrorSkinWeights",
+            "label": "Mirror Skin Weights",
             "annotation": "Select either a single skin or the source and the destination skin.",
             "image1": "mirrorSkinWeight.png",
             "imageOverlayLabel": "",
@@ -149,8 +149,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...isc.addInfCopySkin()",
-            "annotation": "Select the source surface and the destination surface or component.",
+            "label": "Add Copy Skin",
+            "annotation": "Add source influences to target and copy skin weights. When component selected, copy from geometry to components.",
             "image1": "copySkinWeight.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.addInfCopySkin()",
@@ -158,8 +158,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.util....duplicateSkinMesh()",
-            "annotation": "Separate selected faces as separated skin mesh.",
+            "label": "Duplicate Skin",
+            "annotation": "Duplicate selected faces as skin mesh.",
             "image1": "polyDuplicateFacet.png",
             "imageOverlayLabel": "",
             "command": "import takTools.utils.skin as skinUtil\nimport imp\nimp.reload(skinUtil)\nskinUtil.duplicateSkinMesh()",
@@ -167,8 +167,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.util...apVertices(src, trg)",
-            "annotation": "Select source skin geo and target geo",
+            "label": "Copy Skin Overlap",
+            "annotation": "Copy skin from source geometry to target vertices overlaped.",
             "image1": "polyConvertToVertices.png",
             "imageOverlayLabel": "",
             "command": "import takTools.utils.skin as skinUtil\nimport imp\nimp.reload(skinUtil)\nsels = cmds.ls(sl=True)\ntrg = sels.pop(-1)\nfor src in sels: skinUtil.copySkinOverlapVertices(src, trg)",
@@ -176,7 +176,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...\ntak_misc.addInfUI()",
+            "label": "Add Influence",
             "annotation": "Add influences. Select influences and geometry.",
             "image1": "addWrapInfluence.png",
             "imageOverlayLabel": "",
@@ -185,7 +185,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "RemoveInfluence...RemoveInfluence",
+            "label": "Remove Influence",
             "annotation": "Remove Influence",
             "image1": "removeWrapInfluence.png",
             "imageOverlayLabel": "",
@@ -203,8 +203,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...tak_helperJoint.ui()",
-            "annotation": "import takTools.rigg...tak_helperJoint.ui()",
+            "label": "Helper Joints",
+            "annotation": "Set up helper joints",
             "image1": "tak_helperJoint.png",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_helperJoint as tak_helperJoint\nimport imp\nimp.reload(tak_helperJoint)\ntak_helperJoint.ui()",
@@ -212,7 +212,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...ak_correctiveBS.UI()",
+            "label": "Corrective Blendshape",
             "annotation": "Corrective blend shape tools.",
             "image1": "correctiveBS.png",
             "imageOverlayLabel": "",
@@ -221,8 +221,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.rigg...t)\ntak_LRTarget.UI()",
-            "annotation": "import takTools.rigg...t)\ntak_LRTarget.UI()",
+            "label": "LR Target",
+            "annotation": "Build left and right target geometry from a symmetrical expression",
             "image1": "LRTarget.bmp",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_LRTarget as tak_LRTarget\nimport imp\nimp.reload(tak_LRTarget)\ntak_LRTarget.UI()",
@@ -230,8 +230,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "ShapeEditor...ShapeEditor",
-            "annotation": "Shape Editor",
+            "label": "Shape Editor",
+            "annotation": "Blend Shape Editor",
             "image1": "blendShapeEditor.png",
             "imageOverlayLabel": "",
             "command": "ShapeEditor",
@@ -239,8 +239,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "import takTools.comm...sc.editDfmMemberUI()",
-            "annotation": "import takTools.comm...sc.editDfmMemberUI()",
+            "label": "Edit Deform Member",
+            "annotation": "Edit Deform Member",
             "image1": "editDfmMember.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.editDfmMemberUI()",

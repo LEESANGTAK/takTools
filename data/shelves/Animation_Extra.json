@@ -52,7 +52,7 @@
         {
             "label": "Oscillate Maker",
             "annotation": "Create procedure oscillate animation.",
-            "image1": "oscillateMaker.bmp",
+            "image1": "oscillateMaker.png",
             "imageOverlayLabel": "",
             "command": "import takTools.animation.tak_oscillateMaker as tak_oscillateMaker\nimport imp\nimp.reload(tak_oscillateMaker)\ntak_oscillateMaker.UI()",
             "sourceType": "python",
@@ -61,7 +61,7 @@
         {
             "label": "B1 nCloth",
             "annotation": "b1 nCloth tool",
-            "image1": "b1nCloth.bmp",
+            "image1": "nClothCreate.png",
             "imageOverlayLabel": "",
             "command": "source \"D40clothTool.mel\";",
             "sourceType": "mel",
@@ -77,9 +77,9 @@
             "noDefaultPopup": true
         },
         {
-            "label": "Hair Chain Baker",
-            "annotation": "Hair Chain Baker",
-            "image1": "hairChainBaker.png",
+            "label": "Dynamic Spline Baker",
+            "annotation": "Dynamic Spine Baker",
+            "image1": "kinSplineHandle.png",
             "imageOverlayLabel": "",
             "command": "import takTools.animation.dynamicSplineBaker as dsb\nimport imp\nimp.reload(dsb)\ndsb.DynamicSplineBaker()",
             "sourceType": "python",

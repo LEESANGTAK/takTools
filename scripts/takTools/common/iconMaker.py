@@ -1,11 +1,16 @@
 from maya.api import OpenMaya as om
 from maya.api import OpenMayaUI as omui
+from maya import cmds
 import pymel.core as pm
 import os
 
 
+MODULE_NAME = 'takTools'
+MODULE_PATH = __file__.split(MODULE_NAME, 1)[0].replace('\\', '/') + MODULE_NAME
+
+
 class IconMakerGUI(object):
-    DEFAULT_ICON_PATH = pm.about(preferences=True) + '/prefs/icons/icon.png'
+    DEFAULT_ICON_PATH = '{}/icons/icon.png'.format(MODULE_PATH)
 
     def __init__(self):
         self.__build()
@@ -16,7 +21,6 @@ class IconMakerGUI(object):
     def show(self):
         pm.showWindow(self.__win)
         self.__fitAllObjects()
-        pm.mel.eval("setRendererInModelPanel $gLegacyViewport modelPanel4")
 
     def __build(self):
         self.__win = pm.window(title='Icon Maker GUI', mnb=False, mxb=False)
@@ -24,8 +28,8 @@ class IconMakerGUI(object):
         mainFormLayout = pm.formLayout()
 
         buttonLayout = pm.rowColumnLayout(numberOfColumns=5)
-        self.__sizeIntFldGrp = pm.intFieldGrp(label='Size: ', v1=128, columnWidth=[(1, 30), (2, 30)])
-        self.__lineWidthSlider = pm.floatSliderGrp(label='Line Width: ', min=1.0, max=5.0, columnWidth=[(1, 70), (2, 70)])
+        self.__sizeIntFldGrp = pm.intFieldGrp(label='Size: ', v1=64, columnWidth=[(1, 30), (2, 30)])
+        self.__lineWidthSlider = pm.floatSliderGrp(label='Line Width: ', min=1.0, max=10.0, columnWidth=[(1, 70), (2, 70)])
         self.__wireBtn = pm.symbolButton(image='WireFrame.png')
         self.__textureBtn = pm.symbolButton(image='Textured.png')
         self.__fitBtn = pm.symbolButton(image='zoom.png')
@@ -36,6 +40,7 @@ class IconMakerGUI(object):
         pm.modelEditor(self.__modelEditor, e=True, grid=False)
         pm.modelEditor('{}'.format(self.__modelEditor), e=True, displayTextures=False)
         pm.modelEditor(self.__modelEditor, e=True, displayAppearance='smoothShaded')
+        pm.modelEditor(self.__modelEditor, edit=True, jointXray=True)
 
         captureLayout = pm.rowColumnLayout(numberOfColumns=3, columnWidth=[(1, 30), (2, 230), (3, 38)])
         self.__iconPathBtn = pm.symbolButton(image='fileOpen.png')
@@ -59,6 +64,7 @@ class IconMakerGUI(object):
         self.__capCam = pm.camera(n='captureCam')[0]
         self.__capCam.translate.set(0, 15, 0)
         self.__capCam.rotate.set(-90, 0, 0)
+        self.__capCam.focalLength.set(500)
         self.__capCam.hide()
         pm.modelEditor(self.__modelEditor, edit=True, camera=self.__capCam)
 
@@ -73,7 +79,6 @@ class IconMakerGUI(object):
 
     def __closeCallback(self):
         pm.delete(self.__capCam)
-        pm.mel.eval("setRendererInModelPanel $gViewport2 modelPanel4")
 
     def __setLineWidth(self, *args):
         width = pm.floatSliderGrp(self.__lineWidthSlider, q=True, value=True)
@@ -109,16 +114,27 @@ class IconMakerGUI(object):
         pm.viewFit(all=True)
 
     def __getFilePath(self, *args):
-        filePath = pm.fileDialog2(fileMode=0, caption='Save as', fileFilter='*.png;;*.jpg')
+        startDir = os.path.dirname(pm.textField(self.__filePathFld, q=True, text=True))
+        filePath = pm.fileDialog2(fileMode=0, caption='Save as', fileFilter='*.png;;*.jpg', startingDirectory=startDir)
         if filePath:
             pm.textField(self.__filePathFld, e=True, text=filePath[0])
 
     def __captureViewport(self, *args):
-        img = om.MImage()
-        view = omui.M3dView.getM3dViewFromModelEditor(self.__modelEditor.name())
-        view.readColorBuffer(img, True)
+        pm.setFocus('modelPanel4')  # This is a tricky part
+
         iconSize = pm.intFieldGrp(self.__sizeIntFldGrp, q=True, v1=True)
-        img.resize(iconSize, iconSize, False)
         iconPath = pm.textField(self.__filePathFld, q=True, text=True)
         ext = os.path.splitext(iconPath)[-1].strip('.')
+
+        img = om.MImage()
+        view = omui.M3dView.getM3dViewFromModelEditor(self.__modelEditor.name())
+        view.pushViewport(0, 0, view.portWidth(), view.portHeight())
+        view.refresh()
+        view.readColorBuffer(img, True)
+        view.popViewport()
+        img.resize(iconSize, iconSize)
         img.writeToFile(iconPath, ext)
+
+        if cmds.textField('iconNameTxtFld', exists=True):
+            cmds.textField('iconNameTxtFld', e=True, text=os.path.basename(iconPath))
+            pm.deleteUI(self.__win)

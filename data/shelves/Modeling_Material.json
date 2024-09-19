@@ -16,7 +16,7 @@
         {
             "label": "Random Color Material",
             "annotation": "Assign random color lamber.",
-            "image1": "ranColLam.bmp",
+            "image1": "ranColLam.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.ranColLam()",
             "sourceType": "python",
