@@ -42,7 +42,7 @@ ALL_ICONS = getAllIcons()
 # Version constants
 VERSION_MAJOR = 2
 VERSION_MINOR = 2
-VERSION_MICRO = 1
+VERSION_MICRO = 2
 
 # Size values are based on 4k(3840*2160) monitor
 # Caculate scale factor depend on monitor height

@@ -145,7 +145,7 @@ class IconMakerGUI(object):
         view.refresh()
         view.readColorBuffer(img, True)
         view.popViewport()
-        img.resize(iconSize, iconSize)
+        img.resize(iconSize, iconSize, False)
         img.writeToFile(iconPath, ext)
 
         if cmds.textField('iconNameTxtFld', exists=True):
