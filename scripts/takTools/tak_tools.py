@@ -41,7 +41,7 @@ ALL_ICONS = getAllIcons()
 
 # Version constants
 VERSION_MAJOR = 2
-VERSION_MINOR = 1
+VERSION_MINOR = 2
 VERSION_MICRO = 1
 
 # Size values are based on 4k(3840*2160) monitor
@@ -350,7 +350,7 @@ def editorGUI(*args):
     cmds.rowColumnLayout(numberOfColumns=2, columnAlign=[(1, 'right')])
 
     cmds.text(label='Icon Preview: ')
-    cmds.shelfButton('iconPrevShelfBtn', w=ICON_SIZE, h=ICON_SIZE)
+    cmds.shelfButton('iconPrevShelfBtn', w=ICON_SIZE, h=ICON_SIZE, c=evalCommand)
 
     cmds.text(label='Icon Name: ')
     cmds.rowColumnLayout(numberOfColumns=4)
@@ -588,6 +588,15 @@ def renameShelfButton(*args):
     cmds.shelfButton(shelfButton, e=True, label=label)
 
     refreshEditorShelves(selShelf, label)
+
+
+def evalCommand(*args):
+    lang = SOURCE_TYPE_MAPPING.get(cmds.radioButtonGrp('langRadioBtnGrp', q=True, select=True))
+    cmd = cmds.scrollField('cmdScrFld', q=True, text=True)
+    if lang == 'python':
+        cmds.evalDeferred(cmd)
+    elif lang == 'mel':
+        mel.eval(cmd)
 
 
 def setIcon(useMayaResource=False, iconMaker=False, *args):
