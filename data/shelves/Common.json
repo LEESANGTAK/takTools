@@ -1,9 +1,9 @@
 {
     "shelfButtonInfos": [
         {
-            "label": "Shot Setup",
-            "annotation": "Set maya preference.",
-            "image1": "setPref.bmp",
+            "label": "Scene Setup",
+            "annotation": "Set maya preferences for a scene.",
+            "image1": "render.png",
             "imageOverlayLabel": "",
             "command": "import takTools.pipeline.tak_shotSetUp as tak_shotSetUp\nimport imp\nimp.reload(tak_shotSetUp)\ntak_shotSetUp.UI()",
             "sourceType": "python",
@@ -48,8 +48,8 @@
         {
             "label": "Select Hierarchy",
             "annotation": "Select all the children of the current selection",
-            "image1": "menuIconEdit.png",
-            "imageOverlayLabel": "SH",
+            "image1": "selectByHierarchy.png",
+            "imageOverlayLabel": "",
             "command": "SelectHierarchy",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -57,8 +57,8 @@
         {
             "label": "Freeze Transform",
             "annotation": "Freeze Transformations",
-            "image1": "menuIconModify.png",
-            "imageOverlayLabel": "FT",
+            "image1": "FreezeTransform.png",
+            "imageOverlayLabel": "",
             "command": "FreezeTransformations",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -66,8 +66,8 @@
         {
             "label": "Center Pivot",
             "annotation": "Center Pivot",
-            "image1": "menuIconModify.png",
-            "imageOverlayLabel": "CP",
+            "image1": "CenterPivot.png",
+            "imageOverlayLabel": "",
             "command": "CenterPivot",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -85,7 +85,7 @@
             "label": "Component Editor",
             "annotation": "Component Editor",
             "image1": "menuIconWindow.png",
-            "imageOverlayLabel": "CE",
+            "imageOverlayLabel": "cpnt",
             "command": "ComponentEditor",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -103,7 +103,7 @@
             "label": "Hypershade Window",
             "annotation": "Display and edit connections in shading networks",
             "image1": "hypershade.png",
-            "imageOverlayLabel": "HS",
+            "imageOverlayLabel": "",
             "command": "HypershadeWindow",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -166,7 +166,7 @@
             "label": "Material Preset",
             "annotation": "Show material preset GUI.",
             "image1": "hypershade.png",
-            "imageOverlayLabel": "MP",
+            "imageOverlayLabel": "preset",
             "command": "import takTools.modeling.tak_matPreset as tak_matPreset\nimport imp\nimp.reload(tak_matPreset)\ntak_matPreset.MatPreset.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -184,7 +184,7 @@
             "label": "Shape Color Index",
             "annotation": "Set a indexed color for selected shape.",
             "image1": "hairPaintSpecular.png",
-            "imageOverlayLabel": "SC",
+            "imageOverlayLabel": "object",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.setJntColorUI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -193,7 +193,7 @@
             "label": "Outliner Color",
             "annotation": "Set ouliner color",
             "image1": "hairPaintSpecular.png",
-            "imageOverlayLabel": "OC",
+            "imageOverlayLabel": "outliner",
             "command": "import takTools.common.tak_outlinerColor as tc\nimport imp\nimp.reload(tc)\ntc.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -238,8 +238,17 @@
             "label": "Horizontal Layout Script Eitor",
             "annotation": "Layout script editor horizontally",
             "image1": "defaultTwoSideBySideLayout.png",
-            "imageOverlayLabel": "SE",
+            "imageOverlayLabel": "script",
             "command": "from takTools.utils import qtUtil;qtUtil.editScriptEditorHorizontal()",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
+        {
+            "label": "GPT Maya",
+            "annotation": "ChatGPT for Maya",
+            "image1": "ChatGPT_logo.png",
+            "imageOverlayLabel": "",
+            "command": "\nfrom imp import reload\nimport chatmaya; reload(chatmaya)\nchatmaya.run()\n",
             "sourceType": "python",
             "noDefaultPopup": true
         }

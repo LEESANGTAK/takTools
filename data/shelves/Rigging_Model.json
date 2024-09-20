@@ -14,7 +14,7 @@
             "noDefaultPopup": true
         },
         {
-            "label": "Solid color",
+            "label": "Grab Color Mat",
             "annotation": "Assign solid color material with grabed color.",
             "image1": "solColorMat.bmp",
             "imageOverlayLabel": "",
@@ -26,7 +26,7 @@
             "label": "Duplicate Shader",
             "annotation": "Duplicate selected shader network.",
             "image1": "out_lambert.png",
-            "imageOverlayLabel": "DS",
+            "imageOverlayLabel": "duplicate",
             "command": "pm.mel.hyperShadePanelMenuCommand(\"hyperShadePanel1\", \"duplicateShadingNetwork\");",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -34,8 +34,8 @@
         {
             "label": "Duplicate Material Assign",
             "annotation": "Duplicate material and assign duplicated material.",
-            "image1": "dupMatAssign.png",
-            "imageOverlayLabel": "",
+            "image1": "material_assign.png",
+            "imageOverlayLabel": "dupAssign",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.dupMatAndAssign()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -43,8 +43,8 @@
         {
             "label": "Copy Material",
             "annotation": "Assign the material of first selection to the others",
-            "image1": "copyMat.bmp",
-            "imageOverlayLabel": "",
+            "image1": "material_assign.png",
+            "imageOverlayLabel": "copy",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyMat()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -52,8 +52,8 @@
         {
             "label": "Copy Texture",
             "annotation": "Copy selected objects texture",
-            "image1": "copyTexture.png",
-            "imageOverlayLabel": "",
+            "image1": "out_file.png",
+            "imageOverlayLabel": "copy",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyTexRenameUI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -61,7 +61,7 @@
         {
             "label": "Cut Plane Joints",
             "annotation": "Cut selected geometry with selected joints. Select first joints and geometry last.",
-            "image1": "cutGeoWithJoints.png",
+            "image1": "cutPlaneJoints.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.cutGeoWithJnts()",
             "sourceType": "python",
@@ -133,8 +133,8 @@
         {
             "label": "Copy UV Material",
             "annotation": "Copy all uv sets and material from source to target.",
-            "image1": "copyUvMat.png",
-            "imageOverlayLabel": "",
+            "image1": "copyUV.png",
+            "imageOverlayLabel": "mat",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyUvMat()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -142,8 +142,8 @@
         {
             "label": "Copy UV Rigged",
             "annotation": "Copy source mesh's uv to target mesh that rigged",
-            "image1": "copyUvRiggedMesh.png",
-            "imageOverlayLabel": "",
+            "image1": "copyUV.png",
+            "imageOverlayLabel": "rigged",
             "command": "import pymel.core as pm\nimport takTools.common.tak_misc as tak_misc\n\nsels = pm.ls(sl=True)\nsrc = sels[0]\ntrg = sels[1]\n\ntak_misc.copyUvRiggedMesh(src, trg)",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -151,8 +151,8 @@
         {
             "label": "File Texture Manager",
             "annotation": "File Texture Manager",
-            "image1": "texManger.bmp",
-            "imageOverlayLabel": "",
+            "image1": "out_file.png",
+            "imageOverlayLabel": "manager",
             "command": "FileTextureManager;",
             "sourceType": "mel",
             "noDefaultPopup": true

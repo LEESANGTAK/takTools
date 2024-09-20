@@ -8,7 +8,7 @@
             "label": "Delete Keys Default",
             "annotation": "Delete keys and set default value",
             "image1": "deleteKeys.bmp",
-            "imageOverlayLabel": "Default",
+            "imageOverlayLabel": "0 0 0",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.delKeySetDflt()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -34,8 +34,8 @@
         {
             "label": "Offset Keyframe",
             "annotation": "Offset keyframe for selected object(s).",
-            "image1": "offsetKey.bmp",
-            "imageOverlayLabel": "",
+            "image1": "setKeyframe.png",
+            "imageOverlayLabel": "offset",
             "command": "import takTools.animation.tak_offsetKeyframe as tak_offsetKeyframe\nimport imp\nimp.reload(tak_offsetKeyframe)\ntak_offsetKeyframe.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -70,8 +70,8 @@
         {
             "label": "IH Hair Chain",
             "annotation": "Bake IH_HairChain tool.",
-            "image1": "bakeHairChain.png",
-            "imageOverlayLabel": "",
+            "image1": "kinSplineHandle.png",
+            "imageOverlayLabel": "IH",
             "command": "IH_BakeHairChain;",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -92,15 +92,6 @@
             "imageOverlayLabel": "",
             "command": "InteractivePlayback",
             "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "Clean Up Ani Scene",
-            "annotation": "Clean up animation scene.",
-            "image1": "tak_cleanUpAniScene.png",
-            "imageOverlayLabel": "",
-            "command": "import takTools.animation.tak_cleanUpAniScene as tak_cleanUpAniScene\nimport imp\nimp.reload(tak_cleanUpAniScene)\ntak_cleanUpAniScene.ui()",
-            "sourceType": "python",
             "noDefaultPopup": true
         },
         {
@@ -135,22 +126,22 @@
             "annotation": "Spring magic",
             "image1": "springMagic.png",
             "imageOverlayLabel": "",
-            "command": "execfile(r'C:\\GoogleDrive\\programs_env\\maya\\modules\\SpringMagic\\springMagic.py')",
+            "command": "import SpringMagic.springMagic\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },
         {
             "label": "Overlapper",
             "annotation": "Create overlap animation easily.",
-            "image1": "play_hover.png",
-            "imageOverlayLabel": "",
+            "image1": "ghostingPre.png",
+            "imageOverlayLabel": "overlap",
             "command": "source \"Overlapper release 1-1.mel\";OverlapperRelease;",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
             "label": "Bookmark Manager",
-            "annotation": "BookmarkManager;",
+            "annotation": "Bookmark Manager",
             "image1": "Bookmark.png",
             "imageOverlayLabel": "",
             "command": "BookmarkManager;",
@@ -160,8 +151,8 @@
         {
             "label": "B1 Playblast",
             "annotation": "Quicktime playblast with Pdplayer",
-            "image1": "playblastMov.png",
-            "imageOverlayLabel": "",
+            "image1": "playblast.png",
+            "imageOverlayLabel": "B1",
             "command": "source \"makePlayblastMov.mel\";\nmakePlayblastMov;",
             "sourceType": "mel",
             "noDefaultPopup": true

@@ -34,7 +34,7 @@
         {
             "label": "Cycle Infinity",
             "annotation": "Convert selected animation curve to the cycle mode.",
-            "image1": "makeCycle.bmp",
+            "image1": "postInfinityCycle.png",
             "imageOverlayLabel": "",
             "command": "animCurveEditor -edit -displayInfinities true graphEditor1GraphEd;\nsetInfinity -pri cycle;\nsetInfinity -poi cycle;",
             "sourceType": "mel",
@@ -43,7 +43,7 @@
         {
             "label": "Cycle Offset Infinity",
             "annotation": "Convert selected animation curve to the cycle with offset mode.",
-            "image1": "cycleOffset.bmp",
+            "image1": "postInfinityCycleOffset.png",
             "imageOverlayLabel": "",
             "command": "animCurveEditor -edit -displayInfinities true graphEditor1GraphEd;\nsetInfinity -pri cycleRelative;\nsetInfinity -poi cycleRelative;",
             "sourceType": "mel",
@@ -52,26 +52,17 @@
         {
             "label": "Linear Infinity",
             "annotation": "Convert selected animation curve to the linear mode.",
-            "image1": "linear.bmp",
+            "image1": "linearTangent.png",
             "imageOverlayLabel": "",
             "command": "animCurveEditor -edit -displayInfinities true graphEditor1GraphEd;\nsetInfinity -pri linear;\nsetInfinity -poi linear;",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
-            "label": "Constant Infinity",
-            "annotation": "Convert selected animation curve to the constant mode.",
-            "image1": "makeConstant.bmp",
-            "imageOverlayLabel": "",
-            "command": "animCurveEditor -edit -displayInfinities false graphEditor1GraphEd;\nsetInfinity -poi constant;\nsetInfinity -pri constant;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
             "label": "Easy In Easy Out",
             "annotation": "Set easy in and easy out.",
-            "image1": "easyEase.bmp",
-            "imageOverlayLabel": "",
+            "image1": "autoTangent.png",
+            "imageOverlayLabel": "easy",
             "command": "source easyEasyEase.mel;",
             "sourceType": "mel",
             "noDefaultPopup": true

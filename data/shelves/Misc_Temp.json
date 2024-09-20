@@ -6,9 +6,9 @@
     "shelfButtonInfos": [
         {
             "label": "Interactive Skin",
-            "annotation": "Set interactive mode for skin clusters.",
+            "annotation": "Set normalize weights to interactive.",
             "image1": "smoothSkin.png",
-            "imageOverlayLabel": "IS",
+            "imageOverlayLabel": "interactive",
             "command": "for skin in pm.ls(type='skinCluster'):\n    skin.normalizeWeights.set(1)",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -17,7 +17,7 @@
             "label": "SegmentScale False",
             "annotation": "Set segmentScaleCompensate to false for selected skin clusters.",
             "image1": "UVTkScale.png",
-            "imageOverlayLabel": "SSF",
+            "imageOverlayLabel": "false",
             "command": "for jnt in pm.selected(type='joint'):\n    jnt.segmentScaleCompensate.set(False)",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -26,7 +26,7 @@
             "label": "Raw Normal Map",
             "annotation": "Set color space to raw for normal maps.",
             "image1": "render_bump2d.png",
-            "imageOverlayLabel": "RN",
+            "imageOverlayLabel": "raw",
             "command": "for node in pm.ls(type='bump2d'):\n    node.inputs(type='file')[0].colorSpace.set('Raw')",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -35,7 +35,7 @@
             "label": "Mesh Tangent Space",
             "annotation": "Set tangentSpace to Left Handed for meshes.",
             "image1": "out_mesh.png",
-            "imageOverlayLabel": "MT",
+            "imageOverlayLabel": "tangent",
             "command": "for mesh in pm.ls(type='mesh'):\n    mesh.tangentSpace.set(2)",
             "sourceType": "python",
             "noDefaultPopup": true

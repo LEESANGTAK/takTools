@@ -16,7 +16,7 @@
         {
             "label": "Animation Sculpt",
             "annotation": "Correct problematic shape of animated geometry.",
-            "image1": "aniSculpt.bmp",
+            "image1": "sculpt.png",
             "imageOverlayLabel": "",
             "command": "import takTools.animation.tak_aniSculpt as tak_aniSculpt\nimport imp\nimp.reload(tak_aniSculpt)\ntak_aniSculpt.UI()",
             "sourceType": "python",

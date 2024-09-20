@@ -106,7 +106,7 @@
         {
             "label": "Curve To Cylinder",
             "annotation": "Convert nurbs curves to polygon geomtry",
-            "image1": "curveToPoly.png",
+            "image1": "curveToCylinder.png",
             "imageOverlayLabel": "",
             "command": "import takTools.modeling.tak_curveToPoly as tak_curveToPoly\nimport imp\nimp.reload(tak_curveToPoly)\ntak_curveToPoly.UI()",
             "sourceType": "python",
@@ -115,7 +115,7 @@
         {
             "label": "Curve To Ribbon",
             "annotation": "Convert selected curves to polygon stripe.",
-            "image1": "crvToStripe.png",
+            "image1": "curveToRibbon.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.crvToPolyStrp()",
             "sourceType": "python",
@@ -133,7 +133,7 @@
         {
             "label": "Align To Circle",
             "annotation": "Align into circlular shape for selected edge loop.",
-            "image1": "alignCircle.bmp",
+            "image1": "alignToCircle.png",
             "imageOverlayLabel": "",
             "command": "source _sort_circle_tool.mel;\n_sort_circle_tool;",
             "sourceType": "mel",
@@ -142,7 +142,7 @@
         {
             "label": "Mop Knit",
             "annotation": "Flatten geometry into uv space.",
-            "image1": "mopKnit.png",
+            "image1": "shrinkwrap.png",
             "imageOverlayLabel": "",
             "command": "mopKnitOptions",
             "sourceType": "mel",
@@ -160,7 +160,7 @@
         {
             "label": "Hair Tools",
             "annotation": "Creating hair guide curves from polygon tube.",
-            "image1": "hairTools.png",
+            "image1": "menuIconHair.png",
             "imageOverlayLabel": "",
             "command": "import takTools.modeling.hairTools as hairTools\nimport imp\nimp.reload(hairTools)\nhairTools.hairballUI()",
             "sourceType": "python",

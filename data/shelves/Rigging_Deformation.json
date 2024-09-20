@@ -51,9 +51,9 @@
         },
         {
             "label": "Tak Skin Weights",
-            "annotation": "Set skin weights",
-            "image1": "skinWeight.png",
-            "imageOverlayLabel": "",
+            "annotation": "Show tak skin weights GUI",
+            "image1": "smoothSkin.png",
+            "imageOverlayLabel": "takSkin",
             "command": "import takTools.rigging.tak_skinWeights as tak_skinWeights\nimport imp\nimp.reload(tak_skinWeights)\ntak_skinWeights.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -61,8 +61,8 @@
         {
             "label": "Select Child Joints",
             "annotation": "Select all the child joints",
-            "image1": "selChldJnt.bmp",
-            "imageOverlayLabel": "",
+            "image1": "menuIconSkeletons.png",
+            "imageOverlayLabel": "child",
             "command": "### Select Joint in Hierarchy ###\njntList = cmds.ls(sl = True, dag = True, type = 'joint')\ncmds.select(jntList)",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -88,8 +88,8 @@
         {
             "label": "Range of Motion",
             "annotation": "Create range of motion for selected object.",
-            "image1": "ROM.png",
-            "imageOverlayLabel": "",
+            "image1": "updateMotionTrail.png",
+            "imageOverlayLabel": "range",
             "command": "import takTools.rigging.tak_ROM as tak_ROM\nimport imp\nimp.reload(tak_ROM)\ntak_ROM.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -197,7 +197,7 @@
             "label": "bSkinSaver",
             "annotation": "Show bSkinSaver GUI.",
             "image1": "save.png",
-            "imageOverlayLabel": "",
+            "imageOverlayLabel": "skin",
             "command": "import takTools.rigging.bSkinSaver as bSkinSaver\nimport imp\nimp.reload(bSkinSaver)\nbSkinSaver.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -205,8 +205,8 @@
         {
             "label": "Helper Joints",
             "annotation": "Set up helper joints",
-            "image1": "tak_helperJoint.png",
-            "imageOverlayLabel": "",
+            "image1": "kinJoint.png",
+            "imageOverlayLabel": "helper",
             "command": "import takTools.rigging.tak_helperJoint as tak_helperJoint\nimport imp\nimp.reload(tak_helperJoint)\ntak_helperJoint.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -214,8 +214,8 @@
         {
             "label": "Corrective Blendshape",
             "annotation": "Corrective blend shape tools.",
-            "image1": "correctiveBS.png",
-            "imageOverlayLabel": "",
+            "image1": "blendShape.png",
+            "imageOverlayLabel": "corrective",
             "command": "import takTools.rigging.tak_correctiveBS as tak_correctiveBS\nimport imp\nimp.reload(tak_correctiveBS)\nposCorObj = tak_correctiveBS.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -223,8 +223,8 @@
         {
             "label": "LR Target",
             "annotation": "Build left and right target geometry from a symmetrical expression",
-            "image1": "LRTarget.bmp",
-            "imageOverlayLabel": "",
+            "image1": "split.png",
+            "imageOverlayLabel": "L/R",
             "command": "import takTools.rigging.tak_LRTarget as tak_LRTarget\nimport imp\nimp.reload(tak_LRTarget)\ntak_LRTarget.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -241,8 +241,8 @@
         {
             "label": "Edit Deform Member",
             "annotation": "Edit Deform Member",
-            "image1": "editDfmMember.png",
-            "imageOverlayLabel": "",
+            "image1": "menuIconDeformations.png",
+            "imageOverlayLabel": "member",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.editDfmMemberUI()",
             "sourceType": "python",
             "noDefaultPopup": true

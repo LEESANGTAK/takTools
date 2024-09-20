@@ -43,8 +43,8 @@
         {
             "label": "B1Hair Chain",
             "annotation": "b1 hair dynamic tool",
-            "image1": "hairChain.bmp",
-            "imageOverlayLabel": "",
+            "image1": "kinSplineHandle.png",
+            "imageOverlayLabel": "IH",
             "command": "source IH_buildSpIkChain.mel;\nIH_buildSpIkChain();",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -52,7 +52,7 @@
         {
             "label": "B1Hair Chain Utils",
             "annotation": "Additional functions for the 'IH_buildSpIkChain.mel' script.",
-            "image1": "forHairChain.png",
+            "image1": "kinSplineHandle.png",
             "imageOverlayLabel": "Utils",
             "command": "import takTools.rigging.tak_addFuncForIHBuildSpIkChain as tak_addFuncForIHBuildSpIkChain\nimport imp\nimp.reload(tak_addFuncForIHBuildSpIkChain)\ntak_addFuncForIHBuildSpIkChain.ui()",
             "sourceType": "python",
@@ -97,7 +97,7 @@
         {
             "label": "Tak Group",
             "annotation": "Make group",
-            "image1": "group.bmp",
+            "image1": "group.png",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_group as tak_group\nimport imp\nimp.reload(tak_group)\ntak_group.UI()",
             "sourceType": "python",
@@ -115,8 +115,8 @@
         {
             "label": "Mirror Controllers",
             "annotation": "Mirror selected controllers",
-            "image1": "mirSelCon.bmp",
-            "imageOverlayLabel": "",
+            "image1": "control.bmp",
+            "imageOverlayLabel": "mirror",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirCtrlShapeUi()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -124,8 +124,8 @@
         {
             "label": "Mirror Controller",
             "annotation": "Mirror selected controller one to one.",
-            "image1": "mirConOneToOne.png",
-            "imageOverlayLabel": "",
+            "image1": "control.bmp",
+            "imageOverlayLabel": "mir1to1",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirConSel()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -133,8 +133,8 @@
         {
             "label": "Mirror Object",
             "annotation": "Mirror selected objects",
-            "image1": "mirrorObj.bmp",
-            "imageOverlayLabel": "",
+            "image1": "polyMirrorGeometry.png",
+            "imageOverlayLabel": "object",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirObjUi()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -142,8 +142,8 @@
         {
             "label": "Copy SDK",
             "annotation": "Copy or mirror set driven keyframes",
-            "image1": "tak_copySDK.bmp",
-            "imageOverlayLabel": "",
+            "image1": "menuIconKeys.png",
+            "imageOverlayLabel": "copy",
             "command": "import takTools.rigging.tak_copyMirrorSDK as tak_copyMirrorSDK\nimport imp\nimp.reload(tak_copyMirrorSDK)\ntak_copyMirrorSDK.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -160,8 +160,8 @@
         {
             "label": "Match Transform",
             "annotation": "Match transform",
-            "image1": "matchTransform.bmp",
-            "imageOverlayLabel": "",
+            "image1": "out_transform.png",
+            "imageOverlayLabel": "match",
             "command": "import takTools.rigging.tak_matchTransform as tak_matchTransform\nimport imp\nimp.reload(tak_matchTransform)\ntak_matchTransform.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -169,8 +169,8 @@
         {
             "label": "Attribute Manager",
             "annotation": "Attribute manager",
-            "image1": "attrManager.png",
-            "imageOverlayLabel": "",
+            "image1": "attributes.png",
+            "imageOverlayLabel": "manager",
             "command": "import takTools.rigging.tak_attrManager as tak_attrManager\nimport imp\nimp.reload(tak_attrManager)\ntak_attrManager.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -187,8 +187,8 @@
         {
             "label": "Space Switch",
             "annotation": "Set up space switching.",
-            "image1": "tak_setupSpaceSwitching.png",
-            "imageOverlayLabel": "",
+            "image1": "ghostingObjectTypeLocator.png",
+            "imageOverlayLabel": "switch",
             "command": "import takTools.rigging.tak_setupSpaceSwitching as tak_setupSpaceSwitching\nimport imp\nimp.reload(tak_setupSpaceSwitching)\ntak_setupSpaceSwitching.ui()",
             "sourceType": "python",
             "noDefaultPopup": true

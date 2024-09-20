@@ -8,16 +8,16 @@
             "label": "Local Axis On",
             "annotation": "Local axis on",
             "image1": "menuIconModify.png",
-            "imageOverlayLabel": "LAO",
+            "imageOverlayLabel": "on",
             "command": "toggle -state on -localAxis;",
             "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
             "label": "Local Axis Off",
-            "annotation": "Local axis off",
+            "annotation": "Local axis on",
             "image1": "menuIconModify.png",
-            "imageOverlayLabel": "LAF",
+            "imageOverlayLabel": "off",
             "command": "toggle -state off -localAxis;",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -26,7 +26,7 @@
             "label": "Joint Scale",
             "annotation": "Customize the joint scale",
             "image1": "kinJoint.png",
-            "imageOverlayLabel": "JS",
+            "imageOverlayLabel": "scale",
             "command": "jdsWin",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -34,8 +34,8 @@
         {
             "label": "Joint Style",
             "annotation": "Change the joint style",
-            "image1": "jointStyle.bmp",
-            "imageOverlayLabel": "",
+            "image1": "out_joint.png",
+            "imageOverlayLabel": "style",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.drawJntStyle()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -43,8 +43,8 @@
         {
             "label": "Display Type",
             "annotation": "Change display type.",
-            "image1": "displayType.png",
-            "imageOverlayLabel": "",
+            "image1": "menuIconDisplay.png",
+            "imageOverlayLabel": "type",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.displayType()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -53,7 +53,7 @@
             "label": "Affected Objects",
             "annotation": "Display affected objects",
             "image1": "eye.png",
-            "imageOverlayLabel": "DA",
+            "imageOverlayLabel": "affect",
             "command": "import takTools.utils.display as dp\nimport imp\nimp.reload(dp)\ndp.displayAffectedToggle()",
             "sourceType": "python",
             "noDefaultPopup": true

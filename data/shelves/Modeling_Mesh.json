@@ -124,8 +124,8 @@
         {
             "label": "Mirror Object",
             "annotation": "Mirror selected object.",
-            "image1": "mirrorObj.bmp",
-            "imageOverlayLabel": "",
+            "image1": "polyMirrorGeometry.png",
+            "imageOverlayLabel": "object",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirObjUi()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -142,7 +142,7 @@
         {
             "label": "Separate With Edge",
             "annotation": "Separate mesh with edge loop",
-            "image1": "separateGeo.bmp",
+            "image1": "separateEdge.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sepGeoWithEdge()",
             "sourceType": "python",
@@ -151,7 +151,7 @@
         {
             "label": "Separate With Face",
             "annotation": "Separate mesh with face",
-            "image1": "sepGeo.png",
+            "image1": "separateFace.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sepGeoWithFace()",
             "sourceType": "python",
@@ -160,8 +160,8 @@
         {
             "label": "Combine Merge",
             "annotation": "Combine and merge vertex.",
-            "image1": "cbMrgGeo.png",
-            "imageOverlayLabel": "",
+            "image1": "polyUnite.png",
+            "imageOverlayLabel": "merge",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.cbMrgGeo()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -169,8 +169,8 @@
         {
             "label": "Combine Rename",
             "annotation": "Combine and rename with parent.",
-            "image1": "combineRenameWithParent.png",
-            "imageOverlayLabel": "",
+            "image1": "polyUnite.png",
+            "imageOverlayLabel": "rename",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.combineAndRenameWithParentName()",
             "sourceType": "python",
             "noDefaultPopup": true

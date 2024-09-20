@@ -6,8 +6,8 @@
     "shelfButtonInfos": [
         {
             "label": "Ax Crack",
-            "annotation": "AxCrack",
-            "image1": "AxCrack.bmp",
+            "annotation": "Ax Crack",
+            "image1": "AxCrack.png",
             "imageOverlayLabel": "",
             "command": "source AxCrack.mel;\nAxCrack;",
             "sourceType": "mel",

@@ -25,8 +25,8 @@
         {
             "label": "Mirror Controller",
             "annotation": "Mirror selected controls",
-            "image1": "mirrorCtrl.png",
-            "imageOverlayLabel": "",
+            "image1": "control.bmp",
+            "imageOverlayLabel": "mirror",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirrorCtrlsUI()",
             "sourceType": "python",
             "noDefaultPopup": true

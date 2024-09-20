@@ -43,8 +43,8 @@
         {
             "label": "Save Scene Info",
             "annotation": "Save specific scene information as a file.",
-            "image1": "saveSceneInfo.png",
-            "imageOverlayLabel": "",
+            "image1": "save.png",
+            "imageOverlayLabel": "info",
             "command": "import takTools.pipeline.tak_saveSceneInfo as tak_saveSceneInfo\nimport imp\nimp.reload(tak_saveSceneInfo)\ntak_saveSceneInfo.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -52,8 +52,8 @@
         {
             "label": "Project Folder Setup",
             "annotation": "Create folder structure.",
-            "image1": "prjFldSet.bmp",
-            "imageOverlayLabel": "",
+            "image1": "folder-new.png",
+            "imageOverlayLabel": "project",
             "command": "import takTools.pipeline.tak_prjFolderSetup as tak_prjFolderSetup\nimport imp\nimp.reload(tak_prjFolderSetup)\ntak_prjFolderSetup.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -61,8 +61,8 @@
         {
             "label": "Reference Manager",
             "annotation": "Load or reload or delete references.",
-            "image1": "fileRef.png",
-            "imageOverlayLabel": "",
+            "image1": "reference.png",
+            "imageOverlayLabel": "manager",
             "command": "import takTools.pipeline.tak_fileRef as tak_fileRef\nimport imp\nimp.reload(tak_fileRef)\ntak_fileRef.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -70,8 +70,8 @@
         {
             "label": "Rename Reference Node",
             "annotation": "Rename refrence node and namespace.",
-            "image1": "renameRefNode.bmp",
-            "imageOverlayLabel": "",
+            "image1": "reference.png",
+            "imageOverlayLabel": "rename",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.renameRefNode()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -79,8 +79,8 @@
         {
             "label": "Line Width",
             "annotation": "Change line width.",
-            "image1": "lineWidth.bmp",
-            "imageOverlayLabel": "",
+            "image1": "WireFrame.png",
+            "imageOverlayLabel": "width",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.lineWidth()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -97,8 +97,8 @@
         {
             "label": "Bake Camera",
             "annotation": "Bake selected camera",
-            "image1": "bakeCam.png",
-            "imageOverlayLabel": "",
+            "image1": "Camera.png",
+            "imageOverlayLabel": "bake",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.bakeCam()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -106,8 +106,8 @@
         {
             "label": "Bake Camera for AE",
             "annotation": "Bake selected camera to use in AE.",
-            "image1": "mayaCamToAE.png",
-            "imageOverlayLabel": "",
+            "image1": "Camera.png",
+            "imageOverlayLabel": "AE",
             "command": "import takTools.pipeline.tak_mayaCamToAE as tak_mayaCamToAE\nimport imp\nimp.reload(tak_mayaCamToAE)\ntak_mayaCamToAE.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -115,8 +115,8 @@
         {
             "label": "Bake Camera for Max",
             "annotation": "Export selected camera for using in 3ds Max.",
-            "image1": "mayaCamToMax.png",
-            "imageOverlayLabel": "",
+            "image1": "Camera.png",
+            "imageOverlayLabel": "Max",
             "command": "import takTools.pipeline.tak_mayaCamToMax as tak_mayaCamToMax\nimport imp\nimp.reload(tak_mayaCamToMax)\ntak_mayaCamToMax.mayaCamToMax()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -124,8 +124,8 @@
         {
             "label": "Following Camera",
             "annotation": "Create camera following selected object.",
-            "image1": "followingCam.bmp",
-            "imageOverlayLabel": "",
+            "image1": "Camera.png",
+            "imageOverlayLabel": "follow",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.followingCam()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -133,7 +133,7 @@
         {
             "label": "Track Locators",
             "annotation": "Create locators per frame with selected object.",
-            "image1": "trackingLoc.bmp",
+            "image1": "trackingLoc.png",
             "imageOverlayLabel": "",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.trackingLoc()",
             "sourceType": "python",
@@ -142,8 +142,8 @@
         {
             "label": "Viewport Render",
             "annotation": "Render viewport.",
-            "image1": "ikasRenderView.bmp",
-            "imageOverlayLabel": "",
+            "image1": "render.png",
+            "imageOverlayLabel": "viewport",
             "command": "source ikas_renderViewBr",
             "sourceType": "mel",
             "noDefaultPopup": true
@@ -160,8 +160,8 @@
         {
             "label": "Batch Playblast",
             "annotation": "Batch playblast.",
-            "image1": "batchPB.png",
-            "imageOverlayLabel": "",
+            "image1": "playblast.png",
+            "imageOverlayLabel": "batch",
             "command": "import takTools.pipeline.tak_batchPB as tak_batchPB\nimport imp\nimp.reload(tak_batchPB)\ntak_batchPB.batchPB()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -169,8 +169,8 @@
         {
             "label": "Save Render Layer",
             "annotation": "Save and load render layer set up.",
-            "image1": "saveRenderLayer.png",
-            "imageOverlayLabel": "",
+            "image1": "render_renderLayer.png",
+            "imageOverlayLabel": "save",
             "command": "import takTools.pipeline.tak_saveRenderLayer as tak_saveRenderLayer\nimport imp\nimp.reload(tak_saveRenderLayer)\nrenLyrSaveObj = tak_saveRenderLayer.SaveRenderLayer()\nrenLyrSaveObj.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -178,8 +178,8 @@
         {
             "label": "Edit Maya Ascii",
             "annotation": "Edit maya ascii file contents.",
-            "image1": "editMayaAscii.png",
-            "imageOverlayLabel": "",
+            "image1": "SP_FileIcon.png",
+            "imageOverlayLabel": "edit",
             "command": "import takTools.pipeline.tak_editMayaAsciiFile as tak_editMayaAsciiFile\nimport imp\nimp.reload(tak_editMayaAsciiFile)\ntak_editMayaAsciiFile.ui()",
             "sourceType": "python",
             "noDefaultPopup": true

@@ -149,15 +149,6 @@
             "noDefaultPopup": true
         },
         {
-            "label": "Poly Edit Edgeflow",
-            "annotation": "Convert to edge loop and set edge flow.",
-            "image1": "edgeFlow.bmp",
-            "imageOverlayLabel": "",
-            "command": "cmds.SelectEdgeLoopSp()\ncmds.polyEditEdgeFlow()",
-            "sourceType": "python",
-            "noDefaultPopup": true
-        },
-        {
             "label": "Slide Edge",
             "annotation": "Slide edge loops or paths along their neighbouring edges",
             "image1": "slideEdgeTool.png",

@@ -25,7 +25,7 @@
         {
             "label": "nCloth Set up",
             "annotation": "nCloth set up with skined geometry.",
-            "image1": "nClothSetUp.png",
+            "image1": "nClothCreate.png",
             "imageOverlayLabel": "",
             "command": "import takTools.rigging.tak_nClothSetUp as tak_nClothSetUp\nimport imp\nimp.reload(tak_nClothSetUp)\ntak_nClothSetUp.nClothSetUp()",
             "sourceType": "python",
@@ -34,8 +34,8 @@
         {
             "label": "Placeholder Locators",
             "annotation": "Create locator to keep place for selected items.",
-            "image1": "placeHolder.bmp",
-            "imageOverlayLabel": "",
+            "image1": "locator.png",
+            "imageOverlayLabel": "holder",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.plcHldr()",
             "sourceType": "python",
             "noDefaultPopup": true
@@ -43,8 +43,8 @@
         {
             "label": "Curve from Selection",
             "annotation": "Create curve with selected objects.",
-            "image1": "crvFromSels.bmp",
-            "imageOverlayLabel": "",
+            "image1": "curveEP.png",
+            "imageOverlayLabel": "selected",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.crvFromSelsUi()",
             "sourceType": "python",
             "noDefaultPopup": true

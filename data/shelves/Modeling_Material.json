@@ -7,8 +7,8 @@
         {
             "label": "Copy Material",
             "annotation": "Assign the material of first selection to the others",
-            "image1": "copyMat.bmp",
-            "imageOverlayLabel": "",
+            "image1": "material_assign.png",
+            "imageOverlayLabel": "copy",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyMat()",
             "sourceType": "python",
             "noDefaultPopup": true

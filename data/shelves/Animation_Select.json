@@ -7,7 +7,7 @@
         {
             "label": "Pose 2 Shelf",
             "annotation": "Save controls selected",
-            "image1": "pos2Shelf.bmp",
+            "image1": "createPose.png",
             "imageOverlayLabel": "",
             "command": "pose2shelf",
             "sourceType": "mel",
