@@ -2081,8 +2081,6 @@ def addInfCopySkin(source=None, targets=None):
     srcSkinClst = mel.eval('findRelatedSkinCluster("%s");' % source)
     srcInfs = cmds.skinCluster(srcSkinClst, q=True, inf=True)
 
-    print('srcInfs: ', srcInfs)
-
     trgSkinClsts = []
     if '.' in str(targets):
         trgSkinGeo = targets[0].split('.')[0]
@@ -2095,7 +2093,6 @@ def addInfCopySkin(source=None, targets=None):
 
         cmds.select(trgSkinGeo, r=True)
         trgInfs = cmds.skinCluster(trgSkinClst, q=True, inf=True)
-        print('trgInfs: ', trgInfs)
 
         for inf in srcInfs:
             if inf in trgInfs:
@@ -2119,7 +2116,6 @@ def addInfCopySkin(source=None, targets=None):
 
             cmds.select(trgSkinGeo, r=True)
             trgInfs = cmds.skinCluster(trgSkinClst, q=True, inf=True)
-            print('trgInfs: ', trgInfs)
 
             for inf in srcInfs:
                 if inf in trgInfs:

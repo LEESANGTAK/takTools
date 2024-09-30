@@ -1046,6 +1046,11 @@ global proc createSelectMenuItems(string $parent, string $item, int $defaultItem
 					-c ("setSkinWeightSelect(\""+$item+"\", 1.0)")
 					-rp "E"
 					set1WeightItem;
+				menuItem -label ("Set weight 0.5 for \""+$item+"\"")
+					-echoCommand true
+					-c ("setSkinWeightSelect(\""+$item+"\", 0.5)")
+					-rp "N"
+					set05WeightItem;
 				menuItem -label ("Set weight 0.0 for \""+$item+"\"")
 					-echoCommand true
 					-c ("setSkinWeightSelect(\""+$item+"\", 0.0)")
