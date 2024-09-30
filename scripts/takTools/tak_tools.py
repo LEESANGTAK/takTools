@@ -776,6 +776,7 @@ def checkUpdate(self):
                 copyMayaPreferences()
                 import takTools.tak_tools as tt
                 import imp; imp.reload(tt); tt.UI()
+                cmds.hotkeySet('takTools', e=True, current=True)
     else:
         cmds.confirmDialog(title=TOOL_NAME, message='You have latest version.\nEnjoy!')
 
