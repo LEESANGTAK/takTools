@@ -142,15 +142,15 @@ class SkinWeights(object):
         self.uiWidgets['wghtTxtScrLs'] = cmds.textScrollList(p=self.uiWidgets['wghtFrmLo'], h=200, sc=self.weightTxtScrLsSelCmd, allowMultiSelection=True)
 
         self.uiWidgets['wghtPrsRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=5, columnWidth=[(1, 50), (2, 50), (3, 50), (4, 50), (5, 50)], columnSpacing=[(1, 7), (2, 7), (3, 7), (4, 7), (5, 7)])
-        cmds.text(label='Smooth: ', p=self.uiWidgets['wghtPrsRowColLo'])
-        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0.25', c=partial(self.smoothWeight, 0.25))
-        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0.5', c=partial(self.smoothWeight, 0.5))
-        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0.75', c=partial(self.smoothWeight, 0.75))
-        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='1', c=partial(self.smoothWeight, 1.0))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0', c=partial(self.setWeight, 0.0))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0.25', c=partial(self.setWeight, 0.25))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0.5', c=partial(self.setWeight, 0.5))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='0.75', c=partial(self.setWeight, 0.75))
+        cmds.button(p=self.uiWidgets['wghtPrsRowColLo'], label='1', c=partial(self.setWeight, 1.0))
 
-        self.uiWidgets['wghtSubAddRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=4, columnWidth=[(1, 50), (2, 107), (3, 50), (4, 50)], columnSpacing=[(1, 7), (2, 7), (3, 7), (4, 7)])
+        self.uiWidgets['wghtSubAddRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=4, columnWidth=[(1, 107), (2, 50), (3, 50), (4, 50)], columnSpacing=[(1, 7), (2, 7), (3, 7), (4, 7)])
+        cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='Set Custom Weight', c=partial(self.subAddWeight, 'default'))
         self.uiWidgets['rltvWghtValfloatFld'] = cmds.floatField(p=self.uiWidgets['wghtSubAddRowColLo'], v=0.050, min=0.001, max=1.000, step=0.010, precision=3)
-        cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='Set', c=partial(self.subAddWeight, 'default'))
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='-', c=partial(self.subAddWeight, 'sub'))
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='+', c=partial(self.subAddWeight, 'add'))
 
@@ -269,23 +269,12 @@ class SkinWeights(object):
 
         return rmvZroWghtTable
 
-    def smoothWeight(self, weightVal, *args):
+    def setWeight(self, weightVal, mode='default', *args):
         '''
         Set weight value with given value.
         '''
         # Get selected influence
-
-        mel.eval('brSmoothWeightsContext -edit -flood {} `currentCtx`;'.format(weightVal))
-
-        self.loadInf()
-        self.infTxtScrLsSelCmd()
-
-    def subAddWeight(self, mode, *args):
-        '''
-        Set or Add weight value for selected influence.
-        '''
         selInfList = cmds.textScrollList('infsTxtScrLs', q=True, selectItem=True)
-        weightVal = cmds.floatField(self.uiWidgets['rltvWghtValfloatFld'], q=True, v=True)
 
         for selInf in selInfList:
             if mode == 'sub':
@@ -297,6 +286,13 @@ class SkinWeights(object):
 
         self.loadInf()
         self.infTxtScrLsSelCmd()
+
+    def subAddWeight(self, mode, *args):
+        '''
+        Subtract or Add weight value for selected influence.
+        '''
+        weightVal = cmds.floatField(self.uiWidgets['rltvWghtValfloatFld'], q=True, v=True)
+        self.setWeight(weightVal, mode)
 
     def sortByWeight(self, infs):
         weightSortedItems = sorted(self.infWeightTable.items(), key=lambda item: float(item[1].split(' ')[0]))
