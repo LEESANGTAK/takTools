@@ -176,6 +176,27 @@
         menuEditorMenuItem5;
 
     menuItem
+        -label "Update Bind Pose" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from takTools.utils import skin as skUtil\");\npython(\"sels = cmds.ls(sl=True, type='joint')\");\npython(\"if len(sels) and not cmds.listRelatives(sels[0], p=True):\\n\\tskUtil.updateBindPose(sels[0])\\nelse:\\n\\tcmds.error('Please select a root joint.')\");\n" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "smoothSkin.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem21;
+
+    menuItem
         -label "Unbind" 
         -divider 0
         -subMenu 0
