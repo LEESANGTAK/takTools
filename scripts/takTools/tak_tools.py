@@ -350,7 +350,7 @@ def editorGUI(*args):
     cmds.rowColumnLayout(numberOfColumns=2, columnAlign=[(1, 'right')])
 
     cmds.text(label='Icon Preview: ')
-    cmds.shelfButton('iconPrevShelfBtn', w=ICON_SIZE, h=ICON_SIZE, c=evalCommand)
+    cmds.shelfButton('iconPrevShelfBtn', w=ICON_SIZE, h=ICON_SIZE, ndp=True, c=evalCommand)
 
     cmds.text(label='Icon Name: ')
     cmds.rowColumnLayout(numberOfColumns=4)
@@ -774,9 +774,16 @@ def checkUpdate(self):
             succeed = update()
             if succeed:
                 copyMayaPreferences()
+
+                # Reload tool
                 import takTools.tak_tools as tt
                 import imp; imp.reload(tt); tt.UI()
-                cmds.hotkeySet('takTools', e=True, current=True)
+
+                # Reload hotkey set
+                if 'takTools' in cmds.hotkeySet(q=True, hotkeySetArray=True):
+                    cmds.hotkeySet('takTools', e=True, delete=True)
+                    cmds.hotkeySet(e=True, ip="C:/Users/chst2/Documents/maya/2024/prefs/hotkeys/takTools.mhk")
+                    cmds.hotkeySet('takTools', e=True, current=True)
     else:
         cmds.confirmDialog(title=TOOL_NAME, message='You have latest version.\nEnjoy!')
 
