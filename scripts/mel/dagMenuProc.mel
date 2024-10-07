@@ -2867,9 +2867,25 @@ global proc int isComponentSelected() {
 global proc setSkinWeightSelect(string $joint, float $weight) {
 	string $mesh[] = `ls -sl -objectsOnly`;
 	string $skinClst = `findRelatedSkinCluster($mesh[0])`;
-
 	string $vertices[] = `ls -sl -fl`;
-	skinPercent -transformValue $joint $weight $skinClst $vertices;
+
+    int $error = catchQuiet(`skinPercent -transformValue $joint $weight $skinClst $vertices`);
+    if ($error) {
+        string $infs[] = `skinPercent -q -transform $skinClst`;
+        int $exists = `stringArrayContains $joint $infs`;
+        if (!$exists) {
+            skinCluster -e -wt 0.0 -lw true -ai $joint $skinClst;
+            setAttr ($joint + ".liw") false;
+        }
+
+		select -r $mesh[0];
+		selectMode -component;
+		select -r $vertices;
+
+		skinPercent -transformValue $joint $weight $skinClst $vertices;
+    }
+
+	select -r $vertices;
 }
 
 
