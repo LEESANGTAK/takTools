@@ -99,6 +99,7 @@ def UI():
     cmds.menuItem(label='Preferences', image='shelfOptions.png', c=prefsGUI, p='editMenu')
     cmds.menu('helpMenu', label='Help', p=WIN_NAME)
     cmds.menuItem(label='Check Update', image='teDownArrow.png', c=checkUpdate, p='helpMenu')
+    cmds.menuItem(label='Hotkeys Info', c=hotkeysInfo, p='helpMenu')
     cmds.menuItem(label='About Tak Tools', image='info.png', c=aboutGUI, p='helpMenu')
 
     cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(2, 50, 90)])
@@ -826,6 +827,21 @@ def copyMayaPreferences():
     prefsDir = '{}/prefs'.format(MODULE_PATH)
     mayaPrefDir = '{}{}/prefs'.format(cmds.internalVar(uad=True), int(cmds.about(version=True)))
     copy_tree(prefsDir, mayaPrefDir)
+# ------------
+
+
+# ------------ Hotkeys Info
+def hotkeysInfo(*ags):
+    message = '''
+Shift + 1 + LMB: Display Marking Menu
+Shift + 2 + LMB: Select Marking Menu
+Shift + 3 + LMB: Rigging Marking Menu
+Shift + 4 + LMB: Skinning Marking Menu
+Ctrl + Alt + D: Toggle Deformers
+Ctrl + Alt + S: Select Hierarchy
+Ctrl + Alt + Z: Go to Bind Pose
+'''
+    cmds.confirmDialog(title=TOOL_NAME, message=message, button='OK')
 # ------------
 
 

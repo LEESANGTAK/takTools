@@ -2130,7 +2130,7 @@ def addInfCopySkin(source=None, targets=None):
             trgSkinClsts.append(trgSkinClst)
 
     for trgSkinClst in trgSkinClsts:
-        srcSkinMethod = cmds.getAttr('%s.skinningMethod' % srcSkinClst)
+        srcSkinMethod = max(cmds.getAttr('%s.skinningMethod' % srcSkinClst), 0)
         cmds.setAttr('%s.skinningMethod' % trgSkinClst, srcSkinMethod)
         srcUseComponent = cmds.getAttr('%s.useComponents' % srcSkinClst)
         cmds.setAttr('%s.useComponents' % trgSkinClst, srcUseComponent)
