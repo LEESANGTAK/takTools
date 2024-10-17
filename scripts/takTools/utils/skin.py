@@ -349,9 +349,9 @@ def pruneSkinInfluences(mesh, skinClst, maxInfs):
 
 
 def rigidifySkin(*args):
-    selVertices = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=31)
-    faces = cmds.polyListComponentConversion(selVertices, toFace=True)
-    mesh = cmds.ls(selVertices, objectsOnly=True)[0]
+    selComponents = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=[31, 32, 34])
+    faces = cmds.polyListComponentConversion(selComponents, toFace=True)
+    mesh = cmds.ls(selComponents, objectsOnly=True)[0]
 
     meshUtil.toggleDeformers(mesh)
 
@@ -362,11 +362,11 @@ def rigidifySkin(*args):
     cmds.polyReduce(simpleMesh, version=1, ch=False, percentage=50)
 
     copySkin(dupSkinMesh, simpleMesh)
-    copySkin(simpleMesh, mesh, components=selVertices)
+    copySkin(simpleMesh, mesh, components=selComponents)
 
     cmds.delete(dupSkinMesh, simpleMesh)
 
     meshUtil.toggleDeformers(mesh)
 
     cmds.selectMode(component=True)
-    cmds.select(selVertices, r=True)
+    cmds.select(selComponents, r=True)
