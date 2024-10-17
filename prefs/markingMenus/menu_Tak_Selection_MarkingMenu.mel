@@ -156,7 +156,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nselectType -msh false;\nselectMode -object;\nsetToolTo selectSuperContext;" 
+        -command "polySelectConstraint -dis;\nselectType -msh false;\n" 
         -optionBox 0
         -enable 1
         -visible 1

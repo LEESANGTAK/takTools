@@ -92,8 +92,10 @@ class SkinWeights(object):
         ## Edit Menu
         self.uiWidgets['editMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Edit', tearOff=True)
         self.uiWidgets['rebindMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Rebind', c=rebind, ann='Rebind in current state for the selected geometries.')
-        cmds.menuItem(divider=True, dividerLabel='Maya Native')
+        self.uiWidgets['updateBindPoseMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Update Bind Pose', c=updateBindPose, ann='Update bind pose for selected root joint.')
+        cmds.menuItem(divider=True)
         self.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
+        self.uiWidgets['rigidifyMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Rigidify', c=skinUtil.rigidifySkin, ann='Rigidify skin for selected vertices. It is good for thin surface like collar.')
         self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
         cmds.menuItem(optionBox=True, c='mel.eval("MirrorSkinWeightsOptions;")')
         cmds.menuItem(divider=True, dividerLabel='Copy')
@@ -150,7 +152,7 @@ class SkinWeights(object):
 
         self.uiWidgets['wghtSubAddRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=4, columnWidth=[(1, 107), (2, 50), (3, 50), (4, 50)], columnSpacing=[(1, 7), (2, 7), (3, 7), (4, 7)])
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='Set Custom Weight', c=partial(self.subAddWeight, 'default'))
-        self.uiWidgets['rltvWghtValfloatFld'] = cmds.floatField(p=self.uiWidgets['wghtSubAddRowColLo'], v=0.050, min=0.001, max=1.000, step=0.010, precision=3)
+        self.uiWidgets['rltvWghtValfloatFld'] = cmds.floatField(p=self.uiWidgets['wghtSubAddRowColLo'], v=0.010, min=0.001, max=1.000, step=0.010, precision=3)
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='-', c=partial(self.subAddWeight, 'sub'))
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='+', c=partial(self.subAddWeight, 'add'))
 
@@ -465,6 +467,14 @@ def rebind(*args):
     selGeos = cmds.filterExpand(cmds.ls(sl=True), sm=[9, 10, 12])
     for sel in selGeos:
         skinUtil.reBind(sel)
+
+
+def updateBindPose(*args):
+    sels = cmds.ls(sl=True, type='joint')
+    if len(sels) == 1 and not cmds.listRelatives(sels[0], p=True):
+        skinUtil.updateBindPose(sels[0])
+    else:
+        cmds.error('Please select a root joint.')
 
 
 def colorFeedback(*args):

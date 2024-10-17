@@ -68,7 +68,6 @@ def copySkin(source, target, components=None):
     Args:
         source (str): Source geometry
         target (str): Target geomery
-        components (list, optional): Vertex list. Defaults to None.
     """
     source = pm.PyNode(source)
     target = pm.PyNode(target)
@@ -143,6 +142,8 @@ def duplicateSkinMesh():
     except:
         pass
     pm.select(dupMesh, r=True)
+
+    return str(dupMesh)
 
 
 def separateSkinMesh():
@@ -263,10 +264,13 @@ def updateBindPose(rootJoint):
     :param rootJoint: Root joint of joint hierarchy
     :type rootJoint: str
     """
-    bindPose = pm.dagPose(rootJoint, q=True, bindPose=True)
-    bindPoseMembers = pm.dagPose(bindPose, q=True, members=True)
+    bindPose = cmds.dagPose(rootJoint, q=True, bindPose=True)
+    if len(bindPose) > 1:
+        cmds.delete(bindPose[1:])
+    bindPose = bindPose[0]
+    bindPoseMembers = cmds.dagPose(bindPose, q=True, members=True)
     for bpMember in bindPoseMembers:
-        pm.dagPose(bpMember, reset=True, n=bindPose[0])
+        cmds.dagPose(bpMember, reset=True, n=bindPose)
 
 
 def setSolidSkinWeights(sourceVertex):
@@ -342,3 +346,27 @@ def pruneSkinInfluences(mesh, skinClst, maxInfs):
         cmds.progressBar('progBar', e=True, step=1)
 
     return resultMeshWeights
+
+
+def rigidifySkin(*args):
+    selVertices = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=31)
+    faces = cmds.polyListComponentConversion(selVertices, toFace=True)
+    mesh = cmds.ls(selVertices, objectsOnly=True)[0]
+
+    meshUtil.toggleDeformers(mesh)
+
+    cmds.select(faces, r=True)
+    dupSkinMesh = duplicateSkinMesh()
+    simpleMesh = cmds.duplicate(dupSkinMesh)[0]
+    cmds.CleanupPolygon(simpleMesh)
+    cmds.polyReduce(simpleMesh, version=1, ch=False, percentage=50)
+
+    copySkin(dupSkinMesh, simpleMesh)
+    copySkin(simpleMesh, mesh, components=selVertices)
+
+    cmds.delete(dupSkinMesh, simpleMesh)
+
+    meshUtil.toggleDeformers(mesh)
+
+    cmds.selectMode(component=True)
+    cmds.select(selVertices, r=True)
