@@ -152,7 +152,7 @@ class SkinWeights(object):
 
         self.uiWidgets['wghtSubAddRowColLo'] = cmds.rowColumnLayout(p=self.uiWidgets['mainColLo'], numberOfColumns=4, columnWidth=[(1, 107), (2, 50), (3, 50), (4, 50)], columnSpacing=[(1, 7), (2, 7), (3, 7), (4, 7)])
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='Set Custom Weight', c=partial(self.subAddWeight, 'default'))
-        self.uiWidgets['rltvWghtValfloatFld'] = cmds.floatField(p=self.uiWidgets['wghtSubAddRowColLo'], v=0.010, min=0.001, max=1.000, step=0.010, precision=3)
+        self.uiWidgets['rltvWghtValfloatFld'] = cmds.floatField(p=self.uiWidgets['wghtSubAddRowColLo'], v=0.050, min=0.001, max=1.000, step=0.010, precision=3)
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='-', c=partial(self.subAddWeight, 'sub'))
         cmds.button(p=self.uiWidgets['wghtSubAddRowColLo'], label='+', c=partial(self.subAddWeight, 'add'))
 
