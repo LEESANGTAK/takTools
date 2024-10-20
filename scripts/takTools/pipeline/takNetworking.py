@@ -10,22 +10,17 @@ BLENDER_PORT = 30301
 
 
 def sendSelectedObjectsToBlender():
-    sels = cmds.ls(sl=True)
-    for sel in sels:
-        export_path = sendTo(sel, BLENDER_PORT)
-        removeFileDeffered(export_path)
+    meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
+    cmds.select(meshes, r=True)
 
-
-def sendTo(obj, PORT):
-    cmds.select(obj, r=True)
-    export_path = os.path.join(tempfile.gettempdir(), '{}.fbx'.format(obj))
+    export_path = os.path.join(tempfile.gettempdir(), 'mayaExported.fbx')
     mel.eval('FBXExport -f "{}" -s'.format(export_path.replace('\\', '/')))
 
-    tn = telnetlib.Telnet(HOST, PORT)
+    tn = telnetlib.Telnet(HOST, BLENDER_PORT)
     tn.write(b"import_fbx " + export_path.encode('ascii') + b"\n")
     tn.close()
 
-    return export_path
+    removeFileDeffered(export_path)
 
 
 def removeFileDeffered(filePath, delay_minutes=1):
