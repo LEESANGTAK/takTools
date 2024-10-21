@@ -251,6 +251,15 @@
             "command": "\nfrom imp import reload\nimport chatmaya; reload(chatmaya)\nchatmaya.run()\n",
             "sourceType": "python",
             "noDefaultPopup": true
+        },
+        {
+            "label": "Send To Blender",
+            "annotation": "Send selected objects to the Blender.",
+            "image1": "icons8-blender-48.png",
+            "imageOverlayLabel": "",
+            "command": "from takTools.pipeline import takNetworking as netUtil\n\nnetUtil.sendSelectedObjectsToBlender()",
+            "sourceType": "python",
+            "noDefaultPopup": true
         }
     ]
 }

@@ -289,12 +289,13 @@ def getShelfInfoFromGUI(index=0, shelfName=''):
     if shelfButtons:
         for shelfButton in shelfButtons:
             label = cmds.shelfButton(shelfButton, q=True, label=True) or cmds.shelfButton(shelfButton, q=True, command=True)[:20] + '...' + cmds.shelfButton(shelfButton, q=True, command=True)[-20:]
+            command = cmds.shelfButton(shelfButton, q=True, command=True) or cmds.scrollField('cmdScrFld', q=True, text=True)
             shelfButtonInfo = {
                 'label': label,
                 'annotation': cmds.shelfButton(shelfButton, q=True, ann=True),
                 'image1': cmds.shelfButton(shelfButton, q=True, image1=True),
                 'imageOverlayLabel': cmds.shelfButton(shelfButton, q=True, imageOverlayLabel=True),
-                'command': cmds.shelfButton(shelfButton, q=True, command=True),
+                'command': command,
                 'sourceType': cmds.shelfButton(shelfButton, q=True, sourceType=True),
                 'noDefaultPopup': True
             }
@@ -619,7 +620,10 @@ def getFromIconsFolder(widgetName, *args):
 
 def updateIcon(*args):
     selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
-    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
+    selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)
+    if not selShelfBtnLabel:
+        return
+    selShelfBtnLabel = selShelfBtnLabel[0]
     image1 = cmds.textField('iconNameTxtFld', q=True, text=True) or ICON_DEFAULT
 
     shelfButton = allShelfButtons.get(_getShelfButtonKey(selShelf, selShelfBtnLabel))
@@ -651,6 +655,7 @@ def setToolTip(*args):
 
 
 def setCommand(*args):
+    print('setCommand()')
     selShelf = cmds.textScrollList('editorShevesTxtScrLs', q=True, selectItem=True)[0]
     selShelfBtnLabel = cmds.textScrollList('editorShelfContentsTxtScrLs', q=True, selectItem=True)[0]
     language = SOURCE_TYPE_MAPPING.get(cmds.radioButtonGrp('langRadioBtnGrp', q=True, select=True))
