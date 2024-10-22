@@ -39,7 +39,7 @@ ALL_ICONS = getAllIcons()
 # Version constants
 VERSION_MAJOR = 2
 VERSION_MINOR = 2
-VERSION_MICRO = 1
+VERSION_MICRO = 2
 
 # Size values are based on 4k(3840*2160) monitor
 # Caculate scale factor depend on monitor height
@@ -284,14 +284,18 @@ def getShelfInfoFromGUI(index=0, shelfName=''):
     if shelfButtons:
         for shelfButton in shelfButtons:
             label = cmds.shelfButton(shelfButton, q=True, label=True) or cmds.shelfButton(shelfButton, q=True, command=True)[:20] + '...' + cmds.shelfButton(shelfButton, q=True, command=True)[-20:]
-            command = cmds.shelfButton(shelfButton, q=True, command=True) or cmds.scrollField('cmdScrFld', q=True, text=True)
+            sourceType = cmds.shelfButton(shelfButton, q=True, sourceType=True)
+            command = cmds.shelfButton(shelfButton, q=True, command=True)
+            if not command:
+                command = cmds.scrollField('cmdScrFld', q=True, text=True)
+                cmds.shelfButton(shelfButton, e=True, command=command, sourceType=sourceType)
             shelfButtonInfo = {
                 'label': label,
                 'annotation': cmds.shelfButton(shelfButton, q=True, ann=True),
                 'image1': cmds.shelfButton(shelfButton, q=True, image1=True),
                 'imageOverlayLabel': cmds.shelfButton(shelfButton, q=True, imageOverlayLabel=True),
                 'command': command,
-                'sourceType': cmds.shelfButton(shelfButton, q=True, sourceType=True),
+                'sourceType': sourceType,
                 'noDefaultPopup': True
             }
             shelfButtonInfos.append(shelfButtonInfo)
