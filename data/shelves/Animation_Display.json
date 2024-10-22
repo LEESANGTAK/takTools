@@ -48,6 +48,15 @@
             "command": "import takTools.utils.display as dpUtil;import imp;imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();",
             "sourceType": "python",
             "noDefaultPopup": true
+        },
+        {
+            "label": "Speed Calculator",
+            "annotation": "Add a speed attribute for the selected object and add HUD.",
+            "image1": "channelBoxUnknownSpeed.png",
+            "imageOverlayLabel": "",
+            "command": "from imp import reload\nfrom takTools.animation import speedCalculator as sc; reload(sc)\n\nobject = cmds.ls(sl=True)[0]\nsc.speedHUDToggle(object)",
+            "sourceType": "python",
+            "noDefaultPopup": true
         }
     ]
 }
