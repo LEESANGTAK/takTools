@@ -27,12 +27,11 @@ def averageSpeedHUDToggle(object):
 
     if cmds.headsUpDisplay(widgetName, exists=True):
         cmds.headsUpDisplay(widgetName, remove=True)
-        # Remove speed attribute
-        speedAttr = '{}.{}'.format(object, SPEED_ATTRIBUTE_NAME)
-        if cmds.objExists(speedAttr):
-            cmds.deleteAttr(speedAttr)
     else:
-        cmds.addAttr(object, ln=SPEED_ATTRIBUTE_NAME, at='float', keyable=True)
+        if not cmds.objExists('{}.{}'.format(object, SPEED_ATTRIBUTE_NAME)):
+            cmds.addAttr(object, ln=SPEED_ATTRIBUTE_NAME, at='float', keyable=True)
+        else:
+            cmds.cutKey(object, at=SPEED_ATTRIBUTE_NAME, cl=True)
         showHUD(widgetName, label, section, lambda: averageSpeed(object), 'timeChanged')
 
 
@@ -87,7 +86,7 @@ def averageSpeed(object):
 
     wholeDist = getDistance(object, startFrame, endFrame)
     wholeTime = (endFrame - startFrame) / fps
-    avgSpeed = round(wholeDist / wholeTime, 2)
+    avgSpeed = round(wholeDist / wholeTime, 0)
 
     cmds.setAttr('{}.{}'.format(object, SPEED_ATTRIBUTE_NAME), avgSpeed)
 
@@ -102,7 +101,7 @@ def currentSpeed(object):
 
     perDist = getDistance(object, curFrame-1, curFrame)
     perTime = 1 / fps
-    curSpeed = round(perDist / perTime, 2)
+    curSpeed = round(perDist / perTime, 0)
 
     return '{} {}/s'.format(curSpeed, unit)
 
@@ -116,3 +115,10 @@ def getDistance(object, startFrame, endFrame):
         curPos = om.MPoint(cmds.getAttr('{}.worldMatrix'.format(object), t=curFrame)[-4:-1])
         dist += (curPos - prePos).length()
     return dist
+
+
+def bakeSpeedAttribute(object):
+    startFrame = cmds.playbackOptions(q=True, min=True)
+    endFrame = cmds.playbackOptions(q=True, max=True)
+    cmds.bakeResults(object, at=[SPEED_ATTRIBUTE_NAME], t=(startFrame, endFrame), sm=True, smart=True)
+    speedHUDToggle(object)
