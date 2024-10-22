@@ -96,7 +96,7 @@ class SkinWeights(object):
         cmds.menuItem(divider=True)
         self.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Hammer', c="mel.eval('WeightHammer;')", ann='Set average weights with neighbor vertices.')
         self.uiWidgets['rigidifyMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Rigidify', c=skinUtil.rigidifySkin, ann='Rigidify skin for selected vertices. It is good for thin surface like collar.')
-        self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c="mel.eval('MirrorSkinWeights;')", ann='Mirror skin weights positive X to negative X.')
+        self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c=skinUtil.mirrorSkin, ann='Mirror skin weights positive X to negative X.')
         cmds.menuItem(optionBox=True, c='mel.eval("MirrorSkinWeightsOptions;")')
         cmds.menuItem(divider=True, dividerLabel='Copy')
         self.uiWidgets['copyMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Skin', c=copySkin, ann='Copy a source mesh skin to a target meshes.\nIf components and a mesh selected copy weights from mesh to components.')

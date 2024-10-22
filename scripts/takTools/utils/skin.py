@@ -51,13 +51,13 @@ def getInfluences(geo):
     return infs
 
 
-def mirrorSkin(geo, searchStr, replaceStr):
-    oppInfs = [inf.replace(searchStr, replaceStr) for inf in getInfluences(geo)]
-    oppGeo = geo.replace(searchStr, replaceStr)
-    srcSkinClst = getSkinCluster(geo)
-    trgSkinclst = pm.skinCluster(oppInfs, oppGeo)
-    pm.select(geo, oppGeo, r=True)
-    pm.copySkinWeights(ss=srcSkinClst, ds=trgSkinclst, mirrorMode='YZ')
+def mirrorSkin():
+    mesh = cmds.filterExpand(cmds.ls(sl=True), sm=12)
+    if not mesh:
+        return
+    meshUtil.toggleDeformers(mesh[0])
+    pm.copySkinWeights(mirrorMode='YZ', surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
+    meshUtil.toggleDeformers(mesh[0])
 
 
 def copySkin(source, target, components=None):
