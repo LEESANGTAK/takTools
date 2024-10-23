@@ -42,7 +42,7 @@ ALL_ICONS = getAllIcons()
 # Version constants
 VERSION_MAJOR = 2
 VERSION_MINOR = 3
-VERSION_MICRO = 2
+VERSION_MICRO = 3
 
 # Size values are based on 4k(3840*2160) monitor
 # Caculate scale factor depend on monitor height
@@ -835,6 +835,11 @@ def copyMayaPreferences():
     prefsDir = '{}/prefs'.format(MODULE_PATH)
     mayaPrefDir = '{}{}/prefs'.format(cmds.internalVar(uad=True), int(cmds.about(version=True)))
     copy_tree(prefsDir, mayaPrefDir)
+
+    # Load hotkey set
+    if not 'takTools' in cmds.hotkeySet(q=True, hotkeySetArray=True):
+        cmds.hotkeySet(e=True, ip='{}/hotkeys/takTools.mhk'.format(mayaPrefDir))
+    cmds.hotkeySet('takTools', e=True, current=True)
 # ------------
 
 
@@ -848,6 +853,7 @@ Shift + 4 + LMB: Skinning Marking Menu
 Ctrl + Alt + D: Toggle Deformers
 Ctrl + Alt + S: Select Hierarchy
 Ctrl + Alt + Z: Go to Bind Pose
+Ctrl + Alt + E: To Edge Loop
 '''
     cmds.confirmDialog(title=TOOL_NAME, message=message, button='OK')
 # ------------
