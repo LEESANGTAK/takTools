@@ -60,9 +60,10 @@ def copyFiles():
     mayaPrefDir = '{}/{}/prefs'.format(cmds.internalVar(uad=True), MAYA_VERSION)
     copy_tree(prefsDir, mayaPrefDir)
 
+    # Load hotkey set
     if not 'takTools' in cmds.hotkeySet(q=True, hotkeySetArray=True):
         cmds.hotkeySet(e=True, ip='{}/hotkeys/takTools.mhk'.format(mayaPrefDir))
-        cmds.hotkeySet('takTools', e=True, current=True)
+    cmds.hotkeySet('takTools', e=True, current=True)
 
 
 def addEnvPaths():

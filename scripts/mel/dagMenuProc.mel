@@ -2864,6 +2864,32 @@ global proc int isComponentSelected() {
 }
 
 
+proc addInfluence(string $joint, string $mesh) {
+		string $skinClst = `findRelatedSkinCluster($mesh)`;
+
+		// Store current state
+		string $curPoseName = "curPose";
+		string $curSels[] = `ls -sl`;
+
+		string $infs[] = `skinCluster -q -inf $skinClst`;
+		select -r $infs;
+		dagPose -save -sl -n $curPoseName;
+
+		// Go to bind pose
+		select -r $mesh;
+		GoToBindPose();
+
+		// Add a joint to the skin cluster
+		skinCluster -e -wt 0.0 -lw true -ai $joint $skinClst;
+		setAttr ($joint + ".liw") false;
+
+		// Restore current state
+		dagPose -r $curPoseName;
+		delete $curPoseName;
+		select -r $curSels;
+}
+
+
 global proc setSkinWeightSelect(string $joint, float $weight) {
 	string $mesh[] = `ls -sl -objectsOnly`;
 	string $skinClst = `findRelatedSkinCluster($mesh[0])`;
@@ -2874,8 +2900,7 @@ global proc setSkinWeightSelect(string $joint, float $weight) {
         string $infs[] = `skinPercent -q -transform $skinClst`;
         int $exists = `stringArrayContains $joint $infs`;
         if (!$exists) {
-            skinCluster -e -wt 0.0 -lw true -ai $joint $skinClst;
-            setAttr ($joint + ".liw") false;
+			addInfluence($joint, $mesh[0]);
         }
 
 		select -r $mesh[0];

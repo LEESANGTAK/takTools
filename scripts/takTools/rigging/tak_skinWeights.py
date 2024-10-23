@@ -122,12 +122,12 @@ class SkinWeights(object):
 
         ## Utils Menu
         self.uiWidgets['utilsMenu'] = cmds.menu(p=self.uiWidgets['mainMenuBarLo'], label='Utils')
-        self.uiWidgets['skinCageMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin Cage', c=lambda x: bfUtil.showConvertToCageMeshUI(WIN_NAME), ann='Make skin cage mesh.')
-        self.uiWidgets['SSDMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='SSD', c=ssdGUI, ann='Bake skin combined with other deforemr to a single skin cluster for a selected geometry.')
-        self.uiWidgets['convertMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Converter', c=lambda x: ad2sc.showGUI(WIN_NAME), ann='Convert any deformers to a skin cluster for controllers.')
-        self.uiWidgets['transferMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Transfer', c=transferWeightsGUI, ann='Transfer weights form a joint to other joint.')
-        self.uiWidgets['maxInfsMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Max Influences', c=maxInfluencesGUI, ann='Manage max influences.')
-        self.uiWidgets['skinIOMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin I/O', c=showSkinIOGUI, ann='Import/Export skin weights for selected geometries.')
+        self.uiWidgets['skinCageMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin Cage...', c=lambda x: bfUtil.showConvertToCageMeshUI(WIN_NAME), ann='Make skin cage mesh.')
+        self.uiWidgets['SSDMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='SSD...', c=ssdGUI, ann='Bake skin combined with other deforemr to a single skin cluster for a selected geometry.')
+        self.uiWidgets['convertMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Converter...', c=lambda x: ad2sc.showGUI(WIN_NAME), ann='Convert any deformers to a skin cluster for controllers.')
+        self.uiWidgets['transferMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Transfer...', c=transferWeightsGUI, ann='Transfer weights form a joint to other joint.')
+        self.uiWidgets['maxInfsMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Max Influences...', c=maxInfluencesGUI, ann='Manage max influences.')
+        self.uiWidgets['skinIOMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin I/O...', c=showSkinIOGUI, ann='Import/Export skin weights for selected geometries.')
         cmds.menuItem(optionBox=True, c=bSkinSaverGUI)
 
         # Main GUI

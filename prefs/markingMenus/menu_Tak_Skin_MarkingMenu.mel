@@ -26,7 +26,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "copySkinWeights -mirrorMode YZ -surfaceAssociation closestPoint -influenceAssociation oneToOne -influenceAssociation closestJoint;\n" 
+        -command "python(\"from imp import reload\");\npython(\"from takTools.utils import skin as skinUtil;reload(skinUtil)\");\npython(\"skinUtil.mirrorSkin()\");" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -355,7 +355,7 @@
         -image "rigidBind.png" 
         -echoCommand 0
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem22;
