@@ -127,6 +127,21 @@ runTimeCommand
 
 runTimeCommand
 	-label ""
+	-annotation "Smooth skin weights for selected components using btSmoothWeights tool."
+	-longAnnotation ""
+	-category "Custom Scripts.Skinning"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("brSmoothWeightsContext -edit -flood `floatSliderGrp -query -value brSmoothWeightsStrength` `currentCtx`;")
+	smoothSkinWeights;
+
+runTimeCommand
+	-label ""
 	-annotation "Tak_Display_MarkingMenu (Press)"
 	-longAnnotation ""
 	-category "User Marking Menus"
@@ -215,6 +230,12 @@ nameCommand
 	-command ("SelectEdgeLoopSp")
 	SelectEdgeLoopSpNameCommand;
 
+nameCommand
+	-annotation "smoothSkinWeightsNameCommand"
+	-sourceType "mel"
+	-command ("smoothSkinWeights")
+	smoothSkinWeightsNameCommand;
+
 //
 // The user hotkeys
 //
@@ -236,6 +257,7 @@ hotkey -keyShortcut "!" -name ("Tak_Display_MarkingMenu_PressNameCommand");
 hotkey -keyShortcut "$" -name ("Tak_Skin_MarkingMenu_PressNameCommand");
 hotkey -keyShortcut "$" -releaseName ("Tak_Skin_MarkingMenu_ReleaseNameCommand");
 hotkey -keyShortcut "c" -ctl -name ("");
+hotkey -keyShortcut "w" -ctl -alt -name ("smoothSkinWeightsNameCommand");
 hotkey -keyShortcut "@" -name ("Tak_Selection_MarkingMenu_PressNameCommand");
 hotkey -keyShortcut "@" -releaseName ("Tak_Selection_MarkingMenu_ReleaseNameCommand");
 hotkey -keyShortcut "d" -ctl -alt -name ("toggleDeformersNameCommand");

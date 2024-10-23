@@ -41,7 +41,7 @@ ALL_ICONS = getAllIcons()
 
 # Version constants
 VERSION_MAJOR = 2
-VERSION_MINOR = 3
+VERSION_MINOR = 4
 VERSION_MICRO = 3
 
 # Size values are based on 4k(3840*2160) monitor
@@ -854,6 +854,7 @@ Ctrl + Alt + D: Toggle Deformers
 Ctrl + Alt + S: Select Hierarchy
 Ctrl + Alt + Z: Go to Bind Pose
 Ctrl + Alt + E: To Edge Loop
+Ctrl + Alt + W: Smooth Skin Weights
 '''
     cmds.confirmDialog(title=TOOL_NAME, message=message, button='OK')
 # ------------

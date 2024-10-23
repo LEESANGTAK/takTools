@@ -20,6 +20,7 @@ hotkey -keyShortcut "!" -name ("Tak_Display_MarkingMenu_PressNameCommand");
 hotkey -keyShortcut "$" -name ("Tak_Skin_MarkingMenu_PressNameCommand");
 hotkey -keyShortcut "$" -releaseName ("Tak_Skin_MarkingMenu_ReleaseNameCommand");
 hotkey -keyShortcut "c" -ctl -name ("");
+hotkey -keyShortcut "w" -ctl -alt -name ("smoothSkinWeightsNameCommand");
 hotkey -keyShortcut "@" -name ("Tak_Selection_MarkingMenu_PressNameCommand");
 hotkey -keyShortcut "@" -releaseName ("Tak_Selection_MarkingMenu_ReleaseNameCommand");
 hotkey -keyShortcut "d" -ctl -alt -name ("toggleDeformersNameCommand");
