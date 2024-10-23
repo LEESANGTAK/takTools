@@ -52,12 +52,14 @@ def getInfluences(geo):
 
 
 def mirrorSkin():
-    mesh = cmds.filterExpand(cmds.ls(sl=True), sm=12)
-    if not mesh:
+    sels = cmds.filterExpand(cmds.ls(sl=True), sm=[12, 31, 32, 34])
+    if not sels:
         return
-    meshUtil.toggleDeformers(mesh[0])
+    mesh = cmds.ls(sels, objectsOnly=True)[0]
+    meshUtil.toggleDeformers(mesh)
+    cmds.select(sels, r=True)
     pm.copySkinWeights(mirrorMode='YZ', surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
-    meshUtil.toggleDeformers(mesh[0])
+    meshUtil.toggleDeformers(mesh)
 
 
 def copySkin(source, target, components=None):
