@@ -100,6 +100,7 @@ def UI():
     cmds.button(label = 'Package Textures', c = showPackageTexturesUI)
     cmds.button(label = 'Combine Faces by Mat', c = partial(sepCombineByMat, 'combine'))
     cmds.button(label = 'Combine Objects by Mat', c = combineObjByMat, ann = 'Select poly objects.')
+    cmds.button(label = 'Delete Unused Mat', c = deleteUnusedMaterials, ann = 'Delete unused materials.')
 
     cmds.setParent('procColLay')
     cmds.separator(h = 5, style = 'in')
@@ -555,6 +556,10 @@ def combineObjByMat(*args):
             combinedMesh = cmds.polyUnite(trsfLs)
             cmds.delete(combinedMesh, ch=True)
             cmds.rename(combinedMesh[0], '{mat}_mesh'.format(mat=mat))
+
+
+def deleteUnusedMaterials(*args):
+    pm.mel.hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes")
 
 
 def getMatLs(objLs):
