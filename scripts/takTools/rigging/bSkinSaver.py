@@ -163,7 +163,6 @@ class bSkinSaverUI(QDialog):
 
 bSkinPath = OpenMaya.MDagPath()
 def bFindSkinCluster(objectName):
-    print(objectName)
     skinClst = maya.mel.eval('findRelatedSkinCluster("{}");'.format(objectName))
     if skinClst:
         sels = OpenMaya.MSelectionList()

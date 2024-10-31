@@ -56,10 +56,21 @@ def mirrorSkin():
     if not sels:
         return
     mesh = cmds.ls(sels, objectsOnly=True)[0]
-    meshUtil.toggleDeformers(mesh)
+    influences = getInfluences(mesh)
+    topInfluence = globalUtil.getTopDagNode(influences)
+
+    # Store current pose
+    pm.select(topInfluence, hi=True)
+    curPose = cmds.dagPose(save=True, selection=True)
+
+    goToBindPose(topInfluence)
+    # Mirror skin weights
     cmds.select(sels, r=True)
-    pm.copySkinWeights(mirrorMode='YZ', surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
-    meshUtil.toggleDeformers(mesh)
+    cmds.copySkinWeights(mirrorMode='YZ', surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
+
+    # Restore current pose
+    cmds.dagPose(curPose, restore=True)
+    cmds.delete(curPose)
 
 
 def copySkin(source, target, components=None):
@@ -275,6 +286,11 @@ def updateBindPose(rootJoint):
         cmds.dagPose(bpMember, reset=True, n=bindPose)
 
 
+def goToBindPose(rootJoint):
+    bindPose = pm.dagPose(rootJoint, q=True, bindPose=True)[0]
+    pm.dagPose(bindPose, restore=True, g=True)
+
+
 def setSolidSkinWeights(sourceVertex):
     pm.select(sourceVertex, r=True)
     pm.mel.eval('artAttrSkinWeightCopy;')
@@ -355,7 +371,14 @@ def rigidifySkin(*args):
     faces = cmds.polyListComponentConversion(selComponents, toFace=True)
     mesh = cmds.ls(selComponents, objectsOnly=True)[0]
 
-    meshUtil.toggleDeformers(mesh)
+    influences = getInfluences(mesh)
+    topInfluence = globalUtil.getTopDagNode(influences)
+
+    # Store current pose
+    pm.select(topInfluence, hi=True)
+    curPose = cmds.dagPose(save=True, selection=True)
+
+    goToBindPose(topInfluence)
 
     cmds.select(faces, r=True)
     dupSkinMesh = duplicateSkinMesh()
@@ -368,7 +391,9 @@ def rigidifySkin(*args):
 
     cmds.delete(dupSkinMesh, simpleMesh)
 
-    meshUtil.toggleDeformers(mesh)
+    # Restore current pose
+    cmds.dagPose(curPose, restore=True)
+    cmds.delete(curPose)
 
     cmds.selectMode(component=True)
     cmds.select(selComponents, r=True)

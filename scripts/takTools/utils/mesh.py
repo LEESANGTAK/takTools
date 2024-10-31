@@ -25,6 +25,8 @@ def duplicateFace():
     pm.selectMode(object=True)
     pm.parent(dupMesh, world=True)
 
+    pm.select(dupMesh, r=True)
+
     return dupMesh
 
 
