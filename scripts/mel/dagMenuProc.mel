@@ -1049,7 +1049,7 @@ global proc createSelectMenuItems(string $parent, string $item, int $defaultItem
 				menuItem -label ("Set weight 0.5 for \""+$item+"\"")
 					-echoCommand true
 					-c ("setSkinWeightSelect(\""+$item+"\", 0.5)")
-					-rp "N"
+					-rp "S"
 					set05WeightItem;
 				menuItem -label ("Set weight 0.0 for \""+$item+"\"")
 					-echoCommand true
@@ -1059,7 +1059,7 @@ global proc createSelectMenuItems(string $parent, string $item, int $defaultItem
 				menuItem -label ("Select \""+$item+"\"")
 					-echoCommand true
 					-c ("selectInfluenceInList(\""+$item+"\")")
-					-rp "S"
+					-rp "N"
 					selInfItem;
 			}
 	    }
