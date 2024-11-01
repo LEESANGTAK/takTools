@@ -52,7 +52,7 @@
         {
             "label": "Tak Skin Weights",
             "annotation": "Show tak skin weights GUI",
-            "image1": "smoothSkin.png",
+            "image1": "paintSkinWeights.png",
             "imageOverlayLabel": "takSkin",
             "command": "import takTools.rigging.tak_skinWeights as tak_skinWeights\nimport imp\nimp.reload(tak_skinWeights)\ntak_skinWeights.showUI()",
             "sourceType": "python",
@@ -223,7 +223,7 @@
         {
             "label": "LR Target",
             "annotation": "Build left and right target geometry from a symmetrical expression",
-            "image1": "split.png",
+            "image1": "LRTarget.png",
             "imageOverlayLabel": "L/R",
             "command": "import takTools.rigging.tak_LRTarget as tak_LRTarget\nimport imp\nimp.reload(tak_LRTarget)\ntak_LRTarget.UI()",
             "sourceType": "python",

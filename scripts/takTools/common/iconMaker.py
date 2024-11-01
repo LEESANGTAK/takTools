@@ -25,7 +25,7 @@ class IconMakerGUI(object):
         self.__fitAllObjects()
 
     def __build(self):
-        if pm.modelEditor('captureModelEditor', exists=True):
+        if cmds.modelEditor('captureModelEditor', exists=True):
             cmds.deleteUI('captureModelEditor')
 
         self.__win = pm.window(title='Icon Maker GUI', mnb=False, mxb=False)

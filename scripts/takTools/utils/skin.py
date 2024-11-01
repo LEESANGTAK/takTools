@@ -63,7 +63,10 @@ def mirrorSkin():
     pm.select(topInfluence, hi=True)
     curPose = cmds.dagPose(save=True, selection=True)
 
-    goToBindPose(topInfluence)
+    succeed = goToBindPose(topInfluence)
+    if not succeed:
+        pm.warning('Go to bind pose process is failed! Mirror skin weights will be performed in current pose.')
+
     # Mirror skin weights
     cmds.select(sels, r=True)
     cmds.copySkinWeights(mirrorMode='YZ', surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
@@ -288,7 +291,11 @@ def updateBindPose(rootJoint):
 
 def goToBindPose(rootJoint):
     bindPose = pm.dagPose(rootJoint, q=True, bindPose=True)[0]
-    pm.dagPose(bindPose, restore=True, g=True)
+    try:
+        pm.dagPose(bindPose, restore=True, g=True)
+        return True
+    except:
+        return False
 
 
 def setSolidSkinWeights(sourceVertex):
@@ -378,7 +385,9 @@ def rigidifySkin(*args):
     pm.select(topInfluence, hi=True)
     curPose = cmds.dagPose(save=True, selection=True)
 
-    goToBindPose(topInfluence)
+    succeed = goToBindPose(topInfluence)
+    if not succeed:
+        pm.warning('Go to bind pose process is failed! Rigidfy skin weights will be performed in current pose.')
 
     cmds.select(faces, r=True)
     dupSkinMesh = duplicateSkinMesh()
