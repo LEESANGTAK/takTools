@@ -4,36 +4,43 @@ import maya.OpenMaya as om1
 import maya.api.OpenMaya as om
 
 import pymel.core as pm
-import maya.cmds as cmds
+from maya import cmds, mel
 
 from . import globalUtil
 from . import name as nameUtil
 from . import vector as vectorUtil
 from . import material as matUtil
+from .decorators import printElapsedTime
 
 
-def duplicateFace():
-    selFaces = pm.selected()
-    selMesh = selFaces[0].node()
-    dupMesh = pm.duplicate(selMesh)[0]
+def duplicateFace(faces=None):
+    if not faces:
+        faces = cmds.ls(sl=True, fl=True)
+    selMesh = cmds.listRelatives(cmds.ls(faces, objectsOnly=True)[0], p=True)[0]
+    dupMesh = cmds.duplicate(selMesh)[0]
 
-    dupFaces = [face.replace(selMesh.name(), dupMesh.name()) for face in selFaces]
-    pm.select(dupFaces, r=True)
-    pm.mel.InvertSelection()
-    pm.delete()
+    # Select faces of duplicated mesh
+    cmds.select(dupMesh, r=True)
+    cmds.selectMode(component=True)
+    cmds.selectType(facet=True)
+    dupFaces = [face.replace(selMesh, dupMesh) for face in faces]
+    cmds.select(dupFaces, r=True)
 
-    pm.selectMode(object=True)
-    pm.parent(dupMesh, world=True)
+    # Delete other faces
+    mel.eval('InvertSelection();')
+    cmds.delete()
 
-    pm.select(dupMesh, r=True)
+    cmds.selectMode(object=True)
+    cmds.select(dupMesh, r=True)
 
     return dupMesh
 
 
+@printElapsedTime
 def separateFace():
-    faces = pm.selected(fl=True)
-    separateedMesh = duplicateFace()
-    pm.delete(faces)
+    faces = cmds.ls(sl=True, fl=True)
+    separateedMesh = duplicateFace(faces)
+    cmds.delete(faces)
     return separateedMesh
 
 

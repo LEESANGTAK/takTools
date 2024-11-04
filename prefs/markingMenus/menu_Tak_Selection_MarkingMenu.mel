@@ -134,7 +134,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -msh false;\npolySelectConstraint -m 0 -type 0x0008 -sh 1;\nsetToolTo selectSuperContext;\n\n" 
+        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -facet 1;\nselectType -msh false;\npolySelectConstraint -m 0 -type 0x0008 -sh 1;\nsetToolTo selectSuperContext;\n\n" 
         -optionBox 0
         -enable 1
         -visible 1

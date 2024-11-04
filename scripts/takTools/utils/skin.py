@@ -174,7 +174,7 @@ def separateSkinMesh():
 
     cmds.select(sels, r=True)
     sepMesh = meshUtil.separateFace()
-    sepMesh.rename("%s_skin" % sepMesh)
+    cmds.rename(sepMesh, "%s_skin" % sepMesh)
     copySkin(tempSkinMesh, sepMesh)
 
     meshUtil.cleanupMesh(meshTrsf)
