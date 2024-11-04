@@ -113,7 +113,7 @@ def showConvertToCageMeshUI(parent=None, *args):
 
     pm.text(label='Retopology Settings')
     pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=1000, columnWidth=[(1, 60)])
-    pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=2, label='', labelArray2=['Keep Hard Edges', 'Symmetry'], v1=1, columnWidth=[(1, 10)])
+    pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=2, label='', labelArray2=['Keep Hard Edges', 'Symmetry'], v1=0, columnWidth=[(1, 10)])
 
     pm.button(label='Apply', c=applyBtnCallback)
 

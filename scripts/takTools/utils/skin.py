@@ -69,7 +69,7 @@ def mirrorSkin():
 
     # Mirror skin weights
     cmds.select(sels, r=True)
-    cmds.copySkinWeights(mirrorMode='YZ', surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
+    cmds.copySkinWeights(mirrorMode='YZ', surfaceAssociation='closestPoint', influenceAssociation=['oneToOne', 'closestJoint'])
 
     # Restore current pose
     cmds.dagPose(curPose, restore=True)
