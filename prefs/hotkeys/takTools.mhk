@@ -7,6 +7,51 @@
 //
 runTimeCommand
 	-label ""
+	-annotation "Toggle deformers for selected meshes"
+	-longAnnotation ""
+	-category "Custom Scripts.Rigging"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from imp import reload\nfrom takTools.utils import mesh as meshUtil\nreload(meshUtil)\n\nmeshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\nfor mesh in meshes:\n\tmeshUtil.toggleDeformers(mesh)\n")
+	toggleDeformers;
+
+runTimeCommand
+	-label ""
+	-annotation "Tak_Display_MarkingMenu (Press)"
+	-longAnnotation ""
+	-category "User Marking Menus"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Display_MarkingMenu\";\n")
+	Tak_Display_MarkingMenu_Press;
+
+runTimeCommand
+	-label ""
+	-annotation "Tak_Rigging_MarkingMenu (Release)"
+	-longAnnotation ""
+	-category "User Marking Menus"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Rigging_MarkingMenu_Release;
+
+runTimeCommand
+	-label ""
 	-annotation "Tak_Skin_MarkingMenu (Release)"
 	-longAnnotation ""
 	-category "User Marking Menus"
@@ -37,7 +82,7 @@ runTimeCommand
 
 runTimeCommand
 	-label ""
-	-annotation "Tak_Rigging_MarkingMenu (Release)"
+	-annotation "Tak_Skin_MarkingMenu (Press)"
 	-longAnnotation ""
 	-category "User Marking Menus"
 	-image ""
@@ -47,8 +92,8 @@ runTimeCommand
 	-helpUrl ""
 	-hotkeyCtx ""
 	-commandLanguage "mel"
-	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
-	Tak_Rigging_MarkingMenu_Release;
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Skin_MarkingMenu\";\n")
+	Tak_Skin_MarkingMenu_Press;
 
 runTimeCommand
 	-label ""
@@ -67,6 +112,21 @@ runTimeCommand
 
 runTimeCommand
 	-label ""
+	-annotation "Smooth skin weights for selected components using btSmoothWeights tool."
+	-longAnnotation ""
+	-category "Custom Scripts.Skinning"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (!`pluginInfo -q -loaded \"brSmoothWeights\"`) {\n    loadPlugin \"brSmoothWeights\";\n}\n\nif (!`brSmoothWeightsContext -q -ex \"brSmoothWeightsContext1\"`) {\n    string $brSmoothWeightsCtx = `brSmoothWeightsContext`;\n    setToolTo $brSmoothWeightsCtx;\n}\n\nbrSmoothWeightsContext -edit -flood `floatSliderGrp -query -value brSmoothWeightsStrength` \"brSmoothWeightsContext1\";\n")
+	smoothSkinWeights;
+
+runTimeCommand
+	-label ""
 	-annotation "Tak_Selection_MarkingMenu (Release)"
 	-longAnnotation ""
 	-category "User Marking Menus"
@@ -82,36 +142,6 @@ runTimeCommand
 
 runTimeCommand
 	-label ""
-	-annotation "Tak_Skin_MarkingMenu (Press)"
-	-longAnnotation ""
-	-category "User Marking Menus"
-	-image ""
-	-tags ""
-	-keywords ""
-	-plugin ""
-	-helpUrl ""
-	-hotkeyCtx ""
-	-commandLanguage "mel"
-	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Skin_MarkingMenu\";\n")
-	Tak_Skin_MarkingMenu_Press;
-
-runTimeCommand
-	-label ""
-	-annotation "Toggle deformers for selected meshes"
-	-longAnnotation ""
-	-category "Custom Scripts.Rigging"
-	-image ""
-	-tags ""
-	-keywords ""
-	-plugin ""
-	-helpUrl ""
-	-hotkeyCtx ""
-	-commandLanguage "python"
-	-command ("from imp import reload\nfrom takTools.utils import mesh as meshUtil\nreload(meshUtil)\n\nmeshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\nfor mesh in meshes:\n\tmeshUtil.toggleDeformers(mesh)\n")
-	toggleDeformers;
-
-runTimeCommand
-	-label ""
 	-annotation "Tak_Selection_MarkingMenu (Press)"
 	-longAnnotation ""
 	-category "User Marking Menus"
@@ -124,36 +154,6 @@ runTimeCommand
 	-commandLanguage "mel"
 	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Selection_MarkingMenu\";\n")
 	Tak_Selection_MarkingMenu_Press;
-
-runTimeCommand
-	-label ""
-	-annotation "Smooth skin weights for selected components using btSmoothWeights tool."
-	-longAnnotation ""
-	-category "Custom Scripts.Skinning"
-	-image ""
-	-tags ""
-	-keywords ""
-	-plugin ""
-	-helpUrl ""
-	-hotkeyCtx ""
-	-commandLanguage "mel"
-	-command ("brSmoothWeightsContext -edit -flood `floatSliderGrp -query -value brSmoothWeightsStrength` `currentCtx`;")
-	smoothSkinWeights;
-
-runTimeCommand
-	-label ""
-	-annotation "Tak_Display_MarkingMenu (Press)"
-	-longAnnotation ""
-	-category "User Marking Menus"
-	-image ""
-	-tags ""
-	-keywords ""
-	-plugin ""
-	-helpUrl ""
-	-hotkeyCtx ""
-	-commandLanguage "mel"
-	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Display_MarkingMenu\";\n")
-	Tak_Display_MarkingMenu_Press;
 
 //
 // The name commands referenced by the hotkeys
@@ -246,36 +246,36 @@ hotkeySet -source "Maya_Default" -current takTools;
 //
 // The hotkey contexts and hotkeys
 //
-hotkey -keyShortcut "#" -name ("Tak_Rigging_MarkingMenu_PressNameCommand");
-hotkey -keyShortcut "#" -releaseName ("Tak_Rigging_MarkingMenu_ReleaseNameCommand");
 hotkey -keyShortcut "v" -ctl -name ("");
-hotkey -keyShortcut "z" -ctl -alt -name ("GoToBindPoseNameCommand");
 hotkey -keyShortcut "e" -ctl -alt -name ("SelectEdgeLoopSpNameCommand");
-hotkey -keyShortcut "!" -releaseName ("Tak_Display_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "d" -ctl -alt -name ("toggleDeformersNameCommand");
 hotkey -keyShortcut "s" -ctl -alt -name ("SelectHierarchyNameCommand");
+hotkey -keyShortcut "!" -releaseName ("Tak_Display_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "@" -name ("Tak_Selection_MarkingMenu_PressNameCommand");
 hotkey -keyShortcut "!" -name ("Tak_Display_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "@" -releaseName ("Tak_Selection_MarkingMenu_ReleaseNameCommand");
 hotkey -keyShortcut "$" -name ("Tak_Skin_MarkingMenu_PressNameCommand");
 hotkey -keyShortcut "$" -releaseName ("Tak_Skin_MarkingMenu_ReleaseNameCommand");
 hotkey -keyShortcut "c" -ctl -name ("");
+hotkey -keyShortcut "#" -name ("Tak_Rigging_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "#" -releaseName ("Tak_Rigging_MarkingMenu_ReleaseNameCommand");
 hotkey -keyShortcut "w" -ctl -alt -name ("smoothSkinWeightsNameCommand");
-hotkey -keyShortcut "@" -name ("Tak_Selection_MarkingMenu_PressNameCommand");
-hotkey -keyShortcut "@" -releaseName ("Tak_Selection_MarkingMenu_ReleaseNameCommand");
-hotkey -keyShortcut "d" -ctl -alt -name ("toggleDeformersNameCommand");
-hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel";
-hotkeyCtx -type "Editor" -addClient "posePanel";
-hotkeyCtx -type "Editor" -addClient "hyperShadePanel";
-hotkeyCtx -type "Editor" -addClient "profilerPanel";
-hotkeyCtx -type "Editor" -addClient "hyperGraphPanel";
-hotkeyCtx -type "Editor" -addClient "outlinerPanel";
+hotkey -keyShortcut "z" -ctl -alt -name ("GoToBindPoseNameCommand");
 hotkeyCtx -type "Editor" -addClient "shapePanel";
+hotkeyCtx -type "Editor" -addClient "outlinerPanel";
 hotkeyCtx -type "Editor" -addClient "timeEditorPanel";
+hotkeyCtx -type "Editor" -addClient "hyperShadePanel";
+hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel";
+hotkeyCtx -type "Editor" -addClient "profilerPanel";
 hotkeyCtx -type "Editor" -addClient "graphEditor";
+hotkeyCtx -type "Editor" -addClient "hyperGraphPanel";
 hotkeyCtx -type "Editor" -addClient "nodeEditorPanel";
+hotkeyCtx -type "Editor" -addClient "posePanel";
+hotkeyCtx -type "Tool" -addClient "texSculptCacheContext";
+hotkeyCtx -type "Tool" -addClient "bpDraw";
 hotkeyCtx -type "Tool" -addClient "texCutContext";
 hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush";
-hotkeyCtx -type "Tool" -addClient "sculptMeshCache";
-hotkeyCtx -type "Tool" -addClient "texSculptCacheContext";
 hotkeyCtx -type "Tool" -addClient "xgmIGBrush";
 hotkeyCtx -type "Tool" -addClient "Unfold3DBrush";
-hotkeyCtx -type "Tool" -addClient "bpDraw";
+hotkeyCtx -type "Tool" -addClient "sculptMeshCache";
 hotkeyCtx -type "Tool" -addClient "polyCutUV";
