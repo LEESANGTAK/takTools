@@ -290,7 +290,14 @@ def updateBindPose(rootJoint):
 
 
 def goToBindPose(rootJoint):
-    bindPose = pm.dagPose(rootJoint, q=True, bindPose=True)[0]
+    bindPoses = pm.dagPose(rootJoint, q=True, bindPose=True)
+
+    if len(bindPoses) > 1:
+        pm.error('There is more than one bind pose. Please clean up bind poses first.')
+        return False
+    else:
+        bindPose = bindPoses[0]
+
     try:
         pm.dagPose(bindPose, restore=True, g=True)
         return True
