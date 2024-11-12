@@ -149,7 +149,7 @@ def duplicateSkinMesh():
             copySkin(sel, dupMesh)
     else:
         dupMesh = meshUtil.duplicateFace()
-        dupMesh.rename("%s_skin" % dupMesh)
+        dupMesh = cmds.rename(dupMesh, "%s_skin" % dupMesh)
         mesh = cmds.listRelatives(sels[0], p=True)[0]
         meshTrsf = cmds.listRelatives(mesh, p=True)[0]
         copySkin(meshTrsf, dupMesh)

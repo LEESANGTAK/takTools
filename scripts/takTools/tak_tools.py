@@ -846,15 +846,20 @@ def copyMayaPreferences():
 # ------------ Hotkeys Info
 def hotkeysInfo(*ags):
     message = '''
---- Marking Menu
+# Marking Menu
 Shift + 1 + LMB: Display Marking Menu
 Shift + 2 + LMB: Select Marking Menu
 Shift + 3 + LMB: Rigging Marking Menu
 Shift + 4 + LMB: Skinning Marking Menu
---- Select
-Ctrl + Alt + S: Select Hierarchy
+
+# Display
+Alt + C: Toggle Color Feedback
+
+# Select
 Ctrl + Alt + E: To Edge Loop
---- Skin
+Ctrl + Alt + S: Select Hierarchy
+
+# Skin
 Ctrl + Alt + Z: Go to Bind Pose
 Ctrl + Alt + D: Toggle Deformers
 Ctrl + Alt + W: Smooth Skin Weights

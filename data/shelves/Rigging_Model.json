@@ -14,6 +14,15 @@
             "noDefaultPopup": true
         },
         {
+            "label": "Poly Retopo",
+            "annotation": "Retopologize",
+            "image1": "polyTriangulate.png",
+            "imageOverlayLabel": "",
+            "command": "PolyRetopoOptions",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
+        {
             "label": "Grab Color Mat",
             "annotation": "Assign solid color material with grabed color.",
             "image1": "solColorMat.bmp",
@@ -50,12 +59,48 @@
             "noDefaultPopup": true
         },
         {
+            "label": "Random Color Material",
+            "annotation": "Assign random color lamber.",
+            "image1": "ranColLam.png",
+            "imageOverlayLabel": "",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.ranColLam()",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
+        {
+            "label": "Copy UV Material",
+            "annotation": "Copy all uv sets and material from source to target.",
+            "image1": "copyUV.png",
+            "imageOverlayLabel": "mat",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyUvMat()",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
+        {
+            "label": "Copy UV Rigged",
+            "annotation": "Copy source mesh's uv to target mesh that rigged",
+            "image1": "copyUV.png",
+            "imageOverlayLabel": "rigged",
+            "command": "import pymel.core as pm\nimport takTools.common.tak_misc as tak_misc\n\nsels = pm.ls(sl=True)\nsrc = sels[0]\ntrg = sels[1]\n\ntak_misc.copyUvRiggedMesh(src, trg)",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
+        {
             "label": "Copy Texture",
             "annotation": "Copy selected objects texture",
             "image1": "out_file.png",
             "imageOverlayLabel": "copy",
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyTexRenameUI()",
             "sourceType": "python",
+            "noDefaultPopup": true
+        },
+        {
+            "label": "File Texture Manager",
+            "annotation": "File Texture Manager",
+            "image1": "out_file.png",
+            "imageOverlayLabel": "manager",
+            "command": "FileTextureManager;",
+            "sourceType": "mel",
             "noDefaultPopup": true
         },
         {
@@ -118,69 +163,6 @@
             "image1": "SmoothTarget.png",
             "imageOverlayLabel": "",
             "command": "SetMeshSmoothTargetTool",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "Random Color Material",
-            "annotation": "Assign random color lamber.",
-            "image1": "ranColLam.png",
-            "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.ranColLam()",
-            "sourceType": "python",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "Copy UV Material",
-            "annotation": "Copy all uv sets and material from source to target.",
-            "image1": "copyUV.png",
-            "imageOverlayLabel": "mat",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyUvMat()",
-            "sourceType": "python",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "Copy UV Rigged",
-            "annotation": "Copy source mesh's uv to target mesh that rigged",
-            "image1": "copyUV.png",
-            "imageOverlayLabel": "rigged",
-            "command": "import pymel.core as pm\nimport takTools.common.tak_misc as tak_misc\n\nsels = pm.ls(sl=True)\nsrc = sels[0]\ntrg = sels[1]\n\ntak_misc.copyUvRiggedMesh(src, trg)",
-            "sourceType": "python",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "File Texture Manager",
-            "annotation": "File Texture Manager",
-            "image1": "out_file.png",
-            "imageOverlayLabel": "manager",
-            "command": "FileTextureManager;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "Poly Reduce",
-            "annotation": "Reduce",
-            "image1": "polyReduce.png",
-            "imageOverlayLabel": "",
-            "command": "expandPolyGroupSelection; doPerformPolyReduceArgList 3 {\"1\",\"0\",\"0\",\"1\",\"1\",\"1\",\"1\",\"1\",\"1\",\"0.5\",\"0.5\",\"0.5\",\"0.5\",\"0.5\",\"0.5\",\"0\",\"0.01\",\"0\",\"1\",\"0\",\"0.0\",\"1\",\"1\",\"\",\"1\",\"1\",\"50\",\"0\",\"0\",\"1\",\"0\",\"0\",\"0\",\"0\"};",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "Poly Remesh",
-            "annotation": "Remesh",
-            "image1": "polyRemesh.png",
-            "imageOverlayLabel": "",
-            "command": "polyRemesh -maxEdgeLength 1 -useRelativeValues 1 -collapseThreshold 20 -smoothStrength 0 -tessellateBorders 1 -interpolationType 2",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "Poly Retopo",
-            "annotation": "Retopologize",
-            "image1": "polyRetopo.png",
-            "imageOverlayLabel": "",
-            "command": "polyRetopo -constructionHistory 1 -replaceOriginal 1 -preserveHardEdges 0 -topologyRegularity 1.0 -faceUniformity 0 -anisotropy 0.75 -targetFaceCount 1000 -targetFaceCountTolerance 10",
             "sourceType": "mel",
             "noDefaultPopup": true
         }
