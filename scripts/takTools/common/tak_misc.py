@@ -2082,28 +2082,35 @@ def addInfCopySkin(source=None, targets=None):
     srcInfs = cmds.skinCluster(srcSkinClst, q=True, inf=True)
 
     trgSkinClsts = []
-    if '.' in str(targets):
-        trgSkinGeo = targets[0].split('.')[0]
+    if components:
+        # Get targets info
+        componentShapes = list(set(cmds.ls(components, objectsOnly=True)))
+        componentObjects = [cmds.listRelatives(shape, parent=True)[0] for shape in componentShapes]
+        targetsInfo = {}
+        for object in componentObjects:
+            objectComponents = [component for component in components if object in component]
+            targetsInfo[object] = objectComponents
 
-        trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
-
-        if not trgSkinClst:
-            cmds.skinCluster(srcInfs, trgSkinGeo, mi=4, dr=4, tsb=True, omi=False, nw=1)
+        for trgSkinGeo, targets in targetsInfo.items():
             trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
 
-        cmds.select(trgSkinGeo, r=True)
-        trgInfs = cmds.skinCluster(trgSkinClst, q=True, inf=True)
+            # Bind target skin geo with source influences if target skin geo has not a skin cluster
+            if not trgSkinClst:
+                cmds.skinCluster(srcInfs, trgSkinGeo, mi=4, dr=4, tsb=True, omi=False, nw=1)
+                trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
 
-        for inf in srcInfs:
-            if inf in trgInfs:
-                continue
-            else:
-                cmds.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ai=inf)
-                cmds.setAttr('%s.liw' % inf, False)
+            # Add source influences if not in the target influences
+            trgInfs = cmds.skinCluster(trgSkinClst, q=True, inf=True)
+            for srcInf in srcInfs:
+                if srcInf in trgInfs:
+                    continue
+                cmds.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ai=srcInf)
+                cmds.setAttr('%s.liw' % srcInf, False)
 
-        cmds.select(source, targets, r=True)
-        cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
-        trgSkinClsts.append(trgSkinClst)
+            # Copy skin weights from source to target components
+            cmds.select(source, targets, r=True)
+            cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
+            trgSkinClsts.append(trgSkinClst)
     elif cmds.objectType(targets[0]) == 'objectSet':
         print('copy skin to sets')
     else:
