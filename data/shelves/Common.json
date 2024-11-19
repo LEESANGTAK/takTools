@@ -239,7 +239,7 @@
             "annotation": "Layout script editor horizontally",
             "image1": "defaultTwoSideBySideLayout.png",
             "imageOverlayLabel": "script",
-            "command": "from takTools.utils import qtUtil;qtUtil.editScriptEditorHorizontal()",
+            "command": "from imp import reload\nfrom takTools.utils import qtUtil; reload(qtUtil)\nqtUtil.editScriptEditorHorizontal()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

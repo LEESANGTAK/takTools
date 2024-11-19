@@ -109,15 +109,15 @@ def editScriptEditorHorizontal():
     sewww = seww.children()[-1]
 
     splitter = sewww.children()[1]
+    script_console = splitter.widget(0)
+    script_editor = splitter.widget(1)
+
     if splitter.orientation() == QtCore.Qt.Orientation.Vertical:
         splitter.setOrientation(QtCore.Qt.Orientation.Horizontal)
     else:
         splitter.setOrientation(QtCore.Qt.Orientation.Vertical)
 
-    script_console = splitter.widget(0)
-    script_editor = splitter.widget(1)
-
-    splitter.insertWidget(0, script_editor)
+    splitter.insertWidget(0, script_console)
 
     se_splitter = script_editor.children()[1]
 
