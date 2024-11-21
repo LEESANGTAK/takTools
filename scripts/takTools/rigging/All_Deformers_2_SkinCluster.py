@@ -39,6 +39,9 @@ selDrivers = []
 def getSelectedVertices(*args):
     global selVtxs
     selVtxs = cmds.filterExpand(cmds.ls(sl=1, fl=1), sm=31)
+    cmds.textScrollList('verticesTxtScrLs', e=True, removeAll=True)
+    for vtx in selVtxs:
+        cmds.textScrollList('verticesTxtScrLs', e=True, append=vtx)
 
 
 # Procedure to get the selected drivers information
@@ -59,6 +62,10 @@ def getSelectedDrivers(*args):
         distFromCenterMap[driver] = distFromCenter
     sortedDrivers = dict(sorted(distFromCenterMap.items(), key=lambda item: item[1], reverse=True))
     selDrivers = list(sortedDrivers.keys())
+
+    cmds.textScrollList('driversTxtScrLs', e=True, removeAll=True)
+    for driver in selDrivers:
+        cmds.textScrollList('driversTxtScrLs', e=True, append=driver)
 
 # This procedure will return name of the skincluster for selected object
 def getSkinCluster(geo):
@@ -157,14 +164,20 @@ def showGUI(parent=None, *args):
     cmds.columnLayout(adj=1)
 
     cmds.rowLayout(numberOfColumns=2, columnWidth=[(1,125), (2,125)])
+    cmds.columnLayout(adj=True)
     cmds.button(ann ='Select the vertices which is need to be converted.' ,
                 l='Get Selected Vertices',
                 h=40, w=125, c=getSelectedVertices)
+    cmds.textScrollList('verticesTxtScrLs', allowMultiSelection=True, selectCommand=lambda : selectObjects('verticesTxtScrLs'), doubleClickCommand=lambda : selectAllObjects('verticesTxtScrLs'))
 
+    cmds.setParent('..')
+    cmds.columnLayout(adj=True)
     cmds.button(ann ='Select the drivers which deforms the selected vertices.\nIt can be CVs, points of a lattice, clusters, locators ...' ,
                 l='Get Selected drivers',
                 h=40, w=125, c=getSelectedDrivers)
+    cmds.textScrollList('driversTxtScrLs', allowMultiSelection=True, selectCommand=lambda : selectObjects('driversTxtScrLs'), doubleClickCommand=lambda : selectAllObjects('driversTxtScrLs'))
 
+    cmds.setParent('..')
     cmds.setParent('..')
     cmds.separator(h=10)
     cmds.button(ann ='Press the button to Convert. Note:- This will some time according to the number of vertex selected.' ,
@@ -173,3 +186,13 @@ def showGUI(parent=None, *args):
 
     cmds.window('convert2skinWin', e=1, s=0, w=50, h=50)
     cmds.showWindow('convert2skinWin')
+
+
+def selectObjects(textScrollListWidget):
+    selectedItems = cmds.textScrollList(textScrollListWidget, q=True, selectItem=True)
+    cmds.select(selectedItems, r=True)
+
+
+def selectAllObjects(textScrollListWidget):
+    allItems = cmds.textScrollList(textScrollListWidget, q=True, allItems=True)
+    cmds.select(allItems, r=True)
