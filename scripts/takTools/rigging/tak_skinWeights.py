@@ -716,6 +716,12 @@ def showSkinIOGUI(*args):
 
 def importSkin(skinDirectory, *args):
     for skinFile in os.listdir(skinDirectory):
+        skinFilePath = os.path.join(skinDirectory, skinFile)
+        if not os.path.isfile(skinFilePath):
+            continue
+        if not os.path.splitext(skinFilePath)[-1] == '.sw':
+            continue
+
         print(os.path.join(skinDirectory, skinFile))
         skinUtil.loadBSkin(os.path.join(skinDirectory, skinFile))
 
