@@ -855,14 +855,16 @@ Shift + 4 + LMB: Skinning Marking Menu
 # Display
 Alt + C: Toggle Color Feedback
 
-# Select
+# Selection
 Ctrl + Alt + E: To Edge Loop
 Ctrl + Alt + S: Select Hierarchy
 
-# Skin
+# Rigging
+Ctrl + Alt + W: Create Joint on Center
+
+# Skinning
 Ctrl + Alt + Z: Go to Bind Pose
 Ctrl + Alt + D: Toggle Deformers
-Ctrl + Alt + W: Smooth Skin Weights
 '''
     cmds.confirmDialog(title=TOOL_NAME, message=message, button='OK')
 # ------------

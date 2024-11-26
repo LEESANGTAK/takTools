@@ -286,3 +286,12 @@ def setupCorrectiveJointChain(name, driverJnt, rootVtx, midVtx, endVtx):
 def transferRotation(joint):
     joint.jointOrient.set(joint.jointOrient.get() + joint.rotate.get())
     joint.rotate.set(0, 0, 0)
+
+
+def createOnCenter(objects):
+    bb = om.MBoundingBox()
+    for obj in objects:
+        objPoint = om.MPoint(cmds.xform(obj, q=True, t=True, ws=True))
+        bb.expand(objPoint)
+    jnt = cmds.createNode('joint')
+    cmds.xform(jnt, t=(bb.center.x, bb.center.y, bb.center.z), ws=True)

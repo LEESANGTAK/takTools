@@ -80,3 +80,21 @@ nameCommand
 	-command ("smoothSkinWeights")
 	smoothSkinWeightsNameCommand;
 
+nameCommand
+	-annotation "SelectToggleModeNameCommand"
+	-sourceType "mel"
+	-command ("SelectToggleMode")
+	SelectToggleModeNameCommand;
+
+nameCommand
+	-annotation "CreateCameraFromViewNameCommand"
+	-sourceType "mel"
+	-command ("CreateCameraFromView")
+	CreateCameraFromViewNameCommand;
+
+nameCommand
+	-annotation "createJointOnCenterNameCommand"
+	-sourceType "mel"
+	-command ("createJointOnCenter")
+	createJointOnCenterNameCommand;
+

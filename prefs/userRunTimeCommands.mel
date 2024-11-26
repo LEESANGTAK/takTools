@@ -152,3 +152,18 @@ runTimeCommand
 	-command ("if (!`pluginInfo -q -loaded \"brSmoothWeights\"`) {\n    loadPlugin \"brSmoothWeights\";\n}\n\nif (!`brSmoothWeightsContext -q -ex \"brSmoothWeightsContext1\"`) {\n    string $brSmoothWeightsCtx = `brSmoothWeightsContext`;\n    setToolTo $brSmoothWeightsCtx;\n}\n\nbrSmoothWeightsContext -edit -flood `floatSliderGrp -query -value brSmoothWeightsStrength` \"brSmoothWeightsContext1\";\n")
 	smoothSkinWeights;
 
+runTimeCommand
+	-label ""
+	-annotation "Create a joint on center of selected objects."
+	-longAnnotation ""
+	-category "Custom Scripts.Rigging"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from imp import reload\nfrom takTools.utils import joint as jntUtil; reload(jntUtil)\n\n\nsels = cmds.ls(sl=True, fl=True)\n\n# Handle if components exists in selection\nedgesFaces = cmds.filterExpand(sels, sm=[32, 34])\nif edgesFaces:\n    vertices = cmds.ls(cmds.polyListComponentConversion(sels, toVertex=True), fl=True)\n    sels = list(set(sels) - set(edgesFaces))\n    sels.extend(vertices)\n\njntUtil.createOnCenter(sels)")
+	createJointOnCenter;
+
