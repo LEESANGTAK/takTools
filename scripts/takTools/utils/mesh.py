@@ -15,7 +15,20 @@ from .decorators import printElapsedTime
 
 def duplicateFace(faces=None):
     if not faces:
-        faces = cmds.ls(sl=True, fl=True)
+        sels = cmds.ls(sl=True, fl=True)
+
+        faces = []
+        # Filter faces
+        filteredFaces = cmds.filterExpand(sels, sm=34)
+        if filteredFaces:
+            faces.extend(filteredFaces)
+
+        # Filter vertices and edges then convert to faces
+        vtxsEdges = cmds.filterExpand(sels, sm=[31, 32])
+        if vtxsEdges:
+            convertedFaces = cmds.polyListComponentConversion(vtxsEdges, toFace=True)
+            faces.extend(convertedFaces)
+
     selMesh = cmds.listRelatives(cmds.ls(faces, objectsOnly=True)[0], p=True)[0]
     dupMesh = cmds.duplicate(selMesh)[0]
 
