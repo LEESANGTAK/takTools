@@ -1,3 +1,4 @@
+from maya import cmds
 import pymel.core as pm
 
 
@@ -5,40 +6,45 @@ if not pm.pluginInfo('bifrostGraph', q=True, loaded=True):
     pm.loadPlugin('bifrostGraph')
 
 
-def convertToCageMesh(meshes, detailSize=0.02, faceCount=1000, fillHole=False, keepHardEdge=False, symmetry=False):
+def convertToCageMesh(meshes, minHoleRadius=25, detailSize=0.02, faceCount=1000, keepHardEdge=False, symmetry=False):
     dupMeshes = pm.duplicate(meshes, rc=True)
+
+    # When multiple meshes are given then combine meshes before processing
     if len(dupMeshes) > 1:
         mesh = pm.polyUnite(dupMeshes, ch=False)[0]
     else:
         mesh = dupMeshes[0]
 
-    if fillHole:
-        pm.mel.eval('FillHole')
-
-    # It takes long time and produce not good result when below 0.01 value for the detail size
+    # It takes long time and produce desatisfiying result when set too low or too high values
     detailSize = max(detailSize, 0.01)
+    minHoleRadius = min(minHoleRadius, 50)
 
     # Build bifrost graph node
     bfGraph = pm.createNode('bifrostGraphShape')
 
+    ## Create input and output
     pm.vnnNode(bfGraph, '/input', createOutputPort=('inMesh', 'Object'))
     pm.vnnNode(bfGraph, '/output', createInputPort=('outMeshes', 'array<Object>'))
 
+    ## Create a mesh_to_volume node and set parameters
     pm.vnnCompound(bfGraph, '/', addNode='BifrostGraph,Geometry::Converters,mesh_to_volume')
-    pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('volume_mode', '1'))
-    pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('store_level_set', '1'))
+    pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('volume_mode', '0'))  # Set to solid mode
+    pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('store_level_set', '1'))  # This produce more fitted mesh to the input mesh
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('store_fog_density', '0'))
+    pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('min_hole_radius', str(minHoleRadius)))
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('detail_size', str(detailSize)))
+
+    ## Create a volume_to_mesh node and add a input port
     pm.vnnCompound(bfGraph, '/', addNode='BifrostGraph,Geometry::Converters,volume_to_mesh')
     pm.vnnNode(bfGraph, '/volume_to_mesh', createInputPort=('volumes.volume', 'auto'))
 
+    ## Connect nodes
     pm.vnnConnect(bfGraph, '/input.inMesh', '/mesh_to_volume.mesh')
     pm.vnnConnect(bfGraph, '/mesh_to_volume.volume', '/volume_to_mesh.volumes.volume')
     pm.vnnConnect(bfGraph, '/volume_to_mesh.meshes', '/output.outMeshes')
 
-    # Convert to cage mesh
+    # Convert to maya mesh
     skinCageName = '{}_cage'.format(mesh)
-    # mesh = pm.duplicate(mesh)[0]
 
     bfGeoToMaya = pm.createNode('bifrostGeoToMaya')
     cageMesh = pm.createNode('mesh')
@@ -48,9 +54,9 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=1000, fillHole=False, k
     bfGraph.outMeshes >> bfGeoToMaya.bifrostGeo
     bfGeoToMaya.mayaMesh[0] >> cageMesh.inMesh
 
+    # Clean up temp nodes
     pm.delete(cageMesh, ch=True)
     pm.delete(bfGraph.getParent())
-    pm.delete(mesh)
 
     # Clean up cage mesh
     largestArea = 0.0
@@ -98,27 +104,42 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=1000, fillHole=False, k
 def showConvertToCageMeshUI(parent=None, *args):
     def applyBtnCallback(*args):
         meshes = pm.filterExpand(pm.selected(), sm=12)
-        detailSize = pm.floatFieldGrp('detailSizeFloatFld', q=True, v1=True)
+        minHoleRadius = pm.floatField('minHoleRadiusFloatFld', q=True, v=True)
+        detailSize = pm.floatField('detailSizeFloatFld', q=True, v=True)
         faceCount = pm. intFieldGrp('faceCountIntFld', q=True, v1=True)
-        fillHole = pm.checkBoxGrp('retopoOptions', q=True, v1=True)
         keepHardEdges = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
-        symmetry = pm.checkBoxGrp('retopoOptions', q=True, v3=True)
-        convertToCageMesh(meshes, detailSize, faceCount, fillHole, keepHardEdges, symmetry)
+        symmetry = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
+        convertToCageMesh(meshes, minHoleRadius, detailSize, faceCount, keepHardEdges, symmetry)
 
-    pm.window('cageMeshWin', title='Create Cage Mesh', mnb=False, mxb=False)
+    winName = 'cageMeshWin'
+    if cmds.window(winName, exists=True):
+        cmds.deleteUI(winName)
+
+    cmds.window(winName, title='Create Cage Mesh', mnb=False, mxb=False)
     if parent:
-        pm.window('cageMeshWin', e=True, p=parent)
+        cmds.window(winName, e=True, p=parent)
+
     pm.columnLayout(adj=True, cal='left')
 
-    pm.text(label='Volume Mesh Settings')
-    pm.floatFieldGrp('detailSizeFloatFld', label='Detail Size:', v1=0.01, pre=3, columnWidth=[(1, 60)])
+    pm.frameLayout(label='Volume Mesh Settings')
+    pm.rowColumnLayout(numberOfColumns=2)
+    pm.text(label='Min Hole Radius: ', ann='Minimize holes of the volume. \nHigher value produce more solid mesh. \nThis is suitable for making solid mesh from a shell mesh like a shirts or shoes.')
+    pm.floatField('minHoleRadiusFloatFld', v=0.0, min=0.0, pre=1)
+    pm.text(label='Detail Size: ', ann='When this value set to higher the resulting mesh will be more closed to the input mesh.')
+    pm.floatField('detailSizeFloatFld', v=0.02, min=0.01, pre=3)
 
-    pm.separator()
+    pm.setParent('..')
+    pm.setParent('..')
 
-    pm.text(label='Retopology Settings')
+    pm.separator(style='in')
+
+    pm.frameLayout(label='Retopology Settings')
     pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=1000, columnWidth=[(1, 60)])
-    pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=3, label='', labelArray3=['Fill Hole', 'Keep Hard Edges', 'Symmetry'], v1=0, columnWidth=[(1, 10), (2, 70)])
+    pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=2, label='', labelArray2=['Keep Hard Edges', 'Symmetry'], v1=0, columnWidth=[(1, 10)])
+
+    pm.setParent('..')
+    pm.separator(style='in')
 
     pm.button(label='Apply', c=applyBtnCallback)
 
-    pm.showWindow()
+    pm.showWindow(winName)
