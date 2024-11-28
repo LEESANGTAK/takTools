@@ -731,6 +731,7 @@ def exportSkin(skinDirectory, *args):
         return
     for mesh in meshes:
         skinUtil.saveBSkin(mesh, skinDirectory)
+    cmds.select(meshes, r=True)
 
 def setDirectory(*args):
     dir = cmds.fileDialog2(fm=3)

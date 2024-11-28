@@ -200,8 +200,13 @@ def addInfluences():
 
 
 def getAffectedVertex(inf, minWeight):
+    selVtxs = []
+
     inf = pm.PyNode(inf)
     skinClusters = inf.worldMatrix.listConnections()
+    if not skinClusters:
+        print('"{}" is not influence.'.format(inf))
+        return selVtxs
 
     cmds.select(cl=True)
 
@@ -232,7 +237,6 @@ def getAffectedVertex(inf, minWeight):
 
         # Get vertices
         if componentsSelLs.length() >= 1:
-            # componentsSelLs.getDagPath(0, geoDagPath, vertices)
             selIt = om.MItSelectionList(componentsSelLs)
             i = 0
             while not selIt.isDone():
