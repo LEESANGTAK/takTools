@@ -186,9 +186,10 @@ def separateSkinMesh():
 
 def addInfluences():
     sels = pm.selected()
-    jnts = [item for item in sels if item.nodeType() == 'joint']
-    meshes = [item for item in sels if item.getShape()]
+    jnts = pm.ls(sels, type='joint')
+    pm.makeIdentity(jnts, apply=True)
 
+    meshes = [item for item in sels if item.getShape()]
     for mesh in meshes:
         skinClst = getSkinCluster(mesh.name())
         influences = getInfluences(mesh)
@@ -400,9 +401,9 @@ def simplifySkin(*args):
     cmds.select(faces, r=True)
     dupSkinMesh = duplicateSkinMesh()
     bbox = cmds.exactWorldBoundingBox(dupSkinMesh)
-    bboxWidth = bbox[3] - bbox[0]
-    bboxHeight = bbox[4] - bbox[1]
-    bboxDepth = bbox[5] - bbox[2]
+    bboxWidth = abs(bbox[3] - bbox[0])
+    bboxHeight = abs(bbox[4] - bbox[1])
+    bboxDepth = abs(bbox[5] - bbox[2])
     pinHoleRadius = (bboxWidth + bboxHeight + bboxDepth) / 3
     cageMesh = bfUtil.convertToCageMesh(dupSkinMesh, minHoleRadius=pinHoleRadius, detailSize=0.05, faceCount=100)
 
