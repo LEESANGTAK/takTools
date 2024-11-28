@@ -6,7 +6,7 @@ if not pm.pluginInfo('bifrostGraph', q=True, loaded=True):
     pm.loadPlugin('bifrostGraph')
 
 
-def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=1000, keepHardEdge=False, symmetry=False):
+def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=1000, keepHardEdges=False, symmetry=False, delHistory=True):
     dupMeshes = pm.duplicate(meshes, rc=True)
 
     # When multiple meshes are given then combine meshes before processing
@@ -42,6 +42,26 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
     pm.vnnConnect(bfGraph, '/input.inMesh', '/mesh_to_volume.mesh')
     pm.vnnConnect(bfGraph, '/mesh_to_volume.volume', '/volume_to_mesh.volumes.volume')
     pm.vnnConnect(bfGraph, '/volume_to_mesh.meshes', '/output.outMeshes')
+    mesh.outMesh >> bfGraph.inMesh
+
+    # Add attributes to control retopo mesh
+    pm.vnnNode(bfGraph, "/input", createOutputPort=("offset", "float"))
+    pm.vnnConnect(bfGraph, "/input.offset", "/mesh_to_volume.offset")
+
+    pm.vnnNode(bfGraph, "/input", createOutputPort=("min_hole_radius", "float"))
+    pm.vnnConnect(bfGraph, "/input.min_hole_radius", "/mesh_to_volume.min_hole_radius")
+    bfGraph.min_hole_radius.set(minHoleRadius)
+
+    pm.vnnNode(bfGraph, "/input", createOutputPort=("detail_size", "float"))
+    pm.vnnConnect(bfGraph, "/input.detail_size", "/mesh_to_volume.detail_size")
+    bfGraph.detail_size.set(detailSize)
+
+    pm.addAttr(ln='faceCount', at='long', keyable=True)
+    bfGraph.faceCount.set(1000)
+    pm.addAttr(ln='keepHardEdges', at='bool', keyable=True)
+    bfGraph.keepHardEdges.set(keepHardEdges)
+    pm.addAttr(ln='symmetry', at='bool', keyable=True)
+    bfGraph.symmetry.set(symmetry)
 
     # Convert to maya mesh
     skinCageName = '{}_cage'.format(mesh)
@@ -50,36 +70,13 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
     cageMesh = pm.createNode('mesh')
     cageMesh.getParent().rename(skinCageName)
 
-    mesh.outMesh >> bfGraph.inMesh
     bfGraph.outMeshes >> bfGeoToMaya.bifrostGeo
     bfGeoToMaya.mayaMesh[0] >> cageMesh.inMesh
 
-    # Clean up temp nodes
-    pm.delete(cageMesh, ch=True)
-    pm.delete(bfGraph.getParent())
-
-    # Clean up cage mesh
-    largestArea = 0.0
-    try:
-        meshes = pm.polySeparate(cageMesh, ch=False)
-        # Find cage mesh in separated meshes
-        for mesh in meshes:
-            bb = meshes[0].boundingBox()
-            volumeArea = bb.width() * bb.height() * bb.depth()
-            if volumeArea > largestArea:
-                cageMesh = mesh
-                largestArea = volumeArea
-
-        pm.parent(cageMesh, w=True)
-        pm.delete(skinCageName)
-        cageMesh.rename(skinCageName)
-    except:
-        pass
-
     pm.hyperShade(cageMesh, assign='lambert1')
 
-    # Retopologize
-    pm.polyRetopo(
+    # Retopologize maya mesh
+    retopo = pm.polyRetopo(
         cageMesh,
         ch=False,
         symmetry=symmetry,
@@ -88,15 +85,46 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
         axis=1,
         replaceOriginal=True,
         preprocessMesh=True,
-        preserveHardEdges=keepHardEdge,
+        preserveHardEdges=keepHardEdges,
         topologyRegularity=1.0,
         faceUniformity=1.0,
         anisotropy=0.75,
         targetFaceCount=faceCount,
         targetFaceCountTolerance=10,
-    )
+    )[0]
 
-    pm.delete(dupMeshes)
+    bfGraph.symmetry >> retopo.symmetry
+    bfGraph.keepHardEdges >> retopo.preserveHardEdges
+    bfGraph.faceCount >> retopo.targetFaceCount
+
+    pm.hide(dupMeshes, bfGraph)
+    pm.select(bfGraph.getParent())
+
+    if delHistory:
+        # Clean up temp nodes
+        pm.delete(cageMesh, ch=True)
+        pm.delete(bfGraph.getParent())
+        pm.delete(mesh)
+
+        # Clean up cage mesh
+        largestArea = 0.0
+        try:
+            meshes = pm.polySeparate(cageMesh, ch=False)
+            # Find cage mesh in separated meshes
+            for mesh in meshes:
+                bb = meshes[0].boundingBox()
+                volumeArea = bb.width() * bb.height() * bb.depth()
+                if volumeArea > largestArea:
+                    cageMesh = mesh
+                    largestArea = volumeArea
+
+            pm.parent(cageMesh, w=True)
+            pm.delete(skinCageName)
+            cageMesh.rename(skinCageName)
+        except:
+            pass
+
+        pm.select(cageMesh.getParent(), r=True)
 
     return cageMesh
 
@@ -107,9 +135,10 @@ def showConvertToCageMeshUI(parent=None, *args):
         minHoleRadius = pm.floatField('minHoleRadiusFloatFld', q=True, v=True)
         detailSize = pm.floatField('detailSizeFloatFld', q=True, v=True)
         faceCount = pm. intFieldGrp('faceCountIntFld', q=True, v1=True)
-        keepHardEdges = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
+        keepHardEdges = pm.checkBoxGrp('retopoOptions', q=True, v1=True)
         symmetry = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
-        convertToCageMesh(meshes, minHoleRadius, detailSize, faceCount, keepHardEdges, symmetry)
+        delHistory = pm.checkBoxGrp('retopoOptions', q=True, v3=True)
+        convertToCageMesh(meshes, minHoleRadius, detailSize, faceCount, keepHardEdges, symmetry, delHistory)
 
     winName = 'cageMeshWin'
     if cmds.window(winName, exists=True):
@@ -135,7 +164,7 @@ def showConvertToCageMeshUI(parent=None, *args):
 
     pm.frameLayout(label='Retopology Settings')
     pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=1000, columnWidth=[(1, 60)])
-    pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=2, label='', labelArray2=['Keep Hard Edges', 'Symmetry'], v1=0, columnWidth=[(1, 10)])
+    pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=3, label='', labelArray3=['Keep Hard Edges', 'Symmetry', 'Delete History'], v3=True, columnWidth=[(1, 5), (2, 100), (3, 70)])
 
     pm.setParent('..')
     pm.separator(style='in')

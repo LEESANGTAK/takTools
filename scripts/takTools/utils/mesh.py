@@ -46,6 +46,8 @@ def duplicateFace(faces=None):
     cmds.selectMode(object=True)
     cmds.select(dupMesh, r=True)
 
+    pm.parent(dupMesh, world=True)
+
     return dupMesh
 
 
