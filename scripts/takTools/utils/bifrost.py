@@ -6,7 +6,7 @@ if not pm.pluginInfo('bifrostGraph', q=True, loaded=True):
     pm.loadPlugin('bifrostGraph')
 
 
-def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=1000, keepHardEdges=False, symmetry=False, delHistory=True):
+def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=1000, symmetry=False, delHistory=True):
     dupMeshes = pm.duplicate(meshes, rc=True)
 
     # When multiple meshes are given then combine meshes before processing
@@ -57,9 +57,7 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
     bfGraph.detail_size.set(detailSize)
 
     pm.addAttr(ln='faceCount', at='long', keyable=True)
-    bfGraph.faceCount.set(1000)
-    pm.addAttr(ln='keepHardEdges', at='bool', keyable=True)
-    bfGraph.keepHardEdges.set(keepHardEdges)
+    bfGraph.faceCount.set(faceCount)
     pm.addAttr(ln='symmetry', at='bool', keyable=True)
     bfGraph.symmetry.set(symmetry)
 
@@ -85,7 +83,7 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
         axis=1,
         replaceOriginal=True,
         preprocessMesh=True,
-        preserveHardEdges=keepHardEdges,
+        preserveHardEdges=False,
         topologyRegularity=1.0,
         faceUniformity=1.0,
         anisotropy=0.75,
@@ -94,7 +92,6 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
     )[0]
 
     bfGraph.symmetry >> retopo.symmetry
-    bfGraph.keepHardEdges >> retopo.preserveHardEdges
     bfGraph.faceCount >> retopo.targetFaceCount
 
     pm.hide(dupMeshes, bfGraph)
@@ -126,7 +123,7 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
 
         pm.select(cageMesh.getParent(), r=True)
 
-    return cageMesh
+    return cageMesh.name()
 
 
 def showConvertToCageMeshUI(parent=None, *args):
@@ -135,10 +132,9 @@ def showConvertToCageMeshUI(parent=None, *args):
         minHoleRadius = pm.floatField('minHoleRadiusFloatFld', q=True, v=True)
         detailSize = pm.floatField('detailSizeFloatFld', q=True, v=True)
         faceCount = pm. intFieldGrp('faceCountIntFld', q=True, v1=True)
-        keepHardEdges = pm.checkBoxGrp('retopoOptions', q=True, v1=True)
-        symmetry = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
-        delHistory = pm.checkBoxGrp('retopoOptions', q=True, v3=True)
-        convertToCageMesh(meshes, minHoleRadius, detailSize, faceCount, keepHardEdges, symmetry, delHistory)
+        symmetry = pm.checkBoxGrp('retopoOptions', q=True, v1=True)
+        delHistory = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
+        convertToCageMesh(meshes, minHoleRadius, detailSize, faceCount, symmetry, delHistory)
 
     winName = 'cageMeshWin'
     if cmds.window(winName, exists=True):
@@ -164,7 +160,7 @@ def showConvertToCageMeshUI(parent=None, *args):
 
     pm.frameLayout(label='Retopology Settings')
     pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=1000, columnWidth=[(1, 60)])
-    pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=3, label='', labelArray3=['Keep Hard Edges', 'Symmetry', 'Delete History'], v3=True, columnWidth=[(1, 5), (2, 100), (3, 70)])
+    pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=2, label='', labelArray2=['Symmetry', 'Delete History'], v2=True, columnWidth=[(1, 5), (2, 70)])
 
     pm.setParent('..')
     pm.separator(style='in')

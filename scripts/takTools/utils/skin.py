@@ -8,6 +8,7 @@ from maya import cmds, mel
 from imp import reload
 from . import globalUtil
 from . import mesh as meshUtil; reload(meshUtil)
+from . import bifrost as bfUtil; reload(bfUtil)
 from ..rigging import bSkinSaver as bsk
 
 
@@ -380,7 +381,7 @@ def pruneSkinInfluences(mesh, skinClst, maxInfs):
     return resultMeshWeights
 
 
-def rigidifySkin(*args):
+def simplifySkin(*args):
     selComponents = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=[31, 32, 34])
     faces = cmds.polyListComponentConversion(selComponents, toFace=True)
     mesh = cmds.ls(selComponents, objectsOnly=True)[0]
@@ -398,14 +399,17 @@ def rigidifySkin(*args):
 
     cmds.select(faces, r=True)
     dupSkinMesh = duplicateSkinMesh()
-    simpleMesh = cmds.duplicate(dupSkinMesh)[0]
-    cmds.CleanupPolygon(simpleMesh)
-    cmds.polyReduce(simpleMesh, version=1, ch=False, percentage=50)
+    bbox = cmds.exactWorldBoundingBox(dupSkinMesh)
+    bboxWidth = bbox[3] - bbox[0]
+    bboxHeight = bbox[4] - bbox[1]
+    bboxDepth = bbox[5] - bbox[2]
+    pinHoleRadius = (bboxWidth + bboxHeight + bboxDepth) / 3
+    cageMesh = bfUtil.convertToCageMesh(dupSkinMesh, minHoleRadius=pinHoleRadius, detailSize=0.05, faceCount=100)
 
-    copySkin(dupSkinMesh, simpleMesh)
-    copySkin(simpleMesh, mesh, components=selComponents)
+    copySkin(dupSkinMesh, cageMesh)
+    copySkin(cageMesh, mesh, components=selComponents)
 
-    cmds.delete(dupSkinMesh, simpleMesh)
+    cmds.delete(dupSkinMesh, cageMesh)
 
     # Restore current pose
     cmds.dagPose(curPose, restore=True)
