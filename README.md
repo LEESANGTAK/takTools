@@ -54,3 +54,6 @@ You can use marking menu with Hotkey **Shift + 1~4**.
 > - Shift + 2: Selection Tools
 > - Shift + 3: Rigging Tools
 > - Shift + 4: Skinning Tools
+
+## TODO
+- Add search tool feature
