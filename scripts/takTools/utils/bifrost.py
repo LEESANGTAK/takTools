@@ -123,7 +123,7 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
 
         pm.select(cageMesh.getParent(), r=True)
 
-    return cageMesh.getParent().name()
+    return skinCageName
 
 
 def showConvertToCageMeshUI(parent=None, *args):
