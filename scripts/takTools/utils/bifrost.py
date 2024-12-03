@@ -42,7 +42,7 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
     pm.vnnConnect(bfGraph, '/input.inMesh', '/mesh_to_volume.mesh')
     pm.vnnConnect(bfGraph, '/mesh_to_volume.volume', '/volume_to_mesh.volumes.volume')
     pm.vnnConnect(bfGraph, '/volume_to_mesh.meshes', '/output.outMeshes')
-    mesh.outMesh >> bfGraph.inMesh
+    mesh.worldMesh >> bfGraph.inMesh
 
     # Add attributes to control retopo mesh
     pm.vnnNode(bfGraph, "/input", createOutputPort=("offset", "float"))
