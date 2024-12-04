@@ -352,7 +352,10 @@ def saveBSkin(mesh, outputDir):
 def loadBSkin(skinFile):
     with open(skinFile, 'r') as f:
         fContents = f.readlines()
-        mesh = fContents[0]
+        mesh = fContents[0].strip('\n')
+    if not cmds.objExists(mesh):
+        print('"{}" is not exists. Skip importing skin weights.'.format(mesh))
+        return False
     pm.select(mesh, r=True)
     bsk.bLoadSkinValues(True, skinFile)
 
