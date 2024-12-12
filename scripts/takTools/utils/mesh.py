@@ -14,8 +14,12 @@ from .decorators import printElapsedTime
 
 
 def duplicateFace(faces=None):
+    dupMesh = None
+
     if not faces:
         sels = cmds.ls(sl=True, fl=True)
+        if not sels:
+            return dupMesh
 
         faces = []
         # Filter faces

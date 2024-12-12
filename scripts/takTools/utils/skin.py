@@ -52,7 +52,7 @@ def getInfluences(geo):
     return infs
 
 
-def mirrorSkin():
+def mirrorSkin(*args):
     sels = cmds.filterExpand(cmds.ls(sl=True), sm=[12, 31, 32, 34])
     if not sels:
         return
