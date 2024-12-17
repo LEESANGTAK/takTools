@@ -40,15 +40,18 @@ def reBind(skinMesh):
 
 
 def getSkinCluster(geo):
+    skinClst = None
     skinClst = pm.mel.eval('findRelatedSkinCluster("%s");' % geo)
     if skinClst:
         return pm.PyNode(skinClst)
-    return None
+    return skinClst
 
 
 def getInfluences(geo):
+    infs = None
     skinClst = getSkinCluster(geo)
-    infs = skinClst.getInfluence()
+    if skinClst:
+        infs = skinClst.getInfluence()
     return infs
 
 
@@ -166,8 +169,13 @@ def duplicateSkinMesh():
 def separateSkinMesh():
     sels = cmds.ls(sl=True, fl=True)
 
-    mesh = cmds.listRelatives(sels[0], p=True)[0]
+    mesh = list(set(cmds.ls(sels, objectsOnly=True)))[0]
     meshTrsf = cmds.listRelatives(mesh, p=True)[0]
+
+    if not getSkinCluster(meshTrsf):
+        cmds.warning('"{}" has no skin cluster.'.format(meshTrsf))
+        meshUtil.separateFace(sels)
+        return
 
     tempSkinMesh = cmds.duplicate(meshTrsf, n='temp_skin')[0]
     meshUtil.cleanupMesh(tempSkinMesh)

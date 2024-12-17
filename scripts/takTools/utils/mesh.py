@@ -56,8 +56,9 @@ def duplicateFace(faces=None):
 
 
 @printElapsedTime
-def separateFace():
-    faces = cmds.ls(sl=True, fl=True)
+def separateFace(faces=None):
+    if not faces:
+        faces = cmds.ls(sl=True, fl=True)
     separateedMesh = duplicateFace(faces)
     cmds.delete(faces)
     return separateedMesh
