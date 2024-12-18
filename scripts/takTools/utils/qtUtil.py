@@ -90,7 +90,7 @@ def duplicateImage(imagePath, suffix='_copy'):
     qimg.save(newImagePath, ext.strip('.'))
 
 
-def editScriptEditorHorizontal():
+def editScriptEditorHorizontal(consoleSide='left'):
     panel = None
     allPanels = pm.getPanel(all=True)
     for item in allPanels:
@@ -109,19 +109,21 @@ def editScriptEditorHorizontal():
     sewww = seww.children()[-1]
 
     splitter = sewww.children()[1]
-    script_console = splitter.widget(0)
-    script_editor = splitter.widget(1)
 
     if splitter.orientation() == QtCore.Qt.Orientation.Vertical:
+        script_console = splitter.widget(0)
+        script_editor = splitter.widget(1)
         splitter.setOrientation(QtCore.Qt.Orientation.Horizontal)
+        if consoleSide == 'left':
+            splitter.insertWidget(0, script_console)
+        else:
+            splitter.insertWidget(0, script_editor)
     else:
+        if consoleSide == 'left':
+            script_console = splitter.widget(0)
+            script_editor = splitter.widget(1)
+        else:
+            script_editor = splitter.widget(0)
+            script_console = splitter.widget(1)
         splitter.setOrientation(QtCore.Qt.Orientation.Vertical)
-
-    splitter.insertWidget(0, script_console)
-
-    se_splitter = script_editor.children()[1]
-
-    editor = se_splitter.children()[1]
-    tabWidget = editor.children()[1]
-
-    tabWidget.setTabPosition(QtWidgets.QTabWidget.TabPosition.North)
+        splitter.insertWidget(0, script_console)
