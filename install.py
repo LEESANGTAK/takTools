@@ -18,7 +18,7 @@ MODULE_NAME = os.path.dirname(__file__).rsplit('/', 1)[-1]
 MODULE_PATH = os.path.dirname(__file__).replace('\\', '/')
 MAYA_VERSION = int(cmds.about(version=True))
 # Need to modify below depend on module
-AVAILABLE_VERSIONS = [2020, 2022, 2024]
+AVAILABLE_VERSIONS = [2018, 2020, 2022, 2024]
 MODULE_VERSION = 'any'
 
 
@@ -56,7 +56,11 @@ def runScripts():
 
 def copyFiles():
     # Copy preferences files
-    prefsDir = '{}/prefs'.format(MODULE_PATH)
+    if MAYA_VERSION > 2019:
+        prefsDir = '{}/prefs/2020+'.format(MODULE_PATH)
+    else:
+        prefsDir = '{}/prefs/2019-'.format(MODULE_PATH)
+
     mayaPrefDir = '{}/{}/prefs'.format(cmds.internalVar(uad=True), MAYA_VERSION)
     copy_tree(prefsDir, mayaPrefDir)
 

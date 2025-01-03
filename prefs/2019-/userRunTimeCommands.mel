@@ -1,0 +1,93 @@
+//Maya Preference 2018 (Release 1)
+//
+//
+
+runTimeCommand
+	-annotation "Tak_Display_MarkingMenu (Press)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Display_MarkingMenu\";\n")
+	Tak_Display_MarkingMenu_Press;
+
+runTimeCommand
+	-annotation "Tak_Display_MarkingMenu (Release)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Display_MarkingMenu_Release;
+
+runTimeCommand
+	-annotation "Tak_Selection_MarkingMenu (Press)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Selection_MarkingMenu\";\n")
+	Tak_Selection_MarkingMenu_Press;
+
+runTimeCommand
+	-annotation "Tak_Selection_MarkingMenu (Release)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Selection_MarkingMenu_Release;
+
+runTimeCommand
+	-annotation "Tak_Rigging_MarkingMenu (Press)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Rigging_MarkingMenu\";\n")
+	Tak_Rigging_MarkingMenu_Press;
+
+runTimeCommand
+	-annotation "Tak_Rigging_MarkingMenu (Release)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Rigging_MarkingMenu_Release;
+
+runTimeCommand
+	-annotation "Tak_Skin_MarkingMenu (Press)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Skin_MarkingMenu\";\n")
+	Tak_Skin_MarkingMenu_Press;
+
+runTimeCommand
+	-annotation "Tak_Skin_MarkingMenu (Release)"
+	-category "User Marking Menus"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Skin_MarkingMenu_Release;
+
+runTimeCommand
+	-annotation "Toggle deformers for selected meshes"
+	-category "Custom Scripts.Rigging"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from imp import reload\nfrom takTools.utils import mesh as meshUtil\nreload(meshUtil)\n\nmeshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\nfor mesh in meshes:\n\tmeshUtil.toggleDeformers(mesh)\n")
+	toggleDeformers;
+
+runTimeCommand
+	-annotation "Smooth skin weights for selected components using btSmoothWeights tool."
+	-category "Custom Scripts.Skinning"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (!`pluginInfo -q -loaded \"brSmoothWeights\"`) {\n    loadPlugin \"brSmoothWeights\";\n}\n\nif (!`brSmoothWeightsContext -q -ex \"brSmoothWeightsContext1\"`) {\n    string $brSmoothWeightsCtx = `brSmoothWeightsContext`;\n    setToolTo $brSmoothWeightsCtx;\n}\n\nbrSmoothWeightsContext -edit -flood `floatSliderGrp -query -value brSmoothWeightsStrength` \"brSmoothWeightsContext1\";\n")
+	smoothSkinWeights;
+
+runTimeCommand
+	-annotation "Create a joint on center of selected objects."
+	-category "Custom Scripts.Rigging"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from imp import reload\nfrom takTools.utils import joint as jntUtil; reload(jntUtil)\n\n\nsels = cmds.ls(sl=True, fl=True)\n\n# Handle if components exists in selection\nedgesFaces = cmds.filterExpand(sels, sm=[32, 34])\nif edgesFaces:\n    vertices = cmds.ls(cmds.polyListComponentConversion(sels, toVertex=True), fl=True)\n    sels = list(set(sels) - set(edgesFaces))\n    sels.extend(vertices)\n\njntUtil.createOnCenter(sels)")
+	createJointOnCenter;
+
+
