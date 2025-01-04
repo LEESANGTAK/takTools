@@ -30,7 +30,7 @@ def getTopDagNode(dagNodes):
 
     minDepth = 10000
     for dagNode in dagNodes:
-        fullName = dagNode.fullPathName()
+        fullName = cmds.ls(str(dagNode), long=True)[0]
         curDepth = fullName.count('|')
         if curDepth < minDepth:
             minDepth = curDepth

@@ -6,7 +6,7 @@ try:
     if not pm.pluginInfo('bifrostGraph', q=True, loaded=True):
         pm.loadPlugin('bifrostGraph')
 except:
-    cmds.warning('Failed to load bifrostGraph plug-in.')
+    pass
 
 
 def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=1000, symmetry=False, delHistory=True):

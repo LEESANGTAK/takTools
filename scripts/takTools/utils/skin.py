@@ -6,7 +6,7 @@ import pymel.core as pm
 from maya import cmds, mel
 
 from imp import reload
-from . import globalUtil
+from . import globalUtil; reload(globalUtil)
 from . import mesh as meshUtil; reload(meshUtil)
 from . import bifrost as bfUtil; reload(bfUtil)
 from ..rigging import bSkinSaver as bsk
@@ -195,7 +195,6 @@ def separateSkinMesh():
 def addInfluences():
     sels = pm.selected()
     jnts = pm.ls(sels, type='joint')
-    pm.makeIdentity(jnts, apply=True)
 
     meshes = [item for item in sels if item.getShape()]
     for mesh in meshes:
