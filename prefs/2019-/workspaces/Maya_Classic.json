@@ -82,7 +82,7 @@
                                                             "widthProperty": "preferred",
                                                             "heightProperty": "free",
                                                             "controlWidth": 260,
-                                                            "controlHeight": 875,
+                                                            "controlHeight": 745,
                                                             "initCallback": "outlinerStateCallback"
                                                         }
                                                     ]
@@ -95,8 +95,8 @@
                                                         {
                                                             "tabWidget": {
                                                                 "selectedIndex": 0,
-                                                                "controlWidth": 1027,
-                                                                "controlHeight": 504,
+                                                                "controlWidth": 1171,
+                                                                "controlHeight": 511,
                                                                 "collapsed": false,
                                                                 "controls": [
                                                                     {
@@ -110,8 +110,8 @@
                                                                         "closed": false,
                                                                         "widthProperty": "free",
                                                                         "heightProperty": "free",
-                                                                        "controlWidth": 1027,
-                                                                        "controlHeight": 504,
+                                                                        "controlWidth": 1171,
+                                                                        "controlHeight": 511,
                                                                         "initCallback": "mainPaneStateCallback",
                                                                         "stateString": "global string $gMainPane; paneLayout -edit -configuration single $gMainPane;if(`modelPanel -exists modelPanel4`){ modelPanel -edit -parent $gMainPane modelPanel4; paneLayout -edit -setPane modelPanel4 1 $gMainPane;}"
                                                                     }
@@ -121,8 +121,8 @@
                                                         {
                                                             "tabWidget": {
                                                                 "selectedIndex": 0,
-                                                                "controlWidth": 1027,
-                                                                "controlHeight": 365,
+                                                                "controlWidth": 1171,
+                                                                "controlHeight": 358,
                                                                 "collapsed": false,
                                                                 "controls": [
                                                                     {
@@ -136,8 +136,8 @@
                                                                         "closed": false,
                                                                         "widthProperty": "free",
                                                                         "heightProperty": "free",
-                                                                        "controlWidth": 1027,
-                                                                        "controlHeight": 365
+                                                                        "controlWidth": 1171,
+                                                                        "controlHeight": 358
                                                                     },
                                                                     {
                                                                         "objectName": "nodeEditorPanel1Window",
@@ -151,7 +151,7 @@
                                                                         "widthProperty": "free",
                                                                         "heightProperty": "free",
                                                                         "controlWidth": 1027,
-                                                                        "controlHeight": 363
+                                                                        "controlHeight": 304
                                                                     },
                                                                     {
                                                                         "objectName": "graphEditor1Window",
@@ -165,21 +165,7 @@
                                                                         "widthProperty": "free",
                                                                         "heightProperty": "free",
                                                                         "controlWidth": 1027,
-                                                                        "controlHeight": 362
-                                                                    },
-                                                                    {
-                                                                        "objectName": "polyTexturePlacementPanel1Window",
-                                                                        "title": "UV Editor",
-                                                                        "uiScript": "if(!`panel -q -exists polyTexturePlacementPanel1`) {\n\tint $menusOkayInPanels = `optionVar -q allowMenusInPanels`;\n\tstring $panelName = \"polyTexturePlacementPanel1\";\n\tscriptedPanel -unParent  -type \"polyTexturePlacementPanel\" -l (localizedPanelLabel(\"UV Editor\")) -mbv $menusOkayInPanels  polyTexturePlacementPanel1;\n} else {\n\tscriptedPanel -e -unParent polyTexturePlacementPanel1;\n}\nscriptedPanel -e -parent polyTexturePlacementPanel1Window polyTexturePlacementPanel1;\n",
-                                                                        "retain": false,
-                                                                        "loadImmediately": false,
-                                                                        "checkPlugins": true,
-                                                                        "tabDirection": 0,
-                                                                        "closed": false,
-                                                                        "widthProperty": "free",
-                                                                        "heightProperty": "free",
-                                                                        "controlWidth": 1027,
-                                                                        "controlHeight": 365
+                                                                        "controlHeight": 303
                                                                     }
                                                                 ]
                                                             }
@@ -188,138 +174,87 @@
                                                 }
                                             },
                                             {
-                                                "splitter": {
-                                                    "orientation": "vertical",
-                                                    "children": [
+                                                "tabWidget": {
+                                                    "selectedIndex": 1,
+                                                    "controlWidth": 333,
+                                                    "controlHeight": 875,
+                                                    "collapsed": false,
+                                                    "controls": [
                                                         {
-                                                            "tabWidget": {
-                                                                "selectedIndex": 0,
-                                                                "controlWidth": 477,
-                                                                "controlHeight": 578,
-                                                                "collapsed": false,
-                                                                "controls": [
-                                                                    {
-                                                                        "objectName": "AttributeEditor",
-                                                                        "title": "Attribute Editor",
-                                                                        "uiScript": "global string $gAttributeEditorForm; formLayout $gAttributeEditorForm;",
-                                                                        "retain": true,
-                                                                        "loadImmediately": true,
-                                                                        "checkPlugins": false,
-                                                                        "tabDirection": 0,
-                                                                        "closed": false,
-                                                                        "widthProperty": "preferred",
-                                                                        "heightProperty": "free",
-                                                                        "controlWidth": 477,
-                                                                        "controlHeight": 578
-                                                                    },
-                                                                    {
-                                                                        "objectName": "NEXDockControl",
-                                                                        "title": "Modeling Toolkit",
-                                                                        "uiScript": "dR_createNEXDockControl();",
-                                                                        "retain": true,
-                                                                        "loadImmediately": true,
-                                                                        "checkPlugins": false,
-                                                                        "tabDirection": 3,
-                                                                        "closed": true,
-                                                                        "widthProperty": "preferred",
-                                                                        "heightProperty": "free",
-                                                                        "controlWidth": 260,
-                                                                        "controlHeight": 875,
-                                                                        "requiredPlugins": [
-                                                                            "modelingToolkit"
-                                                                        ]
-                                                                    },
-                                                                    {
-                                                                        "objectName": "NEXDockControl",
-                                                                        "title": "Modeling Toolkit",
-                                                                        "uiScript": "dR_createNEXDockControl();",
-                                                                        "retain": true,
-                                                                        "loadImmediately": true,
-                                                                        "checkPlugins": false,
-                                                                        "tabDirection": 3,
-                                                                        "closed": true,
-                                                                        "widthProperty": "preferred",
-                                                                        "heightProperty": "free",
-                                                                        "controlWidth": 260,
-                                                                        "controlHeight": 875,
-                                                                        "requiredPlugins": [
-                                                                            "modelingToolkit"
-                                                                        ]
-                                                                    },
-                                                                    {
-                                                                        "objectName": "ToolSettings",
-                                                                        "title": "Tool Settings",
-                                                                        "uiScript": "global string $gToolSettingsForm; formLayout $gToolSettingsForm;",
-                                                                        "retain": true,
-                                                                        "loadImmediately": true,
-                                                                        "checkPlugins": false,
-                                                                        "tabDirection": 0,
-                                                                        "closed": false,
-                                                                        "widthProperty": "preferred",
-                                                                        "heightProperty": "free",
-                                                                        "controlWidth": 460,
-                                                                        "controlHeight": 493
-                                                                    },
-                                                                    {
-                                                                        "objectName": "XGenDockableWidget",
-                                                                        "title": "XGen",
-                                                                        "uiScript": "python(\"import maya.cmds as xguibootstrap\\nif not xguibootstrap.pluginInfo('xgenToolkit', q=True, loaded=True):\\n    xguibootstrap.loadPlugin('xgenToolkit')\\ndel xguibootstrap\\nxgui.createDockControl()\");",
-                                                                        "retain": false,
-                                                                        "loadImmediately": false,
-                                                                        "checkPlugins": false,
-                                                                        "tabDirection": 3,
-                                                                        "closed": true,
-                                                                        "widthProperty": "free",
-                                                                        "heightProperty": "free",
-                                                                        "controlWidth": 569,
-                                                                        "controlHeight": 762,
-                                                                        "requiredPlugins": [
-                                                                            "xgenToolkit"
-                                                                        ]
-                                                                    },
-                                                                    {
-                                                                        "objectName": "XGenDockableWidget",
-                                                                        "title": "XGen",
-                                                                        "uiScript": "python(\"import maya.cmds as xguibootstrap\\nif not xguibootstrap.pluginInfo('xgenToolkit', q=True, loaded=True):\\n    xguibootstrap.loadPlugin('xgenToolkit')\\ndel xguibootstrap\\nxgui.createDockControl()\");",
-                                                                        "retain": false,
-                                                                        "loadImmediately": false,
-                                                                        "checkPlugins": false,
-                                                                        "tabDirection": 3,
-                                                                        "closed": true,
-                                                                        "widthProperty": "free",
-                                                                        "heightProperty": "free",
-                                                                        "controlWidth": 569,
-                                                                        "controlHeight": 762,
-                                                                        "requiredPlugins": [
-                                                                            "xgenToolkit"
-                                                                        ]
-                                                                    }
-                                                                ]
-                                                            }
+                                                            "objectName": "AttributeEditor",
+                                                            "title": "Attribute Editor",
+                                                            "uiScript": "global string $gAttributeEditorForm; formLayout $gAttributeEditorForm;",
+                                                            "retain": true,
+                                                            "loadImmediately": true,
+                                                            "checkPlugins": false,
+                                                            "tabDirection": 0,
+                                                            "closed": false,
+                                                            "widthProperty": "preferred",
+                                                            "heightProperty": "free",
+                                                            "controlWidth": 477,
+                                                            "controlHeight": 745
                                                         },
                                                         {
-                                                            "tabWidget": {
-                                                                "selectedIndex": 0,
-                                                                "controlWidth": 477,
-                                                                "controlHeight": 274,
-                                                                "collapsed": false,
-                                                                "controls": [
-                                                                    {
-                                                                        "objectName": "ChannelBoxLayerEditor",
-                                                                        "title": "Channel Box / Layer Editor",
-                                                                        "uiScript": "global string $gChannelsLayersForm; formLayout $gChannelsLayersForm;",
-                                                                        "retain": true,
-                                                                        "loadImmediately": true,
-                                                                        "checkPlugins": false,
-                                                                        "tabDirection": 0,
-                                                                        "closed": false,
-                                                                        "widthProperty": "preferred",
-                                                                        "heightProperty": "free",
-                                                                        "controlWidth": 477,
-                                                                        "controlHeight": 274
-                                                                    }
-                                                                ]
-                                                            }
+                                                            "objectName": "NEXDockControl",
+                                                            "title": "Modeling Toolkit",
+                                                            "uiScript": "dR_createNEXDockControl();",
+                                                            "retain": true,
+                                                            "loadImmediately": true,
+                                                            "checkPlugins": false,
+                                                            "tabDirection": 3,
+                                                            "closed": true,
+                                                            "widthProperty": "preferred",
+                                                            "heightProperty": "free",
+                                                            "controlWidth": 260,
+                                                            "controlHeight": 745,
+                                                            "requiredPlugins": [
+                                                                "modelingToolkit"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "objectName": "ChannelBoxLayerEditor",
+                                                            "title": "Channel Box / Layer Editor",
+                                                            "uiScript": "global string $gChannelsLayersForm; formLayout $gChannelsLayersForm;",
+                                                            "retain": true,
+                                                            "loadImmediately": true,
+                                                            "checkPlugins": false,
+                                                            "tabDirection": 0,
+                                                            "closed": false,
+                                                            "widthProperty": "preferred",
+                                                            "heightProperty": "free",
+                                                            "controlWidth": 333,
+                                                            "controlHeight": 875
+                                                        },
+                                                        {
+                                                            "objectName": "ToolSettings",
+                                                            "title": "Tool Settings",
+                                                            "uiScript": "global string $gToolSettingsForm; formLayout $gToolSettingsForm;",
+                                                            "retain": true,
+                                                            "loadImmediately": true,
+                                                            "checkPlugins": false,
+                                                            "tabDirection": 0,
+                                                            "closed": false,
+                                                            "widthProperty": "preferred",
+                                                            "heightProperty": "free",
+                                                            "controlWidth": 460,
+                                                            "controlHeight": 745
+                                                        },
+                                                        {
+                                                            "objectName": "XGenDockableWidget",
+                                                            "title": "XGen",
+                                                            "uiScript": "python(\"import maya.cmds as xguibootstrap\\nif not xguibootstrap.pluginInfo('xgenToolkit', q=True, loaded=True):\\n    xguibootstrap.loadPlugin('xgenToolkit')\\ndel xguibootstrap\\nxgui.createDockControl()\");",
+                                                            "retain": false,
+                                                            "loadImmediately": false,
+                                                            "checkPlugins": false,
+                                                            "tabDirection": 3,
+                                                            "closed": true,
+                                                            "widthProperty": "free",
+                                                            "heightProperty": "free",
+                                                            "controlWidth": 569,
+                                                            "controlHeight": 762,
+                                                            "requiredPlugins": [
+                                                                "xgenToolkit"
+                                                            ]
                                                         }
                                                     ]
                                                 }
@@ -384,10 +319,10 @@
     ],
     "closedControls": [
         {
-            "objectName": "Shelf",
-            "posX": 301,
-            "posY": 277,
-            "controlHeight": 64,
+            "objectName": "HelpLine",
+            "posX": 119,
+            "posY": 378,
+            "controlHeight": 20,
             "controlWidth": 1556,
             "widthProperty": "free",
             "heightProperty": "fixed"
@@ -402,22 +337,13 @@
             "heightProperty": "fixed"
         },
         {
-            "objectName": "HelpLine",
-            "posX": 119,
-            "posY": 378,
-            "controlHeight": 20,
+            "objectName": "Shelf",
+            "posX": 301,
+            "posY": 277,
+            "controlHeight": 64,
             "controlWidth": 1556,
             "widthProperty": "free",
             "heightProperty": "fixed"
-        },
-        {
-            "objectName": "UVToolkitDockControl",
-            "posX": 868,
-            "posY": 660,
-            "controlHeight": 779,
-            "controlWidth": 287,
-            "widthProperty": "preferred",
-            "heightProperty": "free"
         }
     ]
 }
