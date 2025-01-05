@@ -76,7 +76,7 @@ class Functions(object):
         if '.e' in cls.trgObj:
             cls.attachToMeshEdge(oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
         else:
-            trgShp = cmds.listRelatives(cls.trgObj, s=True)[0]
+            trgShp = cmds.listRelatives(cls.trgObj, s=True, ni=True)[0]
             trgType = cmds.objectType(trgShp)
 
             if trgType == 'nurbsCurve':
