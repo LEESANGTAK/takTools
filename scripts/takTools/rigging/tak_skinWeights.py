@@ -470,9 +470,11 @@ def rebind(*args):
 
 
 def updateBindPose(*args):
-    sels = cmds.ls(sl=True, type='joint')
-    if len(sels) == 1 and not cmds.listRelatives(sels[0], p=True):
-        skinUtil.updateBindPose(sels[0])
+    sels = cmds.ls(sl=True, type='joint', long=True)
+    sortedSels = sorted(sels, key=lambda item: item.count('|'))
+    topJnt = sortedSels[0]
+    if not cmds.listRelatives(topJnt, p=True, type='joint'):
+        skinUtil.updateBindPose(topJnt)
     else:
         cmds.error('Please select a root joint.')
 
