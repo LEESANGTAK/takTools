@@ -128,6 +128,8 @@ def copySkin(source, target, components=None):
     pm.PyNode(trgSkinClst).skinningMethod.set(skinMethod)
     pm.PyNode(trgSkinClst).useComponents.set(pm.PyNode(srcSkinClst).useComponents.get())
 
+    return trgSkinClst
+
 
 def copySkinSets(sourceSkinMesh, sets):
     for set in sets:
@@ -328,7 +330,8 @@ def setSolidSkinWeights(sourceVertex):
 def editSkinMesh(skinMesh):
     tempSkin = pm.duplicate(skinMesh, n='temp_skin')[0]
     tempSkin.hide()
-    copySkin(skinMesh, tempSkin)
+    skinClst = copySkin(skinMesh, tempSkin)
+    cmds.setAttr('{}.envelope'.format(skinClst), 0)
     meshUtil.cleanupMesh(skinMesh)
     pm.select(skinMesh, r=True)
     pm.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(tempSkin, skinMesh))
