@@ -18,7 +18,7 @@ MODULE_NAME = os.path.dirname(__file__).rsplit('/', 1)[-1]
 MODULE_PATH = os.path.dirname(__file__).replace('\\', '/')
 MAYA_VERSION = int(cmds.about(version=True))
 # Need to modify below depend on module
-AVAILABLE_VERSIONS = [2018, 2020, 2022, 2024]
+AVAILABLE_VERSIONS = [2018, 2020, 2022, 2024, 2025]
 MODULE_VERSION = 'any'
 
 

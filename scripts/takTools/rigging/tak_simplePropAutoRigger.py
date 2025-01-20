@@ -7,16 +7,6 @@ Contact: chst27@gmail.com
 import re
 import Qt
 
-if Qt.__binding__ == "PySide":
-    from PySide.QtGui import *
-    from PySide.QtCore import *
-    from shiboken import wrapInstance
-elif Qt.__binding__ == "PySide2":
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-    from shiboken2 import wrapInstance
-
 import maya.OpenMayaUI as omui
 import pymel.core as pm
 import maya.cmds as cmds
@@ -25,6 +15,26 @@ from OBB.api import OBB
 
 from takRiggingToolkit.base import control
 from ..common import tak_misc
+
+
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION <= 2016:
+    from PySide.QtWidgets import *
+    from PySide.QtGui import *
+    from PySide.QtCore import *
+    from shiboken import wrapInstance
+elif 2017 <= MAYA_VERSION <= 2024:
+    from PySide2.QtWidgets import *
+    from PySide2.QtGui import *
+    from PySide2.QtCore import *
+    from shiboken2 import wrapInstance
+elif 2025 <= MAYA_VERSION:
+    from PySide6.QtWidgets import *
+    from PySide6.QtGui import *
+    from PySide6.QtCore import *
+    from shiboken6 import wrapInstance
+
+
 
 
 def getMayaMainWin():

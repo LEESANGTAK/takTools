@@ -1,6 +1,17 @@
 import sys
-from PySide2 import QtWidgets, QtGui
+
+from maya import cmds
+
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION <= 2016:
+    from PySide import QtGui, QtWidgets
+elif 2017 <= MAYA_VERSION <= 2024:
+    from PySide2 import QtGui, QtWidgets
+elif 2025 <= MAYA_VERSION:
+    from PySide6 import QtGui, QtWidgets
+
 from . import baseWidget
+
 
 class VectorFieldGrp(baseWidget.BaseWidget):
     def __init__(self, label='', value=[0.0, 0.0, 0.0], parent=None):

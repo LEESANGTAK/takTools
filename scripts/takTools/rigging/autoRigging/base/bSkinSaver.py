@@ -14,27 +14,31 @@
 
 
 
-
-import maya.OpenMayaMPx as OpenMayaMPx
 import maya.OpenMaya as OpenMaya
 import maya.OpenMayaAnim as OpenMayaAnim
 import maya.mel
-import sys
 import maya.cmds as cmds
 import maya.OpenMayaUI as mui
-import os
 import time
 import Qt
 
-if Qt.__binding__ == "PySide":
+
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION <= 2016:
     from PySide.QtGui import *
     from PySide.QtCore import *
     import shiboken
-elif Qt.__binding__ == "PySide2":
+elif 2017 <= MAYA_VERSION <= 2024:
     from PySide2.QtWidgets import *
     from PySide2.QtGui import *
     from PySide2.QtCore import *
     import shiboken2 as shiboken
+elif 2025 <= MAYA_VERSION:
+    from PySide6.QtWidgets import *
+    from PySide6.QtGui import *
+    from PySide6.QtCore import *
+    import shiboken6 as shiboken
+
 
 
 def showUI():
@@ -802,10 +806,10 @@ def bLoadSkinValues(loadOnSelection, inputFile):
         if selectionList.length():
             selectionList.getDagPath( 0, node, component )
             if node.hasFn(OpenMaya.MFn.kTransform):
-	            NewTransform = OpenMaya.MFnTransform (node)
-	            if NewTransform.childCount():
-		            if NewTransform.child(0).hasFn(OpenMaya.MFn.kMesh):
-			            PolygonObject = str(OpenMaya.MFnDagNode(NewTransform.child(0)).partialPathName())
+                NewTransform = OpenMaya.MFnTransform (node)
+                if NewTransform.childCount():
+                    if NewTransform.child(0).hasFn(OpenMaya.MFn.kMesh):
+                        PolygonObject = str(OpenMaya.MFnDagNode(NewTransform.child(0)).partialPathName())
 
 
 

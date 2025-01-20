@@ -22,10 +22,21 @@ import maya.OpenMayaUI as mui
 import time
 
 
-from PySide2.QtWidgets import *
-from PySide2.QtGui import *
-from PySide2.QtCore import *
-import shiboken2 as shiboken
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION <= 2016:
+    from PySide.QtGui import *
+    from PySide.QtCore import *
+    import shiboken
+elif 2017 <= MAYA_VERSION <= 2024:
+    from PySide2.QtWidgets import *
+    from PySide2.QtGui import *
+    from PySide2.QtCore import *
+    import shiboken2 as shiboken
+elif 2025 <= MAYA_VERSION:
+    from PySide6.QtWidgets import *
+    from PySide6.QtGui import *
+    from PySide6.QtCore import *
+    import shiboken6 as shiboken
 
 
 def showUI():
@@ -829,11 +840,11 @@ def bLoadSkinValues(loadOnSelection, inputFile, namespace=''):
 
         line = line.strip()
 
-        if FilePosition is not 0:
+        if FilePosition != 0:
             if not line.startswith("============"):
-                if FilePosition is 1:
+                if FilePosition == 1:
                     joints.append(namespace+line)
-                elif FilePosition is 2:
+                elif FilePosition == 2:
                     if len(line) > 0:
                         weights.append(line)
                     else:

@@ -3,13 +3,21 @@ Author: Tak
 Website: https://ta-note.com
 Description: Searching maya resource images.
 """
-
-from PySide2 import QtWidgets, QtGui, QtCore
-
-import maya.OpenMayaUI as omui
 import maya.cmds as cmds
+import maya.OpenMayaUI as omui
 
-from shiboken2 import wrapInstance
+
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION <= 2016:
+    from PySide import QtWidgets, QtGui, QtCore
+    from shiboken import wrapInstance
+elif 2017 <= MAYA_VERSION <= 2024:
+    from PySide2 import QtWidgets, QtGui, QtCore
+    from shiboken2 import wrapInstance
+elif 2025 <= MAYA_VERSION:
+    from PySide6 import QtWidgets, QtGui, QtCore
+    from shiboken6 import wrapInstance
+
 
 
 def getMayaResourceImages():

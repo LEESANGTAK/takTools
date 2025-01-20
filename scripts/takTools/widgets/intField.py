@@ -1,5 +1,15 @@
 from functools import partial
-from PySide2 import QtCore, QtWidgets
+
+from maya import cmds
+
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION <= 2016:
+    from PySide import QtCore, QtWidgets
+elif 2017 <= MAYA_VERSION <= 2024:
+    from PySide2 import QtCore, QtWidgets
+elif 2025 <= MAYA_VERSION:
+    from PySide6 import QtCore, QtWidgets
+
 from . import baseWidget
 
 

@@ -1,7 +1,15 @@
 import maya.cmds as cmds
 import pymel.core as pm
 
-from PySide2 import QtCore, QtGui, QtWidgets
+
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION <= 2016:
+    from PySide import QtCore, QtGui, QtWidgets
+elif 2017 <= MAYA_VERSION <= 2024:
+    from PySide2 import QtCore, QtGui, QtWidgets
+elif 2025 <= MAYA_VERSION:
+    from PySide6 import QtCore, QtGui, QtWidgets
+
 
 from ..base import general
 from ..utils import skeleton

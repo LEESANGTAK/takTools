@@ -1,6 +1,18 @@
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from maya import cmds
+
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION <= 2016:
+    from PySide.QtCore import *
+    from PySide.QtGui import *
+    from PySide.QtWidgets import *
+elif 2017 <= MAYA_VERSION <= 2024:
+    from PySide2.QtCore import *
+    from PySide2.QtGui import *
+    from PySide2.QtWidgets import *
+elif 2025 <= MAYA_VERSION:
+    from PySide6.QtCore import *
+    from PySide6.QtGui import *
+    from PySide6.QtWidgets import *
 
 
 class FrameLayout(QGroupBox):
