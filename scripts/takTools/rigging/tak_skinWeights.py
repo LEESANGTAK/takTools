@@ -100,7 +100,8 @@ class SkinWeights(object):
         cmds.menuItem(optionBox=True, c='mel.eval("MirrorSkinWeightsOptions;")')
         cmds.menuItem(divider=True, dividerLabel='Copy')
         self.uiWidgets['copyMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Skin', c=copySkin, ann='Copy a source mesh skin to a target meshes.\nIf components and a mesh selected copy weights from mesh to components.')
-        self.uiWidgets['copyOverlapMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Overlaped Vertices', c=SkinWeights.copySkinOverlapVertices, ann='Copy a source mesh skin to a target mesh only for overlaped vertices.')
+        self.uiWidgets['copyOverlapMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Overlaped Vertices', c=copySkinOverlapVertices, ann='Copy a source mesh skin to a target mesh only for overlaped vertices.')
+        cmds.menuItem(optionBox=True, c=copyOverlapGUI)
         self.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy and Paste', c=copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
         cmds.menuItem(optionBox=True, c=copyPasteGUI)
         cmds.menuItem(divider=True, dividerLabel='Optimization')
@@ -445,10 +446,8 @@ class SkinWeights(object):
         weights = om.MDoubleArray(weights)
         skFn.setWeights(meshDag, cpntObj, infIds, weights)
 
-    @staticmethod
-    def copySkinOverlapVertices(*args):
-        meshes = cmds.filterExpand(cmds.ls(os=True), sm=12)
-        skinUtil.copySkinOverlapVertices(meshes[0], meshes[1])
+
+
 
 
 # ------------ Utils
@@ -586,6 +585,29 @@ def transferWeights(*args):
         cmds.skinPercent(skinClst, vtx, transformValue=[(srcInf, 0), (trgInf, resultSkinVal)], nrm=True)
 
     swInstance.loadInf()
+# ------------
+
+
+# ------------ Copy skin weights for overlapped vertices
+def copySkinOverlapVertices(searchDistance, *args):
+    meshes = cmds.filterExpand(cmds.ls(os=True), sm=12)
+    if len(meshes) == 2:
+        skinUtil.copySkinOverlapVertices(meshes[0], meshes[1], searchDistance)
+    elif len(meshes) > 2:
+        srcMeshes = meshes[:-1]
+        trgMesh = meshes[-1]
+        cmds.progressWindow(title='Copy Skin Weights Overlap', minValue=0, maxValue=len(srcMeshes), progress=0, status='Stand by', isInterruptable=True)
+        for i, srcMesh in enumerate(srcMeshes):
+            skinUtil.copySkinOverlapVertices(srcMesh, trgMesh, searchDistance)
+            cmds.progressWindow(e=True, progress=i, status=srcMeshes[i])
+        cmds.progressWindow(endProgress=1)
+
+def copyOverlapGUI(*args):
+    cmds.window(title='Copy Overlap Vertices', tlb=True, p=WIN_NAME)
+    cmds.columnLayout(adj=True)
+    cmds.floatFieldGrp('searchDistFloatFld', label='Search Distance: ', v1=0.0001, precision=4)
+    cmds.button(label='Apply', c=lambda x: copySkinOverlapVertices(cmds.floatFieldGrp('searchDistFloatFld', q=True, v1=True)))
+    cmds.showWindow()
 # ------------
 
 

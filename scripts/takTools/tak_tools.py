@@ -860,6 +860,7 @@ Ctrl + Alt + E: To Edge Loop
 Ctrl + Alt + S: Select Hierarchy
 
 # Rigging
+Alt + Shift + D: Delete History
 Ctrl + Alt + W: Create Joint on Center
 
 # Skinning

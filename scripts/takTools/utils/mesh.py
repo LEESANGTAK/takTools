@@ -177,7 +177,7 @@ def getClosestVertices(source, target):
     return closestVertices
 
 
-def getOverlapVertices(source, target, searchDist=1.0):
+def getOverlapVertices(source, target, searchDist=0.001):
     """Get overlaped vertices of target mesh from source mesh.
 
     Args:
