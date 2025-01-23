@@ -49,11 +49,10 @@ class UI(object):
 
     def _populateColorTable(self):
         for index in UI.colorSwatchIds:
-            indexRgbVal = pm.colorIndex(index, q=True)
             pm.canvas(
                 ('%s%i' % ('colorCanvas_', index)),
-                rgb=indexRgbVal,
-                pc=partial(setOutlinerColor, indexRgbVal),
+                rgb=pm.colorIndex(index, q=True),
+                pc=partial(setOutlinerColor, index),
                 p=self.colorTable
             )
 
@@ -65,7 +64,14 @@ def showUI():
     ui.show()
 
 
-def setOutlinerColor(rgb):
-    for node in pm.selected():
+def setOutlinerColor(index):
+    selNods = pm.selected()
+    if index == 3:
+        for node in selNods:
+            node.useOutlinerColor.set(False)
+        return
+
+    rgb = pm.colorIndex(index, q=True)
+    for node in selNods:
         node.useOutlinerColor.set(True)
         node.outlinerColor.set(rgb)
