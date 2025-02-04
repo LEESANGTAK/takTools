@@ -1,5 +1,5 @@
-import pymel.core as pm
-from .. import utils
+import math
+from maya import cmds
 
 
 class KDTree(object):
@@ -10,12 +10,10 @@ class KDTree(object):
 
     def buildData(self, transforms):
         for item in transforms:
-            item = pm.PyNode(item)
-            name = item.nodeName()
-            position = pm.xform(item, q=True, t=True, ws=True)
+            position = cmds.xform(item, q=True, t=True, ws=True)
             self._data.append(
                 {
-                    'name': name,
+                    'name': item,
                     'position': position
                 }
             )
@@ -36,7 +34,7 @@ class KDTree(object):
         axis = depth % self._pointDimension
 
         dataSorted = sorted(data, key=lambda item: item['position'][axis])
-        median = len(data) / 2
+        median = int(len(data) / 2)
 
         return {
             'data': dataSorted[median],
@@ -48,7 +46,7 @@ class KDTree(object):
         if node is None:
             return bestData, minDist
 
-        currentDistance = utils.distance(point, node['data']['position'])
+        currentDistance = distance(point, node['data']['position'])
         if currentDistance < minDist:
             minDist = currentDistance
             bestData = node['data']
@@ -63,7 +61,15 @@ class KDTree(object):
             oppositeNode = node['left']
 
         bestData, minDist = self._getNearestNeighbor(point, nextNode, depth+1, bestData, minDist)
-        if abs(point[axis] - node['data']['position'][axis]) < utils.distance(point, bestData['position']):
+        if abs(point[axis] - node['data']['position'][axis]) < distance(point, bestData['position']):
             bestData, minDist = self._getNearestNeighbor(point, oppositeNode, depth+1, bestData, minDist)
 
         return bestData, minDist
+
+
+def distance(pointA, pointB):
+    squareSum = 0
+    for point1Component, point2Component in zip(pointA, pointB):
+        difference = point2Component - point1Component
+        squareSum += math.pow(difference, 2)
+    return math.sqrt(squareSum)
