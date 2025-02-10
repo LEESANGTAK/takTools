@@ -216,3 +216,48 @@ def extractCurveFromSelectedEdges():
     cmds.select(tempMeshEdges, r=True)
     cmds.polyToCurve(form=2, degree=3, n='{}_crv'.format(transform), ch=False)
     cmds.delete(tempMesh)
+
+
+def curveToMesh(curve, profileType='tube', sideCount=4):
+    sweepProfileTypeTable = {
+        'tube': 0,
+        'ribbon': 3,
+    }
+
+    valuesInfo = [  # [interface, attrType, min, max, default, attrName]
+        ['width', 'double', 0.001, 100, 5, 'scaleProfileX'],
+        ['endWidth', 'double', 0, 5, 1, 'taper'],
+        ['orientation', 'double', -360, 360, 0, 'rotateProfile'],
+        ['endTwist', 'double', -1, 1, 0, 'twist'],
+        ['lengthDivisions', 'long', 1, 50, 8, 'interpolationSteps'],
+        ['widthDivisions', 'long', 1, 50, sideCount, 'profileArcSegments'],
+        ['widthDivisions', 'long', 1, 50, sideCount, 'profilePolySides'],
+    ]
+
+    sweepMeshCreator = cmds.createNode('sweepMeshCreator')
+    ribbonMesh = cmds.createNode('mesh')
+    ribbonMeshTransform = cmds.listRelatives(ribbonMesh, p=True)[0]
+    ribbonMeshTransform = cmds.rename(ribbonMeshTransform, '{}_mesh'.format(curve))
+
+    # Set default values
+    cmds.setAttr('{}.sweepProfileType'.format(sweepMeshCreator), sweepProfileTypeTable.get(profileType))
+    cmds.setAttr('{}.alignProfileEnable'.format(sweepMeshCreator), True)
+    cmds.setAttr('{}.interpolationMode'.format(sweepMeshCreator), 1)
+    cmds.setAttr('{}.profileArcAngle'.format(sweepMeshCreator), 180)
+
+    # Connect nodes
+    cmds.connectAttr('{}.worldSpace[0]'.format(curve), '{}.inCurveArray[0]'.format(sweepMeshCreator))
+    cmds.connectAttr('{}.outMeshArray[0]'.format(sweepMeshCreator), '{}.inMesh'.format(ribbonMeshTransform))
+
+    # Assign default material
+    cmds.sets(ribbonMeshTransform, e=True, forceElement='initialShadingGroup')
+
+    # Set interfaces
+    for valueInfo in valuesInfo:
+        if not cmds.objExists('{}.{}'.format(ribbonMeshTransform, valueInfo[0])):
+            cmds.addAttr(ribbonMeshTransform, ln=valueInfo[0], at=valueInfo[1], min=valueInfo[2], max=valueInfo[3], dv=valueInfo[4], k=True)
+        cmds.connectAttr('{}.{}'.format(ribbonMeshTransform, valueInfo[0]), '{}.{}'.format(sweepMeshCreator, valueInfo[5]))
+
+    cmds.select(ribbonMeshTransform, r=True)
+
+    return ribbonMeshTransform

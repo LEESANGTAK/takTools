@@ -95,20 +95,11 @@
             "noDefaultPopup": true
         },
         {
-            "label": "Wire Mesh",
-            "annotation": "Wire mesh from curve.",
-            "image1": "out_stroke.png",
-            "imageOverlayLabel": "",
-            "command": "if (! `pluginInfo -q -loaded \"wire\"`)\n{\n    loadPlugin \"wire\";\n}\nwireMeshFromCurve;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
-            "label": "Curve To Cylinder",
+            "label": "Curve To Tube",
             "annotation": "Convert nurbs curves to polygon geomtry",
             "image1": "curveToCylinder.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.modeling.tak_curveToPoly as tak_curveToPoly\nimport imp\nimp.reload(tak_curveToPoly)\ntak_curveToPoly.UI()",
+            "command": "from takTools.utils import curve as crvUtil; reload(crvUtil) \n\nribbonMeshs = []\nfor crv in cmds.filterExpand(cmds.ls(sl=True), sm=9):\n    ribbonMeshs.append(crvUtil.curveToMesh(crv, 'tube', 8))\n\ncmds.select(ribbonMeshs, r=True)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -117,7 +108,7 @@
             "annotation": "Convert selected curves to polygon stripe.",
             "image1": "curveToRibbon.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.crvToPolyStrp()",
+            "command": "from takTools.utils import curve as crvUtil; reload(crvUtil) \n\nribbonMeshs = []\nfor crv in cmds.filterExpand(cmds.ls(sl=True), sm=9):\n    ribbonMeshs.append(crvUtil.curveToMesh(crv, 'ribbon', 1))\n\ncmds.select(ribbonMeshs, r=True)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
