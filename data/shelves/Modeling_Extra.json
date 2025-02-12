@@ -99,7 +99,7 @@
             "annotation": "Convert nurbs curves to polygon geomtry",
             "image1": "curveToCylinder.png",
             "imageOverlayLabel": "",
-            "command": "from takTools.utils import curve as crvUtil; reload(crvUtil) \n\nribbonMeshs = []\nfor crv in cmds.filterExpand(cmds.ls(sl=True), sm=9):\n    ribbonMeshs.append(crvUtil.curveToMesh(crv, 'tube', 8))\n\ncmds.select(ribbonMeshs, r=True)",
+            "command": "from takTools.utils import curve as crvUtil; reload(crvUtil) \n\nribbonMeshs = []\nfor crv in cmds.filterExpand(cmds.ls(sl=True), sm=9):\n    ribbonMeshs.append(crvUtil.curveToMesh(crv, 'tube'))\n\ncmds.select(ribbonMeshs, r=True)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -108,7 +108,7 @@
             "annotation": "Convert selected curves to polygon stripe.",
             "image1": "curveToRibbon.png",
             "imageOverlayLabel": "",
-            "command": "from takTools.utils import curve as crvUtil; reload(crvUtil) \n\nribbonMeshs = []\nfor crv in cmds.filterExpand(cmds.ls(sl=True), sm=9):\n    ribbonMeshs.append(crvUtil.curveToMesh(crv, 'ribbon', 1))\n\ncmds.select(ribbonMeshs, r=True)",
+            "command": "from takTools.utils import curve as crvUtil; reload(crvUtil) \n\nribbonMeshs = []\nfor crv in cmds.filterExpand(cmds.ls(sl=True), sm=9):\n    ribbonMeshs.append(crvUtil.curveToMesh(crv, 'ribbon'))\n\ncmds.select(ribbonMeshs, r=True)",
             "sourceType": "python",
             "noDefaultPopup": true
         },

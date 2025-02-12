@@ -218,21 +218,19 @@ def extractCurveFromSelectedEdges():
     cmds.delete(tempMesh)
 
 
-def curveToMesh(curve, profileType='tube', sideCount=4):
-    sweepProfileTypeTable = {
-        'tube': 0,
-        'ribbon': 3,
-    }
-
+def curveToMesh(curve, profileType='tube'):
     valuesInfo = [  # [interface, attrType, min, max, default, attrName]
         ['width', 'double', 0.001, 100, 5, 'scaleProfileX'],
-        ['endWidth', 'double', 0, 5, 1, 'taper'],
+        ['taper', 'double', 0, 5, 1, 'taper'],
         ['orientation', 'double', -360, 360, 0, 'rotateProfile'],
-        ['endTwist', 'double', -1, 1, 0, 'twist'],
+        ['twist', 'double', -1, 1, 0, 'twist'],
         ['lengthDivisions', 'long', 1, 50, 8, 'interpolationSteps'],
-        ['widthDivisions', 'long', 1, 50, sideCount, 'profileArcSegments'],
-        ['widthDivisions', 'long', 1, 50, sideCount, 'profilePolySides'],
+        ['widthDivisions', 'long', 1, 50, 1, 'profileArcSegments'],
     ]
+    if profileType == 'tube':
+        valuesInfo.insert(0, ['arcAngle', 'double', 0, 360, 360, 'profileArcAngle'])
+    if profileType == 'ribbon':
+        valuesInfo.insert(0, ['arcAngle', 'double', 0, 360, 90, 'profileArcAngle'])
 
     sweepMeshCreator = cmds.createNode('sweepMeshCreator')
     ribbonMesh = cmds.createNode('mesh')
@@ -240,7 +238,7 @@ def curveToMesh(curve, profileType='tube', sideCount=4):
     ribbonMeshTransform = cmds.rename(ribbonMeshTransform, '{}_mesh'.format(curve))
 
     # Set default values
-    cmds.setAttr('{}.sweepProfileType'.format(sweepMeshCreator), sweepProfileTypeTable.get(profileType))
+    cmds.setAttr('{}.sweepProfileType'.format(sweepMeshCreator), 3)
     cmds.setAttr('{}.alignProfileEnable'.format(sweepMeshCreator), True)
     cmds.setAttr('{}.interpolationMode'.format(sweepMeshCreator), 1)
     cmds.setAttr('{}.profileArcAngle'.format(sweepMeshCreator), 180)
@@ -258,6 +256,7 @@ def curveToMesh(curve, profileType='tube', sideCount=4):
             cmds.addAttr(ribbonMeshTransform, ln=valueInfo[0], at=valueInfo[1], min=valueInfo[2], max=valueInfo[3], dv=valueInfo[4], k=True)
         cmds.connectAttr('{}.{}'.format(ribbonMeshTransform, valueInfo[0]), '{}.{}'.format(sweepMeshCreator, valueInfo[5]))
 
-    cmds.select(ribbonMeshTransform, r=True)
+    if profileType == 'tube':
+        cmds.setAttr('{}.widthDivisions'.format(ribbonMeshTransform), 8)
 
     return ribbonMeshTransform
