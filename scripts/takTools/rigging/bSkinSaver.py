@@ -298,10 +298,7 @@ def bLoadVertexSkinValues(inputFile, ignoreJointLocks):
 
             # weights
             splittedWeights = splittedStrings[weightsIndex].split(' ')
-            fileWeightFloats.append(map(float, splittedWeights) )
-
-            #for k in range(len(fileJoints)):
-            #    fileWeightFloats[bindVertCount].append(float(splittedWeights[k]))
+            fileWeightFloats.append([float(splittedWeight) for splittedWeight in splittedWeights])
 
             bindVertCount += 1
 
@@ -501,7 +498,7 @@ def bSaveVertexSkinValues(inputFile, ignoreSoftSelection):
         return
 
     output = open(inputFile, 'w')
-    output.write(str(OpenMaya.MItGeometry(bSkinPath).count()) + '\n')
+    output.write(str(OpenMaya.MItGeometry(dagPath).count()) + '\n')
 
     fnVtxComp = OpenMaya.MFnSingleIndexedComponent()
     vtxComponents = OpenMaya.MObject()
@@ -517,7 +514,7 @@ def bSaveVertexSkinValues(inputFile, ignoreSoftSelection):
     vertexCount = meshIter.count()
     scriptUtil = OpenMaya.MScriptUtil()
     infCountPtr = scriptUtil.asUintPtr()
-    fnSkinCluster.getWeights(bSkinPath, vtxComponents, WeightArray, infCountPtr)
+    fnSkinCluster.getWeights(dagPath, vtxComponents, WeightArray, infCountPtr)
     infCount = OpenMaya.MScriptUtil.getUint(infCountPtr)
 
     weightCheckArray = []
@@ -898,8 +895,3 @@ def getSoftSelection():
         iter.next()
 
     return elements, weights
-
-
-
-
-
