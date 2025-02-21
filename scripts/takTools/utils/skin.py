@@ -59,25 +59,25 @@ def mirrorSkin(*args):
     sels = cmds.filterExpand(cmds.ls(sl=True), sm=[12, 31, 32, 34])
     if not sels:
         return
-    mesh = cmds.ls(sels, objectsOnly=True)[0]
-    influences = getInfluences(mesh)
-    topInfluence = globalUtil.getTopDagNode(influences)
+    # mesh = cmds.ls(sels, objectsOnly=True)[0]
+    # influences = getInfluences(mesh)
+    # topInfluence = globalUtil.getTopDagNode(influences)
 
     # Store current pose
-    pm.select(topInfluence, hi=True)
-    curPose = cmds.dagPose(save=True, selection=True)
+    # pm.select(topInfluence, hi=True)
+    # curPose = cmds.dagPose(save=True, selection=True)
 
-    succeed = goToBindPose(topInfluence)
-    if not succeed:
-        pm.warning('Go to bind pose process is failed! Mirror skin weights will be performed in current pose.')
+    # succeed = goToBindPose(topInfluence)
+    # if not succeed:
+    #     pm.warning('Go to bind pose process is failed! Mirror skin weights will be performed in current pose.')
 
     # Mirror skin weights
     cmds.select(sels, r=True)
     cmds.copySkinWeights(mirrorMode='YZ', surfaceAssociation='closestPoint', influenceAssociation=['oneToOne', 'closestJoint'])
 
     # Restore current pose
-    cmds.dagPose(curPose, restore=True)
-    cmds.delete(curPose)
+    # cmds.dagPose(curPose, restore=True)
+    # cmds.delete(curPose)
 
 
 def copySkin(source, target, components=None):
