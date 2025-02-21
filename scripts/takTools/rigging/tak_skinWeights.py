@@ -694,7 +694,7 @@ def checkMaxInfluences(*args):
 
 @decorators.printElapsedTime
 def fitMaxInfluence(*args):
-    for mesh in cmds.ls(sl=True):
+    for mesh in cmds.filterExpand(cmds.ls(sl=True), sm=12):
         meshMaxInfs = SkinWeights.getMaxInfluences(mesh)
         targetMaxInfs = int(cmds.optionMenu('maxInfsOptMenu', q=True, v=True))
         if meshMaxInfs <= targetMaxInfs:
