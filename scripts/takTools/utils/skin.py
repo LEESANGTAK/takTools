@@ -295,13 +295,8 @@ def updateBindPose(rootJoint):
     :param rootJoint: Root joint of joint hierarchy
     :type rootJoint: str
     """
-    bindPose = cmds.dagPose(rootJoint, q=True, bindPose=True)
-    if len(bindPose) > 1:
-        cmds.delete(bindPose[1:])
-    bindPose = bindPose[0]
-    bindPoseMembers = cmds.dagPose(bindPose, q=True, members=True)
-    for bpMember in bindPoseMembers:
-        cmds.dagPose(bpMember, reset=True, n=bindPose)
+    cmds.delete(cmds.dagPose(rootJoint, q=True, bindPose=True))
+    cmds.dagPose(cmds.ls(rootJoint, dag=True), n='bindPose', save=True, bindPose=True)
 
 
 def goToBindPose(rootJoint):
