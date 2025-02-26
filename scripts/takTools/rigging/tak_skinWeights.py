@@ -571,19 +571,53 @@ def transferWeights(*args):
         cmds.warning('Provided not enough influences. Please set source influence and target influence.')
         return
 
-    selVtxs = cmds.ls(sl=True, fl=True)
+    selComponents = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=[31, 32, 34])
+    selVtxs = cmds.ls(cmds.polyListComponentConversion(selComponents, toVertex=True), fl=True)
     meshes = list(set(cmds.ls(selVtxs, objectsOnly=True)))
-    if not selVtxs or len(meshes) > 1:
+    if not selVtxs:
         cmds.warning('Please select vertices of a mesh.')
+        return
+    if len(meshes) > 1:
+        cmds.warning('Selected components belong to more than one mesh. Please select vertices of one mesh.')
         return
 
     skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(meshes[0]))
-    for vtx in selVtxs:
-        srcInfSkinVal = cmds.skinPercent(skinClst, vtx, transform=srcInf, query=True)
-        trgInfSkinVal = cmds.skinPercent(skinClst, vtx, transform=trgInf, query=True)
-        resultSkinVal = srcInfSkinVal + trgInfSkinVal
-        cmds.skinPercent(skinClst, vtx, transformValue=[(srcInf, 0), (trgInf, resultSkinVal)], nrm=True)
+    selList = om.MSelectionList()
+    selList.add(meshes[0])
+    selList.add(skinClst)
+    selList.add(srcInf)
+    selList.add(trgInf)
+    meshDag = selList.getDagPath(0)
+    skinObj = selList.getDependNode(1)
+    srcInfDag = selList.getDagPath(2)
+    trgInfDag = selList.getDagPath(3)
 
+    skinFn = oma.MFnSkinCluster(skinObj)
+    srcInfIndex = skinFn.indexForInfluenceObject(srcInfDag)
+    trgInfIndex = skinFn.indexForInfluenceObject(trgInfDag)
+
+    vtxComponents = om.MFnSingleIndexedComponent().create(om.MFn.kMeshVertComponent)
+    om.MFnSingleIndexedComponent(vtxComponents).addElements([int(vtx.split('[')[-1][:-1]) for vtx in selVtxs])
+
+    # Get the weights and influence count for the selected vertices
+    # weights are one long list of all the weights for all the vertices. It sliced by influence count to get the weights for each vertex.
+    weights, infCount = skinFn.getWeights(meshDag, vtxComponents)
+
+    # Iterate through each selected vertex
+    for i in range(len(selVtxs)):
+        # Get the weight of the source influence for the current vertex
+        srcWeight = weights[i * infCount + srcInfIndex]
+
+        # Get the weight of the target influence for the current vertex
+        trgWeight = weights[i * infCount + trgInfIndex]
+
+        # Set the weight of the source influence to 0
+        weights[i * infCount + srcInfIndex] = 0
+
+        # Add the source weight to the target influence weight
+        weights[i * infCount + trgInfIndex] = srcWeight + trgWeight
+
+    skinFn.setWeights(meshDag, vtxComponents, om.MIntArray(range(infCount)), weights, False)
     swInstance.loadInf()
 # ------------
 
