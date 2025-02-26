@@ -233,7 +233,7 @@
         -image "MultisampleAA.png" 
         -echoCommand 0
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem24;
@@ -831,7 +831,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem22;
+        menuEditorMenuItem26;
 
     menuItem
         -label "Color Feedback" 
@@ -853,6 +853,27 @@
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem19;
+
+    menuItem
+        -label "Display Affected" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from imp import reload\");\npython(\"import takTools.utils.display as dp\");\npython(\"dp.displayAffectedToggle()\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "eye.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem22;
 
     menuItem
         -label "Wire" 

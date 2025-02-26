@@ -399,16 +399,16 @@ def simplifySkin(*args):
     faces = cmds.polyListComponentConversion(selComponents, toFace=True)
     mesh = cmds.ls(selComponents, objectsOnly=True)[0]
 
-    influences = getInfluences(mesh)
-    topInfluence = globalUtil.getTopDagNode(influences)
+    # influences = getInfluences(mesh)
+    # topInfluence = globalUtil.getTopDagNode(influences)
 
-    # Store current pose
-    pm.select(topInfluence, hi=True)
-    curPose = cmds.dagPose(save=True, selection=True)
+    # # Store current pose
+    # pm.select(topInfluence, hi=True)
+    # curPose = cmds.dagPose(save=True, selection=True)
 
-    succeed = goToBindPose(topInfluence)
-    if not succeed:
-        pm.warning('Go to bind pose process is failed! Rigidfy skin weights will be performed in current pose.')
+    # succeed = goToBindPose(topInfluence)
+    # if not succeed:
+    #     pm.warning('Go to bind pose process is failed! Rigidfy skin weights will be performed in current pose.')
 
     cmds.select(faces, r=True)
     dupSkinMesh = duplicateSkinMesh()
@@ -424,9 +424,9 @@ def simplifySkin(*args):
 
     cmds.delete(dupSkinMesh, cageMesh)
 
-    # Restore current pose
-    cmds.dagPose(curPose, restore=True)
-    cmds.delete(curPose)
+    # # Restore current pose
+    # cmds.dagPose(curPose, restore=True)
+    # cmds.delete(curPose)
 
     cmds.selectMode(component=True)
     cmds.select(selComponents, r=True)
