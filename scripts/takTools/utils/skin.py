@@ -288,6 +288,8 @@ def createSkinMeshWithJoints(joints, type='ribbon'):
 
     bind(joints[:-1], skinMesh)  # Exclude end joint for binding
 
+    pm.select(skinMesh, r=True)
+
 
 def updateBindPose(rootJoint):
     """Update bind pose with current joint orient.

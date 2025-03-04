@@ -166,7 +166,7 @@ def showGUI():
 
     cmds.rowColumnLayout(numberOfColumns=2, columnWidth=[(1, 100), (2, 100)])
     cmds.text(label='Curvature:')
-    cmds.floatField('curvatureFltFld', minValue=1.0, value=3.0, precision=1, annotation='Higher value will result in a more curved line. Too high a value can produce a buggy curve. Default is 3.0')
+    cmds.floatField('curvatureFltFld', min=1.0, value=3.0, precision=2, annotation='Higher value will result in a more curved line. Decrease value or select centric vertices manually if produce a too short curve. Default is 3.0')
 
     cmds.setParent('..')
     cmds.button(label='Create Curve', command=main)
@@ -198,13 +198,19 @@ def main(*args):
 
     # Thin and sort points
     thickness = bounding_box_width / curvature
-    skip = int(len(selected_vertices) / 1000)
+    skip = int(len(selected_vertices) / 1000)  # Optimization: Skip points for faster computation
     thinned_points, regression_lines = thin_line(points, point_cloud_thickness=thickness, skipCount=skip)
-    sorted_points = sort_points(thinned_points, regression_lines)
+    sorted_points = sort_points(thinned_points, regression_lines, sorted_point_distance=thickness)
 
     # Create NURBS curve from sorted points
     crv = create_nurbs_curve_from_points(sorted_points)
     cmds.rebuildCurve(crv, rpo=1, rt=0, end=1, kr=0, kcp=0, kep=1, kt=0, s=8, d=3)
     cmds.select(crv, r=True)
 
-    print("Execution time: %s seconds" % (time.time() - startTime))
+    if selected_mesh:
+        cmds.rename(crv, '{}_centerCurve'.format(selected_mesh[0]))
+    else:
+        mesh = cmds.listRelatives(cmds.ls(selected_vertices, o=True)[0], p=True)[0]
+        cmds.rename(crv, '{}_centerCurve'.format(mesh))
+
+    print("# Execution time: %s seconds" % (time.time() - startTime))
