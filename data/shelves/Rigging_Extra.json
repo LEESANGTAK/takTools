@@ -50,6 +50,15 @@
             "noDefaultPopup": true
         },
         {
+            "label": "Center Curve of Points",
+            "annotation": "User_Script",
+            "image1": "centerCrvPoints.png",
+            "imageOverlayLabel": "",
+            "command": "from imp import reload\nfrom takTools.utils import centerCurveOfPoints as ccop; reload(ccop)\nccop.showGUI()",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
+        {
             "label": "Loop to Curve",
             "annotation": "Extract a curve for selected polygon edges.",
             "image1": "polyEdgeToCurves.png",
