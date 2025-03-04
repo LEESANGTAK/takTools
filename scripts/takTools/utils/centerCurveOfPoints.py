@@ -1,7 +1,21 @@
+"""
+Author: Tak
+Created: 03/04/2025
+Updated: 03/04/2025
+Version: 1.0
+Contact: https://ta-note.com
+
+Description:
+This script is an implementation of the Center Curve of Point Cloud algorithm in Maya.
+The algorithm takes a set of 3D points and computes a curve that represents the center of the point cloud.
+Reference is here: https://github.com/maggielovedd/3D-Point-Cloud-Curve-Extraction-and-Optimization/tree/main
+"""
+
 import numpy as np
 from scipy.spatial import cKDTree
 import maya.cmds as cmds
 import time
+
 
 def thin_line(points, point_cloud_thickness=5, skipCount=0):
     """
