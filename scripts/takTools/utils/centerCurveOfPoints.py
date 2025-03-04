@@ -135,15 +135,15 @@ def sort_points_on_regression_line(points, regression_lines, index, sorted_point
     return sorted_points
 
 
-def sort_points(points, regression_lines, sorted_point_distance=0.2, search_ratio=1.2):
+def sort_points(points, regression_lines, sorted_point_distance=0.2, search_ratio=1.2, method='min_angle'):
     """
     Sorts points along the regression line in both directions.
     """
     index = 0
     search_distance = sorted_point_distance / search_ratio
 
-    sort_points_left = [points[index]] + sort_points_on_regression_line(points, regression_lines, index, sorted_point_distance, search_distance, direction=1)
-    sort_points_right = sort_points_on_regression_line(points, regression_lines, index, sorted_point_distance, search_distance, direction=-1)
+    sort_points_left = [points[index]] + sort_points_on_regression_line(points, regression_lines, index, sorted_point_distance, search_distance, direction=1, method=method)
+    sort_points_right = sort_points_on_regression_line(points, regression_lines, index, sorted_point_distance, search_distance, direction=-1, method=method)
 
     return np.array(sort_points_left[::-1] + sort_points_right)
 
@@ -164,6 +164,14 @@ def showGUI():
     cmds.window(title="Center Curve of Points", mnb=False, mxb=False)
     cmds.columnLayout(adjustableColumn=True)
 
+    cmds.optionMenuGrp('methodOptMenu', label='Method:', columnWidth=[(1, 70)], annotation='Method to sort points along the regression line.')
+    cmds.menuItem(label='min_angle')
+    cmds.menuItem(label='mean')
+    cmds.menuItem(label='shortest_distance')
+    cmds.menuItem(label='max_dot_product')
+    cmds.menuItem(label='density_based')
+    cmds.menuItem(label='curvature_based')
+
     cmds.rowColumnLayout(numberOfColumns=2, columnWidth=[(1, 100), (2, 100)])
     cmds.text(label='Curvature:')
     cmds.floatField('curvatureFltFld', min=1.0, value=3.0, precision=2, annotation='Higher value will result in a more curved line. Decrease value or select centric vertices manually if produce a too short curve. Default is 3.0')
@@ -178,6 +186,7 @@ def main(*args):
     startTime = time.time()
 
     # Get user input
+    method = cmds.optionMenuGrp('methodOptMenu', q=True, value=True)
     curvature = cmds.floatField('curvatureFltFld', q=True, value=True)
 
     # Example usage with Maya vertices
@@ -200,7 +209,7 @@ def main(*args):
     thickness = bounding_box_width / curvature
     skip = int(len(selected_vertices) / 1000)  # Optimization: Skip points for faster computation
     thinned_points, regression_lines = thin_line(points, point_cloud_thickness=thickness, skipCount=skip)
-    sorted_points = sort_points(thinned_points, regression_lines, sorted_point_distance=thickness)
+    sorted_points = sort_points(thinned_points, regression_lines, sorted_point_distance=thickness, method=method)
 
     # Create NURBS curve from sorted points
     crv = create_nurbs_curve_from_points(sorted_points)

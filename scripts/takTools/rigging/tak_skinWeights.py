@@ -622,26 +622,49 @@ def transferWeights(*args):
 # ------------
 
 
-# ------------ Copy skin weights for overlapped vertices
-def copySkinOverlapVertices(searchDistance, *args):
-    meshes = cmds.filterExpand(cmds.ls(os=True), sm=12)
-    if len(meshes) == 2:
-        skinUtil.copySkinOverlapVertices(meshes[0], meshes[1], searchDistance)
-    elif len(meshes) > 2:
-        srcMeshes = meshes[:-1]
-        trgMesh = meshes[-1]
-        cmds.progressWindow(title='Copy Skin Weights Overlap', minValue=0, maxValue=len(srcMeshes), progress=0, status='Stand by', isInterruptable=True)
-        for i, srcMesh in enumerate(srcMeshes):
-            skinUtil.copySkinOverlapVertices(srcMesh, trgMesh, searchDistance)
-            cmds.progressWindow(e=True, progress=i, status=srcMeshes[i])
-        cmds.progressWindow(endProgress=1)
+def loadSelMesh(widget, *args):
+    selectedMeshes = cmds.ls(sl=True, type='transform')
+    if widget == 'trgMeshTxtFldBtnGrp':
+        cmds.textFieldButtonGrp(widget, e=True, text=selectedMeshes[0] if selectedMeshes else '')
+    else:
+        cmds.textScrollList(widget, e=True, removeAll=True)
+        cmds.textScrollList(widget, e=True, append=selectedMeshes)
 
+# ------------ Copy skin weights for overlapped vertices
 def copyOverlapGUI(*args):
     cmds.window(title='Copy Overlap Vertices', tlb=True, p=WIN_NAME)
     cmds.columnLayout(adj=True)
+    cmds.frameLayout(label='Source and Target Meshes', collapsable=True, w=500, marginWidth=10, marginHeight=10)
+    cmds.rowColumnLayout(numberOfColumns=2, columnWidth=[(1, 200), (2, 400)], columnSpacing=[(1, 10), (2, 10)])
+
+    cmds.columnLayout(adj=True, cal='left')
+    cmds.text(label='Source Meshes')
+    cmds.textScrollList('srcMeshTxtScrLs', h=100, ams=True)
+    cmds.popupMenu()
+    cmds.menuItem(label='Load Selected Meshes', c=partial(loadSelMesh, 'srcMeshTxtScrLs'))
+
+    cmds.setParent('..')
+    cmds.columnLayout(adj=True, cal='left')
+    cmds.text(label='Target Mesh')
+    cmds.textFieldButtonGrp('trgMeshTxtFldBtnGrp', label='Target Mesh: ', text='', buttonLabel='<<<', columnWidth=[(1, 100), (2, 100)], bc=partial(loadSelMesh, 'trgMeshTxtFldBtnGrp'))
+
+    cmds.setParent('..')
+    cmds.setParent('..')
+    cmds.frameLayout(label='Settings', collapsable=True, w=500, marginWidth=10, marginHeight=10)
     cmds.floatFieldGrp('searchDistFloatFld', label='Search Distance: ', v1=0.0001, precision=4)
-    cmds.button(label='Apply', c=lambda x: copySkinOverlapVertices(cmds.floatFieldGrp('searchDistFloatFld', q=True, v1=True)))
+    cmds.setParent('..')
+    cmds.button(label='Apply', h=40, c=copySkinOverlapVertices)
     cmds.showWindow()
+
+def copySkinOverlapVertices(*args):
+    srcMeshes = cmds.textScrollList('srcMeshTxtScrLs', q=True, ai=True)
+    trgMesh = cmds.textFieldButtonGrp('trgMeshTxtFldBtnGrp', q=True, text=True)
+    searchDistance = cmds.floatFieldGrp('searchDistFloatFld', q=True, v1=True)
+    cmds.progressWindow(title='Copy Skin Weights Overlap', minValue=0, maxValue=len(srcMeshes), progress=0, status='Stand by', isInterruptable=True)
+    for i, srcMesh in enumerate(srcMeshes):
+        skinUtil.copySkinOverlapVertices(srcMesh, trgMesh, searchDistance)
+        cmds.progressWindow(e=True, progress=i, status=srcMeshes[i])
+    cmds.progressWindow(endProgress=1)
 # ------------
 
 
