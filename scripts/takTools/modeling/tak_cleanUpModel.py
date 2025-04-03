@@ -867,6 +867,7 @@ def setShpAttrs(*args):
             drovInput = cmds.listConnections('%s.drawOverride' %selShape[0], s = True, d = False, p = True)
             if drovInput:
                 cmds.disconnectAttr(drovInput[0], '%s.drawOverride' %selShape[0])
+            cmds.setAttr('%s.visibility' %selShape[0], 1)
             cmds.setAttr('%s.overrideEnabled' %selShape[0], 0)
             if cmds.objExists('%s.doubleSided' %selShape[0]):
                 cmds.setAttr('%s.doubleSided' %selShape[0], 1)
@@ -884,6 +885,7 @@ def setShpAttrs(*args):
             cmds.setAttr('%s.doubleSided' %sel, 1)
             cmds.setAttr('%s.opposite' %sel, 0)
             cmds.setAttr('%s.primaryVisibility' %sel, 1)
+            cmds.setAttr('%s.visibility' %sel, 1)
         else:
             pass
 
