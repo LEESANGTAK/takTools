@@ -115,7 +115,7 @@ def convert(*args):
     joints = []
     for i in range(0, len(selDrivers)):
         cmds.select (cl=1)
-        jnt = cmds.joint()
+        jnt = cmds.joint(n=selDrivers[i] + '_jnt')
         joints.append(jnt)
 
         # Match a joint position to a driver
@@ -134,10 +134,10 @@ def convert(*args):
     vtxsOrigPos = [cmds.xform(vtx, q=True, t=True, ws=True) for vtx in selVtxs]
     for i in range(0, numDrivers):
         # Get vertices deformed positions
-        driverOrigPos = cmds.xform(selDrivers[i], q=True, t=True, ws=True)
-        cmds.xform(selDrivers[i], t=[driverOrigPos[0], driverOrigPos[1], driverOrigPos[2] + 1], ws=True)
+        driverOrigPos = cmds.getAttr(selDrivers[i] + '.t')[0]
+        cmds.setAttr(selDrivers[i] + '.t', driverOrigPos[0], driverOrigPos[1], driverOrigPos[2] + 1)
         vtxsDefPos = [cmds.xform(vtx, q=True, t=True, ws=True) for vtx in selVtxs]
-        cmds.xform(selDrivers[i], t=driverOrigPos, ws=True)
+        cmds.setAttr(selDrivers[i] + '.t', driverOrigPos[0], driverOrigPos[1], driverOrigPos[2])
 
         # Set weights for a driver
         for j, (vtxOrigPos, vtxDefPos) in enumerate(zip(vtxsOrigPos, vtxsDefPos)):
