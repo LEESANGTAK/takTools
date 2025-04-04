@@ -854,6 +854,7 @@ Shift + 4 + LMB: Skinning Marking Menu
 
 # Display
 Alt + C: Toggle Color Feedback
+Alt + W: Toggle Wireframe on Shaded
 
 # Selection
 Ctrl + Alt + E: To Edge Loop
