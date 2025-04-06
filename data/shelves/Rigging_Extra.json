@@ -32,11 +32,11 @@
             "noDefaultPopup": true
         },
         {
-            "label": "Placeholder Locators",
-            "annotation": "Create locator to keep place for selected items.",
+            "label": "Space Locators",
+            "annotation": "Create locator matching to selected transforms.",
             "image1": "locator.png",
-            "imageOverlayLabel": "holder",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.plcHldr()",
+            "imageOverlayLabel": "space",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.spaceLoc()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

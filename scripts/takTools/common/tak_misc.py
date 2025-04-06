@@ -982,10 +982,10 @@ def wireOnOff():
     # cmds.headsUpDisplay('wireStateDisplay', remove = True)
 
 
-def plcHldr():
+def spaceLoc():
     selList = cmds.ls(sl=True, fl=True)
     for sel in selList:
-        loc = cmds.spaceLocator(n='%s_plcHldr_loc' % (sel))
+        loc = cmds.spaceLocator(n='%s_space_loc' % (sel))
         if '[' in sel:
             vtxPos = cmds.xform(sel, q=True, ws=True, t=True)
             cmds.xform(loc, t=vtxPos, ws=True)
