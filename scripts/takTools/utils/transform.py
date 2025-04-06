@@ -43,22 +43,32 @@ def mirrorX(source, target, connect=False):
         pm.delete(decMatrix, multMatrix)
 
 
-def transferValueToParent(transform):
+def zeroOutChannels(transform):
     transform = pm.PyNode(transform)
-    parentTransform = transform.getParent()
 
-    attrs = ['scale', 'rotate', 'translate']
-    for attr in attrs:
-        val = transform.attr(attr).get()
-        parentVal = parentTransform.attr(attr).get()
+    if transform.nodeType() == 'joint':
+        # If the transform is a joint, transfer the values to the joint orientation.
+        jointOrient = transform.jointOrient.get()
+        jointVal = transform.attr('rotate').get()
+        transform.attr('jointOrient').set(jointVal[0] + jointOrient[0], jointVal[1] + jointOrient[1], jointVal[2] + jointOrient[2])
+        transform.attr('rotate').set(0, 0, 0)
+    else:
+        parentTransform = transform.getParent()
+        if not parentTransform:
+            return
+
+        attrs = ['scale', 'rotate', 'translate']
+        for attr in attrs:
+            val = transform.attr(attr).get()
+            parentVal = parentTransform.attr(attr).get()
 
 
-        if attr is 'scale':
-            parentTransform.attr(attr).set(parentVal + (val-1))
-            transform.scale.set(1, 1, 1)
-        else:
-            parentTransform.attr(attr).set(parentVal + val)
-            transform.attr(attr).set(0, 0, 0)
+            if attr is 'scale':
+                parentTransform.attr(attr).set(parentVal + (val-1))
+                transform.scale.set(1, 1, 1)
+            else:
+                parentTransform.attr(attr).set(parentVal + val)
+                transform.attr(attr).set(0, 0, 0)
 
 
 def getOrientation(aimVector, upVector):

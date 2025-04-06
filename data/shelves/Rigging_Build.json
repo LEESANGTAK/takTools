@@ -176,8 +176,8 @@
             "noDefaultPopup": true
         },
         {
-            "label": "Transfer Values Parent",
-            "annotation": "Transfer selected transform channel values to the parent.",
+            "label": "Zero Out Values",
+            "annotation": "Transfer selected transform channel values to the parent. If item is a joint, transfer rotate values to joint orient values.",
             "image1": "zeroDepth.png",
             "imageOverlayLabel": "",
             "command": "import takTools.utils.transform as tu\nimport imp\nimp.reload(tu)\n\nsels = pm.selected()\nfor sel in sels:\n    tu.transferValueToParent(sel)",
