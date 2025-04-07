@@ -143,21 +143,29 @@ def main(*args):
     else:
         # Set up set driven key for constraint.
         for obj in objs:
-            if prntCnstOpt:
+            spcLocs = []
+            for trgSpc in trgSpcs:
+                spcLoc = '%s_%s_space_loc' %(obj, trgSpc)
+                if cmds.objExists(spcLoc):
+                    spcLocs.append(spcLoc)
+
+            spcsGrp = obj + '_space'
+            cnsts = cmds.listRelatives(spcsGrp, type = 'constraint')
+            for cnst in cnsts:
+                if cnstType == 'parentConstraint' and prntCnstOpt:
+                    spaceAttr = '%s.%s' % (obj, 'parentspace')
+                elif cnstType == 'pointConstraint' and pntCnstOpt:
+                    spaceAttr = '%s.%s' % (obj, 'positionspace')
+                elif cnstType == 'orientConstraint' and oriCnstOpt:
+                    spaceAttr = '%s.%s' % (obj, 'orientspace')
+                else:
+                    continue
+
+                # Set driven key for constraint weights.
                 for i in range(len(trgSpcs)):
                     for j, spcLoc in enumerate(spcLocs):
                         value = i == j
-                        cmds.setDrivenKeyframe('%s.%sW%i' % (prntCnst, spcLoc, j), v=value, cd = '%s.%s' % (obj, 'parentspace'), dv = i)
-            if pntCnstOpt:
-                for i in range(len(trgSpcs)):
-                    for j, spcLoc in enumerate(spcLocs):
-                        value = i == j
-                        cmds.setDrivenKeyframe('%s.%sW%i' % (pntCnst, spcLoc, j), v=value, cd = '%s.%s' % (obj, 'positionspace'), dv = i)
-            if oriCnstOpt:
-                for i in range(len(trgSpcs)):
-                    for j, spcLoc in enumerate(spcLocs):
-                        value = i == j
-                        cmds.setDrivenKeyframe('%s.%sW%i' % (oriCnst, spcLoc, j), v=value, cd = '%s.%s' % (obj, 'orientspace'), dv = i)
+                        cmds.setDrivenKeyframe('%s.%sW%i' % (cnst, spcLoc, j), v=value, cd = spaceAttr, dv = i)
 
 def setupScriptNode(objs, trgSpcs, cnsts, spcsGrp, spcLocs, prntCnst, prntCnstOpt, pntCnst, pntCnstOpt, oriCnst, oriCnstOpt):
     for obj in objs:
