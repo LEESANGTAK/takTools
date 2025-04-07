@@ -176,27 +176,6 @@
         menuEditorMenuItem5;
 
     menuItem
-        -label "Wireframe On Shaded" 
-        -divider 0
-        -subMenu 0
-        -tearOff 0
-        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -wireframeOnShaded $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -wireframeOnShaded true $modelPan;\n    } else {\n        modelEditor -e -wireframeOnShaded false $modelPan;\n    }\n}" 
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -image "WireFrameOnShaded.png" 
-        -echoCommand 0
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem21;
-
-    menuItem
         -label "X-Ray Joints" 
         -divider 0
         -subMenu 0
@@ -218,11 +197,11 @@
         menuEditorMenuItem18;
 
     menuItem
-        -label "MultisampleAA" 
+        -label "Wireframe On Shaded" 
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    int $curState = python(\"cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')\");\n    string $cmd = `format -stringArg (1-$curState) \"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', ^1s)\"`;\n    python($cmd);\n}" 
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -wireframeOnShaded $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -wireframeOnShaded true $modelPan;\n    } else {\n        modelEditor -e -wireframeOnShaded false $modelPan;\n    }\n}" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -230,13 +209,13 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "MultisampleAA.png" 
+        -image "WireFrameOnShaded.png" 
         -echoCommand 0
         -italicized 0
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem24;
+        menuEditorMenuItem21;
 
     menuItem
         -label "Use Default Material" 
@@ -258,6 +237,48 @@
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem23;
+
+    menuItem
+        -label "Ambient Occlusion" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    int $curState = python(\"cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')\");\n    string $cmd = `format -stringArg (1-$curState) \"cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', ^1s)\"`;\n    python($cmd);\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "SSAO.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem26;
+
+    menuItem
+        -label "MultisampleAA" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    int $curState = python(\"cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')\");\n    string $cmd = `format -stringArg (1-$curState) \"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', ^1s)\"`;\n    python($cmd);\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "MultisampleAA.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem24;
 
     menuItem
         -label "separator" 
@@ -831,7 +852,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem26;
+        menuEditorMenuItem15;
 
     menuItem
         -label "Color Feedback" 
