@@ -5,7 +5,7 @@ Updated: 12/18/2020
 '''
 
 
-import maya.cmds as cmds
+from maya import cmds
 from functools import partial
 
 from ..common import tak_mayaUiUtils
@@ -37,6 +37,8 @@ def ui():
     cmds.setParent('..') # Move to parent layout that is columnLayout.
     cmds.checkBoxGrp('cnstChkBoxGrp', label = 'Constraint: ', numberOfCheckBoxes = 3, v1 = True, labelArray3 = ['Parent', 'Point', 'Orient'], columnAlign = [1, 'left'], columnWidth = [(1, 70), (2, 80), (3, 80), (4, 80)], on1 = prntCnstChkBoxOn, on2 = posOriCnstChkBoxOn, on3 = posOriCnstChkBoxOn)
 
+    cmds.checkBox('setupScriptNodeChkBox', label = 'Setup Script Node', value = False)
+
     cmds.button(label = 'Apply', c = main, h = 30)
 
     cmds.window(winName, e = True, w = 300, h = 100)
@@ -49,6 +51,7 @@ def main(*args):
     prntCnstOpt = cmds.checkBoxGrp('cnstChkBoxGrp', q = True, v1 = True)
     pntCnstOpt = cmds.checkBoxGrp('cnstChkBoxGrp', q = True, v2 = True)
     oriCnstOpt = cmds.checkBoxGrp('cnstChkBoxGrp', q = True, v3 = True)
+    setupScriptNodeOpt = cmds.checkBox('setupScriptNodeChkBox', q = True, v = True)
 
     for obj in objs:
         spcLocs = []
@@ -60,7 +63,8 @@ def main(*args):
             else:
                 # Create locators on object position.
                 cmds.spaceLocator(n = spcLoc)[0]
-                cmds.delete(cmds.parentConstraint(obj, spcLoc, mo = False)) # Match locator to object's transform.
+                # cmds.delete(cmds.parentConstraint(obj, spcLoc, mo = False)) # Match locator to object's transform.
+                cmds.matchTransform(spcLoc, obj)
                 spcLocs.append(spcLoc)
 
             # Constraint locator with target space.
@@ -93,6 +97,9 @@ def main(*args):
                 cmds.parent(spcsGrp, objPrnt[0])
 
         # Constraint spaces group with locators.
+        prntCnst = None
+        pntCnst = None
+        oriCnst = None
         if prntCnstOpt:
             prntCnst = cmds.parentConstraint(spcLocs, spcsGrp, mo = False)[0]
         if pntCnstOpt:
@@ -113,15 +120,47 @@ def main(*args):
         for cnst in cnsts:
             cnstType = cmds.nodeType(cnst)
             if cnstType == 'parentConstraint' and prntCnstOpt:
-                cmds.addAttr(obj, ln = "parentspace", nn = "Parent space", at = "enum", en = spaces, keyable = False)
-                cmds.setAttr(obj+'.parentspace', e=True, channelBox=True)
+                cmds.addAttr(obj, ln = "parentspace", nn = "Parent space", at = "enum", en = spaces, keyable = True)
             if cnstType == 'pointConstraint' and pntCnstOpt:
-                cmds.addAttr(obj, ln = "positionspace", nn = "Position Space", at = "enum", en = spaces, keyable = False)
-                cmds.setAttr(obj+'.positionspace', e=True, channelBox=True)
+                cmds.addAttr(obj, ln = "positionspace", nn = "Position Space", at = "enum", en = spaces, keyable = True)
             if cnstType == 'orientConstraint' and oriCnstOpt:
-                cmds.addAttr(obj, ln = "orientspace", nn = "Orient space", at = "enum", en = spaces, keyable = False)
-                cmds.setAttr(obj+'.orientspace', e=True, channelBox=True)
+                cmds.addAttr(obj, ln = "orientspace", nn = "Orient space", at = "enum", en = spaces, keyable = True)
 
+    if setupScriptNodeOpt:
+        setupScriptNode(
+            objs,
+            trgSpcs,
+            cnsts,
+            spcsGrp,
+            spcLocs,
+            prntCnst,
+            prntCnstOpt,
+            pntCnst,
+            pntCnstOpt,
+            oriCnst,
+            oriCnstOpt
+        )
+    else:
+        # Set up set driven key for constraint.
+        for obj in objs:
+            if prntCnstOpt:
+                for i in range(len(trgSpcs)):
+                    for j, spcLoc in enumerate(spcLocs):
+                        value = i == j
+                        cmds.setDrivenKeyframe('%s.%sW%i' % (prntCnst, spcLoc, j), v=value, cd = '%s.%s' % (obj, 'parentspace'), dv = i)
+            if pntCnstOpt:
+                for i in range(len(trgSpcs)):
+                    for j, spcLoc in enumerate(spcLocs):
+                        value = i == j
+                        cmds.setDrivenKeyframe('%s.%sW%i' % (pntCnst, spcLoc, j), v=value, cd = '%s.%s' % (obj, 'positionspace'), dv = i)
+            if oriCnstOpt:
+                for i in range(len(trgSpcs)):
+                    for j, spcLoc in enumerate(spcLocs):
+                        value = i == j
+                        cmds.setDrivenKeyframe('%s.%sW%i' % (oriCnst, spcLoc, j), v=value, cd = '%s.%s' % (obj, 'orientspace'), dv = i)
+
+def setupScriptNode(objs, trgSpcs, cnsts, spcsGrp, spcLocs, prntCnst, prntCnstOpt, pntCnst, pntCnstOpt, oriCnst, oriCnstOpt):
+    for obj in objs:
         # Add spaces to the object and connect to constraint weights.
         for trgSpc in trgSpcs:
             defaultVal = 0
