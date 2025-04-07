@@ -858,15 +858,16 @@ Alt + W: Toggle Wireframe on Shaded
 
 # Selection
 Ctrl + Alt + E: To Edge Loop
-Ctrl + Alt + S: Select Hierarchy
+Ctrl + Alt + A: Select Hierarchy
+Ctrl + Alt + S: Toggle Selection Mode
 
 # Rigging
 Alt + Shift + D: Delete History
-Ctrl + Alt + W: Create Joint on Center
+Alt + Shift + C: Create Joint on Center
 
 # Skinning
-Ctrl + Alt + Z: Go to Bind Pose
-Ctrl + Alt + D: Toggle Deformers
+Alt + Shift + Z: Go to Bind Pose
+Alt + Shift + X: Toggle Deformers
 '''
     cmds.confirmDialog(title=TOOL_NAME, message=message, button='OK')
 # ------------
