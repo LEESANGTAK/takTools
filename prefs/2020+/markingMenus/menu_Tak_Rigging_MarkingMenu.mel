@@ -178,7 +178,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.modeling import tak_cleanUpModel as tcum\");\npython(\"tcum.allInOne()\");" 
+        -command "python(\"from imp import reload\");\npython(\"from takTools.modeling import tak_cleanUpModel as tcum;reload(tcum)\");\npython(\"tcum.allInOne()\");" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -589,7 +589,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $sels[] = `ls -sl`;\n\tstring $dups[];\n    for ($sel in $sels) {\n        select -r $sel;\n        string $dup[] = `duplicate -po`;\n        parent $dup $sel;\n\t\t$dups[size($dups)] = $dup[0];\n    }\n\tselect -r $dups;\n}" 
+        -command "{\n    string $sels[] = `ls -sl -type \"joint\"`;\n\tstring $dupJnts[];\n    for ($sel in $sels) {\n        select -r $sel;\n        string $dupJnt[] = `duplicate -po`;\n        parent $dupJnt $sel;\n\t\t$dupJnts[size($dupJnts)] = $dupJnt[0];\n    }\n\tselect -r $dupJnts;\n}" 
         -optionBox 0
         -enable 1
         -visible 1
