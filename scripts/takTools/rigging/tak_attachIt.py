@@ -53,6 +53,8 @@ class UI(object):
         cmds.separator(h=5, style='none', p=cls.widgets['mainColLay'])
 
         cls.widgets['appBtn'] = cmds.button(label='Attach It!', h=50, c=Functions.main, p=cls.widgets['mainColLay'])
+        cmds.separator(h=5, style='none', p=cls.widgets['mainColLay'])
+        cls.widgets['cancleParentTransBtn'] = cmds.button(label='Cancle Parent Translate', h=50, c=Functions.cancelParentTranslateForAnchors, p=cls.widgets['mainColLay'], ann='Set up to cancle parent translation for selected anchor groups.')
 
         cmds.window(cls.win, e=True, w=100, h=50)
         cmds.showWindow(cls.win)
@@ -468,3 +470,17 @@ class Functions(object):
 
         # Connect to anchor group
         cmds.connectAttr('%s.outputRotate' % decMatrix, '%s.rotate' % anchorGrp, force=True)
+
+    @staticmethod
+    def cancelParentTranslateForAnchors(*args):
+        anchorGrps = cmds.ls(sl=True)
+        for anchorGrp in anchorGrps:
+            fol = anchorGrp.replace('_anchor', '_fol')
+            parentGrp = cmds.listRelatives(anchorGrp, p=True)[0]
+            multMtx = cmds.createNode('multMatrix', n=anchorGrp.replace('_anchor', '_localMatrix'))
+            decMtx = cmds.createNode('decomposeMatrix', n=anchorGrp.replace('_anchor', '_decMatrix'))
+
+            cmds.connectAttr(fol+'.worldMatrix', multMtx+'.matrixIn[0]', f=True)
+            cmds.connectAttr(parentGrp+'.worldInverseMatrix', multMtx+'.matrixIn[1]', f=True)
+            cmds.connectAttr(multMtx+'.matrixSum', decMtx+'.inputMatrix', f=True)
+            cmds.connectAttr(decMtx+'.outputTranslate', anchorGrp+'.t', f=True)
