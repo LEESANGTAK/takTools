@@ -98,3 +98,15 @@ nameCommand
 	-command ("createJointOnCenter")
 	createJointOnCenterNameCommand;
 
+nameCommand
+	-annotation "toggleWireNameCommand"
+	-sourceType "mel"
+	-command ("toggleWire")
+	toggleWireNameCommand;
+
+nameCommand
+	-annotation "toggleComponentModeNameCommand"
+	-sourceType "mel"
+	-command ("toggleComponentMode")
+	toggleComponentModeNameCommand;
+

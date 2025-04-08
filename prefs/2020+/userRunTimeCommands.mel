@@ -167,3 +167,33 @@ runTimeCommand
 	-command ("from imp import reload\nfrom takTools.utils import joint as jntUtil; reload(jntUtil)\n\n\nsels = cmds.ls(sl=True, fl=True)\n\n# Handle if components exists in selection\nedgesFaces = cmds.filterExpand(sels, sm=[32, 34])\nif edgesFaces:\n    vertices = cmds.ls(cmds.polyListComponentConversion(sels, toVertex=True), fl=True)\n    sels = list(set(sels) - set(edgesFaces))\n    sels.extend(vertices)\n\njntUtil.createOnCenter(sels)")
 	createJointOnCenter;
 
+runTimeCommand
+	-label ""
+	-annotation "Toggle display wireframe of meshes."
+	-longAnnotation ""
+	-category "Custom Scripts.Display"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import takTools.common.tak_misc as tak_misc\nimport imp; imp.reload(tak_misc)\ntak_misc.wireOnOff()")
+	toggleWire;
+
+runTimeCommand
+	-label ""
+	-annotation "Toggle selection mode"
+	-longAnnotation ""
+	-category "Custom Scripts.Select"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("objMode = cmds.selectMode(q=True, object=True)\nif not objMode:\n    cmds.selectMode(object=True)\nelse:\n    cmds.selectMode(component=True)\n")
+	toggleComponentMode;
+
