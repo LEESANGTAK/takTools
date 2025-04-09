@@ -102,10 +102,10 @@ def setNormalMapIgnoreColorSpaceRule():
         normalMap.ignoreColorSpaceFileRules.set(True)
 
 
-def exportMaterialsInfo(geometries, fileName, exportMaterials=True):
+def exportMaterials(geo, outputDir):
+    geo = pm.PyNode(geo)
     materials = []
-    for geo in geometries:
-        materials.extend(getMaterials(geo))
+    materials.extend(getMaterials(geo))
     materials = list(set(materials))  # Remove repeated items
 
     matAssignInfo = {}
@@ -114,31 +114,18 @@ def exportMaterialsInfo(geometries, fileName, exportMaterials=True):
         matAssignInfo[mat.name()] = [item.name() for item in assignedItems]
 
     # Save material assign information
-    outputDir = pm.env.sceneName().dirname()
-    filePath = os.path.join(outputDir, '{}.json'.format(fileName))
+    filePath = '{}/{}.mats'.format(outputDir, geo.name())
     with open(filePath, 'w') as f:
         json.dump(matAssignInfo, f, indent=4)
 
-    # Export materials
-    if exportMaterials:
-        preSels = pm.selected()
-        matFilePath = os.path.join(outputDir, '{}_materials.ma'.format(fileName))
-        pm.select(materials, r=True)
-        pm.exportSelected(matFilePath, f=True)
-        pm.select(preSels, r=True)
 
-
-def importMaterialsInfo(filePath, importMaterials=True):
-    if importMaterials:
-        dir = os.path.dirname(filePath)
-        fileName = os.path.basename(filePath)
-        matFileName = os.path.splitext(fileName)[0] + '_materials.ma'
-        matFilePath = os.path.join(dir, matFileName)
-        pm.importFile(matFilePath)
-
+def importMaterials(filePath):
     with open(filePath, 'r') as f:
         matAssignInfo = json.load(f)
+
     for mat, meshes in matAssignInfo.items():
+        if not pm.objExists(mat):
+            mat = pm.shadingNode('blinn', n=mat, asShader=True)
         for mesh in meshes:
             if not pm.objExists(mesh):
                 pm.warning('"{}" is not exists.'.format(mesh))

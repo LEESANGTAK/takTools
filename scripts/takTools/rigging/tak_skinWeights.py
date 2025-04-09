@@ -814,14 +814,14 @@ def importSkin(skinDirectory, *args):
         if not os.path.splitext(skinFilePath)[-1] == '.sw':
             continue
 
-        skinUtil.loadBSkin(os.path.join(skinDirectory, skinFile))
+        skinUtil.importSkin(os.path.join(skinDirectory, skinFile))
 
 def exportSkin(skinDirectory, *args):
     meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)
     if not meshes:
         return
     for mesh in meshes:
-        skinUtil.saveBSkin(mesh, skinDirectory)
+        skinUtil.exportSkin(mesh, skinDirectory)
     cmds.select(meshes, r=True)
 
 def setDirectory(*args):

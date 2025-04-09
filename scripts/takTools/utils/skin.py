@@ -33,9 +33,9 @@ def bind(jnts, geos, maxInfluence=4):
 
 def reBind(skinMesh):
     tmpDir = pm.internalVar(userTmpDir=True)
-    skinFile = saveBSkin(skinMesh, tmpDir)
+    skinFile = exportSkin(skinMesh, tmpDir)
     meshUtil.cleanupMesh(skinMesh)
-    loadBSkin(skinFile)
+    importSkin(skinFile)
     os.remove(skinFile)
 
 
@@ -365,14 +365,14 @@ def SSD(geo):
     pm.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=8)
 
 
-def saveBSkin(mesh, outputDir):
+def exportSkin(mesh, outputDir):
     pm.select(mesh, r=True)
     skinFile = '{}/{}.sw'.format(outputDir, mesh)
     bsk.bSaveSkinValues(skinFile)
     return skinFile
 
 
-def loadBSkin(skinFile):
+def importSkin(skinFile):
     with open(skinFile, 'r') as f:
         fContents = f.readlines()
         mesh = fContents[0].strip('\n')

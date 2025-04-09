@@ -297,7 +297,7 @@ def cleanupModel(height, flipZ):
     docDir = os.path.expanduser('~')
     skinFiles = []
     for mesh in meshes:
-        skinFile = skinUtil.saveBSkin(mesh, docDir)
+        skinFile = skinUtil.exportSkin(mesh, docDir)
         skinFiles.append(skinFile)
         pm.polySoftEdge(mesh, a=180)
         meshUtil.cleanupMesh(mesh)
@@ -332,7 +332,7 @@ def cleanupModel(height, flipZ):
 
     # Restore skin weights
     for skinFile in skinFiles:
-        skinUtil.loadBSkin(skinFile)
+        skinUtil.importSkin(skinFile)
         os.remove(skinFile)
 
 
