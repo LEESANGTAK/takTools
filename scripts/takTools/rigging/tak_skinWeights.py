@@ -100,10 +100,11 @@ class SkinWeights(object):
         cmds.menuItem(optionBox=True, c='mel.eval("MirrorSkinWeightsOptions;")')
         cmds.menuItem(divider=True, dividerLabel='Copy')
         self.uiWidgets['copyMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Skin', c=copySkin, ann='Copy a source mesh skin to a target meshes.\nIf components and a mesh selected copy weights from mesh to components.')
-        self.uiWidgets['copyOverlapMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Overlaped Vertices', c=copySkinOverlapVertices, ann='Copy a source mesh skin to a target mesh only for overlaped vertices.')
-        cmds.menuItem(optionBox=True, c=copyOverlapGUI)
+        self.uiWidgets['copySetsMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Skin Sets', c=copySkinSets, ann='Copy a source mesh skin to target sets.')
         self.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy and Paste', c=copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
         cmds.menuItem(optionBox=True, c=copyPasteGUI)
+        self.uiWidgets['copyOverlapMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Overlaped Vertices', c=copySkinOverlapVertices, ann='Copy a source mesh skin to a target mesh only for overlaped vertices.')
+        cmds.menuItem(optionBox=True, c=copyOverlapGUI)
         cmds.menuItem(divider=True, dividerLabel='Optimization')
         self.uiWidgets['pruneMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Prune Small Weights', c=SkinWeights.prunSkinWeights)
         self.uiWidgets['rmvUnusedInfMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Remove Unused Influences', c="mel.eval('removeUnusedInfluences;')")
@@ -127,7 +128,7 @@ class SkinWeights(object):
         self.uiWidgets['SSDMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='SSD...', c=ssdGUI, ann='Bake skin combined with other deforemr to a single skin cluster for a selected geometry.')
         self.uiWidgets['convertMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Converter...', c=lambda x: ad2sc.showGUI(WIN_NAME), ann='Convert any deformers to a skin cluster for controllers.')
         self.uiWidgets['transferMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Transfer...', c=transferWeightsGUI, ann='Transfer weights form a joint to other joint.')
-        self.uiWidgets['maxInfsMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Max Influences...', c=maxInfluencesGUI, ann='Manage max influences.')
+        self.uiWidgets['maxInfsMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Max Influences...', c=lambda x: maxInfluencesGUI(WIN_NAME), ann='Manage max influences.')
         self.uiWidgets['skinIOMenuItem'] = cmds.menuItem(p=self.uiWidgets['utilsMenu'], label='Skin I/O...', c=showSkinIOGUI, ann='Import/Export skin weights for selected geometries.')
         cmds.menuItem(optionBox=True, c=bSkinSaverGUI)
 
@@ -674,6 +675,12 @@ def copySkin(*args):
     import imp; imp.reload(tak_misc)
     tak_misc.addInfCopySkin()
 
+def copySkinSets(*args):
+    from takTools.utils import skin as skUtil; reload(skUtil)
+    sels = cmds.ls(sl=True)
+    trgSets = [item for item in sels if cmds.nodeType(item) == 'objectSet']
+    srcMesh = list(set(sels) - set(trgSets))[0]
+    skUtil.copySkinSets(srcMesh, trgSets)
 
 def copyPasteWeight(*args):
     '''
@@ -728,8 +735,11 @@ def ssdGUI(*args):
 
 
 # ------------  Max Influences
-def maxInfluencesGUI(*args):
-    cmds.window(title='Max Influences Manager', h=10, tlb=True, p=WIN_NAME)
+def maxInfluencesGUI(parent='', *args):
+    if parent:
+        cmds.window(title='Max Influences Manager', h=10, tlb=True, parent=parent)
+    else:
+        cmds.window(title='Max Influences Manager', h=10, tlb=True)
     cmds.columnLayout(adj=True)
     cmds.button(label='Check Max Influences', c=checkMaxInfluences)
     cmds.rowColumnLayout(numberOfColumns=2, columnSpacing=[(1, 2), (2, 2)])
@@ -759,10 +769,10 @@ def fitMaxInfluence(*args):
             continue
 
         # Create progress window
-        cmds.window('progWin', title='working on "{}"'.format(mesh), mnb=False, mxb=False)
+        cmds.window('fitMaxInfProgWin', title='working on "{}"'.format(mesh), mnb=False, mxb=False)
         cmds.columnLayout(adj=True)
-        cmds.progressBar('progBar', w=400, isMainProgressBar=True, beginProgress=True, isInterruptable=True)
-        cmds.showWindow('progWin')
+        cmds.progressBar('progBar', isMainProgressBar=True, beginProgress=True, isInterruptable=True, w=300)
+        cmds.showWindow('fitMaxInfProgWin')
 
         skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
 
@@ -776,13 +786,14 @@ def fitMaxInfluence(*args):
 
         infPrunedWeights = SkinWeights.pruneSkinInfluences(mesh, skinClst, targetMaxInfs)
         SkinWeights.setWeights(mesh, skinClst, infPrunedWeights)
-        print('Fitting max influence for the "{}" is done.'.format(mesh))
 
         # Remove zero weighted influences
         cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
 
         cmds.progressBar('progBar', e=True, endProgress=True)
-        cmds.deleteUI('progWin')
+        cmds.deleteUI('fitMaxInfProgWin')
+
+        print('Fitting max influence for the "{}" is done.'.format(mesh))
 # ------------
 
 

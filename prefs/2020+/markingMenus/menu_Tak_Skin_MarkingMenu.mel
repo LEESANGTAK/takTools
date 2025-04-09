@@ -110,11 +110,11 @@
         menuEditorMenuItem12;
 
     menuItem
-        -label "Copy Skin Sets" 
+        -label "Max Influences" 
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skUtil; reload(skUtil)\");\npython(\"sels = pm.selected()\");\npython(\"skUtil.copySkinSets(sels[0], sels[1:])\");" 
+        -command "python(\"from imp import reload\");\npython(\"from takTools.rigging import tak_skinWeights as tsw; reload(tsw)\");\npython(\"tsw.maxInfluencesGUI()\");" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -123,7 +123,7 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "out_objectSet.png" 
+        -image "setMaxInfluence.png" 
         -echoCommand 0
         -italicized 0
         -boldFont 1

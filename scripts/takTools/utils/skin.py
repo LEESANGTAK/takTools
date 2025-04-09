@@ -131,15 +131,31 @@ def copySkin(source, target, components=None):
     return trgSkinClst
 
 
-def copySkinSets(sourceSkinMesh, sets):
-    for set in sets:
-        for member in set.members():
-            if type(member) == pm.MeshVertex:
-                targetMesh = member.node()
-                copySkin(sourceSkinMesh, targetMesh, member)
-            else:
-                copySkin(sourceSkinMesh, member)
-    pm.select(cl=True)
+def copySkinSets(sourceSkinMesh, targetSets):
+    for targetSet in targetSets:
+        # Filter out meshes and mesh components from set members
+        setMembers = cmds.ls(cmds.sets(targetSet, q=True), fl=True)
+        meshes = cmds.filterExpand(setMembers, sm=12)
+        meshComponents = cmds.filterExpand(setMembers, sm=[31, 32, 33])
+
+        if meshes:
+            for mesh in meshes:
+                copySkin(sourceSkinMesh, mesh)
+
+        if meshComponents:
+            print(meshComponents)
+            # Get cpntMeshes transforms from mesh components
+            cpntMeshes = list(set(cmds.filterExpand(cmds.ls(meshComponents, o=True), sm=12)))
+            # Build mesh and components info
+            meshComponentsInfo = []
+            for cpntMesh in cpntMeshes:
+                meshCpnts = [cpnt for cpnt in meshComponents if cpntMesh in cpnt]
+                meshComponentsInfo.append((cpntMesh, meshCpnts))
+            # Copy skin weights to each cpntMesh and its components
+            for cpntMesh, meshCpnts in meshComponentsInfo:
+                copySkin(sourceSkinMesh, cpntMesh, meshCpnts)
+
+    cmds.select(cl=True)
 
 def copySkinOverlapVertices(sourceSkinMesh, targetMesh, searchDistance=0.001):
     overlapVtxs = meshUtil.getOverlapVertices(sourceSkinMesh, targetMesh, searchDistance)
