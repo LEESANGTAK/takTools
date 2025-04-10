@@ -76,25 +76,39 @@ def convertToCageMesh(meshes, minHoleRadius=10.0, detailSize=0.02, faceCount=100
 
     pm.hyperShade(cageMesh, assign='lambert1')
 
-    # Retopologize maya mesh
-    retopo = pm.polyRetopo(
-        cageMesh,
-        ch=False,
-        symmetry=symmetry,
-        axisPosition=1,
-        axisOffset=0,
-        axis=1,
-        replaceOriginal=True,
-        preprocessMesh=True,
-        preserveHardEdges=False,
-        topologyRegularity=1.0,
-        faceUniformity=1.0,
-        anisotropy=0.75,
-        targetFaceCount=faceCount,
-        targetFaceCountTolerance=10,
-    )[0]
+    # Handle depend on maya version
+    if int(pm.about(v=True)) >= 2024:
+        retopo = pm.polyRetopo(
+            cageMesh,
+            ch=False,
+            symmetry=symmetry,
+            axisPosition=1,
+            axisOffset=0,
+            axis=1,
+            replaceOriginal=True,
+            preprocessMesh=True,
+            preserveHardEdges=False,
+            topologyRegularity=1.0,
+            faceUniformity=1.0,
+            anisotropy=0.75,
+            targetFaceCount=faceCount,
+            targetFaceCountTolerance=10,
+        )[0]
+        bfGraph.symmetry >> retopo.symmetry
+    else:
+        retopo = pm.polyRetopo(
+            cageMesh,
+            ch=False,
+            replaceOriginal=True,
+            preprocessMesh=True,
+            preserveHardEdges=False,
+            topologyRegularity=1.0,
+            faceUniformity=1.0,
+            anisotropy=0.75,
+            targetFaceCount=faceCount,
+            targetFaceCountTolerance=10,
+        )[0]
 
-    bfGraph.symmetry >> retopo.symmetry
     bfGraph.faceCount >> retopo.targetFaceCount
 
     pm.hide(mesh, bfGraph)
