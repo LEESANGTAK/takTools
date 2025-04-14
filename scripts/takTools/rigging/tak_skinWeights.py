@@ -594,8 +594,14 @@ def transferWeights(*args):
     trgInfDag = selList.getDagPath(3)
 
     skinFn = oma.MFnSkinCluster(skinObj)
-    srcInfIndex = skinFn.indexForInfluenceObject(srcInfDag)
-    trgInfIndex = skinFn.indexForInfluenceObject(trgInfDag)
+    infObjs = skinFn.influenceObjects()
+
+    # Find the physical index of the source and target influences
+    srcInfIndex = next((i for i in range(len(infObjs)) if infObjs[i] == srcInfDag), None)
+    trgInfIndex = next((i for i in range(len(infObjs)) if infObjs[i] == trgInfDag), None)
+
+    if srcInfIndex is None or trgInfIndex is None:
+        cmds.error("Source or target influence not found in the influence list.")
 
     vtxComponents = om.MFnSingleIndexedComponent().create(om.MFn.kMeshVertComponent)
     om.MFnSingleIndexedComponent(vtxComponents).addElements([int(vtx.split('[')[-1][:-1]) for vtx in selVtxs])
@@ -603,6 +609,7 @@ def transferWeights(*args):
     # Get the weights and influence count for the selected vertices
     # weights are one long list of all the weights for all the vertices. It sliced by influence count to get the weights for each vertex.
     weights, infCount = skinFn.getWeights(meshDag, vtxComponents)
+    print(weights, infCount, srcInfIndex, trgInfIndex)
 
     # Iterate through each selected vertex
     for i in range(len(selVtxs)):
