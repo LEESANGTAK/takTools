@@ -88,15 +88,24 @@ class UI(object):
 
         cmds.separator(h = 5, p = cls.widgets['mainColLo'])
 
+        cmds.rowColumnLayout(numberOfColumns = 2, columnWidth = [(1, 250), (2, 50)], columnSpacing = [(1, 5), (2, 5)], p = cls.widgets['mainColLo'])
+
+        cmds.columnLayout(adj = True)
         cls.widgets['baseGeoRowColLo'] = cmds.rowColumnLayout(numberOfColumns = 3)
         cmds.text(label = 'Base Geometry: ', p = cls.widgets['baseGeoRowColLo'])
         cls.widgets['baseGeoTxtFld'] = cmds.textField(p = cls.widgets['baseGeoRowColLo'])
         cmds.button(label = '<<', p = cls.widgets['baseGeoRowColLo'], c = Functions.loadGeoBS)
 
-        cls.widgets['bsNodeRowColLo'] = cmds.rowColumnLayout(numberOfColumns = 2, p = cls.widgets['mainColLo'])
+        cmds.setParent('..')
+        cls.widgets['bsNodeRowColLo'] = cmds.rowColumnLayout(numberOfColumns = 2)
         cmds.text(label = 'Blend Shape Node: ', p = cls.widgets['bsNodeRowColLo'])
         cls.widgets['bsNodeOptMenu'] = cmds.optionMenu(cc = Functions.populateCorrectiveTrgList, p = cls.widgets['bsNodeRowColLo'])
 
+        cmds.setParent('..')
+        cmds.setParent('..')
+        cmds.shelfButton(image = 'blendShapeEditor.png', c = lambda : mel.eval('ShapeEditor;'))
+
+        cmds.setParent('..')
         cmds.separator(h = 10, style = 'in', p = cls.widgets['mainColLo'])
 
         cls.widgets['correctiveTrgNameRowColLo'] = cmds.rowColumnLayout(numberOfColumns = 4, columnSpacing = [(3, 30)], p = cls.widgets['mainColLo'])

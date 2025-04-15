@@ -609,7 +609,6 @@ def transferWeights(*args):
     # Get the weights and influence count for the selected vertices
     # weights are one long list of all the weights for all the vertices. It sliced by influence count to get the weights for each vertex.
     weights, infCount = skinFn.getWeights(meshDag, vtxComponents)
-    print(weights, infCount, srcInfIndex, trgInfIndex)
 
     # Iterate through each selected vertex
     for i in range(len(selVtxs)):
