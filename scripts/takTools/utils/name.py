@@ -63,7 +63,7 @@ def convertNiceComponentName(componentName):
         r'[\[\]]': ''
     }
 
-    for searchPattern, replaceCharacter in replaceInfo.iteritems():
+    for searchPattern, replaceCharacter in replaceInfo.items():
         componentName = re.sub(searchPattern, replaceCharacter, componentName)
 
     return componentName

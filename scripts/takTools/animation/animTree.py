@@ -131,7 +131,7 @@ class UI(object):
         return hierarchyInfo
 
     def reParentBranches(self, hierarchyInfo):
-        for branch, parent in hierarchyInfo.iteritems():
+        for branch, parent in hierarchyInfo.items():
             parent|branch
 
     def createExpressions(self, controller, control, rootJoints):

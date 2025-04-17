@@ -350,7 +350,7 @@ def rebuildJhHairChainDynamic(solver, mainCtrl, globalScaleCtrl):
         ('mass',1.0),
         ('damp',0.25),
         ('drag',0.1)])
-    for dynAttr, defaultVal in dynAttrsInfo.iteritems():
+    for dynAttr, defaultVal in dynAttrsInfo.items():
         mainCtrl.addAttr(dynAttr, attributeType='double', keyable=True, defaultValue=defaultVal)
         mainCtrl.attr(dynAttr) >> hairSystem.attr(dynAttr)
 
