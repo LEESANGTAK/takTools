@@ -116,3 +116,9 @@ nameCommand
 	-command ("toggleVertexColor")
 	toggleVertexColorNameCommand;
 
+nameCommand
+	-annotation "ToggleColorFeedbackNameCommand"
+	-sourceType "mel"
+	-command ("ToggleColorFeedback")
+	ToggleColorFeedbackNameCommand;
+

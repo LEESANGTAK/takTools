@@ -853,7 +853,8 @@ Shift + 3 + LMB: Rigging Marking Menu
 Shift + 4 + LMB: Skinning Marking Menu
 
 # Display
-Alt + C: Toggle Color Feedback
+Alt + C: Toggle Vertex Color
+Alt + F: Toggle Color Feedback
 Alt + W: Toggle Wireframe on Shaded
 
 # Selection

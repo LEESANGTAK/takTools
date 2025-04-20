@@ -311,6 +311,12 @@ nameCommand
 	-command ("toggleVertexColor")
 	toggleVertexColorNameCommand;
 
+nameCommand
+	-annotation "ToggleColorFeedbackNameCommand"
+	-sourceType "mel"
+	-command ("ToggleColorFeedback")
+	ToggleColorFeedbackNameCommand;
+
 //
 // The user hotkeys
 //
@@ -339,11 +345,13 @@ hotkey -keyShortcut "z" -alt -sht -name ("GoToBindPoseNameCommand");
 hotkey -keyShortcut "x" -alt -sht -name ("toggleDeformersNameCommand");
 hotkey -keyShortcut "c" -ctl -sht -name ("CreateCameraFromViewNameCommand");
 hotkey -keyShortcut "d" -ctl -alt -name ("");
+hotkey -keyShortcut "c" -alt -name ("toggleVertexColorNameCommand");
 hotkey -keyShortcut "F8" -name ("SelectToggleModeNameCommand");
 hotkey -keyShortcut "$" -name ("Tak_Skin_MarkingMenu_PressNameCommand");
 hotkey -keyShortcut "v" -ctl -name ("");
 hotkey -keyShortcut "$" -releaseName ("Tak_Skin_MarkingMenu_ReleaseNameCommand");
-hotkey -keyShortcut "v" -alt -name ("toggleVertexColorNameCommand");
+hotkey -keyShortcut "f" -alt -name ("ToggleColorFeedbackNameCommand");
+hotkey -keyShortcut "v" -alt -name ("");
 hotkey -keyShortcut "f" -alt -sht -name ("");
 hotkey -keyShortcut "c" -alt -sht -name ("createJointOnCenterNameCommand");
 hotkey -keyShortcut "c" -ctl -name ("");
