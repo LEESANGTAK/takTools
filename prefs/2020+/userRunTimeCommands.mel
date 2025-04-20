@@ -1,4 +1,4 @@
-//Maya Preference 2024 (Release 1)
+//Maya Preference 2023 (Release 1)
 //
 //
 
@@ -196,4 +196,19 @@ runTimeCommand
 	-commandLanguage "python"
 	-command ("objMode = cmds.selectMode(q=True, object=True)\nif not objMode:\n    cmds.selectMode(object=True)\nelse:\n    cmds.selectMode(component=True)\n")
 	toggleComponentMode;
+
+runTimeCommand
+	-label ""
+	-annotation "Toggle vertex color display for selected meshes."
+	-longAnnotation ""
+	-category "Custom Scripts.Display"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("sels = cmds.ls(sl=True)\nmeshes = cmds.filterExpand(sels, sm=12)\nfor mesh in meshes:\n    curVtxColorState = cmds.getAttr(mesh+'.displayColors')\n    cmds.setAttr(mesh+'.displayColors', not curVtxColorState)")
+	toggleVertexColor;
 

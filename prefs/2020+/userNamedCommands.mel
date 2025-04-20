@@ -1,4 +1,4 @@
-//Maya Preference 2024 (Release 1)
+//Maya Preference 2023 (Release 1)
 //
 //
 
@@ -109,4 +109,10 @@ nameCommand
 	-sourceType "mel"
 	-command ("toggleComponentMode")
 	toggleComponentModeNameCommand;
+
+nameCommand
+	-annotation "toggleVertexColorNameCommand"
+	-sourceType "mel"
+	-command ("toggleVertexColor")
+	toggleVertexColorNameCommand;
 
