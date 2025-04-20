@@ -64,6 +64,8 @@ def UI():
     cmds.text('scaleCnstText', label = 'Scale Constraint: ', align = 'right')
     cmds.checkBox('scaleCnstChkBox', label = '', value = False, cc = scaleCnstChkBokCC)
 
+    cmds.text('udCnntText', label = 'User Define Connect: ', align = 'right')
+    cmds.checkBox('udCnntChkBox', label = '', value = True)
     cmds.text('trnsCnntText', label = 'translate Connect: ', align = 'right')
     cmds.checkBox('trnsCnntChkBox', label = '', value = False, cc = trnsCnntChkBokCC)
     cmds.text('roCnntText', label = 'Rotate Connect: ', align = 'right')
@@ -72,13 +74,13 @@ def UI():
     cmds.checkBox('scaleCnntChkBox', label = '', value = True, cc = scaleCnntChkBokCC)
 
     cmds.text('hierText', label = 'Match Hierarchy: ', align = 'right')
-    cmds.checkBox('hierChkBox', label = '', value = True)
+    cmds.checkBox('hierChkBox', label = '', value = False)
     cmds.text('roOdText', label = 'Match Rotation Order: ', align = 'right')
     cmds.checkBox('roOdChkBox', label = '', value = True)
     cmds.text('matchSpaceText', label = 'Match Zero Group: ', align = 'right', ann='It is useful when zero group scaleX has -1 value.')
-    cmds.checkBox('matchSpaceChkBox', label = '', value = False)
+    cmds.checkBox('matchSpaceChkBox', label = '', value = True)
     cmds.text('matchLimitText', label = 'Match Limit: ', align = 'right')
-    cmds.checkBox('matchLimitChkBox', label = '', value = False)
+    cmds.checkBox('matchLimitChkBox', label = '', value = True)
 
     cmds.checkBox('spaceGrpChkBox', label='Zero Group', value=True)
     cmds.checkBox('autoGrpChkBox', label='Auto Group', value=False)
@@ -89,7 +91,7 @@ def UI():
                     attachForm = [('trgText', 'left', 5), ('trgTexScrLis', 'top', 5), ('addButton', 'right', 5), ('addButton', 'top', 5), ('delButton', 'right', 5), ('prntCnstText', 'left', 5), ('hierText', 'left', 5)],
                     attachControl = [('trgTexScrLis', 'left', 5, 'trgText'), ('trgTexScrLis', 'right', 5, 'addButton'), ('delButton', 'top', 5, 'addButton'),
                                      ('prntCnstText', 'top', 5, 'trgTexScrLis'), ('prntCnstChkBox', 'left', 5, 'prntCnstText'), ('prntCnstChkBox', 'top', 5, 'trgTexScrLis'), ('pntCnstText', 'left', 20, 'prntCnstChkBox'), ('pntCnstText', 'top', 5, 'trgTexScrLis'), ('pntCnstChkBox', 'left', 5, 'pntCnstText'), ('pntCnstChkBox', 'top', 5, 'trgTexScrLis'), ('oriCnstText', 'left', 20, 'pntCnstChkBox'), ('oriCnstText', 'top', 5, 'trgTexScrLis'), ('oriCnstChkBox', 'left', 5, 'oriCnstText'), ('oriCnstChkBox', 'top', 5, 'trgTexScrLis'), ('scaleCnstText', 'left', 20, 'oriCnstChkBox'), ('scaleCnstText', 'top', 5, 'trgTexScrLis'), ('scaleCnstChkBox', 'left', 5, 'scaleCnstText'), ('scaleCnstChkBox', 'top', 5, 'trgTexScrLis'),
-                                     ('trnsCnntText', 'top', 5, 'prntCnstText'), ('trnsCnntText', 'left', -85, 'pntCnstText'), ('trnsCnntChkBox', 'left', 5, 'trnsCnntText'), ('trnsCnntChkBox', 'top', 5, 'prntCnstText'), ('roCnntText', 'left', 20, 'trnsCnntChkBox'), ('roCnntText', 'top', 5, 'prntCnstText'), ('roCnntChkBox', 'left', 5, 'roCnntText'), ('roCnntChkBox', 'top', 5, 'prntCnstText'), ('scaleCnntText', 'left', 20, 'roCnntChkBox'), ('scaleCnntText', 'top', 5, 'prntCnstText'), ('scaleCnntChkBox', 'left', 5, 'scaleCnntText'), ('scaleCnntChkBox', 'top', 5, 'prntCnstText'),
+                                     ('udCnntText', 'top', 5, 'prntCnstText'), ('udCnntChkBox', 'top', 5, 'prntCnstChkBox'), ('udCnntChkBox', 'left', 5, 'udCnntText'), ('trnsCnntText', 'top', 5, 'prntCnstText'), ('trnsCnntText', 'left', -85, 'pntCnstText'), ('trnsCnntChkBox', 'left', 5, 'trnsCnntText'), ('trnsCnntChkBox', 'top', 5, 'prntCnstText'), ('roCnntText', 'left', 20, 'trnsCnntChkBox'), ('roCnntText', 'top', 5, 'prntCnstText'), ('roCnntChkBox', 'left', 5, 'roCnntText'), ('roCnntChkBox', 'top', 5, 'prntCnstText'), ('scaleCnntText', 'left', 20, 'roCnntChkBox'), ('scaleCnntText', 'top', 5, 'prntCnstText'), ('scaleCnntChkBox', 'left', 5, 'scaleCnntText'), ('scaleCnntChkBox', 'top', 5, 'prntCnstText'),
                                      ('hierText', 'top', 5, 'trnsCnntText'), ('hierChkBox', 'left', 5, 'hierText'), ('hierChkBox', 'top', 5, 'trnsCnntText'), ('roOdText', 'left', 20, 'hierChkBox'), ('roOdText', 'top', 5, 'trnsCnntText'), ('roOdChkBox', 'left', 5, 'roOdText'), ('roOdChkBox', 'top', 5, 'trnsCnntText'), ('matchSpaceText', 'left', 20, 'roOdChkBox'), ('matchSpaceText', 'top', 5, 'trnsCnntText'), ('matchSpaceChkBox', 'left', 5, 'matchSpaceText'), ('matchSpaceChkBox', 'top', 5, 'trnsCnntText'), ('matchLimitText', 'left', 20, 'matchSpaceChkBox'), ('matchLimitText', 'top', 5, 'trnsCnntText'), ('matchLimitChkBox', 'left', 5, 'matchLimitText'), ('matchLimitChkBox', 'top', 5, 'trnsCnntText'),
                                      ('spaceGrpChkBox', 'left', 5, 'prntCnstText'), ('spaceGrpChkBox', 'top', 5, 'hierChkBox'), ('autoGrpChkBox', 'left', 5, 'spaceGrpChkBox'), ('autoGrpChkBox', 'top', 5, 'hierChkBox'), ('extraGrpChkBox', 'left', 5, 'autoGrpChkBox'), ('extraGrpChkBox', 'top', 5, 'hierChkBox')],
                     attachPosition = [])
@@ -203,6 +205,7 @@ def app(*args):
     scaleCnstOpt = cmds.checkBox('scaleCnstChkBox', q = True, v = True)
 
     # get connect option
+    udCnntOpt = cmds.checkBox('udCnntChkBox', q = True, v = True)
     trnsCnntOpt = cmds.checkBox('trnsCnntChkBox', q = True, v = True)
     roCnntOpt = cmds.checkBox('roCnntChkBox', q = True, v = True)
     scaleCnntOpt = cmds.checkBox('scaleCnntChkBox', q = True, v = True)
@@ -273,6 +276,35 @@ def app(*args):
             cmds.scaleConstraint(ctrl, trg, mo = False)
 
         # Connect
+        if udCnntOpt:
+            udAttrs = cmds.listAttr(trg, ud = True)
+            for udAttr in udAttrs:
+                attrType = cmds.attributeQuery(udAttr, node=trg, attributeType=True)
+                if attrType == 'enum':
+                    enums = cmds.attributeQuery(udAttr, node=trg, listEnum=True)
+                else:
+                    min = None
+                    max = None
+                    if cmds.attributeQuery(udAttr, node=trg, minExists=True):
+                        min = cmds.attributeQuery(udAttr, node=trg, min=True)[0]
+                    if cmds.attributeQuery(udAttr, node=trg, maxExists=True):
+                        max = cmds.attributeQuery(udAttr, node=trg, max=True)[0]
+                    dv = cmds.attributeQuery(udAttr, node=trg, listDefault=True)[0]
+                cv = cmds.getAttr('{}.{}'.format(trg, udAttr))
+
+                if attrType == 'enum':
+                    cmds.addAttr(ctrl, ln = udAttr, at = attrType, enumName = enums[0], keyable=True)
+                else:
+                    cmds.addAttr(ctrl, ln = udAttr, at = attrType, dv = dv, keyable=True)
+                    if min != None:
+                        cmds.addAttr('{}.{}'.format(ctrl, udAttr), e=True, min = min)
+                    if max != None:
+                        cmds.addAttr('{}.{}'.format(ctrl, udAttr), e=True, max = max)
+
+                cmds.setAttr('{}.{}'.format(ctrl, udAttr), cv)
+
+                cmds.connectAttr('{}.{}'.format(ctrl, udAttr), trg + '.' + udAttr, f = True)
+
         channels = ['X', 'Y', 'Z']
         if trnsCnntOpt:
             for channel in channels:
