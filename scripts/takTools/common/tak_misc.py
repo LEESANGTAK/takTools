@@ -2733,11 +2733,12 @@ def setupSoftModCtrl(geometry=None):
 
     geometry = pm.PyNode(geometry)
 
-    count = len(pm.ls(type='softMod'))
+    pm.select(geometry, r=True)
+    softMod, softModHandle = pm.softMod(falloffMode=1)
 
-    softModCtrl = control.Controller(name='%s_softMod%d_ctrl' % (geometry.name(), count), shape='sphere')
+    softModCtrl = control.Controller(name='%s_%s_ctrl' % (geometry.name(), softMod), shape='sphere')
     softModCtrl.createGroups(space=True, extra=True, auto=False)
-    softModSlideCtrl = control.Controller(name='%s_softMod%d_slideCtrl' % (geometry.name(), count), shape='circleY')
+    softModSlideCtrl = control.Controller(name='%s_%s_slideCtrl' % (geometry.name(), softMod), shape='circleY')
     softModSlideCtrl.setScale(2)
     softModSlideCtrl.createGroups(space=True, extra=False, auto=False)
     pm.parent(softModCtrl.spaceGrp, softModSlideCtrl.name)
@@ -2745,17 +2746,14 @@ def setupSoftModCtrl(geometry=None):
     geoBB = geometry.getBoundingBox(space='world')
     softModSlideCtrl.spaceGrp.setTranslation(geoBB.center(), space='world')
 
-    pm.select(geometry, r=True)
-    softMod = pm.softMod(weightedNode=[softModSlideCtrl.name, softModSlideCtrl.name])[0]
     pm.softMod(softMod, e=True, weightedNode=[softModCtrl.name, softModCtrl.name])
 
-    # softModSet = softMod.connections(type='objectSet')[0]
-    # pm.sets(softModSet, add=geometry)
-
-    deMatrix = pm.createNode('decomposeMatrix', n='%s%d_deMatrix' % (softModSlideCtrl.name, count))
+    deMatrix = pm.createNode('decomposeMatrix', n='%s_%s_deMatrix' % (softModSlideCtrl.name, softMod))
 
     # Add attributes
-    softModCtrl.transform.addAttr('falloff', at='float', min=0, keyable=True)
+    softModCtrl.transform.addAttr('interpolation', at='enum', en='None:Linear:Smooth:Spline:', dv=3, keyable=True)
+    softModCtrl.transform.addAttr('falloff', at='float', min=0, dv=10, keyable=True)
+    softModCtrl.transform.addAttr('stiffness', at='float', min=0, max=10, keyable=True)
 
     # Connect attributes
     softModSlideCtrl.transform.worldMatrix >> deMatrix.inputMatrix
@@ -2763,7 +2761,17 @@ def setupSoftModCtrl(geometry=None):
     softModSlideCtrl.transform.worldMatrix >> softMod.softModXforms.preMatrix
     softModSlideCtrl.transform.worldInverseMatrix >> softMod.softModXforms.postMatrix
     softModCtrl.transform.matrix >> softMod.softModXforms.weightedMatrix
+    softModCtrl.transform.interpolation >> softMod.falloffCurve[0].falloffCurve_Interp
+
+    uc = pm.createNode('unitConversion', n='%s_stiffness_uc' % (softModCtrl.name))
+    uc.setAttr('conversionFactor', 0.1)
+    softModCtrl.transform.stiffness >> uc.input
+    uc.output >> softMod.falloffCurve[0].falloffCurve_Position
+
     softModCtrl.transform.falloff >> softMod.falloffRadius
+
+    pm.delete('%sHandle' % (softMod))
+    pm.delete('%sHandleShape' % (softMod))
 
 
 def createClusters():
