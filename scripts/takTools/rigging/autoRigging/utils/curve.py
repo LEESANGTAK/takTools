@@ -32,15 +32,15 @@ def combineCurves(curves):
 def parentCurveShape(sourceCrv, targetCrv):
     cvPositionDict = {}
     for cv in sourceCrv.cv:
-        cvPositionDict[cv] = cv.getPosition(space='world')
+        cvPositionDict[str(cv)] = cv.getPosition(space='world')
 
     if isinstance(sourceCrv, pm.nodetypes.Transform):
         sourceCrv.getShape().setParent(targetCrv, shape=True, relative=True)
     else:
         pm.parent(sourceCrv, targetCrv, shape=True, relative=True)
 
-    for cv in cvPositionDict:
-        cv.setPosition(cvPositionDict.get(cv), space='world')
+    for cv in sourceCrv.cv:
+        cv.setPosition(cvPositionDict.get(str(cv)), space='world')
 
     targetCrv.updateCurve()
 
