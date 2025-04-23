@@ -227,6 +227,18 @@ def delWin(*args):
     cmds.deleteUI('win')
 
 
+
+# parent constraint function
+def parent(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
+    for driver in drivers:
+        for driven in drivens:
+            if len(drivers) > 1:
+                # Constraint with space locator to prevent the driven object from flipping.
+                spaceLoc = setupDrivenMatchedLocator(driver, driven)
+                cmds.parentConstraint(spaceLoc, driven, mo = mainOffOpt, skip = skipAxesLs)
+            else:
+                cmds.parentConstraint(driver, driven, mo = mainOffOpt, skip = skipAxesLs)
+
 # point constraint function
 def point(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
     for driver in drivers:
@@ -239,13 +251,8 @@ def orient(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
     for driver in drivers:
         for driven in drivens:
             if len(drivers) > 1:
-                # Create space locator that match the driven object.
-                spaceLoc = cmds.spaceLocator(n = '{}_{}_space'.format(driven, driver))[0]
-                spaceLocZeroGrp = cmds.group(spaceLoc, n = '{}_zero'.format(spaceLoc))
-                cmds.matchTransform(spaceLocZeroGrp, driven)
-                cmds.parentConstraint(driver, spaceLocZeroGrp, mo = True)
-
                 # Constraint with space locator to prevent the driven object from flipping.
+                spaceLoc = setupDrivenMatchedLocator(driver, driven)
                 cmds.orientConstraint(spaceLoc, driven, mo = mainOffOpt, skip = skipAxesLs)
             else:
                 cmds.orientConstraint(driver, driven, mo = mainOffOpt, skip = skipAxesLs)
@@ -256,13 +263,6 @@ def scale(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
     for driver in drivers:
         for driven in drivens:
             cmds.scaleConstraint(driver, driven, mo = mainOffOpt, skip = skipAxesLs)
-
-
-# parent constraint function
-def parent(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
-    for driver in drivers:
-        for driven in drivens:
-            cmds.parentConstraint(driver, driven, mo = mainOffOpt, st = skipAxesLs, sr = skipAxesLs)
 
 
 # parent constraint function
@@ -289,6 +289,14 @@ def aim(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
 
             if wrldUpType == 'None':
                 cmds.aimConstraint(driver, driven, mo = mainOffOpt, skip = skipAxesLs, aimVector = aimVec, upVector = upVec, worldUpType = "none")
+
+
+def setupDrivenMatchedLocator(driver, driven):
+    spaceLoc = cmds.spaceLocator(n = '{}_{}_space'.format(driven, driver))[0]
+    spaceLocZeroGrp = cmds.group(spaceLoc, n = '{}_zero'.format(spaceLoc))
+    cmds.matchTransform(spaceLocZeroGrp, driven)
+    cmds.parentConstraint(driver, spaceLocZeroGrp, mo = True)
+    return spaceLoc
 
 
 # define the function when item in textScrollList selected
