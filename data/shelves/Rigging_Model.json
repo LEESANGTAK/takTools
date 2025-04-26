@@ -165,6 +165,15 @@
             "command": "SetMeshSmoothTargetTool",
             "sourceType": "mel",
             "noDefaultPopup": true
+        },
+        {
+            "label": "Color Set Editor",
+            "annotation": "Color Set Editor",
+            "image1": "polyColorSetEditor.png",
+            "imageOverlayLabel": "",
+            "command": "OpenColorSetEditor",
+            "sourceType": "mel",
+            "noDefaultPopup": true
         }
     ]
 }

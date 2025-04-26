@@ -201,6 +201,15 @@
             "command": "source \"js_rotationOrderWin.mel\";\njs_rotationOrderWin();",
             "sourceType": "mel",
             "noDefaultPopup": true
+        },
+        {
+            "label": "Evaluation Toolkit",
+            "annotation": "Evaluation Toolkit",
+            "image1": "searchDown.png",
+            "imageOverlayLabel": "Profile",
+            "command": "EvaluationToolkit",
+            "sourceType": "mel",
+            "noDefaultPopup": true
         }
     ]
 }
