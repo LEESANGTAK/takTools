@@ -278,32 +278,33 @@ def app(*args):
         # Connect
         if udCnntOpt:
             udAttrs = cmds.listAttr(trg, ud = True)
-            for udAttr in udAttrs:
-                attrType = cmds.attributeQuery(udAttr, node=trg, attributeType=True)
-                if attrType == 'enum':
-                    enums = cmds.attributeQuery(udAttr, node=trg, listEnum=True)
-                else:
-                    min = None
-                    max = None
-                    if cmds.attributeQuery(udAttr, node=trg, minExists=True):
-                        min = cmds.attributeQuery(udAttr, node=trg, min=True)[0]
-                    if cmds.attributeQuery(udAttr, node=trg, maxExists=True):
-                        max = cmds.attributeQuery(udAttr, node=trg, max=True)[0]
-                    dv = cmds.attributeQuery(udAttr, node=trg, listDefault=True)[0]
-                cv = cmds.getAttr('{}.{}'.format(trg, udAttr))
+            if udAttrs:
+                for udAttr in udAttrs:
+                    attrType = cmds.attributeQuery(udAttr, node=trg, attributeType=True)
+                    if attrType == 'enum':
+                        enums = cmds.attributeQuery(udAttr, node=trg, listEnum=True)
+                    else:
+                        min = None
+                        max = None
+                        if cmds.attributeQuery(udAttr, node=trg, minExists=True):
+                            min = cmds.attributeQuery(udAttr, node=trg, min=True)[0]
+                        if cmds.attributeQuery(udAttr, node=trg, maxExists=True):
+                            max = cmds.attributeQuery(udAttr, node=trg, max=True)[0]
+                        dv = cmds.attributeQuery(udAttr, node=trg, listDefault=True)[0]
+                    cv = cmds.getAttr('{}.{}'.format(trg, udAttr))
 
-                if attrType == 'enum':
-                    cmds.addAttr(ctrl, ln = udAttr, at = attrType, enumName = enums[0], keyable=True)
-                else:
-                    cmds.addAttr(ctrl, ln = udAttr, at = attrType, dv = dv, keyable=True)
-                    if min != None:
-                        cmds.addAttr('{}.{}'.format(ctrl, udAttr), e=True, min = min)
-                    if max != None:
-                        cmds.addAttr('{}.{}'.format(ctrl, udAttr), e=True, max = max)
+                    if attrType == 'enum':
+                        cmds.addAttr(ctrl, ln = udAttr, at = attrType, enumName = enums[0], keyable=True)
+                    else:
+                        cmds.addAttr(ctrl, ln = udAttr, at = attrType, dv = dv, keyable=True)
+                        if min != None:
+                            cmds.addAttr('{}.{}'.format(ctrl, udAttr), e=True, min = min)
+                        if max != None:
+                            cmds.addAttr('{}.{}'.format(ctrl, udAttr), e=True, max = max)
 
-                cmds.setAttr('{}.{}'.format(ctrl, udAttr), cv)
+                    cmds.setAttr('{}.{}'.format(ctrl, udAttr), cv)
 
-                cmds.connectAttr('{}.{}'.format(ctrl, udAttr), trg + '.' + udAttr, f = True)
+                    cmds.connectAttr('{}.{}'.format(ctrl, udAttr), trg + '.' + udAttr, f = True)
 
         channels = ['X', 'Y', 'Z']
         if trnsCnntOpt:
