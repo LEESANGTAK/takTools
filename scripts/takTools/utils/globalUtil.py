@@ -257,3 +257,40 @@ def getDeformerWeights(deformerName, mesh, valueRange=[0.0, 1.0]):
             weightsInfo[vtxID] = w
 
     return weightsInfo
+
+
+def duplicateRenameSelectionGUI():
+    cmds.window('dupRenameSelWin', title="Duplicate and Rename Selection", w=300, h=150, mnb=False, mxb=False)
+    cmds.columnLayout(adjustableColumn=True)
+    cmds.textFieldGrp('PrefixTxtFldGrp', label='Prefix: ', cw=[(1, 50), (2, 100)])
+    cmds.textFieldGrp('SuffixTxtFldGrp', label='Suffix: ', cw=[(1, 50), (2, 100)])
+    cmds.textFieldGrp('SearchTxtFldGrp', label='Search: ', cw=[(1, 50), (2, 100)])
+    cmds.textFieldGrp('ReplaceTxtFldGrp', label='Replace: ', cw=[(1, 50), (2, 100)])
+    cmds.button(label='Duplicate and Rename', command=duplicateRenameSelectionCallback)
+    cmds.window('dupRenameSelWin', e=True, w=10, h=10)
+    cmds.showWindow('dupRenameSelWin')
+
+
+def duplicateRenameSelectionCallback(*args):
+    prefix = cmds.textFieldGrp('PrefixTxtFldGrp', q=True, text=True)
+    suffix = cmds.textFieldGrp('SuffixTxtFldGrp', q=True, text=True)
+    search = cmds.textFieldGrp('SearchTxtFldGrp', q=True, text=True)
+    replace = cmds.textFieldGrp('ReplaceTxtFldGrp', q=True, text=True)
+
+    duplicateRenameSelection(prefix=prefix, suffix=suffix, search=search, replace=replace)
+
+
+def duplicateRenameSelection(prefix='', suffix='', search='', replace=''):
+    sels = cmds.ls(sl=True, long=True)
+    dupSels = cmds.duplicate(sels, rc=True, rr=True, f=True)
+    for orig, dup in zip(sels, dupSels):
+        origNodes = cmds.ls(orig, dag=True, long=True)
+        dupNodes = cmds.ls(dup, dag=True, long=True)
+
+        sortedOrigNodes = sorted(origNodes, key=lambda item: item.count('|'), reverse=True)
+        sortedDupNodes = sorted(dupNodes, key=lambda item: item.count('|'), reverse=True)
+
+        for origNode, dupNode in zip(sortedOrigNodes, sortedDupNodes):
+            origBaseName = origNode.rsplit('|', 1)[1]
+            origBaseNewName = prefix + origBaseName.replace(search, replace) + suffix
+            cmds.rename(dupNode, origBaseNewName)

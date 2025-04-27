@@ -317,7 +317,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem25;
+        menuEditorMenuItem11;
 
     menuItem
         -label "Controller" 
@@ -398,7 +398,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem28;
+        menuEditorMenuItem15;
 
     menuItem
         -label "Multi Constraint" 
@@ -460,7 +460,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem31;
+        menuEditorMenuItem16;
 
     menuItem
         -label "separator" 
@@ -583,6 +583,25 @@
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem21;
+
+    menuItem
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from imp import reload\");\npython(\"from takTools.utils import globalUtil as gu;reload(gu)\");\npython(\"gu.duplicateRenameSelectionGUI()\");\n" 
+        -optionBox 1
+        -enable 1
+        -visible 0
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 0
+        -echoCommand 0
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem25;
 
     menuItem
         -label "Duplicate Parent Only" 
