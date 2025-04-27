@@ -130,11 +130,11 @@
         menuEditorMenuItem4;
 
     menuItem
-        -label "Cleanup Transform" 
+        -label "Delete Constraints" 
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.cleanupTransform()\");" 
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.deleteConstraints()\");" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -174,7 +174,7 @@
         menuEditorMenuItem10;
 
     menuItem
-        -label "Cleanup Mesh" 
+        -label "Clean Up" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -317,7 +317,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem11;
+        menuEditorMenuItem28;
 
     menuItem
         -label "Controller" 
@@ -398,7 +398,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem15;
+        menuEditorMenuItem31;
 
     menuItem
         -label "Multi Constraint" 
@@ -460,7 +460,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem16;
+        menuEditorMenuItem33;
 
     menuItem
         -label "separator" 
@@ -585,6 +585,7 @@
         menuEditorMenuItem21;
 
     menuItem
+        -label "menuEditorMenuItem25" 
         -divider 0
         -subMenu 0
         -tearOff 0
@@ -598,10 +599,10 @@
         -enableCommandRepeat 0
         -echoCommand 0
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem25;
+        menuEditorMenuItem34;
 
     menuItem
         -label "Duplicate Parent Only" 

@@ -2466,23 +2466,12 @@ def reduceMesh():
     cmds.select(selMeshLs, r=True)
 
 
-def cleanupTransform():
+def deleteConstraints():
     sels = pm.selected()
 
     # Remove constraints
     for sel in sels:
         pm.delete(sel.connections(d=False, type='constraint'))
-
-    # Remove input connections
-    for sel in sels:
-        for at in ['translate', 'rotate', 'scale']:
-            sel.attr(at).disconnect(inputs=True, outputs=False)
-            for axis in ['X', 'Y', 'Z']:
-                sel.attr(at+axis).disconnect(inputs=True, outputs=False)
-        try:
-            sel.scale.set(1, 1, 1)
-        except:
-            pass
 
 
 def prntLoc():
@@ -2680,13 +2669,21 @@ def copyUvRiggedMesh(source, target):
         tak_misc.copyUvRiggedMesh(src, trg)
     """
     targetShapes = target.getChildren(shapes=True)
-    if len(targetShapes) > 2:
-        pm.error('Target has too many shapes')
-    targetOrigShape = [shape for shape in targetShapes if shape.isIntermediate()][0]
-    targetOrigShape.intermediateObject.set(False)
-    pm.transferAttributes(source, targetOrigShape, transferUVs=2, transferColors=0, sampleSpace=5)
-    pm.delete(targetOrigShape, ch=True)
-    targetOrigShape.intermediateObject.set(True)
+    targetOrigShapes = [shape for shape in targetShapes if shape.isIntermediate()]
+    for targetOrigShape in targetOrigShapes:
+        targetOrigShape.intermediateObject.set(False)
+        pm.transferAttributes(
+            source,
+            targetOrigShape,
+            transferPositions=0,
+            transferNormals=0,
+            transferUVs=2,
+            transferColors=0,
+            sampleSpace=0,
+            searchMethod=3
+        )
+        pm.delete(targetOrigShape, ch=True)
+        targetOrigShape.intermediateObject.set(True)
 
 
 def saveSetsInfo(filePath):
