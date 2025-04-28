@@ -167,7 +167,10 @@ def duplicateSkinMesh():
     if cmds.nodeType(sels[0]) == "transform":
         for sel in sels:
             dupMesh = cmds.duplicate(sel, n="%s_skin" % sel)[0]
-            cmds.parent(dupMesh, w=True)
+            try:
+                cmds.parent(dupMesh, w=True)
+            except:
+                pass
             copySkin(sel, dupMesh)
     else:
         dupMesh = meshUtil.duplicateFace()
