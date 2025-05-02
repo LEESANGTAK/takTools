@@ -36,7 +36,8 @@ def UI():
         v3=False,
         v4=False
     )
-    cmds.checkBox('mirrorXChkbox', label='mirrorX')
+    cmds.checkBox('mirrorWorldXChkbox', label='Mirror World X')
+    cmds.checkBox('mirrorLocalXChkbox', label='Mirror Local X')
     cmds.button('matchButton', label='Match!', c=match, h=50)
 
     cmds.window('mtWin', e=True, w=150, h=10)
@@ -52,10 +53,11 @@ def match(*args):
     rotateOpt = cmds.checkBoxGrp('optChkGrp', q=True, v2=True)
     scaleOpt = cmds.checkBoxGrp('optChkGrp', q=True, v3=True)
     pivotOpt = cmds.checkBoxGrp('optChkGrp', q=True, v4=True)
-    mirror = cmds.checkBox('mirrorXChkbox', q=True, v=True)
+    mirrorWorldX = cmds.checkBox('mirrorWorldXChkbox', q=True, v=True)
+    mirrorLocalX = cmds.checkBox('mirrorLocalXChkbox', q=True, v=True)
 
     for srcTrsf in srcTrsfs:
-        if mirror:
+        if mirrorWorldX:
             tempLoc = pm.spaceLocator()
             pm.matchTransform(tempLoc, trgTrsf)
 
@@ -71,5 +73,24 @@ def match(*args):
 
             pm.matchTransform(srcTrsf, tempLoc)
             pm.delete(tempLoc)
+        elif mirrorLocalX:
+            tempLoc = pm.spaceLocator()
+            pm.matchTransform(tempLoc, trgTrsf)
+
+            tmpTrgLocWsMtx = pm.xform(tempLoc, q=True, matrix=True, ws=True)
+            mirrorXMatrix = [
+                -1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ]
+            tmpSrcWsMtx = pm.datatypes.Matrix(tmpTrgLocWsMtx) * pm.datatypes.Matrix(mirrorXMatrix)
+            pm.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
+
+            pm.matchTransform(srcTrsf, tempLoc)
+            pm.delete(tempLoc)
+
+            pm.setAttr('{}.scale'.format(srcTrsf), 1, 1, 1)
+            pm.setAttr('{}.rotate'.format(srcTrsf), trgTrsf.rotateX.get(), -trgTrsf.rotateY.get(), -trgTrsf.rotateZ.get())
         else:
             pm.matchTransform(srcTrsf, trgTrsf, pos=translateOpt, rot=rotateOpt, scl=scaleOpt, piv=pivotOpt)
