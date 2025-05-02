@@ -2064,7 +2064,7 @@ def addInfCopySkin(source=None, targets=None):
         sels = cmds.ls(os=True, fl=True)
 
         # Parse selections
-        components = cmds.filterExpand(sels, sm=[28, 31, 32, 34])
+        components = cmds.filterExpand(sels, sm=[28, 31, 32, 34])  # Filter components in a object set also
         geometries = cmds.filterExpand(sels, sm=[9, 10, 12])
 
         if components and len(geometries) == 1:  # When select components
@@ -2111,8 +2111,6 @@ def addInfCopySkin(source=None, targets=None):
             cmds.select(source, targets, r=True)
             cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
             trgSkinClsts.append(trgSkinClst)
-    elif cmds.objectType(targets[0]) == 'objectSet':
-        print('copy skin to sets')
     else:
         for trgSkinGeo in targets:
             trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
