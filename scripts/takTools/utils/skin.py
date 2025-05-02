@@ -159,6 +159,9 @@ def copySkinSets(sourceSkinMesh, targetSets):
 
 def copySkinOverlapVertices(sourceSkinMesh, targetMesh, searchDistance=0.001):
     overlapVtxs = meshUtil.getOverlapVertices(sourceSkinMesh, targetMesh, searchDistance)
+    if not overlapVtxs:
+        cmds.warning('No overlap vertices found between "{}" and "{}". Increase search distance then try again.'.format(sourceSkinMesh, targetMesh))
+        return
     copySkin(sourceSkinMesh, targetMesh, components=overlapVtxs)
 
 

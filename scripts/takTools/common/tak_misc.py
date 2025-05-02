@@ -2063,6 +2063,8 @@ def addInfCopySkin(source=None, targets=None):
     if not source:
         sels = cmds.ls(os=True, fl=True)
 
+        source = sels[0]
+
         # Parse selections
         components = cmds.filterExpand(sels, sm=[28, 31, 32, 34])  # Filter components in a object set also
         geometries = cmds.filterExpand(sels, sm=[9, 10, 12])
@@ -2071,8 +2073,19 @@ def addInfCopySkin(source=None, targets=None):
             source = geometries[0]
             targets = components
         elif len(geometries) > 1:  # When select geometries only
-            source = sels[0]
             targets = sels[1:]
+
+    # Check if source has "targets" attribute
+    if cmds.objExists('%s.targets' % source):
+        targets = eval(cmds.getAttr('%s.targets' % source))
+        # Parse targets
+        components = cmds.filterExpand(targets, sm=[28, 31, 32, 34])  # Filter components in a object set also
+        geometries = cmds.filterExpand(targets, sm=[9, 10, 12])
+        if len(sels) > 1:
+            cmds.confirmDialog(title='Info', message='Source geometry has "targets" attribute.\nYou can copy skin with just a selected source mesh.')
+    else:
+        cmds.addAttr(source, ln='targets', dt='string')
+        cmds.setAttr('%s.targets' % source, str(targets), type='string')
 
     if not isinstance(targets, list):
         cmds.error('Targets should be a list')
