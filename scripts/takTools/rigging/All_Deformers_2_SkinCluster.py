@@ -101,10 +101,9 @@ def convert(*args):
     skinClst = getSkinCluster(geo)
     # If mesh has no skin cluster bind with a 'hold_jnt'
     if not skinClst:
-        if cmds.objExists(HOLD_JOINT_NAME):
-            cmds.delete(HOLD_JOINT_NAME)
-        cmds.select(cl=1)
-        cmds.joint(n=HOLD_JOINT_NAME)
+        if not cmds.objExists(HOLD_JOINT_NAME):
+            cmds.joint(n=HOLD_JOINT_NAME)
+        cmds.select(HOLD_JOINT_NAME, r=True)
         cmds.select(geo, add=1)
         cmds.SmoothBindSkin()
         skinClst = getSkinCluster(geo)
