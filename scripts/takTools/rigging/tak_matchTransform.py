@@ -9,6 +9,7 @@ tak_matchTransform.UI()
 
 import maya.cmds as cmds
 import pymel.core as pm
+from maya.api import OpenMaya as om
 
 
 ROTATE_ORDER_INFO = {
@@ -47,7 +48,7 @@ def UI():
 def match(*args):
     sels = pm.selected()
     srcTrsfs = sels[0:-1]
-    trgTrsf = sels[-1]
+    target = sels[-1]
 
     translateOpt = cmds.checkBoxGrp('optChkGrp', q=True, v1=True)
     rotateOpt = cmds.checkBoxGrp('optChkGrp', q=True, v2=True)
@@ -56,41 +57,58 @@ def match(*args):
     mirrorWorldX = cmds.checkBox('mirrorWorldXChkbox', q=True, v=True)
     mirrorLocalX = cmds.checkBox('mirrorLocalXChkbox', q=True, v=True)
 
-    for srcTrsf in srcTrsfs:
-        if mirrorWorldX:
-            tempLoc = pm.spaceLocator()
-            pm.matchTransform(tempLoc, trgTrsf)
+    if pm.filterExpand(target, sm=12):  # check if target is a mesh node
+        # Match transform to the mesh using uv pin node
+        for srcTrsf in srcTrsfs:
+            pm.select(target, srcTrsf, r=True)
+            cmds.UVPin()
 
-            tmpTrgLocWsMtx = pm.xform(tempLoc, q=True, matrix=True, ws=True)
-            mirrorXMatrix = [
-                -1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]
-            tmpSrcWsMtx = pm.datatypes.Matrix(tmpTrgLocWsMtx) * pm.datatypes.Matrix(mirrorXMatrix)
-            pm.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
+        # Clean up the uv pin node
+        for srcTrsf in srcTrsfs:
+            uvPinPlug = cmds.listConnections(srcTrsf+'.offsetParentMatrix', plugs=True)[0]
+            offsetParentMtx = cmds.getAttr(srcTrsf+'.offsetParentMatrix')
+            cmds.xform(srcTrsf.name(), matrix=offsetParentMtx)
 
-            pm.matchTransform(srcTrsf, tempLoc)
-            pm.delete(tempLoc)
-        elif mirrorLocalX:
-            tempLoc = pm.spaceLocator()
-            pm.matchTransform(tempLoc, trgTrsf)
+            cmds.disconnectAttr(uvPinPlug, srcTrsf+'.offsetParentMatrix')
+            cmds.setAttr(srcTrsf+'.offsetParentMatrix', [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0], type='matrix')
+            cmds.delete(cmds.ls(uvPinPlug, objectsOnly=True))
 
-            tmpTrgLocWsMtx = pm.xform(tempLoc, q=True, matrix=True, ws=True)
-            mirrorXMatrix = [
-                -1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]
-            tmpSrcWsMtx = pm.datatypes.Matrix(tmpTrgLocWsMtx) * pm.datatypes.Matrix(mirrorXMatrix)
-            pm.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
+    else:  # check if target is a transform node
+        for srcTrsf in srcTrsfs:
+            if mirrorWorldX:
+                tempLoc = pm.spaceLocator()
+                pm.matchTransform(tempLoc, target)
 
-            pm.matchTransform(srcTrsf, tempLoc)
-            pm.delete(tempLoc)
+                tmpTrgLocWsMtx = pm.xform(tempLoc, q=True, matrix=True, ws=True)
+                mirrorXMatrix = [
+                    -1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1
+                ]
+                tmpSrcWsMtx = pm.datatypes.Matrix(tmpTrgLocWsMtx) * pm.datatypes.Matrix(mirrorXMatrix)
+                pm.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
 
-            pm.setAttr('{}.scale'.format(srcTrsf), 1, 1, 1)
-            pm.setAttr('{}.rotate'.format(srcTrsf), trgTrsf.rotateX.get(), -trgTrsf.rotateY.get(), -trgTrsf.rotateZ.get())
-        else:
-            pm.matchTransform(srcTrsf, trgTrsf, pos=translateOpt, rot=rotateOpt, scl=scaleOpt, piv=pivotOpt)
+                pm.matchTransform(srcTrsf, tempLoc)
+                pm.delete(tempLoc)
+            elif mirrorLocalX:
+                tempLoc = pm.spaceLocator()
+                pm.matchTransform(tempLoc, target)
+
+                tmpTrgLocWsMtx = pm.xform(tempLoc, q=True, matrix=True, ws=True)
+                mirrorXMatrix = [
+                    -1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1
+                ]
+                tmpSrcWsMtx = pm.datatypes.Matrix(tmpTrgLocWsMtx) * pm.datatypes.Matrix(mirrorXMatrix)
+                pm.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
+
+                pm.matchTransform(srcTrsf, tempLoc)
+                pm.delete(tempLoc)
+
+                pm.setAttr('{}.scale'.format(srcTrsf), 1, 1, 1)
+                pm.setAttr('{}.rotate'.format(srcTrsf), target.rotateX.get(), -target.rotateY.get(), -target.rotateZ.get())
+            else:
+                pm.matchTransform(srcTrsf, target, pos=translateOpt, rot=rotateOpt, scl=scaleOpt, piv=pivotOpt)
