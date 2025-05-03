@@ -2090,8 +2090,16 @@ def addInfCopySkin(source=None, targets=None):
     # Check if source has "targetComponents" attribute
     if cmds.objExists('%s.targetComponents' % source):
         targets = eval(cmds.getAttr('%s.targetComponents' % source))
+
         if len(sels) > 1:
+            if components:
+                unRegisteredTargetComponents = list(set(components) - set(targets))
+                targets = targets + unRegisteredTargetComponents
+                cmds.setAttr('%s.targetComponents' % source, str(targets), type='string')
             cmds.confirmDialog(title='Info', message='Source geometry has "targetComponents" attribute.\nYou can copy skin to components with just a selected source mesh.')
+
+        # Get components from targets that gets from a targetComponents attribute
+        components = cmds.filterExpand(targets, sm=[28, 31, 32, 34])  # Components that in a object set are filtered also
     else:  # Add "targetComponents" attribute to source geometry for the next time
         if components:
             cmds.addAttr(source, ln='targetComponents', dt='string')
