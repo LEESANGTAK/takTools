@@ -1387,7 +1387,8 @@ def editDfmMemberUI():
                             columnWidth=[(1, 60), (2, 100)],
                             bc=partial(tak_lib.loadSel, 'textFieldButtonGrp', 'dfmTxtFldBtnGrp'))
 
-    cmds.rowColumnLayout(numberOfColumns=2, columnWidth=[(1, 105), (2, 105)], columnSpacing=[(2, 5)])
+    cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1, 70), (2, 70), (3, 70)], columnSpacing=[(2, 5), (3, 5)])
+    cmds.button(label='Select', c=partial(editDfmMember, 'select'))
     cmds.button(label='Add', c=partial(editDfmMember, 'add'))
     cmds.button(label='Remove', c=partial(editDfmMember, 'remove'))
 
@@ -1396,21 +1397,31 @@ def editDfmMemberUI():
 
 
 def editDfmMember(mode, *args):
-    deformer = cmds.textFieldButtonGrp('dfmTxtFldBtnGrp', q=True, text=True)
+    deformerName = cmds.textFieldButtonGrp('dfmTxtFldBtnGrp', q=True, text=True)
+    sels = cmds.ls(sl=True, fl=True)
 
-    # Get deformer set
-    deformerObjSets = cmds.listConnections(deformer, s=False, d=True, type='objectSet')
-    if not deformerObjSets:
-        cmds.error('"{}" has no object set'.format(deformer))
-    elif len(deformerObjSets) > 1:
-        cmds.error('"{}" has more than one object sets'.format(deformer))
+    try:
+        deformerObjSets = cmds.listConnections(deformerName, s=False, d=True, type='objectSet')
+        if not deformerObjSets:
+            cmds.error('"{}" has no object set'.format(deformerName))
+        elif len(deformerObjSets) > 1:
+            cmds.error('"{}" has more than one object sets'.format(deformerName))
 
-    selList = cmds.ls(sl=True)
-    if mode == 'add':
-        cmds.sets(selList, add=deformerObjSets[0])
-    if mode == 'remove':
-        cmds.sets(selList, remove=deformerObjSets[0])
+        if mode == 'select':
+            cmds.select(deformerObjSets[0], r=True)
+        elif mode == 'add':
+            cmds.sets(sels, add=deformerObjSets[0])
+        elif mode == 'remove':
+            cmds.sets(sels, remove=deformerObjSets[0])
 
+    except:  # This is for the deformers that use component tag.
+        if mode == 'select':
+            components = cmds.deformer(deformerName, q=True, components=True)
+            cmds.select(components, r=True)
+        elif mode == 'add':
+            cmds.componentTag(sels, tn=deformerName, m='add')
+        elif mode == 'remove':
+            cmds.componentTag(sels, tn=deformerName, m='remove')
 
 def selEveryNUI():
     winName = 'selEveryNWin'
