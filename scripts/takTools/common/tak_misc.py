@@ -2071,36 +2071,39 @@ def addInfCopySkin(source=None, targets=None):
     And copy skin weights.
     '''
 
-    if not source:
+    # When no source and no targets are given, get the first selected object as source and the rest as targets.
+    if not source and not targets:
         sels = cmds.ls(os=True, fl=True)
 
         source = sels[0]
 
-        # Parse selections
-        components = cmds.filterExpand(sels, sm=[28, 31, 32, 34])  # Filter components in a object set also
+        # Get targets from selected objects.
+        components = cmds.filterExpand(sels, sm=[28, 31, 32, 34])  # Components that in a object set are filtered also
         geometries = cmds.filterExpand(sels, sm=[9, 10, 12])
 
-        if components and len(geometries) == 1:  # When select components
+        if components and len(geometries) == 1:  # When components are selected as targets
             source = geometries[0]
             targets = components
-        elif len(geometries) > 1:  # When select geometries only
+        elif len(geometries) > 1:  # When geometries are selected as targets
             targets = sels[1:]
 
-    # Check if source has "targets" attribute
-    if cmds.objExists('%s.targets' % source):
-        targets = eval(cmds.getAttr('%s.targets' % source))
-        # Parse targets
-        components = cmds.filterExpand(targets, sm=[28, 31, 32, 34])  # Filter components in a object set also
-        geometries = cmds.filterExpand(targets, sm=[9, 10, 12])
+    # Check if source has "targetComponents" attribute
+    if cmds.objExists('%s.targetComponents' % source):
+        targets = eval(cmds.getAttr('%s.targetComponents' % source))
         if len(sels) > 1:
-            cmds.confirmDialog(title='Info', message='Source geometry has "targets" attribute.\nYou can copy skin with just a selected source mesh.')
-    else:
-        cmds.addAttr(source, ln='targets', dt='string')
-        cmds.setAttr('%s.targets' % source, str(targets), type='string')
+            cmds.confirmDialog(title='Info', message='Source geometry has "targetComponents" attribute.\nYou can copy skin to components with just a selected source mesh.')
+    else:  # Add "targetComponents" attribute to source geometry for the next time
+        if components:
+            cmds.addAttr(source, ln='targetComponents', dt='string')
+            cmds.setAttr('%s.targetComponents' % source, str(components), type='string')
 
+    # Check if targets are valid
+    if not targets:
+        cmds.error('No targets found.')
     if not isinstance(targets, list):
         cmds.error('Targets should be a list')
 
+    # Get source skin cluster and influences
     cmds.select(source, r=True)
     srcSkinClst = mel.eval('findRelatedSkinCluster("%s");' % source)
     srcInfs = cmds.skinCluster(srcSkinClst, q=True, inf=True)
