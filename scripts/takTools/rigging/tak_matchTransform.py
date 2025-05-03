@@ -68,6 +68,7 @@ def match(*args):
             uvPinPlug = cmds.listConnections(srcTrsf+'.offsetParentMatrix', plugs=True)[0]
             offsetParentMtx = cmds.getAttr(srcTrsf+'.offsetParentMatrix')
             cmds.xform(srcTrsf.name(), matrix=offsetParentMtx)
+            cmds.setAttr(srcTrsf+'.scale', 1, 1, 1)
 
             cmds.disconnectAttr(uvPinPlug, srcTrsf+'.offsetParentMatrix')
             cmds.setAttr(srcTrsf+'.offsetParentMatrix', [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0], type='matrix')
