@@ -62,13 +62,15 @@ def zeroOutChannels(transform):
             val = transform.attr(attr).get()
             parentVal = parentTransform.attr(attr).get()
 
-
-            if attr is 'scale':
-                parentTransform.attr(attr).set(parentVal + (val-1))
-                transform.scale.set(1, 1, 1)
-            else:
-                parentTransform.attr(attr).set(parentVal + val)
-                transform.attr(attr).set(0, 0, 0)
+            try:
+                if attr is 'scale':
+                    parentTransform.attr(attr).set(parentVal + (val-1))
+                    transform.scale.set(1, 1, 1)
+                else:
+                    parentTransform.attr(attr).set(parentVal + val)
+                    transform.attr(attr).set(0, 0, 0)
+            except:
+                pass
 
 
 def getOrientation(aimVector, upVector):

@@ -53,6 +53,11 @@ def main(*args):
     oriCnstOpt = cmds.checkBoxGrp('cnstChkBoxGrp', q = True, v3 = True)
     setupScriptNodeOpt = cmds.checkBox('setupScriptNodeChkBox', q = True, v = True)
 
+    spcLocGrp = 'space_loc_grp'
+    if not cmds.objExists(spcLocGrp):
+        spcLocGrp = cmds.createNode('transform', n = spcLocGrp)
+        cmds.setAttr('%s.visibility' %spcLocGrp, False)
+
     for obj in objs:
         spcLocs = []
         for trgSpc in trgSpcs:
@@ -67,24 +72,19 @@ def main(*args):
                 cmds.matchTransform(spcLoc, obj)
                 spcLocs.append(spcLoc)
 
-            # Constraint locator with target space.
-            if prntCnstOpt:
-                cmds.parentConstraint(trgSpc, spcLoc, mo = True)
-            if pntCnstOpt:
-                cmds.pointConstraint(trgSpc, spcLoc, mo = True)
-            if oriCnstOpt:
-                cmds.orientConstraint(trgSpc, spcLoc, mo = True)
-
-        # Grouping space locators.
-        spcLocGrp = 'space_loc_grp'
-        if not cmds.objExists(spcLocGrp):
-            spcLocGrp = cmds.createNode('transform', n = spcLocGrp)
-            cmds.setAttr('%s.visibility' %spcLocGrp, False)
-        for spcLoc in spcLocs:
             spcLocZero = cmds.createNode('transform', n='{spcLoc}_zero'.format(spcLoc=spcLoc))
             cmds.matchTransform(spcLocZero, spcLoc)
             cmds.parent(spcLoc, spcLocZero)
             cmds.parent(spcLocZero, spcLocGrp)
+
+            # Constraint locator with target space.
+            if prntCnstOpt:
+                cmds.parentConstraint(trgSpc, spcLocZero, mo = True)
+            if pntCnstOpt:
+                cmds.pointConstraint(trgSpc, spcLocZero, mo = True)
+            if oriCnstOpt:
+                cmds.orientConstraint(trgSpc, spcLocZero, mo = True)
+
 
         # Create spaces group that driven by locators.
         spcsGrp = obj + '_space'
