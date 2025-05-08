@@ -52,6 +52,15 @@ def duplicateFace(faces=None):
 
     pm.parent(dupMesh, world=True)
 
+    # Remove from object sets
+    dupShape = cmds.listRelatives(dupMesh, s=True, ni=True)[0]
+    objSetPlugs = cmds.listConnections(dupShape, s=False, type='objectSet', exactType=True, plugs=True)
+
+    if objSetPlugs:
+        for objSetPlug in objSetPlugs:
+            shapePlug = cmds.listConnections(objSetPlug, d=False, plugs=True)[0]
+            cmds.disconnectAttr(shapePlug, objSetPlug)
+
     return dupMesh
 
 
