@@ -13,8 +13,12 @@ Reference is here: https://github.com/maggielovedd/3D-Point-Cloud-Curve-Extracti
 
 import numpy as np
 from scipy.spatial import cKDTree
+from maya.api import OpenMaya as om
 import maya.cmds as cmds
 import time
+
+
+DEFAULT_CURVATURE = 3.0  # Default curvature value for the curve creation
 
 
 def thin_line(points, point_cloud_thickness=5, skipCount=0):
@@ -155,8 +159,18 @@ def create_nurbs_curve_from_points(points):
     Args:
     - points (np.array): Array of points in the format [[x1, y1, z1], [x2, y2, z2], ...].
     """
+    crv = None
+
+    # Remove duplicate points
+    unique_points = np.unique(points, axis=0)
+
+    # Ensure there are enough points to create a curve
+    if len(unique_points) < 4:  # Minimum points required for a degree-3 curve
+        return None
+
     curve_points = [(point[0], point[1], point[2]) for point in points]
     crv = cmds.curve(p=curve_points, d=3)
+
     return crv
 
 
@@ -173,8 +187,14 @@ def showGUI():
     cmds.menuItem(label='curvature_based')
 
     cmds.rowColumnLayout(numberOfColumns=2, columnWidth=[(1, 100), (2, 100)])
-    cmds.text(label='Curvature:')
-    cmds.floatField('curvatureFltFld', min=1.0, value=3.0, precision=2, annotation='Higher value will result in a more curved line. Decrease value or select centric vertices manually if produce a too short curve. Default is 3.0')
+    cmds.text(label='Curvature:', annotation='Higher value will result in a more curved line.\nDecrease value or select centric vertices manually if produce a too short curve.\nDefault is 3.0')
+    cmds.floatField('curvatureFltFld', min=1.0, value=DEFAULT_CURVATURE, precision=2)
+
+    cmds.setParent('..')
+    cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1, 100), (2, 100)])
+    cmds.text(label='Root Locator:', annotation='This locator is for right direction of the curves.\nCorrect the curve direction start from this locator.')
+    cmds.textField('rootLocTxtFld')
+    cmds.button(label='<<', command='cmds.textField("rootLocTxtFld", e=True, text=cmds.ls(sl=True)[0])', annotation='Select a locator to set as root locator.')
 
     cmds.setParent('..')
     cmds.button(label='Create Curve', command=main)
@@ -183,43 +203,101 @@ def showGUI():
 
 
 def main(*args):
-    startTime = time.time()
-
     # Get user input
     method = cmds.optionMenuGrp('methodOptMenu', q=True, value=True)
     curvature = cmds.floatField('curvatureFltFld', q=True, value=True)
+    rootLocator = cmds.textField('rootLocTxtFld', q=True, text=True)
 
-    # Example usage with Maya vertices
+    centerCruves = create_from_selection(method, curvature, rootLocator)
+    if centerCruves:
+        cmds.select(centerCruves, r=True)
+
+
+def create_from_selection(method='min_angle', curvature=DEFAULT_CURVATURE, rootLocator=None):
+    centerCurves = []
+
+    # Get selected vertices and meshes
     sels = cmds.ls(sl=True, fl=True)
     selected_vertices = cmds.filterExpand(sels, sm=31)
-    selected_mesh = cmds.filterExpand(sels, sm=12)
-    if not selected_vertices and not selected_mesh:
-        cmds.error("Please select vertices or a mesh.")
+    selected_meshes = cmds.filterExpand(sels, sm=12)
+
+    if not selected_vertices and not selected_meshes:
+        cmds.error("Please select vertices or a meshe(s).")
         return
 
-    if not selected_vertices:
-        selected_vertices = cmds.ls(cmds.polyListComponentConversion(selected_mesh, toVertex=True), flatten=True)
-    points = np.array([cmds.pointPosition(vertex) for vertex in selected_vertices])
+    if selected_vertices:
+        crv = create(selected_vertices, method, curvature)
+        postCrv = post_process_curve(selected_vertices, crv)
+        centerCurves.append(postCrv)
+
+    if selected_meshes:
+        for mesh in selected_meshes:
+            vertices = cmds.ls(cmds.polyListComponentConversion(mesh, toVertex=True), flatten=True)
+
+            arcLength = 0.0
+            minArcLen = 0.001
+            tempCurvature = curvature
+            while (arcLength < minArcLen):
+                if tempCurvature < 0.1:
+                    cmds.warning("Can't create a curve from '{}'.".format(mesh))
+                    break
+
+                crv = create(vertices, method, tempCurvature)
+                if crv:
+                    arcLength = cmds.arclen(crv, ch=False)
+                    if arcLength < minArcLen:
+                        cmds.delete(crv)
+
+                tempCurvature -= 0.5
+
+            if crv:
+                postCrv = post_process_curve(vertices, crv, rootLocator)
+                centerCurves.append(postCrv)
+
+    return centerCurves
+
+def create(vertices=[], method='min_angle', curvature=DEFAULT_CURVATURE):
+    crv = None
+
+    points = np.array([cmds.pointPosition(vertex) for vertex in vertices])
 
     # Get bounding box width for selected vertices
-    bounding_box = cmds.exactWorldBoundingBox(selected_vertices)
+    bounding_box = cmds.exactWorldBoundingBox(vertices)
     bounding_box_width = max(bounding_box[3] - bounding_box[0], bounding_box[4] - bounding_box[1], bounding_box[5] - bounding_box[2])
 
     # Thin and sort points
     thickness = bounding_box_width / curvature
-    skip = int(len(selected_vertices) / 1000)  # Optimization: Skip points for faster computation
+    skip = int(len(vertices) / 1000)  # Optimization: Skip points for faster computation
     thinned_points, regression_lines = thin_line(points, point_cloud_thickness=thickness, skipCount=skip)
     sorted_points = sort_points(thinned_points, regression_lines, sorted_point_distance=thickness, method=method)
 
     # Create NURBS curve from sorted points
     crv = create_nurbs_curve_from_points(sorted_points)
-    cmds.rebuildCurve(crv, rpo=1, rt=0, end=1, kr=0, kcp=0, kep=1, kt=0, s=8, d=3)
-    cmds.select(crv, r=True)
 
-    if selected_mesh:
-        cmds.rename(crv, '{}_centerCurve'.format(selected_mesh[0]))
-    else:
-        mesh = cmds.listRelatives(cmds.ls(selected_vertices, o=True)[0], p=True)[0]
-        cmds.rename(crv, '{}_centerCurve'.format(mesh))
+    return crv
 
-    print("# Execution time: %s seconds" % (time.time() - startTime))
+
+def post_process_curve(vertices, curve, rootLocator=None):
+    # Reverse cruve if curve is upside down from the root locator
+    if rootLocator:
+        cvs = cmds.ls('{}.cv[*]'.format(curve), fl=True)
+        rootCvPoint = om.MPoint(cmds.xform(cvs[0], q=True, ws=True, t=True))
+        endCvPoint = om.MPoint(cmds.xform(cvs[-1], q=True, ws=True, t=True))
+        locPoint = om.MPoint(cmds.xform(rootLocator, q=True, ws=True, t=True))
+
+        locToRootCvLen = (rootCvPoint - locPoint).length()
+        locToEndCvLen = (endCvPoint - locPoint).length()
+
+        if locToRootCvLen > locToEndCvLen:
+            cmds.reverseCurve(curve, ch=False, rpo=True)
+
+    # Rebuild curve to make it more smooth
+    cmds.rebuildCurve(curve, rpo=1, rt=0, end=1, kr=0, kcp=0, kep=1, kt=0, s=8, d=3)
+    cmds.select(curve, r=True)
+
+    # Rename curve to match the mesh name
+    mesh = cmds.listRelatives(cmds.ls(vertices, o=True)[0], p=True)[0]
+    niceName = '{}_centerCurve'.format(mesh)
+    cmds.rename(curve, niceName)
+
+    return niceName
