@@ -99,8 +99,7 @@ class SkinWeights(object):
         self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c=skinUtil.mirrorSkin, ann='Mirror skin weights positive X to negative X.')
         cmds.menuItem(optionBox=True, c='mel.eval("MirrorSkinWeightsOptions;")')
         cmds.menuItem(divider=True, dividerLabel='Copy')
-        self.uiWidgets['copyMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Skin', c=copySkin, ann='Copy a source mesh skin to a target meshes.\nIf components and a mesh selected copy weights from mesh to components.')
-        self.uiWidgets['copySetsMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Skin Sets', c=copySkinSets, ann='Copy a source mesh skin to target sets.')
+        self.uiWidgets['copyMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Skin', c=copySkin, ann='Copy a source mesh skin to a target meshes.\nIf components and a mesh selected copy weights from mesh to components.\nIt works for object set too.')
         self.uiWidgets['copyPasteMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy and Paste', c=copyPasteWeight, ann='Copy first selected vertex weights and paste the others.')
         cmds.menuItem(optionBox=True, c=copyPasteGUI)
         self.uiWidgets['copyOverlapMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Copy Overlaped Vertices', c=copySkinOverlapVertices, ann='Copy a source mesh skin to a target mesh only for overlaped vertices.')
@@ -686,13 +685,6 @@ def copySkin(*args):
     import takTools.common.tak_misc as tak_misc
     import imp; imp.reload(tak_misc)
     tak_misc.addInfCopySkin()
-
-def copySkinSets(*args):
-    from takTools.utils import skin as skUtil; reload(skUtil)
-    sels = cmds.ls(sl=True)
-    trgSets = [item for item in sels if cmds.nodeType(item) == 'objectSet']
-    srcMesh = list(set(sels) - set(trgSets))[0]
-    skUtil.copySkinSets(srcMesh, trgSets)
 
 def copyPasteWeight(*args):
     '''
