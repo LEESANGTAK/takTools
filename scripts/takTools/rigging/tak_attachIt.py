@@ -392,26 +392,26 @@ class Functions(object):
 
         matrix = cmds.shadingNode('fourByFourMatrix', asUtility=True, n=srcObj + '_matrix')
 
-        # Z Vector is normalizedTangent ^ normalizedNormal
-        zVecNode = cmds.shadingNode('vectorProduct', asUtility=True, n=srcObj + '_Zvec')
-        cmds.setAttr('%s.operation' % zVecNode, 2)
-        cmds.setAttr('%s.normalizeOutput' % zVecNode, True)
+        # Y Vector is normalizedNormal normalizedTangentU
+        yVecNode = cmds.shadingNode('vectorProduct', asUtility=True, n=srcObj + '_Yvec')
+        cmds.setAttr('%s.operation' % yVecNode, 2)
+        cmds.setAttr('%s.normalizeOutput' % yVecNode, True)
 
         if cmds.nodeType(pntInfoNode) == 'pointOnSurfaceInfo':  # In case nurbs surface
-            cmds.connectAttr('%s.result.normalizedTangentU' % pntInfoNode, '%s.input1' % zVecNode, force=True)
-            cmds.connectAttr('%s.result.normalizedNormal' % pntInfoNode, '%s.input2' % zVecNode, force=True)
+            cmds.connectAttr('%s.result.normalizedNormal' % pntInfoNode, '%s.input1' % yVecNode, force=True)
+            cmds.connectAttr('%s.result.normalizedTangentU' % pntInfoNode, '%s.input2' % yVecNode, force=True)
         else:  # In case curve
-            cmds.connectAttr('%s.result.normalizedTangent' % pntInfoNode, '%s.input1' % zVecNode, force=True)
+            cmds.connectAttr('%s.result.normalizedTangent' % pntInfoNode, '%s.input1' % yVecNode, force=True)
             # cmds.connectAttr('%s.result.normalizedNormal' % pntInfoNode, '%s.input2' % zVecNode, force=True)
-            cmds.setAttr('%s.input2X' % zVecNode, 0)
-            cmds.setAttr('%s.input2Y' % zVecNode, 0)
-            cmds.setAttr('%s.input2Z' % zVecNode, 1)
+            cmds.setAttr('%s.input2X' % yVecNode, 0)
+            cmds.setAttr('%s.input2Y' % yVecNode, 0)
+            cmds.setAttr('%s.input2Z' % yVecNode, 1)
 
-        cmds.connectAttr('%s.outputX' % zVecNode, '%s.in20' % matrix, force=True)
-        cmds.connectAttr('%s.outputY' % zVecNode, '%s.in21' % matrix, force=True)
-        cmds.connectAttr('%s.outputZ' % zVecNode, '%s.in22' % matrix, force=True)
+        cmds.connectAttr('%s.outputX' % yVecNode, '%s.in10' % matrix, force=True)
+        cmds.connectAttr('%s.outputY' % yVecNode, '%s.in11' % matrix, force=True)
+        cmds.connectAttr('%s.outputZ' % yVecNode, '%s.in12' % matrix, force=True)
 
-        # X Vector is normalizedTangent
+        # X Vector is normalizedTangentU
         if cmds.nodeType(pntInfoNode) == 'pointOnSurfaceInfo':
             cmds.connectAttr('%s.result.normalizedTangentUX' % pntInfoNode, '%s.in00' % matrix, force=True)
             cmds.connectAttr('%s.result.normalizedTangentUY' % pntInfoNode, '%s.in01' % matrix, force=True)
@@ -421,17 +421,17 @@ class Functions(object):
             cmds.connectAttr('%s.result.normalizedTangentY' % pntInfoNode, '%s.in01' % matrix, force=True)
             cmds.connectAttr('%s.result.normalizedTangentZ' % pntInfoNode, '%s.in02' % matrix, force=True)
 
-        # Y Vector
+        # Z Vector
         if cmds.nodeType(pntInfoNode) == 'pointOnSurfaceInfo':
-            # Y Vector is normalizedNormal
-            cmds.connectAttr('%s.normalizedNormalX' % pntInfoNode, '%s.in10' % matrix, force=True)
-            cmds.connectAttr('%s.normalizedNormalY' % pntInfoNode, '%s.in11' % matrix, force=True)
-            cmds.connectAttr('%s.normalizedNormalZ' % pntInfoNode, '%s.in12' % matrix, force=True)
+            # Z Vector is normalizedNormal
+            cmds.connectAttr('%s.normalizedNormalX' % pntInfoNode, '%s.in20' % matrix, force=True)
+            cmds.connectAttr('%s.normalizedNormalY' % pntInfoNode, '%s.in21' % matrix, force=True)
+            cmds.connectAttr('%s.normalizedNormalZ' % pntInfoNode, '%s.in22' % matrix, force=True)
         else:
-            # Y Vector is worldZ
-            cmds.setAttr('%s.in10' % matrix, 0)
-            cmds.setAttr('%s.in11' % matrix, 0)
-            cmds.setAttr('%s.in12' % matrix, 1)
+            # Z Vector is worldZ
+            cmds.setAttr('%s.in20' % matrix, 0)
+            cmds.setAttr('%s.in21' % matrix, 0)
+            cmds.setAttr('%s.in22' % matrix, 1)
 
         # Position
         cmds.connectAttr('%s.positionX' % pntInfoNode, '%s.in30' % matrix, force=True)
