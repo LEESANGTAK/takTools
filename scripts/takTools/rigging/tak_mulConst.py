@@ -234,10 +234,12 @@ def parent(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
         for driven in drivens:
             if len(drivers) > 1:
                 # Constraint with space locator to prevent the driven object from flipping.
-                spaceLoc = setupDrivenMatchedLocator(driver, driven)
-                cmds.parentConstraint(spaceLoc, driven, mo = mainOffOpt, skip = skipAxesLs)
+                spaceLoc = '{}_{}_space'.format(driven, driver)
+                if not cmds.objExists(spaceLoc):
+                    setupDrivenMatchedLocator(driver, driven)
+                cmds.parentConstraint(spaceLoc, driven, mo = mainOffOpt, skipTranslate = skipAxesLs, skipRotate = skipAxesLs)
             else:
-                cmds.parentConstraint(driver, driven, mo = mainOffOpt, skip = skipAxesLs)
+                cmds.parentConstraint(driver, driven, mo = mainOffOpt, skipTranslate = skipAxesLs, skipRotate = skipAxesLs)
 
 # point constraint function
 def point(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
@@ -252,7 +254,9 @@ def orient(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
         for driven in drivens:
             if len(drivers) > 1:
                 # Constraint with space locator to prevent the driven object from flipping.
-                spaceLoc = setupDrivenMatchedLocator(driver, driven)
+                spaceLoc = '{}_{}_space'.format(driven, driver)
+                if not cmds.objExists(spaceLoc):
+                    setupDrivenMatchedLocator(driver, driven)
                 cmds.orientConstraint(spaceLoc, driven, mo = mainOffOpt, skip = skipAxesLs)
             else:
                 cmds.orientConstraint(driver, driven, mo = mainOffOpt, skip = skipAxesLs)
