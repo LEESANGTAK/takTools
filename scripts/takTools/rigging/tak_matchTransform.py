@@ -57,7 +57,7 @@ def match(*args):
     mirrorWorldX = cmds.checkBox('mirrorWorldXChkbox', q=True, v=True)
     mirrorLocalX = cmds.checkBox('mirrorLocalXChkbox', q=True, v=True)
 
-    if pm.filterExpand(target, sm=12):  # check if target is a mesh node
+    if pm.filterExpand(target, sm=[10, 12]):  # check if target is a Mesh or Nurbs Surface
         # Match transform to the mesh using uv pin node
         for srcTrsf in srcTrsfs:
             pm.select(target, srcTrsf, r=True)
