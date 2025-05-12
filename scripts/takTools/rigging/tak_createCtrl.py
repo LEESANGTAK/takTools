@@ -55,6 +55,9 @@ def UI():
     cmds.button('addButton', width = 20, label = '+', c = addSel)
     cmds.button('delButton', width = 20, label = '-', c = delSel)
 
+    cmds.text('prntText', label = 'Parent: ', align = 'right')
+    cmds.checkBox('prntChkBox', label = '', value = False, cc = prntChkBokCC)
+
     cmds.text('prntCnstText', label = 'Parent Constraint: ', align = 'right')
     cmds.checkBox('prntCnstChkBox', label = '', value = True, cc = prntCnstChkBokCC)
     cmds.text('pntCnstText', label = 'Point Constraint: ', align = 'right')
@@ -90,7 +93,8 @@ def UI():
     cmds.formLayout('trgFormLay', e = True,
                     attachForm = [('trgText', 'left', 5), ('trgTexScrLis', 'top', 5), ('addButton', 'right', 5), ('addButton', 'top', 5), ('delButton', 'right', 5), ('prntCnstText', 'left', 5), ('hierText', 'left', 5)],
                     attachControl = [('trgTexScrLis', 'left', 5, 'trgText'), ('trgTexScrLis', 'right', 5, 'addButton'), ('delButton', 'top', 5, 'addButton'),
-                                     ('prntCnstText', 'top', 5, 'trgTexScrLis'), ('prntCnstChkBox', 'left', 5, 'prntCnstText'), ('prntCnstChkBox', 'top', 5, 'trgTexScrLis'), ('pntCnstText', 'left', 20, 'prntCnstChkBox'), ('pntCnstText', 'top', 5, 'trgTexScrLis'), ('pntCnstChkBox', 'left', 5, 'pntCnstText'), ('pntCnstChkBox', 'top', 5, 'trgTexScrLis'), ('oriCnstText', 'left', 20, 'pntCnstChkBox'), ('oriCnstText', 'top', 5, 'trgTexScrLis'), ('oriCnstChkBox', 'left', 5, 'oriCnstText'), ('oriCnstChkBox', 'top', 5, 'trgTexScrLis'), ('scaleCnstText', 'left', 20, 'oriCnstChkBox'), ('scaleCnstText', 'top', 5, 'trgTexScrLis'), ('scaleCnstChkBox', 'left', 5, 'scaleCnstText'), ('scaleCnstChkBox', 'top', 5, 'trgTexScrLis'),
+                                     ('prntText', 'top', 5, 'trgTexScrLis'), ('prntChkBox', 'left', 5, 'prntText'), ('prntChkBox', 'top', 5, 'trgTexScrLis'),
+                                     ('prntCnstText', 'top', 5, 'prntText'), ('prntCnstChkBox', 'left', 5, 'prntCnstText'), ('prntCnstChkBox', 'top', 5, 'prntText'), ('pntCnstText', 'left', 20, 'prntCnstChkBox'), ('pntCnstText', 'top', 5, 'prntText'), ('pntCnstChkBox', 'left', 5, 'pntCnstText'), ('pntCnstChkBox', 'top', 5, 'prntText'), ('oriCnstText', 'left', 20, 'pntCnstChkBox'), ('oriCnstText', 'top', 5, 'prntText'), ('oriCnstChkBox', 'left', 5, 'oriCnstText'), ('oriCnstChkBox', 'top', 5, 'prntText'), ('scaleCnstText', 'left', 20, 'oriCnstChkBox'), ('scaleCnstText', 'top', 5, 'prntText'), ('scaleCnstChkBox', 'left', 5, 'scaleCnstText'), ('scaleCnstChkBox', 'top', 5, 'prntText'),
                                      ('udCnntText', 'top', 5, 'prntCnstText'), ('udCnntChkBox', 'top', 5, 'prntCnstChkBox'), ('udCnntChkBox', 'left', 5, 'udCnntText'), ('trnsCnntText', 'top', 5, 'prntCnstText'), ('trnsCnntText', 'left', -85, 'pntCnstText'), ('trnsCnntChkBox', 'left', 5, 'trnsCnntText'), ('trnsCnntChkBox', 'top', 5, 'prntCnstText'), ('roCnntText', 'left', 20, 'trnsCnntChkBox'), ('roCnntText', 'top', 5, 'prntCnstText'), ('roCnntChkBox', 'left', 5, 'roCnntText'), ('roCnntChkBox', 'top', 5, 'prntCnstText'), ('scaleCnntText', 'left', 20, 'roCnntChkBox'), ('scaleCnntText', 'top', 5, 'prntCnstText'), ('scaleCnntChkBox', 'left', 5, 'scaleCnntText'), ('scaleCnntChkBox', 'top', 5, 'prntCnstText'),
                                      ('hierText', 'top', 5, 'trnsCnntText'), ('hierChkBox', 'left', 5, 'hierText'), ('hierChkBox', 'top', 5, 'trnsCnntText'), ('roOdText', 'left', 20, 'hierChkBox'), ('roOdText', 'top', 5, 'trnsCnntText'), ('roOdChkBox', 'left', 5, 'roOdText'), ('roOdChkBox', 'top', 5, 'trnsCnntText'), ('matchSpaceText', 'left', 20, 'roOdChkBox'), ('matchSpaceText', 'top', 5, 'trnsCnntText'), ('matchSpaceChkBox', 'left', 5, 'matchSpaceText'), ('matchSpaceChkBox', 'top', 5, 'trnsCnntText'), ('matchLimitText', 'left', 20, 'matchSpaceChkBox'), ('matchLimitText', 'top', 5, 'trnsCnntText'), ('matchLimitChkBox', 'left', 5, 'matchLimitText'), ('matchLimitChkBox', 'top', 5, 'trnsCnntText'),
                                      ('spaceGrpChkBox', 'left', 5, 'prntCnstText'), ('spaceGrpChkBox', 'top', 5, 'hierChkBox'), ('autoGrpChkBox', 'left', 5, 'spaceGrpChkBox'), ('autoGrpChkBox', 'top', 5, 'hierChkBox'), ('extraGrpChkBox', 'left', 5, 'autoGrpChkBox'), ('extraGrpChkBox', 'top', 5, 'hierChkBox')],
@@ -198,6 +202,9 @@ def app(*args):
     # get traget objects
     trgObjs = cmds.textScrollList('trgTexScrLis', q = True, allItems = True)
 
+    # get parent option
+    prntOpt = cmds.checkBox('prntChkBox', q = True, v = True)
+
     # get constraint option
     pConstOpt = cmds.checkBox('prntCnstChkBox', q = True, v = True)
     pntCnstOpt = cmds.checkBox('pntCnstChkBox', q = True, v = True)
@@ -264,6 +271,13 @@ def app(*args):
 
         if matchLimitOpt:
             matchLimit(trg, ctrl)
+
+        # Parent
+        if prntOpt:
+            trgParent = cmds.listRelatives(trg, p = True)
+            cmds.parent(trg, ctrl)
+            if trgParent:
+                cmds.parent(ctrl + '_zero', trgParent[0])
 
         # Constraint
         if pConstOpt:
@@ -398,6 +412,19 @@ def strModeBtnCc(*args):
         cmds.textFieldGrp('sufTexGrp', e = True, visible = True)
 
 
+def prntChkBokCC(*args):
+    pCnstChkOpt = cmds.checkBox('prntChkBox', q = True, value = True)
+
+    if pCnstChkOpt:
+        cmds.checkBox('prntCnstChkBox', e = True, value = False)
+        cmds.checkBox('pntCnstChkBox', e = True, value = False)
+        cmds.checkBox('oriCnstChkBox', e = True, value = False)
+        cmds.checkBox('scaleCnstChkBox', e = True, value = False)
+        cmds.checkBox('trnsCnntChkBox', e = True, value = False)
+        cmds.checkBox('roCnntChkBox', e = True, value = False)
+        cmds.checkBox('scaleCnntChkBox', e = True, value = False)
+
+
 def prntCnstChkBokCC(*args):
     """
     Parent constriant checkbox change command.
@@ -460,13 +487,13 @@ def scaleCnntChkBokCC(*args):
 def popCtrlShpOptMenu():
     ctrlShpLs = [
         'circleX','circleY','circleZ',
-        'cube','sphere','semiSphere','pyramid',
+        'cube','sphere','locator','semiSphere','pyramid',
         'square','pentagon','triangle','squareArc','squareRounded','squareDoubleRounded',
         'arrowSingle','arrowSingleFat','arrowDouble','arrowDoubleFat','arrow4','arrow4Fat','arrow8','arrowsOnBall',
         'cylinder',
         'cross','fatCross',
         'nail','nail2','nail4',
-        'eye','teeth','foot','cloth','gear','dumbell','locator',
+        'eye','teeth','foot','cloth','gear','dumbell',
         'arrowsLocator','arrowsPointCenter','arrowForm','arrowDirectionBall',
         'arrowRotate90','arrowRotate90Fat','arrowRotate180','arrowRotate180Fat',
         'circleArrow','circleArrow1','circleArrow2','circleArrow3','circleArrow1Interior','circleArrow2Axis',
