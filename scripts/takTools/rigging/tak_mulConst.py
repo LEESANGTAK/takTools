@@ -232,11 +232,9 @@ def delWin(*args):
 def parent(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
     for driver in drivers:
         for driven in drivens:
-            if len(drivers) > 1:
-                # Constraint with space locator to prevent the driven object from flipping.
-                spaceLoc = '{}_{}_space'.format(driven, driver)
-                if not cmds.objExists(spaceLoc):
-                    setupDrivenMatchedLocator(driver, driven)
+            if len(drivers) > 1:  # Constrain with trasnforms that has default channel values to prevent flipping
+                spaceLoc = setupDrivenMatchedLocator(driver, driven)
+                setupDrivenZeroGroup(driven)
                 cmds.parentConstraint(spaceLoc, driven, mo = mainOffOpt, skipTranslate = skipAxesLs, skipRotate = skipAxesLs)
             else:
                 cmds.parentConstraint(driver, driven, mo = mainOffOpt, skipTranslate = skipAxesLs, skipRotate = skipAxesLs)
@@ -252,11 +250,9 @@ def point(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
 def orient(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
     for driver in drivers:
         for driven in drivens:
-            if len(drivers) > 1:
-                # Constraint with space locator to prevent the driven object from flipping.
-                spaceLoc = '{}_{}_space'.format(driven, driver)
-                if not cmds.objExists(spaceLoc):
-                    setupDrivenMatchedLocator(driver, driven)
+            if len(drivers) > 1:  # Constrain with trasnforms that has default channel values to prevent flipping
+                spaceLoc = setupDrivenMatchedLocator(driver, driven)
+                setupDrivenZeroGroup(driven)
                 cmds.orientConstraint(spaceLoc, driven, mo = mainOffOpt, skip = skipAxesLs)
             else:
                 cmds.orientConstraint(driver, driven, mo = mainOffOpt, skip = skipAxesLs)
@@ -296,12 +292,26 @@ def aim(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
 
 
 def setupDrivenMatchedLocator(driver, driven):
-    spaceLoc = cmds.spaceLocator(n = '{}_{}_space'.format(driven, driver))[0]
+    spaceLoc = '{}_{}_space'.format(driven, driver)
+    if cmds.objExists(spaceLoc):
+        return spaceLoc
+    spaceLoc = cmds.spaceLocator(n = spaceLoc)[0]
     spaceLocZeroGrp = cmds.group(spaceLoc, n = '{}_zero'.format(spaceLoc))
     cmds.matchTransform(spaceLocZeroGrp, driven)
     cmds.parentConstraint(driver, spaceLocZeroGrp, mo = True)
     return spaceLoc
 
+
+def setupDrivenZeroGroup(driven):
+    drivenSpaceGrp = '{}_zero'.format(driven)
+    if cmds.objExists(drivenSpaceGrp):
+        return
+    drivenParent = cmds.listRelatives(driven, p = True)
+    cmds.createNode('transform', n = drivenSpaceGrp)
+    cmds.matchTransform(drivenSpaceGrp, driven)
+    cmds.parent(driven, drivenSpaceGrp)
+    if drivenParent:
+        cmds.parent(drivenSpaceGrp, drivenParent[0])
 
 # define the function when item in textScrollList selected
 def sel(texScLiName):
