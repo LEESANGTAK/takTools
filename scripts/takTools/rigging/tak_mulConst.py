@@ -234,8 +234,8 @@ def parent(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
         for driven in drivens:
             if len(drivers) > 1:  # Constrain with trasnforms that has default channel values to prevent flipping
                 spaceLoc = setupDrivenMatchedLocator(driver, driven)
-                setupDrivenZeroGroup(driven)
-                cmds.parentConstraint(spaceLoc, driven, mo = mainOffOpt, skipTranslate = skipAxesLs, skipRotate = skipAxesLs)
+                pCnst = cmds.parentConstraint(spaceLoc, driven, mo = mainOffOpt, skipTranslate = skipAxesLs, skipRotate = skipAxesLs)
+                cmds.setAttr('{}.interpType'.format(pCnst[0]), 2)  # Set the constraint interpType to 2 (shortest)
             else:
                 cmds.parentConstraint(driver, driven, mo = mainOffOpt, skipTranslate = skipAxesLs, skipRotate = skipAxesLs)
 
@@ -252,8 +252,8 @@ def orient(drivers, drivens, mainOffOpt, skipAxesLs, arg = None):
         for driven in drivens:
             if len(drivers) > 1:  # Constrain with trasnforms that has default channel values to prevent flipping
                 spaceLoc = setupDrivenMatchedLocator(driver, driven)
-                setupDrivenZeroGroup(driven)
-                cmds.orientConstraint(spaceLoc, driven, mo = mainOffOpt, skip = skipAxesLs)
+                oriCnst = cmds.orientConstraint(spaceLoc, driven, mo = mainOffOpt, skip = skipAxesLs)
+                cmds.setAttr('{}.interpType'.format(oriCnst[0]), 2)  # Set the constraint interpType to 2 (shortest)
             else:
                 cmds.orientConstraint(driver, driven, mo = mainOffOpt, skip = skipAxesLs)
 
