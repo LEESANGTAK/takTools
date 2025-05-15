@@ -10,6 +10,7 @@ from . import globalUtil; reload(globalUtil)
 from . import mesh as meshUtil; reload(meshUtil)
 from . import bifrost as bfUtil; reload(bfUtil)
 from ..rigging import bSkinSaver as bsk
+from ..rigging import sculptSkinAPI as ssAPI
 
 
 def bind(jnts, geos, maxInfluence=4):
@@ -360,6 +361,20 @@ def doneEditSkinMesh(tempSkin, skinMesh):
     copySkin(tempSkin, skinMesh)
     pm.delete(tempSkin)
     pm.headsUpDisplay('editSkinMeshHUD', remove=True)
+
+
+def sculptSkinMesh(skinMesh):
+    sculptMesh = cmds.duplicate(skinMesh, n='sculptSkin_geo')[0]
+    cmds.hide(skinMesh)
+    meshUtil.cleanupMesh(sculptMesh)
+    cmds.select(sculptMesh, r=True)
+    cmds.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(skinMesh, sculptMesh))
+
+def doneEditSkinMesh(skinMesh, sculptMesh):
+    ssAPI.apply_inverse_weights_all(skinMesh, sculptMesh)
+    cmds.setAttr('{}.visibility'.format(skinMesh), 1)
+    cmds.delete(sculptMesh)
+    cmds.headsUpDisplay('editSkinMeshHUD', remove=True)
 
 
 def SSD(geo):

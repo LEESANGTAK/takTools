@@ -154,6 +154,28 @@
         menuEditorMenuItem2;
 
     menuItem
+        -label "brSmooth Volume Toggle" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    string $curCtx = `currentCtx`;\n    int $volState = `brSmoothWeightsContext -q -volume $curCtx`;\n    brSmoothWeightsContext -edit -volume (1-$volState) $curCtx;\n}\n" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -radialPosition "S" 
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "brSmoothWeights.svg" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem23;
+
+    menuItem
         -label "Go to Bind Pose" 
         -divider 0
         -subMenu 0
@@ -423,6 +445,27 @@
         menuEditorMenuItem14;
 
     menuItem
+        -label "Sculpt Skin Weights" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"from takTools.utils import skin as skinUtil; import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.sculptSkinMesh(cmds.ls(sl=True)[0])\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "Sculpt.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 0
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem24;
+
+    menuItem
         -label "separator" 
         -divider 1
         -dividerLabel "separator" 
@@ -461,28 +504,6 @@
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem18;
-
-    menuItem
-        -label "brSmooth Volume Toggle" 
-        -divider 0
-        -subMenu 0
-        -tearOff 0
-        -command "{\n    string $curCtx = `currentCtx`;\n    int $volState = `brSmoothWeightsContext -q -volume $curCtx`;\n    brSmoothWeightsContext -edit -volume (1-$volState) $curCtx;\n}\n" 
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -radialPosition "S" 
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -image "brSmoothWeights.svg" 
-        -echoCommand 0
-        -italicized 0
-        -boldFont 0
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem23;
 
 setParent -m ..;
 
