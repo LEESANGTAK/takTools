@@ -132,6 +132,7 @@ def convertToCageMesh(meshes, minHoleRadius=4.0, detailSize=0.02, faceCount=1000
                     cageMesh = mesh
                     largestArea = volumeArea
 
+
             pm.parent(cageMesh, w=True)
             pm.delete(skinCageName)
             cageMesh.rename(skinCageName)
@@ -139,6 +140,10 @@ def convertToCageMesh(meshes, minHoleRadius=4.0, detailSize=0.02, faceCount=1000
             pass
 
         pm.select(cageMesh.getParent(), r=True)
+
+    # Set cage mesh color
+    cmds.setAttr('%s.overrideEnabled' % (skinCageName), 1)
+    cmds.setAttr('%s.overrideColor' % (skinCageName), int(17))
 
     return skinCageName
 

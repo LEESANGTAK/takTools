@@ -16,6 +16,7 @@ from .decorators import printElapsedTime
 def duplicateFace(faces=None):
     dupMesh = None
 
+    # Get selected faces
     if not faces:
         sels = cmds.ls(sl=True, fl=True)
         if not sels:
@@ -33,33 +34,44 @@ def duplicateFace(faces=None):
             convertedFaces = cmds.polyListComponentConversion(vtxsEdges, toFace=True)
             faces.extend(convertedFaces)
 
-    selMesh = cmds.listRelatives(cmds.ls(faces, objectsOnly=True)[0], p=True)[0]
-    dupMesh = cmds.duplicate(selMesh)[0]
+    # Get mesh faces info
+    meshes = list(set(cmds.ls(faces, objectsOnly=True)))
+    geos = [cmds.listRelatives(mesh, p=True)[0] for mesh in meshes]
+    meshFacesInfo = {}
+    for geo in geos:
+        geoFaces = [face for face in sels if geo in face]
+        meshFacesInfo[geo] = geoFaces
 
-    # Select faces of duplicated mesh
-    cmds.select(dupMesh, r=True)
-    cmds.selectMode(component=True)
-    cmds.selectType(facet=True)
-    dupFaces = [face.replace(selMesh, dupMesh) for face in faces]
-    cmds.select(dupFaces, r=True)
+    # Duplicate meshes and delete unselected faces
+    dupMeshes = []
+    for mesh, faces in meshFacesInfo.items():
+        dupMesh = cmds.duplicate(mesh)[0]
+        dupFaces = [face.replace(mesh, dupMesh) for face in faces]
 
-    # Delete other faces
-    mel.eval('InvertSelection();')
-    cmds.delete()
+        allFacesSet = set(cmds.ls(f"{dupMesh}.f[*]", fl=True))
+        selFacesSet = set(dupFaces)
+        delFaces = list(allFacesSet - selFacesSet)
+        cmds.delete(delFaces)
 
-    cmds.selectMode(object=True)
-    cmds.select(dupMesh, r=True)
+        # Remove from object sets
+        dupShape = cmds.listRelatives(dupMesh, s=True, ni=True)[0]
+        objSetPlugs = cmds.listConnections(dupShape, s=False, type='objectSet', exactType=True, plugs=True)
 
-    pm.parent(dupMesh, world=True)
+        if objSetPlugs:
+            for objSetPlug in objSetPlugs:
+                shapePlug = cmds.listConnections(objSetPlug, d=False, plugs=True)[0]
+                cmds.disconnectAttr(shapePlug, objSetPlug)
 
-    # Remove from object sets
-    dupShape = cmds.listRelatives(dupMesh, s=True, ni=True)[0]
-    objSetPlugs = cmds.listConnections(dupShape, s=False, type='objectSet', exactType=True, plugs=True)
+        pm.parent(dupMesh, world=True)
 
-    if objSetPlugs:
-        for objSetPlug in objSetPlugs:
-            shapePlug = cmds.listConnections(objSetPlug, d=False, plugs=True)[0]
-            cmds.disconnectAttr(shapePlug, objSetPlug)
+        dupMeshes.append(dupMesh)
+
+    # Merge duplicated meshes
+    if len(dupMeshes) > 1:
+        dupMesh = cmds.polyUnite(dupMeshes, ch=False, mergeUVSets=True)[0]
+        cmds.delete(dupMeshes)
+    else:
+        dupMesh = dupMeshes[0]
 
     return dupMesh
 
