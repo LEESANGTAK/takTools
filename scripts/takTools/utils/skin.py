@@ -368,9 +368,9 @@ def sculptSkinMesh(skinMesh):
     cmds.hide(skinMesh)
     meshUtil.cleanupMesh(sculptMesh)
     cmds.select(sculptMesh, r=True)
-    cmds.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(skinMesh, sculptMesh))
+    cmds.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done', bw=80, bsh='roundRectangle', rc=lambda : doneEditSculptMesh(skinMesh, sculptMesh))
 
-def doneEditSkinMesh(skinMesh, sculptMesh):
+def doneEditSculptMesh(skinMesh, sculptMesh):
     ssAPI.apply_inverse_weights_all(skinMesh, sculptMesh)
     cmds.setAttr('{}.visibility'.format(skinMesh), 1)
     cmds.delete(sculptMesh)
