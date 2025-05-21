@@ -39,7 +39,7 @@ def duplicateFace(faces=None):
     geos = [cmds.listRelatives(mesh, p=True)[0] for mesh in meshes]
     meshFacesInfo = {}
     for geo in geos:
-        geoFaces = [face for face in sels if geo in face]
+        geoFaces = [face for face in faces if geo in face]
         meshFacesInfo[geo] = geoFaces
 
     # Duplicate meshes and delete unselected faces
@@ -69,7 +69,9 @@ def duplicateFace(faces=None):
     # Merge duplicated meshes
     if len(dupMeshes) > 1:
         dupMesh = cmds.polyUnite(dupMeshes, ch=False, mergeUVSets=True)[0]
-        cmds.delete(dupMeshes)
+        for item in dupMeshes:
+            if cmds.objExists(item):
+                cmds.delete(item)
     else:
         dupMesh = dupMeshes[0]
 
