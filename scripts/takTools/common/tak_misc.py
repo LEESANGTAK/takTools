@@ -2108,7 +2108,7 @@ def addInfCopySkin(source=None, targets=None):
             objectComponents = [component for component in components if object in component]
             targetsInfo[object] = objectComponents
 
-        for trgSkinGeo, targets in targetsInfo.items():
+        for trgSkinGeo, targetComponents in targetsInfo.items():
             trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
 
             # Bind target skin geo with source influences if target skin geo has not a skin cluster
@@ -2125,7 +2125,7 @@ def addInfCopySkin(source=None, targets=None):
                 cmds.setAttr('%s.liw' % srcInf, False)
 
             # Copy skin weights from source to target components
-            cmds.select(source, targets, r=True)
+            cmds.select(source, targetComponents, r=True)
             cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
             trgSkinClsts.append(trgSkinClst)
     else:
