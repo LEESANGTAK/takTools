@@ -317,7 +317,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem28;
+        menuEditorMenuItem11;
 
     menuItem
         -label "Controller" 
@@ -398,7 +398,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem31;
+        menuEditorMenuItem15;
 
     menuItem
         -label "Multi Constraint" 
@@ -426,7 +426,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"bfUtil.convertToCageMesh(pm.selected())\");" 
+        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"meshes = pm.filterExpand(pm.selected(), sm=12)\");\npython(\"if not meshes: meshes = meshUtil.duplicateFace()\");\npython(\"bfUtil.convertToCageMesh(meshes)\");" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -460,7 +460,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem33;
+        menuEditorMenuItem16;
 
     menuItem
         -label "separator" 
@@ -602,7 +602,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem34;
+        menuEditorMenuItem25;
 
     menuItem
         -label "Duplicate Parent Only" 
