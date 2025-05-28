@@ -9,7 +9,7 @@ except:
     pass
 
 
-def convertToCageMesh(meshes, minHoleRadius=4.0, detailSize=0.02, faceCount=1000, symmetry=False, delHistory=True):
+def convertToCageMesh(meshes, minHoleRadius=10, detailSize=0.02, faceCount=500, symmetry=False, delHistory=True):
     dupMeshes = pm.duplicate(meshes, rc=True)
 
     # When multiple meshes are given then combine meshes before processing
@@ -173,7 +173,7 @@ def showConvertToCageMeshUI(parent=None, *args):
     pm.frameLayout(label='Volume Mesh Settings')
     pm.rowColumnLayout(numberOfColumns=2)
     pm.text(label='Min Hole Radius: ', ann='Minimize holes of the volume. \nHigher value produce more solid mesh. \nThis is suitable for making solid mesh from a shell mesh like a shirts or shoes.')
-    pm.floatField('minHoleRadiusFloatFld', v=4.0, min=0.0, pre=1)
+    pm.floatField('minHoleRadiusFloatFld', v=10, min=0.0, pre=1)
     pm.text(label='Detail Size: ', ann='When this value set to higher the resulting mesh will be more closed to the input mesh.')
     pm.floatField('detailSizeFloatFld', v=0.02, min=0.01, pre=3)
 
@@ -183,7 +183,7 @@ def showConvertToCageMeshUI(parent=None, *args):
     pm.separator(style='in')
 
     pm.frameLayout(label='Retopology Settings')
-    pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=1000, columnWidth=[(1, 60)])
+    pm.intFieldGrp('faceCountIntFld', label='Face Count:', v1=500, columnWidth=[(1, 60)])
     pm.checkBoxGrp('retopoOptions', numberOfCheckBoxes=2, label='', labelArray2=['Symmetry', 'Delete History'], v2=False, columnWidth=[(1, 5), (2, 70)])
 
     pm.setParent('..')
