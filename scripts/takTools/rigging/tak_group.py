@@ -41,7 +41,8 @@ def UI():
     cmds.checkBox('ctrlGrpChkBox', label='Control Groups', cc=lambda val: cmds.checkBox('negateScaleXChkBox', e=True, vis=val))
     cmds.checkBox('negateScaleXChkBox', label='Negate ScaleX', vis=False)
     cmds.checkBox('revGrpChkBox', label='Reverse Group')
-    cmds.checkBox('spaceGrpChkBox', label='Space Group')
+    cmds.checkBox('spaceGrpChkBox', label='Space Group', cc=lambda val: cmds.textFieldGrp('targetSpaceTxtFldGrp', e=True, vis=val))
+    cmds.textFieldGrp('targetSpaceTxtFldGrp', label="Target Space: ", cw=[(1, 80), (2, 100)], vis=False)
     cmds.checkBox('moduleGrpChkBox', label='Module Groups', cc=lambda val: cmds.columnLayout('moduleDataColLo', e=True, vis=val))
 
     cmds.columnLayout('moduleDataColLo', adj=True, vis=False)
@@ -118,7 +119,8 @@ def app(*args):
             elif revGrpOpt:
                 revGrp(trg)
             elif spaceGrpOpt:
-                spaceGroup(trg)
+                trgSpace = cmds.textFieldGrp('targetSpaceTxtFldGrp', q=True, text=True)
+                spaceGroup(trg, trgSpace)
             else:
                 tak_misc.doGroup(trg, suffix)
 
@@ -222,12 +224,18 @@ def ctrlGrp(obj, negateScaleX=False):
         cmds.setAttr('{}.scaleX'.format(zeroGrp), -1)
 
 
-def spaceGroup(obj):
+def spaceGroup(obj, targetSpace):
     obj = pm.PyNode(obj)
-    group = pm.group(n="%s_space" % obj, empty=True)
+    targetSpace = pm.PyNode(targetSpace)
 
-    pm.parentConstraint(obj, group)
-    obj.scale >> group.scale
+    spaceGrp = pm.createNode('transform', n='%s_%s_space' % (obj, targetSpace))
+    spaceGrpZero = pm.createNode('transform', n='%s_zero' % (spaceGrp))
+
+    pm.matchTransform(spaceGrp, targetSpace)
+    pm.matchTransform(spaceGrpZero, targetSpace)
+
+    pm.parent(obj, spaceGrp)
+    pm.parent(spaceGrp, spaceGrpZero)
 
 
 def chainParent(*args):
