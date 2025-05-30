@@ -11,6 +11,7 @@ except:
 
 def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, delHistory=True):
     dupMeshes = pm.duplicate(meshes, rc=True)
+    pm.parent(dupMeshes, world=True)
 
     # When multiple meshes are given then combine meshes before processing
     if len(dupMeshes) > 1:
