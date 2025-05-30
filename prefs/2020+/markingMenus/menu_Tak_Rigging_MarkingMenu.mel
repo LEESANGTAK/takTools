@@ -426,7 +426,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"meshes = pm.filterExpand(pm.selected(), sm=12)\");\npython(\"if not meshes: meshes = meshUtil.duplicateFace()\");\npython(\"bfUtil.convertToCageMesh(meshes)\");" 
+        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"meshes = pm.filterExpand(pm.selected(), sm=12)\");\npython(\"faceMeshes = None\");\npython(\"if not meshes: faceMeshes = meshUtil.duplicateFace()\");\npython(\"srcMeshes = meshes or faceMeshes\");\npython(\"bfUtil.convertToCageMesh(srcMeshes)\");\npython(\"if faceMeshes: pm.delete(faceMeshes)\");" 
         -optionBox 0
         -enable 1
         -visible 1

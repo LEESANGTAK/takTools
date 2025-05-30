@@ -9,10 +9,7 @@ except:
     pass
 
 
-MIN_HOLE_RADIUS = 30
-
-
-def convertToCageMesh(meshes, minHoleRadius=MIN_HOLE_RADIUS, detailSize=0.02, faceCount=500, symmetry=False, delHistory=True):
+def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, delHistory=True):
     dupMeshes = pm.duplicate(meshes, rc=True)
 
     # When multiple meshes are given then combine meshes before processing
@@ -23,7 +20,7 @@ def convertToCageMesh(meshes, minHoleRadius=MIN_HOLE_RADIUS, detailSize=0.02, fa
 
     # It takes long time and produce desatisfiying result when set too low or too high values
     detailSize = max(detailSize, 0.01)
-    minHoleRadius = min(minHoleRadius, 50)
+    minHoleRadius = min(mesh.boundingBox().width(), mesh.boundingBox().height(), mesh.boundingBox().depth()) / 3
 
     # Build bifrost graph node
     bfGraph = pm.createNode('bifrostGraphShape')
@@ -118,35 +115,15 @@ def convertToCageMesh(meshes, minHoleRadius=MIN_HOLE_RADIUS, detailSize=0.02, fa
     pm.select(bfGraph.getParent())
 
     if delHistory:
-        # Clean up temp nodes
         pm.delete(cageMesh, ch=True)
         pm.delete(bfGraph.getParent())
         pm.delete(mesh)
 
-        # Clean up cage mesh
-        largestArea = 0.0
-        try:
-            meshes = pm.polySeparate(cageMesh, ch=False)
-            # Find cage mesh in separated meshes
-            for mesh in meshes:
-                bb = meshes[0].boundingBox()
-                volumeArea = bb.width() * bb.height() * bb.depth()
-                if volumeArea > largestArea:
-                    cageMesh = mesh
-                    largestArea = volumeArea
-
-
-            pm.parent(cageMesh, w=True)
-            pm.delete(skinCageName)
-            cageMesh.rename(skinCageName)
-        except:
-            pass
-
-        pm.select(cageMesh.getParent(), r=True)
-
     # Set cage mesh color
     cmds.setAttr('%s.overrideEnabled' % (skinCageName), 1)
     cmds.setAttr('%s.overrideColor' % (skinCageName), int(17))
+
+    pm.select(cageMesh.getParent(), r=True)
 
     return skinCageName
 
@@ -154,14 +131,21 @@ def convertToCageMesh(meshes, minHoleRadius=MIN_HOLE_RADIUS, detailSize=0.02, fa
 def showConvertToCageMeshUI(parent=None, *args):
     def applyBtnCallback(*args):
         meshes = pm.filterExpand(pm.selected(), sm=12)
+        faceMeshes = None
         if not meshes:
-            meshes = meshUtil.duplicateFace()
-        minHoleRadius = pm.floatField('minHoleRadiusFloatFld', q=True, v=True)
+            faceMeshes = meshUtil.duplicateFace()
+
+        srcMeshes = meshes or faceMeshes
+
         detailSize = pm.floatField('detailSizeFloatFld', q=True, v=True)
         faceCount = pm. intFieldGrp('faceCountIntFld', q=True, v1=True)
         symmetry = pm.checkBoxGrp('retopoOptions', q=True, v1=True)
         delHistory = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
-        convertToCageMesh(meshes, minHoleRadius, detailSize, faceCount, symmetry, delHistory)
+
+        convertToCageMesh(srcMeshes, detailSize, faceCount, symmetry, delHistory)
+
+        if faceMeshes:
+            pm.delete(faceMeshes)
 
     winName = 'cageMeshWin'
     if cmds.window(winName, exists=True):
@@ -175,8 +159,6 @@ def showConvertToCageMeshUI(parent=None, *args):
 
     pm.frameLayout(label='Volume Mesh Settings')
     pm.rowColumnLayout(numberOfColumns=2)
-    pm.text(label='Min Hole Radius: ', ann='Minimize holes of the volume. \nHigher value produce more solid mesh. \nThis is suitable for making solid mesh from a shell mesh like a shirts or shoes.')
-    pm.floatField('minHoleRadiusFloatFld', v=MIN_HOLE_RADIUS, min=0.0, pre=1)
     pm.text(label='Detail Size: ', ann='When this value set to higher the resulting mesh will be more closed to the input mesh.')
     pm.floatField('detailSizeFloatFld', v=0.02, min=0.01, pre=3)
 
