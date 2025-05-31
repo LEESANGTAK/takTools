@@ -832,8 +832,13 @@ def update():
 
 
 def copyMayaPreferences():
-    prefsDir = '{}/prefs'.format(MODULE_PATH)
-    mayaPrefDir = '{}{}/prefs'.format(cmds.internalVar(uad=True), int(cmds.about(version=True)))
+    # Copy preferences files
+    if MAYA_VERSION > 2019:
+        prefsDir = '{}/prefs/2020+'.format(MODULE_PATH)
+    else:
+        prefsDir = '{}/prefs/2019-'.format(MODULE_PATH)
+
+    mayaPrefDir = '{}/{}/prefs'.format(cmds.internalVar(uad=True), MAYA_VERSION)
     copy_tree(prefsDir, mayaPrefDir)
 
     # Load hotkey set
