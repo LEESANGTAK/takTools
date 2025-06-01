@@ -258,8 +258,10 @@ def app(*args):
         cmds.matchTransform(ctrl, trg)
 
         if matchSpaceOpt:
-            cmds.delete(cmds.parentConstraint(trg + "_zero", ctrl, mo=False))
-            cmds.delete(cmds.scaleConstraint(trg + "_zero", ctrl, mo=False))
+            trgSpaceGrp = trg + "_zero"
+            if cmds.objExists(trgSpaceGrp):
+                cmds.delete(cmds.parentConstraint(trgSpaceGrp, ctrl, mo=False))
+                cmds.delete(cmds.scaleConstraint(trgSpaceGrp, ctrl, mo=False))
 
         # Create control groups.
         if spaceGrpOpt:
