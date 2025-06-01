@@ -260,7 +260,7 @@ def getAffectedVertex(inf, minWeight):
             continue
         skinFn = oma.MFnSkinCluster(skinNode)
 
-        # Get geometry dag path
+        # Get influence dag path
         selLs.add(inf.name())
         selLs.getDagPath(1, infDagPath)
 

@@ -63,7 +63,7 @@ def UI():
     cmds.frameLayout(label = 'Manual Check List', collapsable = True, collapse = True)
     cmds.checkBox('mdlGridChkBox', label = '[ World Position ]  Center of the Grid in Front and Side, Bottom on Grid', cc = partial(chkBoxCC, 'mdlGridChkBox'))
     cmds.checkBox('scaleChkBox', label = '[ Scale ]  Compare to other characters, Real World Scale', cc = partial(chkBoxCC, 'scaleChkBox'))
-    cmds.checkBox('dfltStateChkBox', label = '[ Default Pose ]  Middle Pose between extreme poses', cc = partial(chkBoxCC, 'dfltStateChkBox'))
+    cmds.checkBox('dfltStateChkBox', label = '[ Bind Pose ]  Middle Pose between extreme poses. Straighten. No penetration.', cc = partial(chkBoxCC, 'dfltStateChkBox'))
     cmds.checkBox('topoChkBox', label = '[ Topology ]  Deformable/Continuous Flow, Enough Resolution, Quad', cc = partial(chkBoxCC, 'topoChkBox'))
     cmds.checkBox('hiddenChkBox', label = '[ Hidden Area ]  Inner Eyelid, Inner Mouth, Inner Cloth', cc = partial(chkBoxCC, 'hiddenChkBox'))
     cmds.checkBox('uvChkBox', label = '[ UV ]  No overlaped UVs', cc = partial(chkBoxCC, 'uvChkBox'))
