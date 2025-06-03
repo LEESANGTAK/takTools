@@ -68,7 +68,7 @@ def UI():
     cmds.checkBox('scaleCnstChkBox', label = '', value = False, cc = scaleCnstChkBokCC)
 
     cmds.text('udCnntText', label = 'User Define Connect: ', align = 'right')
-    cmds.checkBox('udCnntChkBox', label = '', value = True)
+    cmds.checkBox('udCnntChkBox', label = '', value = False)
     cmds.text('trnsCnntText', label = 'translate Connect: ', align = 'right')
     cmds.checkBox('trnsCnntChkBox', label = '', value = False, cc = trnsCnntChkBokCC)
     cmds.text('roCnntText', label = 'Rotate Connect: ', align = 'right')
@@ -295,6 +295,8 @@ def app(*args):
         if udCnntOpt:
             udAttrs = cmds.listAttr(trg, ud = True)
             if udAttrs:
+                IGNORE_ATTRS = ['lockInfluenceWeights']
+                udAttrs = list(set(udAttrs) - set(IGNORE_ATTRS))
                 for udAttr in udAttrs:
                     attrType = cmds.attributeQuery(udAttr, node=trg, attributeType=True)
                     if attrType == 'enum':

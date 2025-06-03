@@ -13,6 +13,19 @@ from ..rigging import bSkinSaver as bsk
 from ..rigging import sculptSkinAPI as ssAPI
 
 
+def removeLockWeightsInputConnection(joints=[]):
+    if not joints:
+        joints = cmds.ls(type='joint')
+
+    for jnt in joints:
+        attr = jnt+'.lockInfluenceWeights'
+        if not cmds.objExists(attr):
+            continue
+        inConnection = cmds.listConnections(attr, s=True, d=False, plugs=True)
+        if inConnection:
+            cmds.disconnectAttr(inConnection[0], attr)
+
+
 def bind(jnts, geos, maxInfluence=4):
     """
     Binds geometries with given joints.
@@ -22,6 +35,8 @@ def bind(jnts, geos, maxInfluence=4):
         geos (list): Geometries to bind.
         maxInfluence (int, optional): Number of influeces per point. Defaults to 1.
     """
+    removeLockWeightsInputConnection(jnts)
+
     geoShpLs = pm.ls(geos, dag=True, ni=True, type=['mesh', 'nurbsCurve', 'nurbsSurface'])
 
     for geoShp in geoShpLs:
@@ -90,6 +105,8 @@ def copySkin(source, target, components=None):
         source (str): Source geometry
         target (str): Target geomery
     """
+    removeLockWeightsInputConnection()
+
     source = pm.PyNode(source)
     target = pm.PyNode(target)
 
@@ -144,7 +161,6 @@ def copySkinSets(sourceSkinMesh, targetSets):
                 copySkin(sourceSkinMesh, mesh)
 
         if meshComponents:
-            print(meshComponents)
             # Get cpntMeshes transforms from mesh components
             cpntMeshes = list(set(cmds.filterExpand(cmds.ls(meshComponents, o=True), sm=12)))
             # Build mesh and components info
@@ -220,6 +236,8 @@ def separateSkinMesh():
 def addInfluences():
     sels = pm.selected()
     jnts = pm.ls(sels, type='joint')
+
+    removeLockWeightsInputConnection(jnts)
 
     meshes = [item for item in sels if item.getShape()]
     for mesh in meshes:
@@ -394,6 +412,8 @@ def exportSkin(mesh, outputDir):
 
 
 def importSkin(skinFile):
+    removeLockWeightsInputConnection()
+
     with open(skinFile, 'r') as f:
         fContents = f.readlines()
         mesh = fContents[0].strip('\n')

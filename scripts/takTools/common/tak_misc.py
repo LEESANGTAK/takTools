@@ -2071,6 +2071,8 @@ def addInfCopySkin(source=None, targets=None):
     And copy skin weights.
     '''
 
+    skinUtil.removeLockWeightsInputConnection()
+
     # When no source and no targets are given, get the first selected object as source and the rest as targets.
     if not source and not targets:
         sels = cmds.ls(os=True, fl=True)
