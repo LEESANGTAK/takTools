@@ -254,7 +254,7 @@
         -image "SSAO.png" 
         -echoCommand 0
         -italicized 0
-        -boldFont 0
+        -boldFont 1
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem26;
@@ -346,7 +346,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"joint\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\n}" 
+        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"transform\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\n}" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -852,7 +852,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem15;
+        menuEditorMenuItem27;
 
     menuItem
         -label "Color Feedback" 
