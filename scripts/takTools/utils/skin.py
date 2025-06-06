@@ -381,18 +381,29 @@ def doneEditSkinMesh(tempSkin, skinMesh):
     pm.headsUpDisplay('editSkinMeshHUD', remove=True)
 
 
+def editSkinnedJoints(skinMesh):
+    tempSkinFile = exportSkin(skinMesh, pm.internalVar(userTmpDir=True))
+    pm.select(skinMesh, r=True)
+    pm.mel.eval('DetachSkin;')
+    pm.hudButton('editSkinnedJointsHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinnedJoints(tempSkinFile))
+
+def doneEditSkinnedJoints(tempSkinFile):
+    importSkin(tempSkinFile)
+    pm.headsUpDisplay('editSkinnedJointsHUD', remove=True)
+
+
 def sculptSkinMesh(skinMesh):
     sculptMesh = cmds.duplicate(skinMesh, n='sculptSkin_geo')[0]
     cmds.hide(skinMesh)
     meshUtil.cleanupMesh(sculptMesh)
     cmds.select(sculptMesh, r=True)
-    cmds.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done', bw=80, bsh='roundRectangle', rc=lambda : doneEditSculptMesh(skinMesh, sculptMesh))
+    cmds.hudButton('sculptSkinMeshHUD', s=3, b=4, vis=1, l='Done', bw=80, bsh='roundRectangle', rc=lambda : doneEditSculptMesh(skinMesh, sculptMesh))
 
 def doneEditSculptMesh(skinMesh, sculptMesh):
     ssAPI.apply_inverse_weights_all(skinMesh, sculptMesh)
     cmds.setAttr('{}.visibility'.format(skinMesh), 1)
     cmds.delete(sculptMesh)
-    cmds.headsUpDisplay('editSkinMeshHUD', remove=True)
+    cmds.headsUpDisplay('sculptSkinMeshHUD', remove=True)
 
 
 def SSD(geo):
