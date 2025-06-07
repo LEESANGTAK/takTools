@@ -14,10 +14,10 @@
 
 
 
+import os
 import maya.OpenMaya as OpenMaya
 import maya.OpenMayaAnim as OpenMayaAnim
-import maya.mel
-import maya.cmds as cmds
+from maya import cmds, mel
 import maya.OpenMayaUI as mui
 import time
 
@@ -44,6 +44,13 @@ def showUI():
     mainWin = bSkinSaverUI()
     mainWin.show()
 
+    dirName = os.path.dirname(mainWin.objectsFileLine.text())
+    fileName = 'fileName.sw'
+    sels = cmds.ls(sl=True)
+    if sels:
+        fileName = sels[0] + '.sw'
+    mainWin.objectsFileLine.setText(os.path.join(dirName, fileName))
+
 
 def getMayaWindow():
     ptr = mui.MQtUtil.mainWindow()
@@ -63,7 +70,9 @@ class bSkinSaverUI(QDialog):
         self.descLabel = QLabel("(C) 2015 by Thomas Bittner", parent=self)
         self.setWindowTitle('bSkinSaver 1.1')
 
-        self.objectsFileLine = QLineEdit('/Users/thomas/default.weights', parent=self)
+        self.geoCheckBox = QCheckBox("Geometry", parent=self)
+        self.geoCheckBox.setToolTip("If checked, the geometry will be saved/loaded with the skinWeights.\nIf not checked, only the skinWeights will be saved/loaded.")
+        self.objectsFileLine = QLineEdit('{0}/fileName.sw'.format(os.path.join(os.path.expanduser("~"), "Downloads")), parent=self)
         self.selectObjectsFileButton = QPushButton("Set File", parent=self)
         self.saveObjectsButton = QPushButton("Save Weights from selected Objects", parent=self)
         self.loadObjectsButton = QPushButton("Load", parent=self)
@@ -72,6 +81,9 @@ class bSkinSaverUI(QDialog):
         objectsLayout = QVBoxLayout(objectsTab)
         objectsLayout.setAlignment(Qt.AlignTop)
         objectsLayout.setSpacing(3)
+
+        objectsLayout.addWidget(self.geoCheckBox)
+
         objectsFileLayout = QBoxLayout(QBoxLayout.LeftToRight)
         objectsFileLayout.addWidget(self.objectsFileLine)
         objectsFileLayout.addWidget(self.selectObjectsFileButton)
@@ -143,7 +155,8 @@ class bSkinSaverUI(QDialog):
         self._namespaceCBox.addItems([ns+':' for ns in namespaces])
 
     def selectObjectsFile(self):
-        fileResult = cmds.fileDialog2()
+        startDir = os.path.dirname(self.objectsFileLine.text())
+        fileResult = cmds.fileDialog2(dir=startDir, fileMode=0, fileFilter="All Files (*.sw)")
         if fileResult != None:
             self.objectsFileLine.setText(fileResult[0])
 
@@ -155,14 +168,14 @@ class bSkinSaverUI(QDialog):
 
     def loadObjects(self):
         namespace = self._namespaceCBox.currentText()
-        bLoadSkinValues (False, str(self.objectsFileLine.text()), namespace)
+        bLoadSkinValues (False, str(self.objectsFileLine.text()), namespace, self.geoCheckBox.isChecked())
 
     def loadObjectsSelection(self):
         namespace = self._namespaceCBox.currentText()
         bLoadSkinValues (True, str(self.objectsFileLine.text()), namespace)
 
     def saveObjects(self):
-        bSaveSkinValues(str(self.objectsFileLine.text()))
+        bSaveSkinValues(str(self.objectsFileLine.text()), self.geoCheckBox.isChecked())
 
     def loadVertices(self):
         bLoadVertexSkinValues(str(self.verticesFileLine.text()), self.ignoreJointLocksWhenLoading.isChecked())
@@ -174,7 +187,7 @@ class bSkinSaverUI(QDialog):
 
 bSkinPath = OpenMaya.MDagPath()
 def bFindSkinCluster(objectName):
-    skinClst = maya.mel.eval('findRelatedSkinCluster("{}");'.format(objectName))
+    skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(objectName))
     if skinClst:
         sels = OpenMaya.MSelectionList()
         sels.add(skinClst)
@@ -563,7 +576,7 @@ def bSaveVertexSkinValues(inputFile, ignoreSoftSelection):
 
 
 
-def bSaveSkinValues(inputFile):
+def bSaveSkinValues(inputFile, geometry=False):
 
     timeBefore = time.time()
 
@@ -582,6 +595,10 @@ def bSaveSkinValues(inputFile):
             print(OpenMaya.MFnDagNode(node).name() + ' is not a Transform node (need to select transform node of polyMesh)')
         else:
             objectName = OpenMaya.MFnDagNode(node).name()
+
+            if geometry:
+                mel.eval('AbcExport -j "-frameRange 0 0 -stripNamespaces -uvWrite -worldSpace -writeUVSets -dataFormat ogawa -root {0} -file {1}/{0}.abc";'.format(objectName, os.path.dirname(inputFile.replace('\\', '/'))))
+
             newTransform = OpenMaya.MFnTransform(node)
             for childIndex in range(newTransform.childCount()):
                 childObject = newTransform.child(childIndex)
@@ -693,7 +710,7 @@ def bSkinObject(objectName, fileJoints, weights):
                 break
 
         if not allJointsHere:
-            maya.mel.eval("DetachSkin " + objectName)
+            mel.eval("DetachSkin " + objectName)
         else:
             objectFoundJointsInFile = [False] * len(influenceStringArray)
 
@@ -717,12 +734,12 @@ def bSkinObject(objectName, fileJoints, weights):
 
         cmd += " " + objectName
         print(cmd)
-        maya.mel.eval(cmd)
+        mel.eval(cmd)
 
-        maya.mel.eval("skinCluster -tsb -mi 10")
-        maya.mel.eval("select `listRelatives -p " + objectName + "`")
-        maya.mel.eval("refresh")
-        #maya.mel.eval("undoInfo -st 1")
+        mel.eval("skinCluster -tsb -mi 10")
+        mel.eval("select `listRelatives -p " + objectName + "`")
+        mel.eval("refresh")
+        #mel.eval("undoInfo -st 1")
 
         skinCluster = bFindSkinCluster(objectName)
 
@@ -803,18 +820,22 @@ def bSkinObject(objectName, fileJoints, weights):
     # set the weights
     #
     fnSkinCluster.setWeights(bSkinPath, vtxComponents, mayafileJointsMapArray, weightDoubles, 0)
-    #Maya.mel.eval("skinPercent -normalize true " + fnSkinCluster.name() + " " + objectName)
+    #mel.eval("skinPercent -normalize true " + fnSkinCluster.name() + " " + objectName)
 
 
 
 
-def bLoadSkinValues(loadOnSelection, inputFile, namespace=''):
+def bLoadSkinValues(loadOnSelection, inputFile, namespace='', geometry=False):
 
     timeBefore = time.time()
 
     joints = []
     weights = []
     PolygonObject = ""
+
+    if geometry:
+        geo = os.path.basename(inputFile).replace('.sw', '')
+        mel.eval('AbcImport -mode import "{}/{}";'.format(os.path.dirname(inputFile.replace('\\', '/')), geo+'.abc'))
 
     if loadOnSelection == True:
         sels = cmds.ls(sl=True)
@@ -862,8 +883,8 @@ def bLoadSkinValues(loadOnSelection, inputFile, namespace=''):
             FilePosition = 1
 
             if cmds.objExists(PolygonObject):
-                maya.mel.eval("select " + PolygonObject)
-                maya.mel.eval("refresh")
+                mel.eval("select " + PolygonObject)
+                mel.eval("refresh")
 
     print('done loading weights, it took ', (time.time()-timeBefore), ' seconds.')
 
