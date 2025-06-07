@@ -338,8 +338,19 @@ def updateBindPose(rootJoint):
     :param rootJoint: Root joint of joint hierarchy
     :type rootJoint: str
     """
+    parent = cmds.listRelatives(rootJoint, p=True)
+    if parent:
+        if cmds.nodeType(parent[0]) == 'joint':
+            cmds.error('Joint "{}" has parent joint. Please use the root joint of the hierarchy.'.format(rootJoint))
+            return
+        else:
+            cmds.parent(rootJoint, world=True)
+
     cmds.delete(cmds.dagPose(rootJoint, q=True, bindPose=True))
     cmds.dagPose(cmds.ls(rootJoint, dag=True), n='bindPose', save=True, bindPose=True)
+
+    if parent:
+        cmds.parent(rootJoint, parent[0])
 
 
 def goToBindPose(rootJoint):
