@@ -142,8 +142,10 @@ def copySkin(source, target, components=None):
 
     pm.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
 
-    skinMethod = max(pm.PyNode(srcSkinClst).skinningMethod.get(), 0)  # Prevent the value of skinning method not to be negative
-    pm.PyNode(trgSkinClst).skinningMethod.set(skinMethod)
+    srcSkinMethod = max(pm.PyNode(srcSkinClst).skinningMethod.get(), 0)  # Prevent the value of skinning method not to be negative
+    trgSkinMethod = max(pm.PyNode(trgSkinClst).skinningMethod.get(), 0)
+    if trgSkinMethod != 2:  # Set skinning method as same as source skin cluster if not Weighted Blended
+        pm.PyNode(trgSkinClst).skinningMethod.set(srcSkinMethod)
     pm.PyNode(trgSkinClst).useComponents.set(pm.PyNode(srcSkinClst).useComponents.get())
 
     return trgSkinClst

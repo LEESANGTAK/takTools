@@ -2155,7 +2155,9 @@ def addInfCopySkin(source=None, targets=None):
 
     for trgSkinClst in trgSkinClsts:
         srcSkinMethod = max(cmds.getAttr('%s.skinningMethod' % srcSkinClst), 0)
-        cmds.setAttr('%s.skinningMethod' % trgSkinClst, srcSkinMethod)
+        trgSkinMethod = max(cmds.getAttr('%s.skinningMethod' % trgSkinClst), 0)
+        if trgSkinMethod != 2:  # Set skinning method as same as source skin cluster if not Weighted Blended
+            cmds.setAttr('%s.skinningMethod' % trgSkinClst, srcSkinMethod)
         srcUseComponent = cmds.getAttr('%s.useComponents' % srcSkinClst)
         cmds.setAttr('%s.useComponents' % trgSkinClst, srcUseComponent)
         srcNormalize = cmds.getAttr('%s.normalizeWeights' % srcSkinClst)
