@@ -377,6 +377,7 @@ def duplicateOrigMesh(meshTransform):
     for shape in newMeshTransform.getShapes():
         if shape.isIntermediate():  # Show orig shape
             shape.intermediateObject.set(False)
+            shape.rename('{0}Shape'.format(newMeshTransform.name()))
         else:
             pm.delete(shape)  # Delte displayed shape
 
