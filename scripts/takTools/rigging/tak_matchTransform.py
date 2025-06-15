@@ -57,22 +57,8 @@ def match(*args):
     mirrorWorldX = cmds.checkBox('mirrorWorldXChkbox', q=True, v=True)
     mirrorLocalX = cmds.checkBox('mirrorLocalXChkbox', q=True, v=True)
 
-    if pm.filterExpand(target, sm=[10, 12]):  # check if target is a Mesh or Nurbs Surface
-        # Match transform to the mesh using uv pin node
-        for srcTrsf in srcTrsfs:
-            pm.select(target, srcTrsf, r=True)
-            cmds.UVPin()
-
-        # Clean up the uv pin node
-        for srcTrsf in srcTrsfs:
-            uvPinPlug = cmds.listConnections(srcTrsf+'.offsetParentMatrix', plugs=True)[0]
-            offsetParentMtx = cmds.getAttr(srcTrsf+'.offsetParentMatrix')
-            cmds.xform(srcTrsf.name(), matrix=offsetParentMtx)
-            cmds.setAttr(srcTrsf+'.scale', 1, 1, 1)
-
-            cmds.disconnectAttr(uvPinPlug, srcTrsf+'.offsetParentMatrix')
-            cmds.setAttr(srcTrsf+'.offsetParentMatrix', [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0], type='matrix')
-            cmds.delete(cmds.ls(uvPinPlug, objectsOnly=True))
+    if pm.filterExpand(target, sm=[12]):  # check if target is a Mesh
+        mathToClosestPointOnSurface([src.name() for src in srcTrsfs], target.name())
 
     else:  # check if target is a transform node
         for srcTrsf in srcTrsfs:
@@ -113,3 +99,28 @@ def match(*args):
                 pm.setAttr('{}.rotate'.format(srcTrsf), target.rotateX.get(), -target.rotateY.get(), -target.rotateZ.get())
             else:
                 pm.matchTransform(srcTrsf, target, pos=translateOpt, rot=rotateOpt, scl=scaleOpt, piv=pivotOpt)
+
+
+def mathToClosestPointOnSurface(srcs, trg):
+    mSels = om.MSelectionList()
+    mSels.add(trg)
+
+    meshNode = mSels.getDagPath(0)
+    fnMesh = om.MFnMesh(meshNode)
+
+    for src in srcs:
+        srcPoint = om.MPoint(cmds.xform(src, q=True, ws=True, t=True))
+        pointOnMesh, normalOnMesh, faceId = fnMesh.getClosestPointAndNormal(srcPoint, om.MSpace.kWorld)
+        vtxs = fnMesh.getPolygonVertices(faceId)
+        tangent = fnMesh.getFaceVertexTangent(faceId, vtxs[0], om.MSpace.kWorld)
+        biTangent = (normalOnMesh ^ tangent).normalize()
+        tangent = (biTangent ^ normalOnMesh).normalize()
+
+        closestMtx = [
+            tangent.x, tangent.y, tangent.z, 0,
+            biTangent.x, biTangent.y, biTangent.z, 0,
+            normalOnMesh.x, normalOnMesh.y, normalOnMesh.z, 0,
+            pointOnMesh.x, pointOnMesh.y, pointOnMesh.z, 1
+        ]
+
+        cmds.xform(src, ws=True, m=closestMtx)
