@@ -109,6 +109,8 @@ def app(*args):
     if moduleGrpOpt:
         moduleName = cmds.textFieldGrp('moduleNameTxtFldGrp', q=True, text=True)
         parentSpace = cmds.textFieldGrp('parentSpaceTxtFldGrp', q=True, text=True)
+        if not parentSpace:
+            cmds.error("Please specify a parent space for the module group.")
         createModuleGroups(moduleName, parentSpace)
     else:
         for trg in trgList:
