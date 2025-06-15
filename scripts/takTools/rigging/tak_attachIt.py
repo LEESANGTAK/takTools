@@ -44,7 +44,7 @@ class UI(object):
         cls.widgets['menuBar'] = cmds.menuBarLayout(p=cls.win)
         cls.widgets['editMenu'] = cmds.menu(label='Edit', p=cls.widgets['menuBar'])
         cmds.menuItem(label='Convert to uvPin', p=cls.widgets['editMenu'], c=Functions.convertToUvPin, ann="Convert setup from follicle to uvPin for selected anchor groups.")
-        cmds.menuItem(label='Cancel Parent Translate', p=cls.widgets['editMenu'], c=Functions.cancelParentTranslate, ann="Set up that cancel translation for it's parent for selected anchor groups.")
+        cmds.menuItem(label='Cancel Parent Translate', p=cls.widgets['editMenu'], c=Functions.cancelParentTranslate, ann="Set up that cancel translation for it's parent for selected anchor groups to solve double translation.")
 
         cls.widgets['mainColLay'] = cmds.columnLayout(adj=True)
 
@@ -455,7 +455,7 @@ class Functions(object):
     def convertToUvPin(*args):
         anchorGrps = cmds.ls(sl=True)
         for anchorGrp in anchorGrps:
-            folConnectInfo = getFollicleConnectionInfo(anchorGrp)
+            folConnectInfo = getFollicleTransform(anchorGrp)
             folTransform = folConnectInfo['follicleTransform']
             folDestinationAttr = folConnectInfo['follicleMatrixDestinationAttr']
             geo = folConnectInfo['geometry']
@@ -480,79 +480,52 @@ class Functions(object):
     def cancelParentTranslate(*args):
         anchorGrps = cmds.ls(sl=True)
         for anchorGrp in anchorGrps:
-            folConnectInfo = getFollicleConnectionInfo(anchorGrp)
-            if folConnectInfo:
-                folTransform = folConnectInfo['follicleTransform']
-                parentGrp = cmds.listRelatives(anchorGrp, p=True)[0]
-                multMtx = cmds.createNode('multMatrix', n=anchorGrp.replace('_anchor', '_localMatrix'))
-                decMtx = cmds.createNode('decomposeMatrix', n=anchorGrp.replace('_anchor', '_decMatrix'))
+            parentGrp = cmds.listRelatives(anchorGrp, p=True)[0]
+            multMtx = cmds.createNode('multMatrix', n=anchorGrp.replace('_anchor', '_localMatrix'))
+            decMtx = cmds.createNode('decomposeMatrix', n=anchorGrp.replace('_anchor', '_decMatrix'))
 
+            folTransform = getFollicleTransform(anchorGrp)
+            uvPin = getUvPin(anchorGrp)
+            surfaceMatrix = getSurfaceMatrix(anchorGrp)
+
+            if folTransform:
                 cmds.connectAttr(folTransform+'.worldMatrix', multMtx+'.matrixIn[0]', f=True)
-                cmds.connectAttr(parentGrp+'.worldInverseMatrix', multMtx+'.matrixIn[1]', f=True)
-                cmds.connectAttr(multMtx+'.matrixSum', decMtx+'.inputMatrix', f=True)
-                cmds.connectAttr(decMtx+'.outputTranslate', anchorGrp+'.t', f=True)
-            else:
-                uvPinConnectInfo = getUvPinConnectionInfo(anchorGrp)
-                uvPin = uvPinConnectInfo['uvPin']
-                parentGrp = cmds.listRelatives(anchorGrp, p=True)[0]
-                multMtx = cmds.createNode('multMatrix', n=anchorGrp.replace('_anchor', '_localMatrix'))
-                decMtx = cmds.createNode('decomposeMatrix', n=anchorGrp.replace('_anchor', '_decMatrix'))
-
+            elif uvPin:
                 cmds.connectAttr(uvPin+'.outputMatrix[0]', multMtx+'.matrixIn[0]', f=True)
-                cmds.connectAttr(parentGrp+'.worldInverseMatrix', multMtx+'.matrixIn[1]', f=True)
-                cmds.connectAttr(multMtx+'.matrixSum', decMtx+'.inputMatrix', f=True)
-                cmds.connectAttr(decMtx+'.outputTranslate', anchorGrp+'.t', f=True)
+            elif surfaceMatrix:
+                cmds.connectAttr(surfaceMatrix+'.output', multMtx+'.matrixIn[0]', f=True)
+
+            cmds.connectAttr(parentGrp+'.worldInverseMatrix', multMtx+'.matrixIn[1]', f=True)
+            cmds.connectAttr(multMtx+'.matrixSum', decMtx+'.inputMatrix', f=True)
+            cmds.connectAttr(decMtx+'.outputTranslate', anchorGrp+'.t', f=True)
 
 # Uils ------------------------------------------------------------------
-def getFollicleConnectionInfo(anchorGrp):
+def getFollicleTransform(anchorGrp):
     folShape = cmds.ls(cmds.listHistory(anchorGrp, ac=True), type='follicle')
     if not folShape:
         return None
     folShape = folShape[0]
-    fol = cmds.listRelatives(folShape, p=True)[0]
-    folDestinationAttr = cmds.listConnections(fol+'.worldMatrix[0]', plugs=True)[0]
-    geo = cmds.listConnections(folShape+'.inputMesh', sh=True)[0]
-    geoOrig = get_intermediate_object(cmds.listRelatives(geo, p=True)[0])
-    uvSet = cmds.getAttr(folShape+'.mapSetName')
-    u = cmds.getAttr(folShape+'.parameterU')
-    v = cmds.getAttr(folShape+'.parameterV')
+    folTransform = cmds.listRelatives(folShape, p=True)[0]
 
-    folConnectInfo = {
-        'follicleShape': folShape,
-        'follicleTransform': fol,
-        'follicleMatrixDestinationAttr': folDestinationAttr,
-        'geometry': geo,
-        'geometryOrig': geoOrig,
-        'uvSet': uvSet,
-        'u': u,
-        'v': v
-    }
-
-    return folConnectInfo
+    return folTransform
 
 
-def getUvPinConnectionInfo(anchorGrp):
-    uvPin = cmds.ls(cmds.listHistory(anchorGrp, ac=True), type='uvPin')
+def getUvPin(anchorGrp):
+    decMtx = cmds.listConnections(anchorGrp, d=False, s=True, type='decomposeMatrix')[0]
+    uvPin = cmds.listConnections(decMtx, d=False, s=True, type='uvPin')
     if not uvPin:
         return None
-    uvPin = uvPin[0]
-    uvPinDestinationAttr = cmds.listConnections(uvPin+'.outputMatrix[0]', plugs=True)[0]
-    geo = cmds.listConnections(uvPin+'.deformedGeometry', sh=True)[0]
-    geoOrig = get_intermediate_object(cmds.listRelatives(geo, p=True)[0])
-    uvSet = cmds.getAttr(uvPin+'.uvSetName')
-    u, v = cmds.getAttr(uvPin+'.coordinate[0]')[0]
 
-    uvPinConnectInfo = {
-        'uvPin': uvPin,
-        'uvPinMatrixDestinationAttr': uvPinDestinationAttr,
-        'geometry': geo,
-        'geometryOrig': geoOrig,
-        'uvSet': uvSet,
-        'u': u,
-        'v': v
-    }
+    return uvPin[0]
 
-    return uvPinConnectInfo
+
+def getSurfaceMatrix(anchorGrp):
+    decMtx = cmds.listConnections(anchorGrp, d=False, s=True, type='decomposeMatrix')[0]
+    fourByFourMtx = cmds.listConnections(decMtx, d=False, s=True, type='fourByFourMatrix')
+    if not fourByFourMtx:
+        return None
+
+    return fourByFourMtx[0]
 
 
 def get_intermediate_object(transform):
