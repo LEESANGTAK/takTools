@@ -19,6 +19,7 @@ import re
 
 from maya import cmds
 import pymel.core as pm
+import maya.api.OpenMaya as om
 
 
 requirePlugins = ['matrixNodes', 'nearestPointOnMesh']
@@ -43,8 +44,10 @@ class UI(object):
 
         cls.widgets['menuBar'] = cmds.menuBarLayout(p=cls.win)
         cls.widgets['editMenu'] = cmds.menu(label='Edit', p=cls.widgets['menuBar'])
-        cmds.menuItem(label='Convert to uvPin', p=cls.widgets['editMenu'], c=Functions.convertToUvPin, ann="Convert setup from follicle to uvPin for selected anchor groups.")
         cmds.menuItem(label='Cancel Parent Translate', p=cls.widgets['editMenu'], c=Functions.cancelParentTranslate, ann="Set up that cancel translation for it's parent for selected anchor groups to solve double translation.")
+        cmds.menuItem(label='Convert to Follicle', p=cls.widgets['editMenu'], c=Functions.convertToFollicle)
+        cmds.menuItem(label='Convert to UV Pin', p=cls.widgets['editMenu'], c=Functions.convertToUvPin)
+        cmds.menuItem(label='Convert to Two Edge', p=cls.widgets['editMenu'], c=Functions.convertToTwoEdge)
 
         cls.widgets['mainColLay'] = cmds.columnLayout(adj=True)
 
@@ -55,10 +58,11 @@ class UI(object):
         cls.widgets['mPosOffChkBox'] = cmds.checkBox(label='Maintain Pos Offset', v=True, p=cls.widgets['chkRowLay'])
         cls.widgets['moOriOffChkBox'] = cmds.checkBox(label='Maintain Ori Offset', v=True, p=cls.widgets['chkRowLay'])
 
-        cmds.separator(h=5, style='none', p=cls.widgets['mainColLay'])
+        cmds.separator(h=5, p=cls.widgets['mainColLay'])
+
+        cls.widgets['attachMethodRadioBtnGrp'] = cmds.radioButtonGrp(label='Attach to Mesh Method:', numberOfRadioButtons=3, labelArray3=['UV Pin', 'Follicle', 'Two Edge'], select=1, p=cls.widgets['mainColLay'], cw=[(1, 130), (2, 70), (3, 70)])
 
         cls.widgets['appBtn'] = cmds.button(label='Attach It!', h=50, c=Functions.main, p=cls.widgets['mainColLay'])
-        cmds.separator(h=5, style='none', p=cls.widgets['mainColLay'])
 
         cmds.window(cls.win, e=True, w=100, h=50)
         cmds.showWindow(cls.win)
@@ -74,26 +78,31 @@ class Functions(object):
         mPosOffOpt = cmds.checkBox(UI.widgets['mPosOffChkBox'], q=True, v=True)
         freezedTransformOpt = cmds.checkBox(UI.widgets['freezedTransformChkBox'], q=True, v=True)
         mOriOffOpt = cmds.checkBox(UI.widgets['moOriOffChkBox'], q=True, v=True)
+        attachMethod = cmds.radioButtonGrp(UI.widgets['attachMethodRadioBtnGrp'], q=True, select=True)
 
         selList = cmds.ls(sl=True)
         srcObjs = selList[0:-1]
         cls.trgObj = selList[-1]
 
-        if '.e' in cls.trgObj:
-            cls.attachToMeshEdge(oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
-        else:
-            trgShp = cmds.listRelatives(cls.trgObj, s=True, ni=True)[0]
-            trgType = cmds.objectType(trgShp)
+        trgShp = cmds.listRelatives(cls.trgObj, s=True, ni=True)[0]
+        trgType = cmds.objectType(trgShp)
 
-            if trgType == 'nurbsCurve':
+        if trgType == 'nurbsCurve':
+            for srcObj in srcObjs:
+                cls.attachToCrv(srcObj, trgShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
+        elif trgType == 'nurbsSurface':
+            for srcObj in srcObjs:
+                cls.attachToSurface(srcObj, trgShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
+        elif trgType == 'mesh':
+            if attachMethod == 1:  # UV Pin
                 for srcObj in srcObjs:
-                    cls.attachToCrv(srcObj, trgShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
-            elif trgType == 'nurbsSurface':
+                    cls.attachToMeshUvPin(srcObj, trgShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
+            elif attachMethod == 2:  # Follicle
                 for srcObj in srcObjs:
-                    cls.attachToSurface(srcObj, trgShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
-            elif trgType == 'mesh':
+                    cls.attachToMeshFollicle(srcObj, trgShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
+            else:  # Two Edge
                 for srcObj in srcObjs:
-                    cls.attachToMeshUV(srcObj, trgShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
+                    cls.attachToMeshTwoEdge(srcObj, trgShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt)
 
     @classmethod
     def attachToCrv(cls, srcObj, trgCrvShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt):
@@ -114,7 +123,9 @@ class Functions(object):
         cmds.connectAttr('%s.parameter' % (nPntCrvNode), '%s.parameter' % (pOnCrvInfoNode), force=True)
         parmVal = cmds.getAttr('%s.parameter' % (pOnCrvInfoNode))
 
-        anchorGrp = cmds.createNode('transform', n=srcObj + '_anchor')
+        anchorGrp = srcObj + '_anchor'
+        if not cmds.objExists(anchorGrp):
+            cmds.createNode('transform', n=anchorGrp)
 
         cmds.connectAttr('%s.position' % (pOnCrvInfoNode), '%s.translate' % (anchorGrp), force=True)
         cmds.delete(nPntCrvNode)
@@ -169,7 +180,9 @@ class Functions(object):
         parmUVal = cmds.getAttr('%s.parameterU' % (pOnSurfInfoNode))
         parmVVal = cmds.getAttr('%s.parameterV' % (pOnSurfInfoNode))
 
-        anchorGrp = cmds.createNode('transform', n=srcObj + '_anchor')
+        anchorGrp = srcObj + '_anchor'
+        if not cmds.objExists(anchorGrp):
+            cmds.createNode('transform', n=anchorGrp)
 
         if srcPrnt:
             pntMtxMult = cmds.createNode("pointMatrixMult", n="%s_pntMtxMult" % (srcObj))
@@ -208,21 +221,16 @@ class Functions(object):
 
 
     @classmethod
-    def attachToMeshUV(cls, srcObj, trgMeshShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt):
+    def attachToMeshUvPin(cls, srcObj, trgMeshShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt):
         # Get parameter u and v values.
-        decMatrix = cmds.createNode('decomposeMatrix')
-        nearestPntOnMeshNode = cmds.createNode('nearestPointOnMesh')
+        mSels = om.MSelectionList()
+        mSels.add(trgMeshShp)
 
-        cmds.connectAttr('%s.worldMatrix' % srcObj, '%s.inputMatrix' % decMatrix, force=True)
-        if freezedTransformOpt:
-            cmds.connectAttr('%s.scalePivot' % (srcObj), '%s.inPosition' % (nearestPntOnMeshNode), force=True)
-        else:
-            cmds.connectAttr('%s.outputTranslate' % (decMatrix), '%s.inPosition' % (nearestPntOnMeshNode), force=True)
-        cmds.connectAttr('%s.outMesh' % trgMeshShp, '%s.inMesh' % nearestPntOnMeshNode, force=True)
+        meshDagPath = mSels.getDagPath(0)
+        fnMesh = om.MFnMesh(meshDagPath)
 
-        parmUVal = cmds.getAttr('%s.parameterU' % (nearestPntOnMeshNode))
-        parmVVal = cmds.getAttr('%s.parameterV' % (nearestPntOnMeshNode))
-        cmds.delete(decMatrix, nearestPntOnMeshNode)
+        srcPoint = om.MPoint(cmds.xform(srcObj, q=True, ws=True, t=True))
+        parmUVal, parmVVal, faceId = fnMesh.getUVAtPoint(srcPoint, space=om.MSpace.kWorld)
 
         # Create uvPin and connect nodes.
         trgMeshOrig = get_intermediate_object(cmds.listRelatives(trgMeshShp, p=True)[0])
@@ -235,7 +243,9 @@ class Functions(object):
         cmds.connectAttr(trgMeshOrig+'.outMesh', uvPin+'.originalGeometry', f=True)
 
         # Create anchor transform node.
-        anchorGrp = cmds.createNode('transform', n=srcObj + '_anchor')
+        anchorGrp = srcObj + '_anchor'
+        if not cmds.objExists(anchorGrp):
+            cmds.createNode('transform', n=anchorGrp)
 
         # Get local transform if source object parent transform exists.
         srcObjParentTrsf = cmds.listRelatives(srcObj, parent=True)
@@ -276,30 +286,110 @@ class Functions(object):
 
 
     @classmethod
-    def attachToMeshEdge(cls, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt):
-        selList = cmds.ls(sl=True, fl=True)
+    def attachToMeshFollicle(cls, srcObj, trgMeshShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt):
+        # Get parameter u and v values.
+        mSels = om.MSelectionList()
+        mSels.add(trgMeshShp)
+
+        meshDagPath = mSels.getDagPath(0)
+        fnMesh = om.MFnMesh(meshDagPath)
+
+        srcPoint = om.MPoint(cmds.xform(srcObj, q=True, ws=True, t=True))
+        parmUVal, parmVVal, faceId = fnMesh.getUVAtPoint(srcPoint, space=om.MSpace.kWorld)
+
+        # Create follicle and connect nodes.
+        fol = cmds.createNode('follicle')
+        folTrsf = cmds.listRelatives(fol, parent=True)[0]
+        folTrsf = cmds.rename(folTrsf, srcObj + '_fol')
+        fol = cmds.listRelatives(folTrsf, s=True)[0]
+
+        cmds.setAttr('{0}.parameterU'.format(fol), parmUVal)
+        cmds.setAttr('{0}.parameterV'.format(fol), parmVVal)
+        cmds.connectAttr('{0}.outMesh'.format(trgMeshShp), '{0}.inputMesh'.format(fol))
+        cmds.connectAttr('{0}.worldMatrix'.format(trgMeshShp), '{0}.inputWorldMatrix'.format(fol))
+        cmds.connectAttr('{0}.outTranslate'.format(fol), '{0}.translate'.format(folTrsf))
+        cmds.connectAttr('{0}.outRotate'.format(fol), '{0}.rotate'.format(folTrsf))
+
+        # Create anchor transform node.
+        anchorGrp = srcObj + '_anchor'
+        if not cmds.objExists(anchorGrp):
+            cmds.createNode('transform', n=anchorGrp)
+
+        # Get local transform if source object parent transform exists.
+        srcObjParentTrsf = cmds.listRelatives(srcObj, parent=True)
+        if srcObjParentTrsf:
+            multMatrix = cmds.createNode('multMatrix', n='%s_localMatrix' % srcObj)
+            decMatrix = cmds.createNode('decomposeMatrix', n='%s_decMatrix' % srcObj)
+
+            cmds.connectAttr('%s.worldMatrix' % folTrsf, '%s.matrixIn[0]' % multMatrix, f=True)
+            cmds.connectAttr('%s.worldInverseMatrix' % srcObjParentTrsf[0], '%s.matrixIn[1]' % multMatrix, f=True)
+            cmds.connectAttr('%s.matrixSum' % multMatrix, '%s.inputMatrix' % decMatrix)
+            cmds.connectAttr('%s.outputTranslate' % decMatrix, '%s.translate' % anchorGrp)
+            if oriOpt:
+                cmds.connectAttr('%s.outputRotate' % decMatrix, '%s.rotate' % anchorGrp)
+        else:
+            cmds.connectAttr('{0}.translate'.format(folTrsf), '{0}.translate'.format(anchorGrp))
+            if oriOpt:
+                cmds.connectAttr('{0}.rotate'.format(folTrsf), '{0}.rotate'.format(anchorGrp))
+
+        # Parenting
+        if srcObjParentTrsf:
+            cmds.parent(anchorGrp, srcObjParentTrsf[0])
+        cmds.parent(srcObj, anchorGrp)
+
+        # Maintain offset option
+        if not mPosOffOpt:
+            if freezedTransformOpt:
+                pm.matchTransform(srcObj, anchorGrp)
+                pm.makeIdentity(srcObj, apply=True)
+            else:
+                cls.setZeroAttr(srcObj, 'pos')
+
+        if not mOriOffOpt:
+            cls.setZeroAttr(srcObj, 'ori')
+            if cmds.objectType(srcObj) == "joint":
+                cls.setZeroJntOri(srcObj)
+
+        return folTrsf
+
+    @classmethod
+    def attachToMeshTwoEdge(cls, srcObj, trgMeshShp, oriOpt, mPosOffOpt, mOriOffOpt, freezedTransformOpt):
+        # Get closest edges.
+        mSels = om.MSelectionList()
+        mSels.add(trgMeshShp)
+
+        meshDagPath = mSels.getDagPath(0)
+        fnMesh = om.MFnMesh(meshDagPath)
+
+        srcPoint = om.MPoint(cmds.xform(srcObj, q=True, ws=True, t=True))
+
+        # Get the closest point on the mesh and the corresponding face index
+        closest_point, face_index = fnMesh.getClosestPoint(srcPoint, om.MSpace.kWorld)
+
+        # Initialize a polygon iterator and set it to the closest face
+        poly_iter = om.MItMeshPolygon(meshDagPath)
+        poly_iter.setIndex(face_index)
+
+        # Retrieve the edges of the face
+        edge_indices = poly_iter.getEdges()
+
         edgeDic = {}
-        srcObj = selList[0]
 
-        matchObj = re.match(r'(.+)\.(\w+)\[(\d+)\]', selList[1])
-        edgeOneNiceName = matchObj.group(1) + '_' + matchObj.group(2) + matchObj.group(3)
-        edgeDic[1] = [edgeOneNiceName, matchObj.group(3)]
+        trgMeshTrsf = cmds.listRelatives(trgMeshShp, p=True)[0]
+        edgeOneNiceName = '{}_e{}'.format(trgMeshTrsf, edge_indices[0])
+        edgeDic['edgeOne'] = [edgeOneNiceName, edge_indices[0]]
 
-        matchObj = re.match(r'(.+)\.(\w+)\[(\d+)\]', selList[2])
-        edgeTwoNiceName = matchObj.group(1) + '_' + matchObj.group(2) + matchObj.group(3)
-        edgeDic[2] = [edgeTwoNiceName, matchObj.group(3)]
-
-        trgMesh = matchObj.group(1)
-        trgMeshShp = cmds.listRelatives(trgMesh, s=True)[0]
+        edgeTwoNiceName = '{}_e{}'.format(trgMeshTrsf, edge_indices[2])
+        edgeDic['edgeTwo'] = [edgeTwoNiceName, edge_indices[2]]
 
         cmds.select(cl=True)
 
-        for edge in edgeDic.keys():
-            crvFromEdgeNode = cmds.createNode('curveFromMeshEdge', n=edgeDic[edge][0] + '_crvFromEdge')
-            cmds.connectAttr('%s.worldMesh[0]' % (trgMeshShp), '%s.inputMesh' % (crvFromEdgeNode), force=True)
-            cmds.setAttr('%s.edgeIndex[0]' % (crvFromEdgeNode), int(edgeDic[edge][1]))
+        for edgeInfo in edgeDic.values():
+            crvFromEdgeNode = cmds.createNode('curveFromMeshEdge', n=edgeInfo[0] + '_crvFromEdge')
+            cmds.connectAttr('%s.worldMesh[0]' % (trgMeshTrsf), '%s.inputMesh' % (crvFromEdgeNode), force=True)
+            cmds.setAttr('%s.edgeIndex[0]' % (crvFromEdgeNode), edgeInfo[1])
 
-        loftNode = cmds.createNode('loft', n=edgeOneNiceName + '_' + edgeTwoNiceName + '_loft')
+        loftNode = cmds.createNode('loft', n='{}_e{}_e{}_loft'.format(trgMeshTrsf, edgeDic['edgeOne'][1], edgeDic['edgeTwo'][1]))
         cmds.setAttr('%s.uniform' % loftNode, 1)
         cmds.setAttr('%s.reverseSurfaceNormals' % loftNode, 1)
         cmds.connectAttr('%s.outputCurve' % (edgeOneNiceName + '_crvFromEdge'), '%s.inputCurve[0]' % (loftNode),
@@ -324,7 +414,9 @@ class Functions(object):
         cmds.setAttr('%s.parameterU' % pOnSurfInfoNode, parmUVal)
         cmds.setAttr('%s.parameterV' % pOnSurfInfoNode, parmVVal)
 
-        anchorGrp = cmds.createNode('transform', n=srcObj + '_anchor')
+        anchorGrp = srcObj + '_anchor'
+        if not cmds.objExists(anchorGrp):
+            cmds.createNode('transform', n=anchorGrp)
 
         cmds.connectAttr('{0}.position'.format(pOnSurfInfoNode), '{0}.translate'.format(anchorGrp))
 
@@ -452,10 +544,26 @@ class Functions(object):
         cmds.connectAttr('%s.outputRotate' % decMatrix, '%s.rotate' % anchorGrp, force=True)
 
     @staticmethod
+    def convertToFollicle(*args):
+        objs = cmds.ls(sl=True)
+        for obj in objs:
+            anchorGrp = findAnchorGroup(obj)
+            if not anchorGrp:
+                cmds.warning("No anchor group found for {}".format(obj))
+                continue
+
+            driverNode = cmds.listConnections(anchorGrp + '.translate')
+            if not driverNode:
+                cmds.warning("No driver node found for {}".format(anchorGrp))
+                continue
+
+            cmds.delete(driverNode[0])
+
+    @staticmethod
     def convertToUvPin(*args):
         anchorGrps = cmds.ls(sl=True)
         for anchorGrp in anchorGrps:
-            folConnectInfo = getFollicleTransform(anchorGrp)
+            folConnectInfo = getFollicleConnectionInfo(anchorGrp)
             folTransform = folConnectInfo['follicleTransform']
             folDestinationAttr = folConnectInfo['follicleMatrixDestinationAttr']
             geo = folConnectInfo['geometry']
@@ -477,6 +585,10 @@ class Functions(object):
             cmds.delete(folTransform)
 
     @staticmethod
+    def convertToTwoEdge(*args):
+        pass
+
+    @staticmethod
     def cancelParentTranslate(*args):
         anchorGrps = cmds.ls(sl=True)
         for anchorGrp in anchorGrps:
@@ -484,8 +596,8 @@ class Functions(object):
             multMtx = cmds.createNode('multMatrix', n=anchorGrp.replace('_anchor', '_localMatrix'))
             decMtx = cmds.createNode('decomposeMatrix', n=anchorGrp.replace('_anchor', '_decMatrix'))
 
-            folTransform = getFollicleTransform(anchorGrp)
-            uvPin = getUvPin(anchorGrp)
+            folTransform = getFollicleConnectionInfo(anchorGrp)['follicleTransform']
+            uvPin = getUvPinConnectionInfo(anchorGrp)['uvPin']
             surfaceMatrix = getSurfaceMatrix(anchorGrp)
 
             if folTransform:
@@ -500,23 +612,55 @@ class Functions(object):
             cmds.connectAttr(decMtx+'.outputTranslate', anchorGrp+'.t', f=True)
 
 # Uils ------------------------------------------------------------------
-def getFollicleTransform(anchorGrp):
+def getFollicleConnectionInfo(anchorGrp):
     folShape = cmds.ls(cmds.listHistory(anchorGrp, ac=True), type='follicle')
     if not folShape:
         return None
     folShape = folShape[0]
-    folTransform = cmds.listRelatives(folShape, p=True)[0]
+    fol = cmds.listRelatives(folShape, p=True)[0]
+    folDestinationAttr = cmds.listConnections(fol+'.worldMatrix[0]', plugs=True)[0]
+    geo = cmds.listConnections(folShape+'.inputMesh', sh=True)[0]
+    geoOrig = get_intermediate_object(cmds.listRelatives(geo, p=True)[0])
+    uvSet = cmds.getAttr(folShape+'.mapSetName')
+    u = cmds.getAttr(folShape+'.parameterU')
+    v = cmds.getAttr(folShape+'.parameterV')
 
-    return folTransform
+    folConnectInfo = {
+        'follicleShape': folShape,
+        'follicleTransform': fol,
+        'follicleMatrixDestinationAttr': folDestinationAttr,
+        'geometry': geo,
+        'geometryOrig': geoOrig,
+        'uvSet': uvSet,
+        'u': u,
+        'v': v
+    }
+
+    return folConnectInfo
 
 
-def getUvPin(anchorGrp):
-    decMtx = cmds.listConnections(anchorGrp, d=False, s=True, type='decomposeMatrix')[0]
-    uvPin = cmds.listConnections(decMtx, d=False, s=True, type='uvPin')
+def getUvPinConnectionInfo(anchorGrp):
+    uvPin = cmds.ls(cmds.listHistory(anchorGrp, ac=True), type='uvPin')
     if not uvPin:
         return None
+    uvPin = uvPin[0]
+    uvPinDestinationAttr = cmds.listConnections(uvPin+'.outputMatrix[0]', plugs=True)[0]
+    geo = cmds.listConnections(uvPin+'.deformedGeometry', sh=True)[0]
+    geoOrig = get_intermediate_object(cmds.listRelatives(geo, p=True)[0])
+    uvSet = cmds.getAttr(uvPin+'.uvSetName')
+    u, v = cmds.getAttr(uvPin+'.coordinate[0]')[0]
 
-    return uvPin[0]
+    uvPinConnectInfo = {
+        'uvPin': uvPin,
+        'uvPinMatrixDestinationAttr': uvPinDestinationAttr,
+        'geometry': geo,
+        'geometryOrig': geoOrig,
+        'uvSet': uvSet,
+        'u': u,
+        'v': v
+    }
+
+    return uvPinConnectInfo
 
 
 def getSurfaceMatrix(anchorGrp):
@@ -540,3 +684,27 @@ def get_intermediate_object(transform):
             return shape
 
     return None
+
+
+def findAnchorGroup(obj):
+    maxCount = 10
+    anhorGrp = None
+    count = 1
+
+    while not anhorGrp:
+        if count > maxCount:
+            break
+
+        parent = cmds.listRelatives(obj, p=True)
+        if parent:
+            if '_anchor' in parent[0]:
+                anhorGrp = parent[0]
+                break
+            else:
+                obj = parent[0]
+        else:
+            break
+
+        count += 1
+
+    return anhorGrp
