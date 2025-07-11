@@ -59,7 +59,8 @@ def match(*args):
 
     if pm.filterExpand(target, sm=[12]):  # check if target is a Mesh
         mathToClosestPointOnSurface([src.name() for src in srcTrsfs], target.name())
-
+    elif pm.filterExpand(target, sm=[9]):  # check if target is a Curve
+        matchToClosestPointOnCurve([src.name() for src in srcTrsfs], target.name())
     else:  # check if target is a transform node
         for srcTrsf in srcTrsfs:
             if mirrorWorldX:
@@ -124,3 +125,18 @@ def mathToClosestPointOnSurface(srcs, trg):
         ]
 
         cmds.xform(src, ws=True, m=closestMtx)
+
+
+def matchToClosestPointOnCurve(srcs, trg):
+    mSels = om.MSelectionList()
+    mSels.add(trg)
+
+    curveNode = mSels.getDagPath(0)
+    fnCurve = om.MFnNurbsCurve(curveNode)
+
+    for src in srcs:
+        srcPoint = om.MPoint(cmds.xform(src, q=True, ws=True, t=True))
+        param = fnCurve.closestPoint(srcPoint, space=om.MSpace.kWorld)
+        pointOnCurve = fnCurve.getPointAtParam(param[1], space=om.MSpace.kWorld)
+
+        cmds.xform(src, ws=True, t=(pointOnCurve.x, pointOnCurve.y, pointOnCurve.z))
