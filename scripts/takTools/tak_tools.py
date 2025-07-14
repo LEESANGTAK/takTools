@@ -864,8 +864,8 @@ Alt + W: Toggle Wireframe on Shaded
 
 # Selection
 Ctrl + Alt + E: To Edge Loop
-Ctrl + Alt + S: Select Hierarchy
-Ctrl + Alt + A: Toggle Selection Mode
+Ctrl + Alt + S: Selection Component Toggle
+Ctrl + Alt + A: Select All in Hierarchy
 
 # Rigging
 Alt + Shift + D: Delete History
