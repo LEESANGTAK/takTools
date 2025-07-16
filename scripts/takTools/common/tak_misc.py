@@ -2079,6 +2079,11 @@ def addInfCopySkin(source=None, targets=None):
 
         source = sels[0]
 
+        # Store shape visibility state and turn on visibility for the source
+        srcShapeVisInfo = {}
+        for srcShape in cmds.listRelatives(source, s=True, ni=True):
+            srcShapeVisInfo[srcShape] = cmds.getAttr(f'{srcShape}.visibility')
+
         # Get targets from selected objects.
         components = cmds.filterExpand(sels, sm=[28, 31, 32, 34]) or []  # Components that in a object set are filtered also
         geometries = cmds.filterExpand(sels, sm=[9, 10, 12]) or []
@@ -2088,6 +2093,20 @@ def addInfCopySkin(source=None, targets=None):
             targets = components
         elif len(geometries) > 1:  # When geometries are selected as targets
             targets = sels[1:]
+            # Store shape visibility state and turn on visibility for targets
+            targetsShapeVisInfo = []
+            for trgSkinGeo in targets:
+                shapes = cmds.listRelatives(trgSkinGeo, s=True, ni=True)
+                if shapes:
+                    shapeVisStateInfo = {}
+                    for shape in shapes:
+                        visState = cmds.getAttr(f'{shape}.visibility')
+                        shapeVisStateInfo[shape] = visState
+                        cmds.setAttr(f'{shape}.visibility', True)
+                    targetsShapeVisInfo.append(shapeVisStateInfo)
+                else:
+                    targets.remove(trgSkinGeo)
+                    cmds.warning(f'"{trgSkinGeo}" has no valid shapes. Skip copy skin operation for the "{trgSkinGeo}".')
 
     # Check if targets are valid
     if not targets:
@@ -2152,6 +2171,15 @@ def addInfCopySkin(source=None, targets=None):
             cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
 
             trgSkinClsts.append(trgSkinClst)
+
+        # Restore targets shapes visiblity state
+        for targetVisInfo in targetsShapeVisInfo:
+            for trgShape, visState in targetVisInfo.items():
+                cmds.setAttr(f'{trgShape}.visibility', visState)
+
+    # Restore source shapes visibility state
+    for srcShape, visState in srcShapeVisInfo.items():
+        cmds.setAttr(f'{srcShape}.visibility', visState)
 
     for trgSkinClst in trgSkinClsts:
         srcSkinMethod = max(cmds.getAttr('%s.skinningMethod' % srcSkinClst), 0)
