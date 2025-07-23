@@ -165,6 +165,7 @@ class SkinWeights(object):
         Main method.
         Populate influence and weight value text scroll list.
         '''
+        self._refreshInfluences()
         self._disableInfluencesColor()
 
         # Get options
@@ -349,6 +350,12 @@ class SkinWeights(object):
             for selInf in selInfList:
                 cmds.textScrollList('infsTxtScrLs', e=True, selectItem=selInf)
                 displayObjectColor(selInf, True)
+
+    def _refreshInfluences(self):
+        """ Refresh influences list by removing non-existing influences in the current scene """
+        for inf in self.infs:
+            if not cmds.objExists(inf):
+                self.infs.remove(inf)
 
     def _disableInfluencesColor(self):
         if self.infs:
