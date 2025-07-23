@@ -39,16 +39,19 @@ elif 2025 <= MAYA_VERSION:
     import shiboken6 as shiboken
 
 
+EXT = '.sw'
+
+
 def showUI():
     global mainWin
     mainWin = bSkinSaverUI()
     mainWin.show()
 
     dirName = os.path.dirname(mainWin.objectsFileLine.text())
-    fileName = 'fileName.sw'
+    fileName = 'fileName{}'.format(EXT)
     sels = cmds.ls(sl=True)
     if sels:
-        fileName = sels[0] + '.sw'
+        fileName = sels[0] + EXT
     mainWin.objectsFileLine.setText(os.path.join(dirName, fileName))
 
 
@@ -72,7 +75,7 @@ class bSkinSaverUI(QDialog):
 
         self.geoCheckBox = QCheckBox("Geometry", parent=self)
         self.geoCheckBox.setToolTip("If checked, the geometry will be saved/loaded with the skinWeights.\nIf not checked, only the skinWeights will be saved/loaded.")
-        self.objectsFileLine = QLineEdit('{0}/fileName.sw'.format(os.path.join(os.path.expanduser("~"), "Downloads")), parent=self)
+        self.objectsFileLine = QLineEdit('{}/fileName{}'.format(os.path.join(os.path.expanduser("~"), "Downloads"), EXT), parent=self)
         self.selectObjectsFileButton = QPushButton("Set File", parent=self)
         self.saveObjectsButton = QPushButton("Save Weights from selected Objects", parent=self)
         self.loadObjectsButton = QPushButton("Load", parent=self)
@@ -156,7 +159,7 @@ class bSkinSaverUI(QDialog):
 
     def selectObjectsFile(self):
         startDir = os.path.dirname(self.objectsFileLine.text())
-        fileResult = cmds.fileDialog2(dir=startDir, fileMode=0, fileFilter="All Files (*.sw)")
+        fileResult = cmds.fileDialog2(dir=startDir, fileMode=0, fileFilter="All Files (*{})".format(EXT))
         if fileResult != None:
             self.objectsFileLine.setText(fileResult[0])
 
@@ -597,7 +600,10 @@ def bSaveSkinValues(inputFile, geometry=False):
             objectName = OpenMaya.MFnDagNode(node).name()
 
             if geometry:
-                mel.eval('AbcExport -j "-frameRange 0 0 -stripNamespaces -uvWrite -worldSpace -writeUVSets -dataFormat ogawa -root {0} -file {1}/{0}.abc";'.format(objectName, os.path.dirname(inputFile.replace('\\', '/'))))
+                nicePath = inputFile.replace('\\', '/')
+                dirPath = os.path.dirname(nicePath)
+                abcFileName = os.path.basename(nicePath).replace(EXT, '.abc')
+                mel.eval('AbcExport -j "-frameRange 0 0 -stripNamespaces -uvWrite -worldSpace -writeUVSets -dataFormat ogawa -root {0} -file {1}/{2}";'.format(objectName, dirPath, abcFileName))
 
             newTransform = OpenMaya.MFnTransform(node)
             for childIndex in range(newTransform.childCount()):
@@ -834,8 +840,9 @@ def bLoadSkinValues(loadOnSelection, inputFile, namespace='', geometry=False):
     PolygonObject = ""
 
     if geometry:
-        geo = os.path.basename(inputFile).replace('.sw', '')
-        mel.eval('AbcImport -mode import "{}/{}";'.format(os.path.dirname(inputFile.replace('\\', '/')), geo+'.abc'))
+        dirPath = os.path.dirname(inputFile.replace('\\', '/'))
+        abcFileName = os.path.basename(inputFile).replace(EXT, '.abc')
+        mel.eval('AbcImport -mode import "{}/{}";'.format(dirPath, abcFileName))
 
     if loadOnSelection == True:
         sels = cmds.ls(sl=True)
