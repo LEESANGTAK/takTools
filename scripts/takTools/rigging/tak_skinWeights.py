@@ -203,7 +203,7 @@ class SkinWeights(object):
 
         # Hide zero weighted influences depend on option state
         if hideZroInfOpt:
-            self.infs = self.removeZeroWeightInfs().keys()
+            self.infs = list(self.removeZeroWeightInfs().keys())
 
         # Sorting
         sortedInfs = sorted(self.infs)
