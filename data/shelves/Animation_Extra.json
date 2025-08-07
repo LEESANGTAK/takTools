@@ -174,6 +174,15 @@
             "command": "from imp import reload\nfrom takTools.animation import speedCalculator as sc; reload(sc)\n\nobject = cmds.ls(sl=True)[0]\nsc.bakeSpeedAttribute(object)",
             "sourceType": "python",
             "noDefaultPopup": true
+        },
+        {
+            "label": "Max Palyback Speed",
+            "annotation": "Set max playback speed.",
+            "image1": "cachedPlayback.png",
+            "imageOverlayLabel": "MPS",
+            "command": "cmds.playbackOptions(playbackSpeed=0)\ncmds.window(title='Max Playback Speed', mnb=False, mxb=False)\ncmds.columnLayout(adj=True)\ncmds.floatFieldGrp(\n    label='Max Playback Speed: ', \n    v1=cmds.playbackOptions(query=True, maxPlaybackSpeed=True), \n    cc=lambda x: cmds.playbackOptions(maxPlaybackSpeed=x)\n)\ncmds.showWindow()",
+            "sourceType": "python",
+            "noDefaultPopup": true
         }
     ]
 }
