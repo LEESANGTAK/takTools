@@ -54,8 +54,8 @@
             "annotation": "Run spPaint3d.",
             "image1": "spPaint3d.bmp",
             "imageOverlayLabel": "",
-            "command": "spPaint3d",
-            "sourceType": "mel",
+            "command": "from sppaint3d import gui as sppaintgui; sppaintgui.spPaint3dWin()",
+            "sourceType": "python",
             "noDefaultPopup": true
         },
         {
