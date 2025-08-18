@@ -696,6 +696,11 @@ def bSkinObject(objectName, fileJoints, weights):
     fileJointsMapArray = list(range(len(fileJoints)))
     objectEmptyJoints = []
 
+    # Show shape visibility and store visibility state
+    shape = objectName if cmds.nodeType(objectName) == 'mesh' else cmds.listRelatives(objectName, s=True, ni=True)[0]
+    shapeVisState = cmds.getAttr('{}.visibility'.format(shape))
+    cmds.setAttr('{}.visibility'.format(shape), True)
+
     # let's check if there's already a skinCluster, let's try to use that - if it contains all the needed joints
     #
     skinCluster = bFindSkinCluster(objectName)
@@ -828,7 +833,8 @@ def bSkinObject(objectName, fileJoints, weights):
     fnSkinCluster.setWeights(bSkinPath, vtxComponents, mayafileJointsMapArray, weightDoubles, 0)
     #mel.eval("skinPercent -normalize true " + fnSkinCluster.name() + " " + objectName)
 
-
+    # Restore shape visibility
+    cmds.setAttr('{}.visibility'.format(shape), shapeVisState)
 
 
 def bLoadSkinValues(loadOnSelection, inputFile, namespace='', geometry=False):
