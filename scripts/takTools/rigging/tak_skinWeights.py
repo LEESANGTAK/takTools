@@ -140,6 +140,7 @@ class SkinWeights(object):
         cmds.textScrollList('infsTxtScrLs', p=self.uiWidgets['infFrmLo'], h=200, sc=self.infTxtScrLsSelCmd, vcc=self.infTxtScrLsSelCmd, allowMultiSelection=True)
         self.uiWidgets['infPopMenu'] = cmds.popupMenu(p='infsTxtScrLs')
         self.uiWidgets['loadInfMenu'] = cmds.menuItem(p=self.uiWidgets['infPopMenu'], label='Load Influences', c=self.loadInf)
+        self.uiWidgets['selectInfMenu'] = cmds.menuItem(p=self.uiWidgets['infPopMenu'], label='Select Influences', c=self.selInfs)
 
         self.uiWidgets['wghtFrmLo'] = cmds.frameLayout(p=self.uiWidgets['infWghtRowColLo'], label='Weights')
         self.uiWidgets['wghtTxtScrLs'] = cmds.textScrollList(p=self.uiWidgets['wghtFrmLo'], h=200, sc=self.weightTxtScrLsSelCmd, allowMultiSelection=True)
@@ -272,6 +273,13 @@ class SkinWeights(object):
                 rmvZroWghtTable[inf] = self.infWeightTable[inf]
 
         return rmvZroWghtTable
+
+    def selInfs(self, *args):
+        '''
+        Select influences from text scroll list.
+        '''
+        selInfList = cmds.textScrollList('infsTxtScrLs', q=True, selectItem=True)
+        cmds.select(selInfList, r=True)
 
     def setWeight(self, weightVal, mode='default', *args):
         '''
@@ -537,6 +545,22 @@ def selAffectedVertex(*args):
 
 
 def selectInfluences(*args):
+    """
+    Select and return all influence objects (e.g., joints) from skinClusters related to the current Maya selection.
+
+    For each selected object, the related skinCluster is found and its influences are queried, then those influences are made the active selection.
+
+    Parameters:
+        *args: Unused; present for compatibility with UI callbacks.
+
+    Returns:
+        list[str]: Names of the gathered influence objects.
+
+    Notes:
+        - Modifies the active selection in Maya.
+        - Requires Autodesk Maya (uses maya.cmds and maya.mel).
+        - May raise a Maya error if a selected object has no related skinCluster.
+    """
     sels = cmds.ls(sl=True)
     infs = []
     for sel in sels:
