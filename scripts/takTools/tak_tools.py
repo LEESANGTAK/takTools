@@ -141,8 +141,6 @@ def UI():
     # Dock window to left side
     cmds.dockControl(MODULE_NAME, label=TOOL_NAME, area='left', content=WIN_NAME)
 
-    # Register search hotkeys
-    registerSearchHotkeys()
 
 
 # ------------ Load & Save
@@ -972,59 +970,7 @@ def searchTools(*args):
     if len(searchResults) > 100:
         searchResults = searchResults[:100]
 
-    # Show autocomplete suggestions
-    showAutoCompleteSuggestions(searchQuery)
-
     showSearchResults()
-
-
-def showAutoCompleteSuggestions(searchQuery):
-    """Show autocomplete suggestions"""
-    if len(searchQuery) < 2:  # Only suggest when 2 or more characters
-        return
-
-    suggestions = []
-    allTools = getAllTools()
-
-    for tool in allTools:
-        label = tool['shelfButtonInfo'].get('label', '').lower()
-        if label.startswith(searchQuery) and label not in suggestions:
-            suggestions.append(tool['shelfButtonInfo'].get('label', ''))
-
-    # Maximum 5 suggestions
-    suggestions = suggestions[:5]
-
-    if suggestions:
-        # Show autocomplete popup
-        showAutoCompletePopup(suggestions)
-
-
-def showAutoCompletePopup(suggestions):
-    """Show autocomplete popup window"""
-    popupName = 'autoCompletePopup'
-    if cmds.window(popupName, exists=True):
-        cmds.deleteUI(popupName)
-
-    cmds.window(popupName, title='Suggestions', tlb=True, p=WIN_NAME)
-    cmds.columnLayout(adj=True)
-
-    for suggestion in suggestions:
-        cmds.button(label=suggestion,
-                   c=lambda x, s=suggestion: selectAutoCompleteSuggestion(s),
-                   annotation=f'Select: {suggestion}')
-
-    # Set popup position below search field
-    cmds.window(popupName, e=True, w=200, h=len(suggestions) * 25)
-
-    # Set popup position based on search field position
-    try:
-        searchFieldPos = cmds.textField('searchField', q=True, position=True)
-        if searchFieldPos:
-            cmds.window(popupName, e=True, topLeftCorner=[searchFieldPos[0], searchFieldPos[1] - len(suggestions) * 25])
-    except:
-        pass
-
-    cmds.showWindow(popupName)
 
 
 def selectAutoCompleteSuggestion(suggestion):
@@ -1235,12 +1181,12 @@ def showSearchResults(*args):
         cmds.separator(style='in', h=2)
 
         # Search results header
-        cmds.rowColumnLayout(numberOfColumns=5, columnWidth=[(1, 180), (2, 120), (3, 80), (4, 80), (5, 80)])
+        cmds.rowColumnLayout(numberOfColumns=5, columnWidth=[(1, 180), (2, 200), (3, 100), (4, 80), (5, 80)], columnSpacing=[(1, 5), (2, 5), (3, 5), (4, 5), (5, 5)])
         cmds.text(label='Tool Name', font='boldLabelFont')
+        cmds.text(label='Description', font='boldLabelFont')
         cmds.text(label='Location', font='boldLabelFont')
-        cmds.text(label='Type', font='boldLabelFont')
-        cmds.text(label='Run', font='boldLabelFont')
         cmds.text(label='Locate', font='boldLabelFont')
+        cmds.text(label='Run', font='boldLabelFont')
         cmds.setParent('..')
 
         cmds.separator(style='in', h=3)
@@ -1249,15 +1195,18 @@ def showSearchResults(*args):
         for i, result in enumerate(searchResults):
             shelfButtonInfo = result['shelfButtonInfo']
 
-            cmds.rowColumnLayout(numberOfColumns=5, columnWidth=[(1, 180), (2, 120), (3, 80), (4, 80), (5, 80)])
+            cmds.rowColumnLayout(numberOfColumns=5, columnWidth=[(1, 180), (2, 200), (3, 100), (4, 80), (5, 80)], columnSpacing=[(1, 5), (2, 5), (3, 5), (4, 5), (5, 5)])
 
-            # Tool name (with tooltip)
+            # Tool name
             toolName = shelfButtonInfo.get('label', 'Unknown')
+            cmds.text(label=toolName)
+
+            # Description
             tooltip = shelfButtonInfo.get('annotation', '')
-            if tooltip:
-                cmds.text(label=toolName, annotation=tooltip)
-            else:
-                cmds.text(label=toolName)
+            # Truncate tooltip if too long
+            if len(tooltip) > 40:
+                truncTooltip = tooltip[:40] + "..."
+            cmds.text(label=truncTooltip, ann=tooltip, align='left')
 
             # Location
             location = result['shelf']
@@ -1265,18 +1214,11 @@ def showSearchResults(*args):
                 location = f"{result['tabName']} > {result['frameName']}"
             cmds.text(label=location)
 
-            # Type
-            cmds.text(label=result['type'])
-
             # Action buttons
-            cmds.button(label='▶', annotation='Run Tool', c=lambda x, r=result: runToolFromSearch(r))
             cmds.button(label='📍', annotation='Locate Tool', c=lambda x, r=result: locateTool(r))
+            cmds.button(label='▶', annotation='Run Tool', c=lambda x, r=result: runToolFromSearch(r))
 
             cmds.setParent('..')
-
-            # Show tool description (if available)
-            if tooltip:
-                cmds.text(label=f"  {tooltip}", font='smallPlainLabelFont')
 
             # Show usage statistics (if available)
             usageCount = toolUsageStats.get(toolName, 0)
@@ -1285,12 +1227,6 @@ def showSearchResults(*args):
 
             if i < len(searchResults) - 1:
                 cmds.separator(style='out')
-
-        # Keyboard shortcuts info
-        cmds.separator(style='in')
-        cmds.text(label='Keyboard Shortcuts:', font='boldLabelFont')
-        cmds.text(label='Ctrl+F: Focus search field')
-        cmds.text(label='Enter: Run first result')
 
     cmds.button(label='Close', c=lambda x: cmds.deleteUI(winName))
 
@@ -1405,24 +1341,4 @@ def handleSearchEnter(*args):
     # Execute first search result
     if searchResults:
         runToolFromSearch(searchResults[0])
-
-
-def registerSearchHotkeys():
-    """Register global search hotkeys"""
-    # Focus search field with Ctrl+F
-    try:
-        cmds.nameCommand('takToolsFocusSearch',
-                        annotation='Focus Tak Tools Search Field',
-                        command='cmds.setFocus("searchField")')
-        cmds.hotkey(keyShortcut='F', altModifier=True, name='takToolsFocusSearch')
-    except:
-        pass  # Ignore if already registered
-
-
-def unregisterSearchHotkeys():
-    """Unregister global search hotkeys"""
-    try:
-        cmds.hotkey(keyShortcut='F', altModifier=True, name='', remove=True)
-    except:
-        pass
 # ------------
