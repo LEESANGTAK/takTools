@@ -79,6 +79,9 @@ commonShelfInfo = {}
 taskShelvesInfo = {}
 allShelfButtons = {}
 maxOrderNum = 0
+searchResults = []  # Global variable to store search results
+searchHistory = []  # Search history
+toolUsageStats = {}  # Tool usage statistics
 
 
 def UI():
@@ -92,19 +95,31 @@ def UI():
     # Main menu
     cmds.menuBarLayout(WIN_NAME)
     cmds.menu('fileMenu', label='File', p=WIN_NAME)
-    cmds.menuItem(label='Save', image='save.png', c=writeShelvesToFile, p='fileMenu')
-    cmds.menuItem(label='Restore', image='refresh.png', c=restore, p='fileMenu')
+    cmds.menuItem(label='Save', image='save.png', c=lambda x: writeShelvesToFile(), p='fileMenu')
+    cmds.menuItem(label='Restore', image='refresh.png', c=lambda x: restore(), p='fileMenu')
     cmds.menu('editMenu', label='Edit', p=WIN_NAME)
-    cmds.menuItem(label='Editor', image='passSetRelationEditor.png', c=editorGUI, p='editMenu')
-    cmds.menuItem(label='Preferences', image='shelfOptions.png', c=prefsGUI, p='editMenu')
+    cmds.menuItem(label='Editor', image='passSetRelationEditor.png', c=lambda x: editorGUI(), p='editMenu')
+    cmds.menuItem(label='Preferences', image='shelfOptions.png', c=lambda x: prefsGUI(), p='editMenu')
+    cmds.menu('searchMenu', label='Search', p=WIN_NAME)
+    cmds.menuItem(label='Search History', image='history.png', c=lambda x: showSearchHistory(), p='searchMenu')
+    cmds.menuItem(label='Popular Tools', image='favorite.png', c=lambda x: showPopularTools(), p='searchMenu')
+    cmds.menuItem(label='Clear Search History', image='delete.png', c=lambda x: clearSearchHistory(), p='searchMenu')
     cmds.menu('helpMenu', label='Help', p=WIN_NAME)
-    cmds.menuItem(label='Check Update', image='teDownArrow.png', c=checkUpdate, p='helpMenu')
-    cmds.menuItem(label='Hotkeys Info', c=hotkeysInfo, p='helpMenu')
-    cmds.menuItem(label='About Tak Tools', image='info.png', c=aboutGUI, p='helpMenu')
+    cmds.menuItem(label='Check Update', image='teDownArrow.png', c=lambda x: checkUpdate(), p='helpMenu')
+    cmds.menuItem(label='Hotkeys Info', c=lambda x: hotkeysInfo(), p='helpMenu')
+    cmds.menuItem(label='About Tak Tools', image='info.png', c=lambda x: aboutGUI(), p='helpMenu')
 
-    cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(2, 50, 90)])
+    cmds.paneLayout('mainPaneLo', configuration='horizontal2', w=PANE_WIDTH, paneSize=[(1, 70, 30)])
 
-    cmds.columnLayout('mainColLo', adj=True)
+    cmds.columnLayout('mainColLo', adj=True, p='mainPaneLo')
+
+    # Add search functionality
+    cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1, 30), (2, PANE_WIDTH-60), (3, 30)], p='mainColLo')
+    cmds.symbolButton(image='search.png', c=lambda x: toggleSearchResults())
+    cmds.textField('searchField', placeholderText='Search tools... (Enter to run first result)', cc=searchTools, ec=handleSearchEnter, h=20)
+    cmds.symbolButton(image='delete.png', c=lambda x: clearSearch())
+
+    cmds.separator(style='in', h=5, p='mainColLo')
 
     # Common tab
     cmds.tabLayout('cmnToolTabLo', tv=False, p='mainColLo')
@@ -112,10 +127,8 @@ def UI():
     readCommonShelfInfo()
     rebuildCommonShelf()
 
-    cmds.separator('mainSep', style='in', p='mainColLo')
-
     # Task tabs
-    cmds.tabLayout('taskTabLo', p='mainColLo')
+    cmds.tabLayout('taskTabLo', p='mainPaneLo')
     readTaskShelvesInfo()
     rebuildTaskShelves()
 
@@ -127,6 +140,9 @@ def UI():
 
     # Dock window to left side
     cmds.dockControl(MODULE_NAME, label=TOOL_NAME, area='left', content=WIN_NAME)
+
+    # Register search hotkeys
+    registerSearchHotkeys()
 
 
 # ------------ Load & Save
@@ -151,6 +167,20 @@ def rebuildCommonShelf():
             noDefaultPopup=shelfButtonInfo.get('noDefaultPopup'),
             p='Common')
         allShelfButtons[shelfButtonInfo.get('label')] = shelfBtn
+
+    # Resize the common shelf area to fit actual contents to avoid large empty space below the search bar
+    try:
+        num_buttons = len(commonShelfInfo.get('shelfButtonInfos') or [])
+        if num_buttons <= 0:
+            # Collapse when empty (1px to keep layout valid)
+            cmds.shelfLayout('Common', e=True, h=1)
+        else:
+            rows = (num_buttons + NUM_ICONS_PER_ROW - 1) // NUM_ICONS_PER_ROW
+            desired_height = (ICON_SIZE + ICON_MARGINE) * rows
+            cmds.shelfLayout('Common', e=True, h=desired_height)
+    except Exception:
+        # Fail-safe: keep existing height if resize isn't supported in current context
+        pass
 
 
 def readCommonShelfInfo(fromGUI=False):
@@ -769,7 +799,7 @@ def applyPreferences(*args):
 
 
 # ------------ Git Utils
-def checkUpdate(self):
+def checkUpdate():
     if isOutdated():
         result = cmds.confirmDialog(
             title=TOOL_NAME,
@@ -895,4 +925,504 @@ Custom shelf tool to organize shelf buttons more efficiently.
     time.localtime().tm_year,
 )
     cmds.confirmDialog(title=TOOL_NAME, message=message, button='OK')
+# ------------
+
+
+# ------------ Search Functions
+def searchTools(*args):
+    """Tool search functionality"""
+    global searchResults
+    searchQuery = cmds.textField('searchField', q=True, text=True).lower()
+
+    if not searchQuery:
+        clearSearch()
+        return
+
+    # Add to search history
+    addToSearchHistory(searchQuery)
+
+    searchResults = []
+
+    # Search in Common shelf
+    for shelfButtonInfo in commonShelfInfo.get('shelfButtonInfos', []):
+        if _matchesSearch(shelfButtonInfo, searchQuery):
+            searchResults.append({
+                'shelf': 'Common',
+                'shelfButtonInfo': shelfButtonInfo,
+                'type': 'Common'
+            })
+
+    # Search in Task shelves
+    for tabName, tabData in taskShelvesInfo.items():
+        for frameName, frameData in tabData.items():
+            for shelfButtonInfo in frameData.get('shelfButtonInfos', []):
+                if _matchesSearch(shelfButtonInfo, searchQuery):
+                    searchResults.append({
+                        'shelf': f'{tabName}_{frameName}',
+                        'shelfButtonInfo': shelfButtonInfo,
+                        'type': 'Task',
+                        'tabName': tabName,
+                        'frameName': frameName
+                    })
+
+    # Sort search results by relevance
+    searchResults.sort(key=lambda x: _getSearchRelevance(x['shelfButtonInfo'], searchQuery), reverse=True)
+
+    # Limit results to prevent performance issues (max 100 results)
+    if len(searchResults) > 100:
+        searchResults = searchResults[:100]
+
+    # Show autocomplete suggestions
+    showAutoCompleteSuggestions(searchQuery)
+
+    showSearchResults()
+
+
+def showAutoCompleteSuggestions(searchQuery):
+    """Show autocomplete suggestions"""
+    if len(searchQuery) < 2:  # Only suggest when 2 or more characters
+        return
+
+    suggestions = []
+    allTools = getAllTools()
+
+    for tool in allTools:
+        label = tool['shelfButtonInfo'].get('label', '').lower()
+        if label.startswith(searchQuery) and label not in suggestions:
+            suggestions.append(tool['shelfButtonInfo'].get('label', ''))
+
+    # Maximum 5 suggestions
+    suggestions = suggestions[:5]
+
+    if suggestions:
+        # Show autocomplete popup
+        showAutoCompletePopup(suggestions)
+
+
+def showAutoCompletePopup(suggestions):
+    """Show autocomplete popup window"""
+    popupName = 'autoCompletePopup'
+    if cmds.window(popupName, exists=True):
+        cmds.deleteUI(popupName)
+
+    cmds.window(popupName, title='Suggestions', tlb=True, p=WIN_NAME)
+    cmds.columnLayout(adj=True)
+
+    for suggestion in suggestions:
+        cmds.button(label=suggestion,
+                   c=lambda x, s=suggestion: selectAutoCompleteSuggestion(s),
+                   annotation=f'Select: {suggestion}')
+
+    # Set popup position below search field
+    cmds.window(popupName, e=True, w=200, h=len(suggestions) * 25)
+
+    # Set popup position based on search field position
+    try:
+        searchFieldPos = cmds.textField('searchField', q=True, position=True)
+        if searchFieldPos:
+            cmds.window(popupName, e=True, topLeftCorner=[searchFieldPos[0], searchFieldPos[1] - len(suggestions) * 25])
+    except:
+        pass
+
+    cmds.showWindow(popupName)
+
+
+def selectAutoCompleteSuggestion(suggestion):
+    """Select autocomplete suggestion"""
+    cmds.textField('searchField', e=True, text=suggestion)
+
+    # Close autocomplete popup
+    if cmds.window('autoCompletePopup', exists=True):
+        cmds.deleteUI('autoCompletePopup')
+
+    # Execute search
+    searchTools()
+
+
+def updateToolUsageStats(toolName):
+    """Update tool usage statistics"""
+    global toolUsageStats
+
+    if toolName not in toolUsageStats:
+        toolUsageStats[toolName] = 0
+    toolUsageStats[toolName] += 1
+
+
+def addToSearchHistory(searchQuery):
+    """Add to search history"""
+    global searchHistory
+
+    if searchQuery and searchQuery not in searchHistory:
+        searchHistory.insert(0, searchQuery)
+        # Store maximum 10 items
+        searchHistory = searchHistory[:10]
+
+
+def showSearchHistory():
+    """Show search history"""
+    if not searchHistory:
+        cmds.inViewMessage(amg="No search history available",
+                          pos='midCenter', fade=True, fadeInTime=0.1, fadeOutTime=0.5)
+        return
+
+    winName = 'searchHistoryWin'
+    if cmds.window(winName, exists=True):
+        cmds.deleteUI(winName)
+
+    cmds.window(winName, title='Recent Searches', tlb=True, p=WIN_NAME)
+    cmds.columnLayout(adj=True)
+
+    cmds.text(label='Recent Searches:', font='boldLabelFont')
+    cmds.separator(style='in')
+
+    for i, query in enumerate(searchHistory):
+        cmds.rowColumnLayout(numberOfColumns=2, columnWidth=[(1, 200), (2, 50)])
+        cmds.button(label=query, c=lambda x, q=query: selectFromHistory(q))
+        cmds.button(label='×', c=lambda x, idx=i: removeFromHistory(idx))
+        cmds.setParent('..')
+
+        if i < len(searchHistory) - 1:
+            cmds.separator(style='out')
+
+    cmds.button(label='Clear All', c=clearSearchHistory)
+    cmds.button(label='Close', c=lambda x: cmds.deleteUI(winName))
+
+    cmds.window(winName, e=True, w=300, h=min(400, 100 + len(searchHistory) * 30))
+    cmds.showWindow(winName)
+
+
+def selectFromHistory(query):
+    """Select from search history"""
+    cmds.textField('searchField', e=True, text=query)
+
+    # Close search history window
+    if cmds.window('searchHistoryWin', exists=True):
+        cmds.deleteUI('searchHistoryWin')
+
+    # Execute search
+    searchTools()
+
+
+def removeFromHistory(index):
+    """Remove from search history"""
+    global searchHistory
+
+    if 0 <= index < len(searchHistory):
+        searchHistory.pop(index)
+        showSearchHistory()  # Refresh window
+
+
+def clearSearchHistory():
+    """Clear all search history"""
+    global searchHistory
+    searchHistory = []
+
+    if cmds.window('searchHistoryWin', exists=True):
+        cmds.deleteUI('searchHistoryWin')
+
+    cmds.inViewMessage(amg="Search history cleared",
+                      pos='midCenter', fade=True, fadeInTime=0.1, fadeOutTime=0.5)
+
+
+def showPopularTools():
+    """Show frequently used tools"""
+    if not toolUsageStats:
+        cmds.inViewMessage(amg="No tool usage statistics available",
+                          pos='midCenter', fade=True, fadeInTime=0.1, fadeOutTime=0.5)
+        return
+
+    # Sort by usage frequency
+    sortedTools = sorted(toolUsageStats.items(), key=lambda x: x[1], reverse=True)
+
+    winName = 'popularToolsWin'
+    if cmds.window(winName, exists=True):
+        cmds.deleteUI(winName)
+
+    cmds.window(winName, title='Popular Tools', tlb=True, p=WIN_NAME)
+    cmds.columnLayout(adj=True)
+
+    cmds.text(label='Most Used Tools:', font='boldLabelFont')
+    cmds.separator(style='in')
+
+    for i, (toolName, usageCount) in enumerate(sortedTools[:10]):  # Show top 10 only
+        cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1, 200), (2, 50), (3, 50)])
+        cmds.text(label=toolName)
+        cmds.text(label=f'{usageCount} times')
+        cmds.button(label='Search', c=lambda x, tn=toolName: searchForTool(tn))
+        cmds.setParent('..')
+
+        if i < min(9, len(sortedTools) - 1):
+            cmds.separator(style='out')
+
+    cmds.button(label='Close', c=lambda x: cmds.deleteUI(winName))
+
+    cmds.window(winName, e=True, w=350, h=min(400, 100 + min(10, len(sortedTools)) * 30))
+    cmds.showWindow(winName)
+
+
+def searchForTool(toolName):
+    """Search for specific tool"""
+    cmds.textField('searchField', e=True, text=toolName)
+
+    # Close popular tools window
+    if cmds.window('popularToolsWin', exists=True):
+        cmds.deleteUI('popularToolsWin')
+
+    # Execute search
+    searchTools()
+
+
+def _matchesSearch(shelfButtonInfo, searchQuery):
+    """Check if search query matches tool information"""
+    label = shelfButtonInfo.get('label', '').lower()
+    annotation = shelfButtonInfo.get('annotation', '').lower()
+    command = shelfButtonInfo.get('command', '').lower()
+
+    return (searchQuery in label or
+            searchQuery in annotation or
+            searchQuery in command)
+
+
+def _getSearchRelevance(shelfButtonInfo, searchQuery):
+    """Calculate search result relevance"""
+    label = shelfButtonInfo.get('label', '').lower()
+    annotation = shelfButtonInfo.get('annotation', '').lower()
+    command = shelfButtonInfo.get('command', '').lower()
+
+    relevance = 0
+
+    # Highest score for exact match in label
+    if searchQuery == label:
+        relevance += 100
+    elif searchQuery in label:
+        relevance += 50
+
+    # Additional score if label starts with search query
+    if label.startswith(searchQuery):
+        relevance += 30
+
+    # Match in annotation
+    if searchQuery in annotation:
+        relevance += 20
+
+    # Match in command
+    if searchQuery in command:
+        relevance += 10
+
+    return relevance
+
+
+def showSearchResults(*args):
+    """Show search results window"""
+    global searchResults
+
+    winName = 'searchResultsWin'
+    if cmds.window(winName, exists=True):
+        cmds.deleteUI(winName)
+
+    cmds.window(winName, title=f'Search Results ({len(searchResults)} found)', tlb=True, p=WIN_NAME)
+
+    # Use scroll layout for better handling of many results
+    cmds.scrollLayout(horizontalScrollBarThickness=0, verticalScrollBarThickness=16)
+    cmds.columnLayout(adj=True)
+
+    if not searchResults:
+        cmds.text(label='No tools found matching your search.')
+        cmds.text(label='Try different keywords or check spelling.')
+    else:
+        # Show result count and navigation info
+        cmds.text(label=f'Found {len(searchResults)} tools. Use scroll to see all results.', font='boldLabelFont')
+        cmds.separator(style='in', h=2)
+
+        # Search results header
+        cmds.rowColumnLayout(numberOfColumns=5, columnWidth=[(1, 180), (2, 120), (3, 80), (4, 80), (5, 80)])
+        cmds.text(label='Tool Name', font='boldLabelFont')
+        cmds.text(label='Location', font='boldLabelFont')
+        cmds.text(label='Type', font='boldLabelFont')
+        cmds.text(label='Run', font='boldLabelFont')
+        cmds.text(label='Locate', font='boldLabelFont')
+        cmds.setParent('..')
+
+        cmds.separator(style='in', h=3)
+
+        # Search results list
+        for i, result in enumerate(searchResults):
+            shelfButtonInfo = result['shelfButtonInfo']
+
+            cmds.rowColumnLayout(numberOfColumns=5, columnWidth=[(1, 180), (2, 120), (3, 80), (4, 80), (5, 80)])
+
+            # Tool name (with tooltip)
+            toolName = shelfButtonInfo.get('label', 'Unknown')
+            tooltip = shelfButtonInfo.get('annotation', '')
+            if tooltip:
+                cmds.text(label=toolName, annotation=tooltip)
+            else:
+                cmds.text(label=toolName)
+
+            # Location
+            location = result['shelf']
+            if result['type'] == 'Task':
+                location = f"{result['tabName']} > {result['frameName']}"
+            cmds.text(label=location)
+
+            # Type
+            cmds.text(label=result['type'])
+
+            # Action buttons
+            cmds.button(label='▶', annotation='Run Tool', c=lambda x, r=result: runToolFromSearch(r))
+            cmds.button(label='📍', annotation='Locate Tool', c=lambda x, r=result: locateTool(r))
+
+            cmds.setParent('..')
+
+            # Show tool description (if available)
+            if tooltip:
+                cmds.text(label=f"  {tooltip}", font='smallPlainLabelFont')
+
+            # Show usage statistics (if available)
+            usageCount = toolUsageStats.get(toolName, 0)
+            if usageCount > 0:
+                cmds.text(label=f"  Used {usageCount} times", font='smallPlainLabelFont')
+
+            if i < len(searchResults) - 1:
+                cmds.separator(style='out')
+
+        # Keyboard shortcuts info
+        cmds.separator(style='in')
+        cmds.text(label='Keyboard Shortcuts:', font='boldLabelFont')
+        cmds.text(label='Ctrl+F: Focus search field')
+        cmds.text(label='Enter: Run first result')
+
+    cmds.button(label='Close', c=lambda x: cmds.deleteUI(winName))
+
+    # Calculate appropriate window size based on number of results
+    baseHeight = 150  # Base height for header and buttons
+    resultHeight = min(len(searchResults) * 35, 600)  # Max 600px for results area
+    totalHeight = baseHeight + resultHeight
+
+    # Ensure window fits on screen (max 80% of screen height)
+    # Use a reasonable default height and limit window size
+    maxHeight = 800  # Maximum window height
+    finalHeight = min(totalHeight, maxHeight)
+
+    cmds.window(winName, e=True, w=600, h=finalHeight)
+    cmds.showWindow(winName)
+
+    # Focus on first result if search results exist
+    if searchResults:
+        cmds.setFocus('searchField')
+
+
+def runToolFromSearch(result):
+    """Execute tool from search results"""
+    shelfButtonInfo = result['shelfButtonInfo']
+    command = shelfButtonInfo.get('command', '')
+    sourceType = shelfButtonInfo.get('sourceType', 2)  # Default to Python
+    toolName = shelfButtonInfo.get('label', 'Unknown')
+
+    try:
+        if sourceType == 1:  # MEL
+            mel.eval(command)
+        else:  # Python
+            cmds.evalDeferred(command)
+
+        # Update tool usage statistics
+        updateToolUsageStats(toolName)
+
+        cmds.inViewMessage(amg=f"Executed: {toolName}",
+                          pos='midCenter', fade=True, fadeInTime=0.1, fadeOutTime=0.5)
+    except Exception as e:
+        cmds.warning(f"Failed to execute tool: {e}")
+
+
+def locateTool(result):
+    """Navigate to the location of the searched tool"""
+    shelfName = result['shelf']
+
+    # Navigate to the corresponding tab
+    if result['type'] == 'Task':
+        tabName = result['tabName']
+        cmds.tabLayout('taskTabLo', e=True, selectTab=tabName)
+
+        # Expand the corresponding frame
+        frameName = result['frameName']
+        frameLayout = f'{shelfName}FrameLayout'
+        if cmds.frameLayout(frameLayout, exists=True):
+            cmds.frameLayout(frameLayout, e=True, collapse=False)
+
+    # Close search results window
+    if cmds.window('searchResultsWin', exists=True):
+        cmds.deleteUI('searchResultsWin')
+
+
+def clearSearch(*args):
+    """Clear search field"""
+    global searchResults
+    cmds.textField('searchField', e=True, text='')
+    searchResults = []
+
+    # Close search results window if open
+    if cmds.window('searchResultsWin', exists=True):
+        cmds.deleteUI('searchResultsWin')
+
+
+def toggleSearchResults(*args):
+    """Toggle search results window"""
+    if cmds.window('searchResultsWin', exists=True):
+        cmds.deleteUI('searchResultsWin')
+    else:
+        showSearchResults()
+
+
+def getAllTools():
+    """Collect all tool information (for search)"""
+    allTools = []
+
+    # Common shelf tools
+    for shelfButtonInfo in commonShelfInfo.get('shelfButtonInfos', []):
+        allTools.append({
+            'shelf': 'Common',
+            'shelfButtonInfo': shelfButtonInfo,
+            'type': 'Common'
+        })
+
+    # Task shelves tools
+    for tabName, tabData in taskShelvesInfo.items():
+        for frameName, frameData in tabData.items():
+            for shelfButtonInfo in frameData.get('shelfButtonInfos', []):
+                allTools.append({
+                    'shelf': f'{tabName}_{frameName}',
+                    'shelfButtonInfo': shelfButtonInfo,
+                    'type': 'Task',
+                    'tabName': tabName,
+                    'frameName': frameName
+                })
+
+    return allTools
+
+
+def handleSearchEnter(*args):
+    """Handle Enter key in search field"""
+    # Execute first search result
+    if searchResults:
+        runToolFromSearch(searchResults[0])
+
+
+def registerSearchHotkeys():
+    """Register global search hotkeys"""
+    # Focus search field with Ctrl+F
+    try:
+        cmds.nameCommand('takToolsFocusSearch',
+                        annotation='Focus Tak Tools Search Field',
+                        command='cmds.setFocus("searchField")')
+        cmds.hotkey(keyShortcut='F', altModifier=True, name='takToolsFocusSearch')
+    except:
+        pass  # Ignore if already registered
+
+
+def unregisterSearchHotkeys():
+    """Unregister global search hotkeys"""
+    try:
+        cmds.hotkey(keyShortcut='F', altModifier=True, name='', remove=True)
+    except:
+        pass
 # ------------
