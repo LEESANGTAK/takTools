@@ -317,7 +317,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem11;
+        menuEditorMenuItem31;
 
     menuItem
         -label "Controller" 
@@ -364,7 +364,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $sels[] = `ls -os`;\n    string $parent = $sels[1];\n    string $child = $sels[0];\n    parentConstraint $parent $child;\n    select -r $parent;\n}" 
+        -command "{\n    string $sels[] = `ls -os`;\n    string $parent = $sels[1];\n    string $child = $sels[0];\n    string $consts[] = `listRelatives -ad -type \"constraint\" $child`;\n    if (size($consts) > 0){\n        delete $consts;\n    }\n    parentConstraint $parent $child;\n    select -r $parent;\n}" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -440,7 +440,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem15;
+        menuEditorMenuItem33;
 
     menuItem
         -label "separator" 
@@ -500,7 +500,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem16;
+        menuEditorMenuItem34;
 
     menuItem
         -label "Duplicate Face" 
@@ -623,7 +623,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem25;
+        menuEditorMenuItem35;
 
     menuItem
         -label "Duplicate Parent Only" 
