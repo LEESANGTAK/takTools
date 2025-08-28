@@ -797,8 +797,19 @@ def checkMaxInfluences(*args):
 @decorators.printElapsedTime
 def fitMaxInfluence(*args):
     for mesh in cmds.filterExpand(cmds.ls(sl=True), sm=12):
-        meshMaxInfs = SkinWeights.getMaxInfluences(mesh)
         targetMaxInfs = int(cmds.optionMenu('maxInfsOptMenu', q=True, v=True))
+
+        skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
+
+        # Set max influences for a skin cluster
+        cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
+        cmds.setAttr("{}.maxInfluences".format(skinClst), targetMaxInfs)
+
+        # Optimize weights and influences to speed up processing
+        SkinWeights.prunSkinWeights(skinClst, mesh)
+        cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
+
+        meshMaxInfs = SkinWeights.getMaxInfluences(mesh)
         if meshMaxInfs <= targetMaxInfs:
             print('"{}"s max influence is {} already. Skip processing.'.format(mesh, meshMaxInfs))
             continue
@@ -808,16 +819,6 @@ def fitMaxInfluence(*args):
         cmds.columnLayout(adj=True)
         cmds.progressBar('progBar', isMainProgressBar=True, beginProgress=True, isInterruptable=True, w=300)
         cmds.showWindow('fitMaxInfProgWin')
-
-        skinClst = mel.eval('findRelatedSkinCluster("{}");'.format(mesh))
-
-        # Optimize weights and influences to speed up processing
-        SkinWeights.prunSkinWeights(skinClst, mesh)
-        cmds.skinCluster(skinClst, e=True, removeUnusedInfluence=True)
-
-        # Set max influences for a skin cluster
-        cmds.setAttr("{}.maintainMaxInfluences".format(skinClst), True)
-        cmds.setAttr("{}.maxInfluences".format(skinClst), targetMaxInfs)
 
         infPrunedWeights = SkinWeights.pruneSkinInfluences(mesh, skinClst, targetMaxInfs)
         SkinWeights.setWeights(mesh, skinClst, infPrunedWeights)

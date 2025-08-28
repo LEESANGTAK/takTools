@@ -317,7 +317,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem28;
+        menuEditorMenuItem11;
 
     menuItem
         -label "Controller" 
@@ -360,6 +360,48 @@
         menuEditorMenuItem32;
 
     menuItem
+        -label "Attach To" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "{\n    string $sels[] = `ls -os`;\n    string $parent = $sels[1];\n    string $child = $sels[0];\n    parentConstraint $parent $child;\n    select -r $parent;\n}" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "parentConstraint.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem28;
+
+    menuItem
+        -label "Multi Constraint" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.rigging.tak_mulConst as tak_mulConst\\nimport imp; imp.reload(tak_mulConst)\\ntak_mulConst.UI()\");" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "multiConstraint.bmp" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem27;
+
+    menuItem
         -label "Connect Attributes" 
         -divider 0
         -subMenu 0
@@ -398,14 +440,14 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem31;
+        menuEditorMenuItem15;
 
     menuItem
-        -label "Multi Constraint" 
-        -divider 0
+        -label "separator" 
+        -divider 1
+        -dividerLabel "separator" 
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.rigging.tak_mulConst as tak_mulConst\\nimport imp; imp.reload(tak_mulConst)\\ntak_mulConst.UI()\");" 
         -optionBox 0
         -enable 1
         -visible 1
@@ -413,13 +455,11 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "multiConstraint.bmp" 
-        -echoCommand 0
         -italicized 0
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem27;
+        menuEditorMenuItem30;
 
     menuItem
         -label "Create Cage Mesh" 
@@ -460,26 +500,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem33;
-
-    menuItem
-        -label "separator" 
-        -divider 1
-        -dividerLabel "separator" 
-        -subMenu 0
-        -tearOff 0
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem30;
+        menuEditorMenuItem16;
 
     menuItem
         -label "Duplicate Face" 
@@ -602,7 +623,7 @@
         -boldFont 1
         -sourceType "mel" 
         -longDivider 1
-        menuEditorMenuItem34;
+        menuEditorMenuItem25;
 
     menuItem
         -label "Duplicate Parent Only" 
