@@ -1,0 +1,1619 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "User::Compounds::get_border_edges",
+            "uriImported": "stream:/bifrostGraphShape1",
+            "metadata": [
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "mesh"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "value"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "-36.647 -103.202"
+                },
+                {
+                    "metaName": "zValue",
+                    "metaType": "string",
+                    "metaValue": "122.000000"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "value",
+                    "portDirection": "output"
+                },
+                {
+                    "portName": "mesh",
+                    "portDirection": "input",
+                    "portType": "Object",
+                    "portDefault": {}
+                }
+            ],
+            "compounds": [
+                {
+                    "name": "get_all_face_edges",
+                    "uriImported": "stream:/bifrostGraphShape1",
+                    "metadata": [
+                        {
+                            "metaName": "ViewportRect",
+                            "metaType": "string",
+                            "metaValue": "-531.983 -232.579 1593.15 528.955"
+                        },
+                        {
+                            "metaName": "io_nodes",
+                            "metadata": [
+                                {
+                                    "metaName": "io_inodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "input",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-450.333 -60.6667"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "31.000000"
+                                                },
+                                                {
+                                                    "metaName": "io_ports",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "face_count"
+                                                        },
+                                                        {
+                                                            "metaName": "face_offset"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "metaName": "io_onodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "output",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "726.667 -118.667"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "32.000000"
+                                                },
+                                                {
+                                                    "metaName": "io_ports",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "face_edges"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "ports": [
+                        {
+                            "portName": "face_count",
+                            "portDirection": "input",
+                            "portType": "long"
+                        },
+                        {
+                            "portName": "face_offset",
+                            "portDirection": "input",
+                            "portType": "array<uint>"
+                        },
+                        {
+                            "portName": "face_edges",
+                            "portDirection": "output"
+                        }
+                    ],
+                    "compounds": [
+                        {
+                            "name": "for_each_face",
+                            "uriImported": "stream:/bifrostGraphShape1",
+                            "metadata": [
+                                {
+                                    "metaName": "icon",
+                                    "metaType": "string",
+                                    "metaValue": "<NATIVE>../icons/LoopForEach.svg"
+                                },
+                                {
+                                    "metaName": "icon",
+                                    "metaType": "string",
+                                    "metaValue": "<NATIVE>../icons/LoopForEach.svg"
+                                },
+                                {
+                                    "metaName": "_recentNode_",
+                                    "metaType": "string",
+                                    "metaValue": "BifrostGraph,Core::Constants,float"
+                                },
+                                {
+                                    "metaName": "_recentNode_",
+                                    "metaType": "string",
+                                    "metaValue": "BifrostGraph,Core::Iterators,iterate"
+                                },
+                                {
+                                    "metaName": "_recentNode_",
+                                    "metaType": "string",
+                                    "metaValue": "BifrostGraph,Core::Array,slice_array"
+                                },
+                                {
+                                    "metaName": "_recentNode_",
+                                    "metaType": "string",
+                                    "metaValue": "BifrostGraph,Geometry::Common,access_offset_array"
+                                },
+                                {
+                                    "metaName": "_recentNode_",
+                                    "metaType": "string",
+                                    "metaValue": "BifrostGraph,Core::Iterators,for_each"
+                                },
+                                {
+                                    "metaName": "ViewportRect",
+                                    "metaType": "string",
+                                    "metaValue": "-827.352 -242 1867.37 620"
+                                },
+                                {
+                                    "metaName": "io_nodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_inodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "input",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "DisplayMode",
+                                                            "metaType": "string",
+                                                            "metaValue": "2"
+                                                        },
+                                                        {
+                                                            "metaName": "LayoutPos",
+                                                            "metaType": "string",
+                                                            "metaValue": "-538.803 2.52749"
+                                                        },
+                                                        {
+                                                            "metaName": "zValue",
+                                                            "metaType": "string",
+                                                            "metaValue": "31.000000"
+                                                        },
+                                                        {
+                                                            "metaName": "io_ports",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "max_iterations"
+                                                                },
+                                                                {
+                                                                    "metaName": "current_index"
+                                                                },
+                                                                {
+                                                                    "metaName": "face_offset"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "io_onodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "output",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "DisplayMode",
+                                                            "metaType": "string",
+                                                            "metaValue": "2"
+                                                        },
+                                                        {
+                                                            "metaName": "LayoutPos",
+                                                            "metaType": "string",
+                                                            "metaValue": "614.081 -31.4243"
+                                                        },
+                                                        {
+                                                            "metaName": "zValue",
+                                                            "metaType": "string",
+                                                            "metaValue": "32.000000"
+                                                        },
+                                                        {
+                                                            "metaName": "io_ports",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "out_face_edges"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "ports": [
+                                {
+                                    "portName": "max_iterations",
+                                    "portDirection": "input",
+                                    "portType": "long",
+                                    "portIterationLimit": "true"
+                                },
+                                {
+                                    "portName": "current_index",
+                                    "portDirection": "input",
+                                    "portType": "long",
+                                    "portIterationCounter": "true"
+                                },
+                                {
+                                    "portName": "face_offset",
+                                    "portDirection": "input"
+                                },
+                                {
+                                    "portName": "out_face_edges",
+                                    "portDirection": "output",
+                                    "portIterationTarget": "true"
+                                }
+                            ],
+                            "compounds": [
+                                {
+                                    "name": "access_offset_array",
+                                    "uriImported": "stream:/bifrostGraphShape1",
+                                    "metadata": [
+                                        {
+                                            "metaName": "documentation",
+                                            "metaType": "string",
+                                            "metaValue": "../docs/${language}/Geometry_Common_access_offset_array.md"
+                                        },
+                                        {
+                                            "metaName": "ViewportRect",
+                                            "metaType": "string",
+                                            "metaValue": "-444.154 -172.281 2311.03 767.302"
+                                        },
+                                        {
+                                            "metaName": "io_nodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "io_inodes",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "input",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "DisplayMode",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "2"
+                                                                },
+                                                                {
+                                                                    "metaName": "LayoutPos",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "-1310.32 69.0822"
+                                                                },
+                                                                {
+                                                                    "metaName": "zValue",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "41.000000"
+                                                                },
+                                                                {
+                                                                    "metaName": "io_ports",
+                                                                    "metadata": [
+                                                                        {
+                                                                            "metaName": "offset_array"
+                                                                        },
+                                                                        {
+                                                                            "metaName": "index"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "metaName": "io_onodes",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "output",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "DisplayMode",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "2"
+                                                                },
+                                                                {
+                                                                    "metaName": "LayoutPos",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "1077.72 59.6811"
+                                                                },
+                                                                {
+                                                                    "metaName": "zValue",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "42.000000"
+                                                                },
+                                                                {
+                                                                    "metaName": "io_ports",
+                                                                    "metadata": [
+                                                                        {
+                                                                            "metaName": "start"
+                                                                        },
+                                                                        {
+                                                                            "metaName": "end"
+                                                                        },
+                                                                        {
+                                                                            "metaName": "length"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "ports": [
+                                        {
+                                            "portName": "offset_array",
+                                            "portDirection": "input",
+                                            "portType": "array<uint>"
+                                        },
+                                        {
+                                            "portName": "index",
+                                            "portDirection": "input",
+                                            "portType": "long",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "UiSoftMin",
+                                                    "metaType": "string",
+                                                    "metaValue": "0"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "portName": "start",
+                                            "portDirection": "output",
+                                            "portType": "long"
+                                        },
+                                        {
+                                            "portName": "end",
+                                            "portDirection": "output",
+                                            "portType": "long"
+                                        },
+                                        {
+                                            "portName": "length",
+                                            "portDirection": "output",
+                                            "portType": "long"
+                                        }
+                                    ],
+                                    "compounds": [
+                                        {
+                                            "name": "increment",
+                                            "uriImported": "stream:/bifrostGraphShape1",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "ViewportRect",
+                                                    "metaType": "string",
+                                                    "metaValue": "-942.173 113.198 956.25 487.32"
+                                                },
+                                                {
+                                                    "metaName": "io_nodes",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "io_inodes",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "input",
+                                                                    "metadata": [
+                                                                        {
+                                                                            "metaName": "io_ports",
+                                                                            "metadata": [
+                                                                                {
+                                                                                    "metaName": "current_index"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "metaName": "io_onodes",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "output",
+                                                                    "metadata": [
+                                                                        {
+                                                                            "metaName": "io_ports",
+                                                                            "metadata": [
+                                                                                {
+                                                                                    "metaName": "output"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "ports": [
+                                                {
+                                                    "portName": "current_index",
+                                                    "portDirection": "input"
+                                                },
+                                                {
+                                                    "portName": "output",
+                                                    "portDirection": "output"
+                                                }
+                                            ],
+                                            "compoundNodes": [
+                                                {
+                                                    "nodeName": "add",
+                                                    "nodeType": "Core::Math::add",
+                                                    "multiInPortNames": [
+                                                        "current_index",
+                                                        "output1"
+                                                    ],
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "DisplayMode",
+                                                            "metaType": "string",
+                                                            "metaValue": "2"
+                                                        },
+                                                        {
+                                                            "metaName": "LayoutPos",
+                                                            "metaType": "string",
+                                                            "metaValue": "-528 368"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "nodeName": "value",
+                                                    "valueType": "long",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "DisplayMode",
+                                                            "metaType": "string",
+                                                            "metaValue": "2"
+                                                        },
+                                                        {
+                                                            "metaName": "valuenode_defaultvalue",
+                                                            "metaType": "string",
+                                                            "metaValue": "0"
+                                                        },
+                                                        {
+                                                            "metaName": "LayoutPos",
+                                                            "metaType": "string",
+                                                            "metaValue": "-775 479"
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "connections": [
+                                                {
+                                                    "source": "add.output",
+                                                    "target": ".output"
+                                                },
+                                                {
+                                                    "source": "value.output",
+                                                    "target": "add.first.output1"
+                                                },
+                                                {
+                                                    "source": ".current_index",
+                                                    "target": "add.first.current_index"
+                                                }
+                                            ],
+                                            "values": [
+                                                {
+                                                    "valueName": "value.value",
+                                                    "valueType": "long",
+                                                    "value": "1"
+                                                }
+                                            ],
+                                            "reservedNodeNames": [
+                                                {
+                                                    "name": "input"
+                                                },
+                                                {
+                                                    "name": "output"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "compoundNodes": [
+                                        {
+                                            "nodeName": "increment",
+                                            "nodeType": "increment",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-985.321 198.082"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "31.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "subtract1",
+                                            "nodeType": "Core::Math::subtract",
+                                            "multiInPortNames": [
+                                                "output1",
+                                                "output2"
+                                            ],
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-86.6744 79.2048"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "32.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "get_from_array",
+                                            "nodeType": "Core::Array::get_from_array",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-696.321 89.0822"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "33.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "get_from_array1",
+                                            "nodeType": "Core::Array::get_from_array",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-703.116 -188.279"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "34.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "add",
+                                            "nodeType": "Core::Math::add",
+                                            "multiInPortNames": [
+                                                "value",
+                                                "output1"
+                                            ],
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "795.994 -122.363"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "35.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "to_long",
+                                            "nodeType": "Core::Type_Conversion::to_long",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-387.648 -59.9655"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "36.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "to_long1",
+                                            "nodeType": "Core::Type_Conversion::to_long",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-393.562 118.909"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "37.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "zero",
+                                            "valueType": "long",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "valuenode_defaultvalue",
+                                                    "metaType": "string",
+                                                    "metaValue": "0"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "98.044 308.686"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "38.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "if_less_than_zero",
+                                            "nodeType": "Core::Logic::if",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "567.684 252.809"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "39.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "less",
+                                            "nodeType": "Core::Logic::less",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "326.177 84.7666"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "40.000000"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "connections": [
+                                        {
+                                            "source": "increment.output",
+                                            "target": "get_from_array.index"
+                                        },
+                                        {
+                                            "source": "subtract1.output",
+                                            "target": "less.first"
+                                        },
+                                        {
+                                            "source": "subtract1.output",
+                                            "target": "if_less_than_zero.false_case"
+                                        },
+                                        {
+                                            "source": "get_from_array.value",
+                                            "target": "to_long1.from"
+                                        },
+                                        {
+                                            "source": "get_from_array1.value",
+                                            "target": ".start"
+                                        },
+                                        {
+                                            "source": "get_from_array1.value",
+                                            "target": "add.first.value"
+                                        },
+                                        {
+                                            "source": "get_from_array1.value",
+                                            "target": "to_long.from"
+                                        },
+                                        {
+                                            "source": "add.output",
+                                            "target": ".end"
+                                        },
+                                        {
+                                            "source": "to_long.long",
+                                            "target": "subtract1.first.output2"
+                                        },
+                                        {
+                                            "source": "to_long1.long",
+                                            "target": "subtract1.first.output1"
+                                        },
+                                        {
+                                            "source": "zero.output",
+                                            "target": "less.second"
+                                        },
+                                        {
+                                            "source": "zero.output",
+                                            "target": "if_less_than_zero.true_case"
+                                        },
+                                        {
+                                            "source": "if_less_than_zero.output",
+                                            "target": "add.first.output1"
+                                        },
+                                        {
+                                            "source": "if_less_than_zero.output",
+                                            "target": ".length"
+                                        },
+                                        {
+                                            "source": "less.output",
+                                            "target": "if_less_than_zero.condition"
+                                        },
+                                        {
+                                            "source": ".offset_array",
+                                            "target": "get_from_array.array"
+                                        },
+                                        {
+                                            "source": ".offset_array",
+                                            "target": "get_from_array1.array"
+                                        },
+                                        {
+                                            "source": ".index",
+                                            "target": "get_from_array1.index"
+                                        },
+                                        {
+                                            "source": ".index",
+                                            "target": "increment.current_index"
+                                        }
+                                    ],
+                                    "values": [
+                                        {
+                                            "valueName": "zero.value",
+                                            "valueType": "long",
+                                            "value": "0"
+                                        }
+                                    ],
+                                    "reservedNodeNames": [
+                                        {
+                                            "name": "input"
+                                        },
+                                        {
+                                            "name": "output"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "iterate_over_face_edges",
+                                    "uriImported": "stream:/bifrostGraphShape1",
+                                    "metadata": [
+                                        {
+                                            "metaName": "icon",
+                                            "metaType": "string",
+                                            "metaValue": "<NATIVE>../icons/LoopIterate.svg"
+                                        },
+                                        {
+                                            "metaName": "icon",
+                                            "metaType": "string",
+                                            "metaValue": "<NATIVE>../icons/LoopIterate.svg"
+                                        },
+                                        {
+                                            "metaName": "_recentNode_",
+                                            "metaType": "string",
+                                            "metaValue": "BifrostGraph,Core::Type_Conversion,to_unsigned_int"
+                                        },
+                                        {
+                                            "metaName": "_recentNode_",
+                                            "metaType": "string",
+                                            "metaValue": "BifrostGraph,Core::Constants,float"
+                                        },
+                                        {
+                                            "metaName": "_recentNode_",
+                                            "metaType": "string",
+                                            "metaValue": "BifrostGraph,Core::Array,build_array"
+                                        },
+                                        {
+                                            "metaName": "_recentNode_",
+                                            "metaType": "string",
+                                            "metaValue": "BifrostGraph,Core::Iterators,iterate"
+                                        },
+                                        {
+                                            "metaName": "_recentNode_",
+                                            "metaType": "string",
+                                            "metaValue": "BifrostGraph,Core::Array,slice_array"
+                                        },
+                                        {
+                                            "metaName": "ViewportRect",
+                                            "metaType": "string",
+                                            "metaValue": "-739.205 -32.6667 1961.74 651.333"
+                                        },
+                                        {
+                                            "metaName": "io_nodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "io_inodes",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "input",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "DisplayMode",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "2"
+                                                                },
+                                                                {
+                                                                    "metaName": "LayoutPos",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "-527 -25.5"
+                                                                },
+                                                                {
+                                                                    "metaName": "zValue",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "31.000000"
+                                                                },
+                                                                {
+                                                                    "metaName": "io_ports",
+                                                                    "metadata": [
+                                                                        {
+                                                                            "metaName": "max_iterations"
+                                                                        },
+                                                                        {
+                                                                            "metaName": "current_side"
+                                                                        },
+                                                                        {
+                                                                            "metaName": "face_edges"
+                                                                        },
+                                                                        {
+                                                                            "metaName": "current_face"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "metaName": "io_onodes",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "output",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "DisplayMode",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "2"
+                                                                },
+                                                                {
+                                                                    "metaName": "LayoutPos",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "983.761 -17.9621"
+                                                                },
+                                                                {
+                                                                    "metaName": "zValue",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "36.000000"
+                                                                },
+                                                                {
+                                                                    "metaName": "io_ports",
+                                                                    "metadata": [
+                                                                        {
+                                                                            "metaName": "out_face_edges"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "ports": [
+                                        {
+                                            "portName": "max_iterations",
+                                            "portDirection": "input",
+                                            "portType": "long",
+                                            "portIterationLimit": "true"
+                                        },
+                                        {
+                                            "portName": "current_side",
+                                            "portDirection": "input",
+                                            "portType": "long",
+                                            "portIterationCounter": "true"
+                                        },
+                                        {
+                                            "portName": "face_edges",
+                                            "portDirection": "input",
+                                            "portType": "array<Geometry::Mesh::FaceEdge>"
+                                        },
+                                        {
+                                            "portName": "current_face",
+                                            "portDirection": "input",
+                                            "portType": "long"
+                                        },
+                                        {
+                                            "portName": "out_face_edges",
+                                            "portDirection": "output"
+                                        }
+                                    ],
+                                    "compoundNodes": [
+                                        {
+                                            "nodeName": "build_array",
+                                            "nodeType": "Core::Array::build_array",
+                                            "multiInPortNames": [
+                                                "face_edges",
+                                                "output"
+                                            ],
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "459.5 81"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "34.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "value",
+                                            "valueType": "Geometry::Mesh::FaceEdge",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "valuenode_defaultvalue",
+                                                    "metaType": "string",
+                                                    "metaValue": "0"
+                                                },
+                                                {
+                                                    "metaName": "valuenode_defaultvalue",
+                                                    "metaType": "string",
+                                                    "metaValue": "0"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "87.5371 233.964"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "35.000000"
+                                                },
+                                                {
+                                                    "metaName": "PortExpandedState",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "value",
+                                                            "metaType": "string",
+                                                            "metaValue": "1"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "to_unsigned_int",
+                                            "nodeType": "Core::Type_Conversion::to_unsigned_int",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-221.5 401"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "33.000000"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "nodeName": "to_unsigned_int1",
+                                            "nodeType": "Core::Type_Conversion::to_unsigned_int",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-218.5 238"
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "32.000000"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "connections": [
+                                        {
+                                            "source": "build_array.array",
+                                            "target": ".out_face_edges"
+                                        },
+                                        {
+                                            "source": "value.output",
+                                            "target": "build_array.first.output"
+                                        },
+                                        {
+                                            "source": "to_unsigned_int.unsigned_int",
+                                            "target": "value.value.side"
+                                        },
+                                        {
+                                            "source": "to_unsigned_int1.unsigned_int",
+                                            "target": "value.value.face"
+                                        },
+                                        {
+                                            "source": ".current_side",
+                                            "target": "to_unsigned_int.from"
+                                        },
+                                        {
+                                            "source": ".face_edges",
+                                            "target": "build_array.first.face_edges"
+                                        },
+                                        {
+                                            "source": ".current_face",
+                                            "target": "to_unsigned_int1.from"
+                                        }
+                                    ],
+                                    "values": [
+                                        {
+                                            "valueName": "value.value",
+                                            "valueType": "Geometry::Mesh::FaceEdge",
+                                            "value": {
+                                                "face": "0U",
+                                                "side": "0U"
+                                            }
+                                        }
+                                    ],
+                                    "reservedNodeNames": [
+                                        {
+                                            "name": "input"
+                                        },
+                                        {
+                                            "name": "output"
+                                        }
+                                    ],
+                                    "iterateCompound": {
+                                        "ports": [
+                                            {
+                                                "portKind": "state",
+                                                "inputPortName": "face_edges",
+                                                "outputPortName": "out_face_edges"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "compoundNodes": [
+                                {
+                                    "nodeName": "access_offset_array",
+                                    "nodeType": "access_offset_array",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "36.000000"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-223.6 -190.627"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "iterate_over_face_edges",
+                                    "nodeType": "iterate_over_face_edges",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "79.5 -33"
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "38.000000"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "connections": [
+                                {
+                                    "source": "access_offset_array.length",
+                                    "target": "iterate_over_face_edges.max_iterations"
+                                },
+                                {
+                                    "source": "iterate_over_face_edges.out_face_edges",
+                                    "target": ".out_face_edges"
+                                },
+                                {
+                                    "source": ".current_index",
+                                    "target": "access_offset_array.index"
+                                },
+                                {
+                                    "source": ".current_index",
+                                    "target": "iterate_over_face_edges.current_face"
+                                },
+                                {
+                                    "source": ".face_offset",
+                                    "target": "access_offset_array.offset_array"
+                                }
+                            ],
+                            "values": [
+                                {
+                                    "valueName": "iterate_over_face_edges.max_iterations",
+                                    "valueType": "long",
+                                    "value": "10"
+                                }
+                            ],
+                            "reservedNodeNames": [
+                                {
+                                    "name": "input"
+                                },
+                                {
+                                    "name": "output"
+                                }
+                            ],
+                            "forEachCompound": {
+                                "ports": []
+                            }
+                        }
+                    ],
+                    "compoundNodes": [
+                        {
+                            "nodeName": "for_each_face",
+                            "nodeType": "for_each_face",
+                            "metadata": [
+                                {
+                                    "metaName": "DisplayMode",
+                                    "metaType": "string",
+                                    "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "-52.784 -147.693"
+                                },
+                                {
+                                    "metaName": "zValue",
+                                    "metaType": "string",
+                                    "metaValue": "36.000000"
+                                }
+                            ]
+                        },
+                        {
+                            "nodeName": "flatten_nested_array",
+                            "nodeType": "Core::Array::flatten_nested_array",
+                            "metadata": [
+                                {
+                                    "metaName": "DisplayMode",
+                                    "metaType": "string",
+                                    "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "334.365 -143.551"
+                                },
+                                {
+                                    "metaName": "zValue",
+                                    "metaType": "string",
+                                    "metaValue": "34.000000"
+                                }
+                            ]
+                        }
+                    ],
+                    "connections": [
+                        {
+                            "source": "for_each_face.out_face_edges",
+                            "target": "flatten_nested_array.nested_array"
+                        },
+                        {
+                            "source": "flatten_nested_array.flattened_array",
+                            "target": ".face_edges"
+                        },
+                        {
+                            "source": ".face_count",
+                            "target": "for_each_face.max_iterations"
+                        },
+                        {
+                            "source": ".face_offset",
+                            "target": "for_each_face.face_offset"
+                        }
+                    ],
+                    "values": [
+                        {
+                            "valueName": "for_each_face.max_iterations",
+                            "valueType": "long",
+                            "value": "10"
+                        }
+                    ],
+                    "reservedNodeNames": [
+                        {
+                            "name": "input"
+                        },
+                        {
+                            "name": "output"
+                        }
+                    ]
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "get_all_face_edges",
+                    "nodeType": "get_all_face_edges",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "88.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "37.7212 -88.1033"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "find_all_true_in_array",
+                    "nodeType": "Core::Array::find_all_true_in_array",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "93.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "590.036 -204.599"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "get_from_array",
+                    "nodeType": "Core::Array::get_from_array",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "904.596 -471.236"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "37.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "get_mesh_structure",
+                    "nodeType": "Geometry::Mesh::get_mesh_structure",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-225.5 -104"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "82.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "is_face_edge_open",
+                    "nodeType": "Geometry::Mesh::Internal::is_face_edge_open",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "304.519 289.227"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "92.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "update_mesh_adjacency",
+                    "nodeType": "Geometry::Mesh::update_mesh_adjacency",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-232.368 208.827"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "34.000000"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "is_face_edge_open.is_open",
+                    "target": "find_all_true_in_array.boolean_array"
+                },
+                {
+                    "source": "find_all_true_in_array.indices",
+                    "target": "get_from_array.index"
+                },
+                {
+                    "source": "get_mesh_structure.face_count",
+                    "target": "get_all_face_edges.face_count"
+                },
+                {
+                    "source": "get_mesh_structure.face_offset",
+                    "target": "get_all_face_edges.face_offset"
+                },
+                {
+                    "source": "get_all_face_edges.face_edges",
+                    "target": "is_face_edge_open.face_edge"
+                },
+                {
+                    "source": "get_all_face_edges.face_edges",
+                    "target": "get_from_array.array"
+                },
+                {
+                    "source": "get_from_array.value",
+                    "target": ".value"
+                },
+                {
+                    "source": ".mesh",
+                    "target": "get_mesh_structure.mesh"
+                },
+                {
+                    "source": "get_mesh_structure.face_offset",
+                    "target": "is_face_edge_open.face_offset"
+                },
+                {
+                    "source": "update_mesh_adjacency.face_vertex_adjacent_edge",
+                    "target": "is_face_edge_open.face_vertex_adjacent_edge"
+                },
+                {
+                    "source": ".mesh",
+                    "target": "update_mesh_adjacency.mesh"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "get_all_face_edges.face_count",
+                    "valueType": "long",
+                    "value": "10"
+                },
+                {
+                    "valueName": "get_all_face_edges.face_offset",
+                    "valueType": "array<uint>",
+                    "value": []
+                },
+                {
+                    "valueName": "is_face_edge_open.face_edge",
+                    "valueType": "Geometry::Mesh::FaceEdge",
+                    "value": {
+                        "face": "0U",
+                        "side": "0U"
+                    }
+                },
+                {
+                    "valueName": "is_face_edge_open.face_offset",
+                    "valueType": "array<uint>",
+                    "value": []
+                },
+                {
+                    "valueName": "is_face_edge_open.face_vertex_adjacent_edge",
+                    "valueType": "array<Geometry::Mesh::FaceEdge>",
+                    "value": []
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

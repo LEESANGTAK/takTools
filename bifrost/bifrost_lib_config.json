@@ -1,0 +1,15 @@
+{
+  "AminoConfigurations": [
+    {
+      "vendorName": "Sangtak Lee",
+      "libraryVersion": "0.0.1",
+      "libraryName": "Tak",
+      "jsonLibs": [
+        {
+          "path": "compounds",
+          "files": [ ]
+        }
+      ]
+    }
+  ]
+}
