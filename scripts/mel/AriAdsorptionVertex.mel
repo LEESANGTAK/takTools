@@ -1,0 +1,567 @@
+//--------------------------------------------------------------------------
+//
+// ScriptName : AriAdsorptionVertex
+// Contents   : 2組の境界頂点/エッジを吸着します。
+// Author     : Ari
+// Since      : 2019/05
+// LastUpdate : 2021/06/13 エッジの直線状で吸着機能追加
+//            : 2020/07/05 固定の仕様変更
+// Help       : http://cgjishu.net/blog-entry-277.html
+//
+//--------------------------------------------------------------------------
+
+
+proc string[] StringArrayAnd(string $listA[],string $listB[]){
+	string $addList[];
+	for($aa in $listA){
+		if(stringArrayContains($aa,$listB)){
+			$addList[size($addList)] = $aa;
+		}
+	}
+	return $addList;
+}
+proc ReloadUI(){
+	global string $AriGetEdgeList_FixVertexList[];
+	global string $AriGetEdgeList_SaveVertexList[];
+	global string $AriAdsorptionVertexOptions_UI_fixTF;
+	global string $AriAdsorptionVertexOptions_UI_saveTF;
+	if(`textField -ex $AriAdsorptionVertexOptions_UI_fixTF`){
+		textField -e -text (size($AriGetEdgeList_FixVertexList)+" FixVertex") $AriAdsorptionVertexOptions_UI_fixTF;
+	}
+	if(`textField -ex $AriAdsorptionVertexOptions_UI_saveTF`){
+		textField -e -text (size($AriGetEdgeList_SaveVertexList)+" FixVertex") $AriAdsorptionVertexOptions_UI_saveTF;
+	}
+}
+proc int Ari_checkSideVer(string $ver0,string $ver1)
+{
+	string $verToEdge[]=`polyListComponentConversion -te $ver0`;
+	string $edgeToVer[]=`polyListComponentConversion -tv $verToEdge`;
+	$edgeToVer=`filterExpand -selectionMask 31 $edgeToVer`;
+	if(stringArrayContains($ver1,$edgeToVer)){
+		return 1;
+	}
+	else	return 0;
+}
+proc vector[] intersectionPos(vector $P,vector $Q,vector $R,vector $S){
+	vector $AB[];
+	vector $a1,$a2,$a3,$b1,$b2,$b3,$c1,$c2;
+	float $D1,$D2,$D3,$D4,$D5,$D6,$t,$s;
+	vector $A,$B;
+	$a1=$P;
+	$a2=$Q;
+	$b1=$R;
+	$b2=$S;
+	$a3 = <<$a2.x - $a1.x ,$a2.y - $a1.y ,$a2.z - $a1.z>>;
+	$b3 = <<$b2.x - $b1.x ,$b2.y - $b1.y ,$b2.z - $b1.z>>;
+	$c1 = <<$a3.x*($b1.x-$a1.x),$a3.y*($b1.y-$a1.y),$a3.z*($b1.z-$a1.z)>>;
+	$D1 = $a3.x*$b3.x + $a3.y*$b3.y + $a3.z*$b3.z;
+	$D2 = $a3.x*$a3.x + $a3.y*$a3.y + $a3.z*$a3.z;
+	$D3 = $c1.x + $c1.y + $c1.z;
+	$c2 = <<$b3.x*($b1.x-$a1.x),$b3.y*($b1.y-$a1.y),$b3.z*($b1.z-$a1.z)>>;
+	$D5 = $b3.x*$b3.x + $b3.y*$b3.y + $b3.z*$b3.z;
+	$D6 = $c2.x + $c2.y + $c2.z;
+	if( (($D1*$D1)-($D2*$D5)) < 0.0001 && (($D1*$D1)-($D2*$D5)) > -0.0001){
+		$AB[2] = <<1,1,1>>;
+		return $AB;
+	}
+	$t = (($D1*$D6)-($D3*$D5))/(($D1*$D1)-($D2*$D5));
+	$s = ($D1*$t-$D6)/$D5;
+	$A=<<$a3.x*$t+$a1.x, $a3.y*$t+$a1.y, $a3.z*$t+$a1.z>>;
+	$B=<<$b3.x*$s+$b1.x, $b3.y*$s+$b1.y, $b3.z*$s+$b1.z>>;
+	$AB[0] = $A;
+	$AB[1] = $B;
+	return $AB;
+}
+proc float distancePos(vector $verPosA,vector $verPosB){
+		float $dis;
+		$dis=	 (($verPosB.x)-($verPosA.x))*(($verPosB.x)-($verPosA.x))
+				+(($verPosB.y)-($verPosA.y))*(($verPosB.y)-($verPosA.y))
+				+(($verPosB.z)-($verPosA.z))*(($verPosB.z)-($verPosA.z));
+		$dis=sqrt ($dis);
+		return $dis;
+}
+proc string[] ArrayLeadSort(string $array[],string $lead){
+	string $sortArray[];
+	int $i=0;
+	int $inputTrue = false;
+	for($string in $array){
+		if($string == $lead){
+			$inputTrue=true;
+		}
+		if($inputTrue){
+			$sortArray[$i] = $string;
+			$i++;
+		}
+	}
+	for($string in $array){
+		if($string == $lead){
+			break;
+		}
+		if($inputTrue){
+			$sortArray[$i] = $string;
+			$i++;
+		}
+	}
+	return $sortArray;
+}
+proc string[] AriGetEdgeList(string  $getList_edges[],int $verMode){
+	global string $gMainProgressBar;     
+	string $getList_vartex[];
+	for($i=0;$i<size($getList_edges);$i++){
+		string $edgeToUv[] = `polyListComponentConversion -tv $getList_edges[$i]`;
+		$edgeToUv = `filterExpand -selectionMask 31 $edgeToUv`;
+		$getList_vartex = stringArrayCatenate( $getList_vartex, $edgeToUv );
+	}
+	int $maxVal = size($getList_edges);
+	progressBar -e -maxValue ($maxVal) -pr 0 -beginProgress  -isInterruptable true $gMainProgressBar;
+	int $breakTrue = false;
+	string $sort_edgeList[];
+	string $sort_vertexList[];
+	int $count=0;
+	for($i=0; $i<size($getList_edges); $i++){
+		if(stringArrayContains($getList_edges[$i], $sort_edgeList))continue;
+		int $verNum1=$i*2;
+		string $nowEdge;
+		string $workEdgeList[];
+		string $workVertexList[];
+		clear $workEdgeList;
+		clear $workVertexList;
+		int $workEdgeListCounter=0;
+		string $leadEdge;
+		int $loopTrue = false;
+		for($k=0;$k<2;$k++){
+			$nowEdge   = $getList_edges[$i];
+			$nowVertex = $getList_vartex[$i*2+$k];
+			int $n=0;
+			if(!stringArrayContains($nowVertex,$sort_vertexList)){
+				$workVertexList[0] = $nowVertex;
+				string $beforeEdge=$nowVertex;
+				while($n<100000){
+					for($j=0;$j<size($getList_edges);$j++){
+						if(                    $getList_edges[$j] == $nowEdge  )continue;
+						if(stringArrayContains($getList_edges[$j],   $workEdgeList))continue;
+						if(stringArrayContains($getList_edges[$j],   $sort_edgeList))continue;
+						int $verNum2=$j*2;
+						if($nowVertex == $getList_vartex[$verNum2]){
+							$nowEdge   = $getList_edges[$j];
+							$nowVertex = $getList_vartex[$verNum2+1];
+							if(!stringArrayContains($nowVertex,$workVertexList)){
+								$workEdgeList[$workEdgeListCounter]     = $nowEdge;
+								$workVertexList[$workEdgeListCounter+1] = $nowVertex;
+								$workEdgeListCounter++;
+							}
+							else{
+								$loopTrue = true;
+							}
+							break;
+						}
+						if($nowVertex == $getList_vartex[$verNum2+1]){
+							$nowEdge   = $getList_edges[$j];
+							$nowVertex = $getList_vartex[$verNum2];
+							if(!stringArrayContains($nowVertex,$workVertexList)){
+								$workEdgeList[$workEdgeListCounter]     = $nowEdge;
+								$workVertexList[$workEdgeListCounter+1] = $nowVertex;
+								$workEdgeListCounter++;
+							}
+							else{
+								$loopTrue = true;
+							}
+							break;
+						}
+					}
+					if($beforeEdge == $nowVertex)break;
+					$beforeEdge=$nowVertex;
+					$n++;
+				}
+			}
+			string $plusEdge_Work[]   = $workEdgeList;
+			string $plusVertex_Work[] = $workVertexList;
+			if($k==0){
+				for($j=0;$j<size($workEdgeList);$j++){
+					$plusEdge_Work[(size($workEdgeList))-$j-1] = $workEdgeList[$j];
+				}
+				for($j=0;$j<size($workVertexList);$j++){
+					$plusVertex_Work[(size($workVertexList))-$j-1] = $workVertexList[$j];
+				}
+			}
+			$sort_edgeList   = stringArrayCatenate( $sort_edgeList,   $plusEdge_Work );
+			$sort_vertexList = stringArrayCatenate( $sort_vertexList, $plusVertex_Work );
+			if($k==0){
+				if($plusEdge_Work[0] != $getList_edges[$i]){
+					$sort_edgeList[size($sort_edgeList)]=$getList_edges[$i];
+				}
+				else{
+					$loopTrue = true;
+				}
+			}
+			else{
+				string $sepaString="--";
+				if($loopTrue)$sepaString="--Loop";
+				$sort_edgeList[size($sort_edgeList)]     = $sepaString;
+				$sort_vertexList[size($sort_vertexList)] = $sepaString;
+			}
+			clear $workEdgeList;
+			clear $workVertexList;
+			$workEdgeListCounter=0;
+			int $sortSize = size($sort_edgeList);
+			progressBar -e -pr $sortSize -isInterruptable true $gMainProgressBar;
+			if(`progressBar -query -isCancelled $gMainProgressBar`){
+				print ("中断---------------------------------\n");
+				$breakTrue = true;
+				break;
+			}
+		}
+		if($breakTrue)break;
+	}
+	if($breakTrue){
+		print"中断\n";
+	}
+	progressBar -e -pr 0 $gMainProgressBar;
+	progressBar -e -endProgress $gMainProgressBar;
+	if($verMode) return $sort_vertexList;
+	else         return $sort_edgeList;
+}
+proc string[] ArrayReverce(string $array[]){
+	string $newArray[];
+	for($i=0; $i<size($array);$i++){
+		$newArray[$i]=$array[size($array)-1-$i];
+	}
+	return $newArray;
+}
+proc int faceRotDirection(string $ver1, string $ver2){
+	string $faceList1[] = `polyListComponentConversion -tf $ver1`;
+	$faceList1 =`filterExpand -selectionMask 34 $faceList1`;
+	string $faceList2[] = `polyListComponentConversion -tf $ver2`;
+	$faceList2 =`filterExpand -selectionMask 34 $faceList2`;
+	string $commonFace;
+	for($face1 in $faceList1){
+		if(stringArrayContains($face1, $faceList2)){
+			$commonFace = $face1;
+		}
+	}
+	string $obj[];
+	tokenize $commonFace "." $obj;
+	string $verList[] = `polyInfo -faceToVertex $commonFace`;
+	string $vers[];
+	tokenizeList $verList[0] $vers;
+	for($x=2; $x<size($vers);$x++){
+		string $ver = ($obj[0]+".vtx["+$vers[$x]+"]");
+		if($ver==$ver1){
+			if($x==2){
+				string $verPulus = ($obj[0]+".vtx["+$vers[$x+1]+"]");
+				if($verPulus != $ver2)return 1;
+			}
+			return 0;
+		}
+		if($ver==$ver2){
+			if($x==2){
+				string $verPulus = ($obj[0]+".vtx["+$vers[$x+1]+"]");
+				if($verPulus != $ver1)return 0;
+			}
+			return 1;
+		}
+	}
+	return 2;
+}
+global proc AriAdsorptionVertex(){
+	global string $AriGetEdgeList_FixVertexList[];
+	global string $AriGetEdgeList_SaveVertexList[];
+	global int $AriGetEdgeList_SaveLoop;
+	int $mergeTrue = true;
+	int $softTrue  = true;
+	int $getfixTrue = true;
+	int $straightTrue = false;
+	if(`optionVar -exists "AriAdsorptionVertex_merge"`)	$mergeTrue = `optionVar -q "AriAdsorptionVertex_merge"`;
+	if(`optionVar -exists "AriAdsorptionVertex_soft"`)	$softTrue = `optionVar -q "AriAdsorptionVertex_soft"`;
+	if(`optionVar -exists "AriAdsorptionVertex_firstfix"`)	$getFixTrue = `optionVar -q "AriAdsorptionVertex_firstfix"`;
+	if(`optionVar -exists "AriAdsorptionVertex_straight"`)	$straightTrue = `optionVar -q "AriAdsorptionVertex_straight"`;
+	int $onlyBorder = true;
+	string $firstSelectList[] = `ls -sl`;
+	if(size($firstSelectList)==0){
+		AriAdsorptionVertexOptions();
+	}
+	string $edgeList[] = `filterExpand -selectionMask 32 $firstSelectList`;
+	string $verList[]  = `filterExpand -selectionMask 31 $firstSelectList`;
+	string $faceList[] = `filterExpand -selectionMask 34 $firstSelectList`;
+	if(size($edgeList)==0 && size($verList)==0){
+		return;
+	}
+	string $selectList[];
+	string $targetEdgeList[];
+	if(size($edgeList)){
+		if($onlyBorder){
+			ConvertSelectionToShellBorder;
+			$selectList = `ls -sl`;
+		}
+		else{
+			$selectList = $edgeList;
+		}
+		string $borderEdges[] = `filterExpand -selectionMask 32 $selectList`;
+		$targetEdgeList = StringArrayAnd($edgeList,$borderEdges);
+	}
+	else{
+		$verList = `polyListComponentConversion -tv $firstSelectList`;
+		$verList = `filterExpand -selectionMask 31 $verList`;
+		select $verList;
+		if($onlyBorder){
+			ConvertSelectionToShellBorder;
+			$selectList = `ls -sl`;
+		}
+		else{
+			$selectList = $verList;
+		}
+		string $borderVerList[] = `filterExpand -selectionMask 31 $selectList`;
+		string $targetVerList[] = StringArrayAnd($verList,$borderVerList);
+		select $targetVerList;
+		ConvertSelectionToContainedEdges;
+		$selectList = `ls -sl`;
+		$targetEdgeList = `filterExpand -selectionMask 32 $selectList`;
+	}
+	if(size($targetEdgeList)==0)return;
+	int $i=0;
+	int $mode_towVerTrue = false;
+	if(size($verList)==2)$mode_towVerTrue = true;
+	string $verListOrderA[];
+	string $verListOrderB[];
+	int $loopTrueA = false;
+	int $loopTrueB = false;
+	if($mode_towVerTrue == false){
+		string $verListOrder[] = AriGetEdgeList($targetEdgeList,1);
+		$i=0;
+		int $j=0;
+		for($edge in $verListOrder){
+			if($j==0){
+				if($edge=="--" || $edge=="--Loop"){
+					if($edge=="--Loop")$loopTrueA = true;
+					$j=1;
+					$i=0;
+				}
+				else{
+					$verListOrderA[$i]=$edge;
+					$i++;
+				}
+			}
+			else{
+				if($edge=="--" || $edge=="--Loop"){
+					if($edge=="--Loop")$loopTrueB = true;
+					$j=1;
+					$i=0;
+				}
+				else{
+					$verListOrderB[$i]=$edge;
+					$i++;
+				}
+			}
+		}
+	}
+	else{
+		if(size($verList)==2){
+			if(Ari_checkSideVer($verList[0],$verList[1])){
+				$verListOrderA = $verList;
+			}
+			else{
+				$verListOrderA[0] = $verList[0];
+				$verListOrderB[0] = $verList[1];
+			}
+		}
+	}
+	int $fixMode = 0;
+	if(size($verListOrderA)!=0 && size($verListOrderB)==0){
+		int $keepTrue = false;
+		if(size($AriGetEdgeList_SaveVertexList)==0) $keepTrue=true;
+		for($var in $verListOrderA){
+			if(stringArrayContains($var,$AriGetEdgeList_SaveVertexList)){
+				$keepTrue=true;
+				break;
+			}
+		}
+		if($keepTrue){
+			$AriGetEdgeList_SaveVertexList = $verListOrderA;
+			$AriGetEdgeList_FixVertexList  = $verListOrderA;
+			$AriGetEdgeList_SaveLoop = $loopTrueA;
+			print "Save---------------------------\n";
+			print $AriGetEdgeList_SaveVertexList;
+			print ("Save "+ size($AriGetEdgeList_SaveVertexList)+" Vertex\n");
+			ReloadUI();
+			if(size($verList)){
+				SelectVertexMask;
+			}
+			select -cl;
+			return;
+		}
+		else{
+			$verListOrderB = $AriGetEdgeList_SaveVertexList;
+			$loopTrueB = $AriGetEdgeList_SaveLoop;
+			if($getFixTrue)	$fixMode = 2;
+			else $fixMode = 1;
+		}
+	}
+	if(size($verListOrderA)==0 || size($verListOrderB)==0){
+		select $firstSelectList;
+		if(size($verList)){
+			SelectVertexMask;
+		}
+		return;
+	}
+	if($mode_towVerTrue==false){
+		clear $AriGetEdgeList_SaveVertexList;
+		ReloadUI();
+		if($loopTrueA == true || $loopTrueB == true){
+			vector $verPosA[];
+			vector $verPosB[];
+			string $verListSurchA[];
+			string $verListSurchB[];
+			if($loopTrueA==true) $verListSurchA = $verListOrderA;
+			else{
+				$verListSurchA[0] = $verListOrderA[0];
+				$verListSurchA[1] = $verListOrderA[size($verListOrderA)-1];
+			}
+			if($loopTrueB==true) $verListSurchB = $verListOrderB;
+			else{
+				$verListSurchB[0] = $verListOrderB[0];
+				$verListSurchB[1] = $verListOrderB[size($verListOrderB)-1];
+			}
+			for($i=0;$i<size($verListSurchA);$i++){
+				$verPosA[$i] = `pointPosition -w $verListSurchA[$i]`;
+			}
+			for($i=0;$i<size($verListSurchB);$i++){
+				$verPosB[$i] = `pointPosition -w $verListSurchB[$i]`;
+			}
+			string $startVerA;
+			string $startVerB;
+			float $minDistance=0;
+			for($i=0; $i<size($verListSurchA); $i++){
+				for($j=0; $j<size($verListSurchB); $j++){
+					float $distance = distancePos($verPosA[$i],$verPosB[$j]);
+					if($i==0 && $j==0){
+						$minDistance = $distance;
+						$startVerA = $verListSurchA[$i];
+						$startVerB = $verListSurchB[$j];
+					}
+					if($minDistance>$distance){
+						$minDistance = $distance;
+						$startVerA = $verListSurchA[$i];
+						$startVerB = $verListSurchB[$j];
+					}
+				}
+			}
+			if($loopTrueA==true){
+				$verListOrderA = ArrayLeadSort($verListSurchA, $startVerA);
+				$verListOrderA[size($verListOrderA)] = $verListOrderA[0];
+			}
+			if($loopTrueB==true){
+				$verListOrderB = ArrayLeadSort($verListSurchB, $startVerB);
+				$verListOrderB[size($verListOrderB)] = $verListOrderB[0];
+			}
+		}
+		int $rotverA = faceRotDirection($verListOrderA[0], $verListOrderA[1]);
+		int $rotverB = faceRotDirection($verListOrderB[0], $verListOrderB[1]);
+		if($rotverA == $rotverB){
+			$verListOrderB = ArrayReverce($verListOrderB);
+		}
+	}
+	string $borderEdgeList[];
+	if($straightTrue){
+		select $verListOrderA;
+		select -add $verListOrderB;
+		ConvertSelectionToContainedEdges;
+		string $edgeContained[] = `ls -sl`;
+		ConvertSelectionToShellBorder;
+		$borderEdgeList = `filterExpand -selectionMask 32 $selectList`;
+	}
+	int $partnerMode = 2;
+	for($i=0; $i<size($verListOrderA); $i++){
+		string $verA;
+		string $verB;
+		if($partnerMode==0){
+			if($i%2 == 0){
+				$verA = $verListOrderA[$i/2];
+				$verB = $verListOrderB[$i/2];
+			}
+			else{
+				$verA = $verListOrderA[size($verListOrderA)-1-$i/2];
+				$verB = $verListOrderB[size($verListOrderB)-1-$i/2];
+			}
+		}
+		if($partnerMode==1){
+			$verA = $verListOrderA[$i];
+			$verB = $verListOrderB[$i];
+		}
+		if($partnerMode==2){
+			int $plusA=0;
+			int $plusB=0;
+			if(size($verListOrderA) < size($verListOrderB)){
+				$plusB = (size($verListOrderB) - size($verListOrderA))/2;
+			}
+			if(size($verListOrderA) > size($verListOrderB)){
+				$plusA = (size($verListOrderA) - size($verListOrderB))/2;
+			}
+			$verA = $verListOrderA[$i+$plusA];
+			$verB = $verListOrderB[$i+$plusB];
+		}
+		if($i>=size($verListOrderB))break;
+		vector $movePosA;
+		vector $movePosB;
+		if($straightTrue){
+			string $toEdgeA[] = `polyListComponentConversion -te $verA`;
+			$toEdgeA = `filterExpand -selectionMask 32 $toEdgeA`;
+			string $vectorEdgeA[] = stringArrayRemove($borderEdgeList, $toEdgeA);
+			string $toEdgeB[] = `polyListComponentConversion -te $verB`;
+			$toEdgeB = `filterExpand -selectionMask 32 $toEdgeB`;
+			string $vectorEdgeB[] = stringArrayRemove($borderEdgeList, $toEdgeB);
+			if(size($vectorEdgeA) == 1 && size($vectorEdgeB) == 1){
+				string $toVerA[] = `polyListComponentConversion -tv $vectorEdgeA[0]`;
+				$toVerA = `filterExpand -selectionMask 31 $toVerA`;
+				vector $posA_0 = `pointPosition -w $toVerA[0]`;
+				vector $posA_1 = `pointPosition -w $toVerA[1]`;
+				string $toVerB[] = `polyListComponentConversion -tv $vectorEdgeB[0]`;
+				$toVerB = `filterExpand -selectionMask 31 $toVerB`;
+				vector $posB_0 = `pointPosition -w $toVerB[0]`;
+				vector $posB_1 = `pointPosition -w $toVerB[1]`;
+				vector $movePosList[] = intersectionPos($posA_0,$posA_1,$posB_0,$posB_1);
+				if($movePosList[2] == <<1,1,1>>){
+					print ("Edges parallel \n");
+					continue;
+				}
+				$movePosA = $movePosList[0];
+				$movePosB = $movePosList[1];
+			}
+			else continue;
+		}
+		else{ 
+			vector $movePos;
+			vector $posA = `pointPosition -w $verA`;
+			vector $posB = `pointPosition -w $verB`;
+			if($fixMode==0) $movePos = ($posA+$posB)/2.0;
+			if($fixMode==1) $movePos = $posA;
+			if($fixMode==2) $movePos = $posB;
+			$movePosA = $movePos;
+			$movePosB = $movePos;
+		}
+		if($fixMode!=1)	move -rpr ($movePosA.x) ($movePosA.y) ($movePosA.z) $verA;
+		if($fixMode!=2) move -rpr ($movePosB.x) ($movePosB.y) ($movePosB.z) $verB;
+	}
+	string $catenateVer[] = stringArrayCatenate($verListOrderA, $verListOrderB);
+	select $catenateVer;
+	string $sepa[];
+	tokenize $verListOrderA[0] "." $sepa;
+	string $objA = $sepa[0];
+	tokenize $verListOrderB[0] "." $sepa;
+	string $objB = $sepa[0];
+	if($objA == $objB){
+		if($mergeTrue){
+			polyMergeVertex -d 0.001 $catenateVer;	
+		}
+		if($softTrue && $mode_towVerTrue==false){
+			ConvertSelectionToContainedEdges;			
+			polySoftEdge -a 180 -ch 1;	
+		}
+	}
+	if(size($verList)){
+		SelectVertexMask;
+		select -cl;
+	}
+	clear $AriGetEdgeList_FixVertexList;
+	clear $AriGetEdgeList_SaveVertexList;
+	ReloadUI();
+}

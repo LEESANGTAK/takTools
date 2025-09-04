@@ -1,0 +1,911 @@
+//--------------------------------------------------------------------------
+//
+// ScriptName : AriCircleVertex
+// Contents   : 頂点を円状(正多角形)に整列します。
+// Author     : Ari
+// URL        : http://cgjishu.net/
+// Since      : 2017/09/18
+// LastUpdate : 2020/01/13 UI表記の間違いを修正 
+//            : 2018/05/06 半円、扇形に対応。
+//            : 2017/10/31 「隣接しているエッジの選択」機能のボタン「Contiguous」を追加
+//            : 2017/10/11 法線がY軸向きのものに実行するとおかしくなるバグ修正。
+//            : 2017/10/09 優先頂点を指定できるように機能追加。
+//
+//--------------------------------------------------------------------------
+
+
+proc AriCircleVertex_Save(){
+	global string $AriCircleVertexUI_Frame[3];
+	global string $AriCircleVertexUI_FloatField[5];
+	global string $AriCircleVertexUI_TextField;
+	global string $AriCircleVertexUI_CB[3];
+	global string $AriCircleVertexUI_Button[3];
+	int $optionFrameTrue = `frameLayout -q -cl $AriCircleVertexUI_Frame[0]`;
+	int $diameterTrue = `checkBox -q -v $AriCircleVertexUI_CB[0]`;
+	int $angleTrue    = `checkBox -q -v $AriCircleVertexUI_CB[1]`;
+	float $diameterVal  = `floatField -q -v $AriCircleVertexUI_FloatField[0]`;
+	float $angleVal     = `floatField -q -v $AriCircleVertexUI_FloatField[1]`;
+	optionVar -intValue "AriCircleVertex_optionFrameTrue" $optionFrameTrue;
+	optionVar -intValue "AriCircleVertex_diameterTrue"    $diameterTrue;
+	optionVar -intValue "AriCircleVertex_angleTrue"       $angleTrue;
+	optionVar -floatValue "AriCircleVertex_diameterVal"   $diameterVal;
+	optionVar -floatValue "AriCircleVertex_angleVal"      $angleVal;
+}
+proc AriCircleVertex_Load(){
+	global string $AriCircleVertexUI_Frame[3];
+	global string $AriCircleVertexUI_FloatField[5];
+	global string $AriCircleVertexUI_TextField;
+	global string $AriCircleVertexUI_CB[3];
+	global string $AriCircleVertexUI_Button[3];
+	int $optionFrameTrue = true;
+	int $diameterTrue = false;
+	int $angleTrue    = false;
+	float $diameterVal = 1;
+	float $angleVal    = 180;
+	if(`optionVar -exists "AriCircleVertex_optionFrameTrue"`)	$optionFrameTrue = `optionVar -q "AriCircleVertex_optionFrameTrue"`;
+	if(`optionVar -exists "AriCircleVertex_diameterTrue"`)		$diameterTrue = `optionVar -q "AriCircleVertex_diameterTrue"`;
+	if(`optionVar -exists "AriCircleVertex_angleTrue"`)			$angleTrue = `optionVar -q "AriCircleVertex_angleTrue"`;
+	if(`optionVar -exists "AriCircleVertex_diameterVal"`)		$diameterVal = `optionVar -q "AriCircleVertex_diameterVal"`;
+	if(`optionVar -exists "AriCircleVertex_angleVal"`)			$angleVal = `optionVar -q "AriCircleVertex_angleVal"`;
+	frameLayout -e -cl $optionFrameTrue $AriCircleVertexUI_Frame[0];
+	checkBox    -e -v  $diameterTrue $AriCircleVertexUI_CB[0];
+	checkBox    -e -v  $angleTrue    $AriCircleVertexUI_CB[1];
+	floatField -e -v $diameterVal $AriCircleVertexUI_FloatField[0];
+	floatField -e -v $angleVal    $AriCircleVertexUI_FloatField[1];
+}
+proc vector AriPointNormal_Point(vector $a, vector $nm, vector $P){
+	$d=-$a.x*$nm.x-$a.y*$nm.y-$a.z*$nm.z;
+	float $lmn=($nm.x*$nm.x + $nm.y*$nm.y + $nm.z*$nm.z);
+	float $x1=( $P.x*($nm.y*$nm.y + $nm.z*$nm.z)-($P.y*$nm.y + $P.z*$nm.z+$d)*$nm.x )/$lmn;
+	float $y1=( $P.y*($nm.z*$nm.z + $nm.x*$nm.x)-($P.z*$nm.z + $P.x*$nm.x+$d)*$nm.y )/$lmn;
+	float $z1=( $P.z*($nm.x*$nm.x + $nm.y*$nm.y)-($P.x*$nm.x + $P.y*$nm.y+$d)*$nm.z )/$lmn;
+	vector $Q=<<$x1,$y1,$z1>>;
+	return $Q;
+}
+proc vector AriHeimenTen(vector $a,vector $b,vector $c,vector $P)
+{
+	vector $ab=$b-$a;
+	vector $ac=$c-$a;
+	$nm=cross($ab,$ac);
+	$d=-$a.x*$nm.x-$a.y*$nm.y-$a.z*$nm.z;
+	float $lmn=($nm.x*$nm.x + $nm.y*$nm.y + $nm.z*$nm.z);
+	float $x1=( $P.x*($nm.y*$nm.y + $nm.z*$nm.z)-($P.y*$nm.y + $P.z*$nm.z+$d)*$nm.x )/$lmn;
+	float $y1=( $P.y*($nm.z*$nm.z + $nm.x*$nm.x)-($P.z*$nm.z + $P.x*$nm.x+$d)*$nm.y )/$lmn;
+	float $z1=( $P.z*($nm.x*$nm.x + $nm.y*$nm.y)-($P.x*$nm.x + $P.y*$nm.y+$d)*$nm.z )/$lmn;
+	vector $Q=<<$x1,$y1,$z1>>;
+	return $Q;
+}
+proc vector vectorNormalize(vector $normal){
+	float $NormalArray[3] = {($normal.x), ($normal.y), ($normal.z)};
+	normalize($NormalArray);
+	vector $NormalizeNormal = <<$NormalArray[0], $NormalArray[1], $NormalArray[2]>>;
+	return $NormalizeNormal;
+}
+proc vector RotPosition(vector $pos,float $rot,int $mode){
+	vector $rotPos;
+	float $rotRad = deg_to_rad($rot);
+	if($mode==0) $rotPos = << $pos.x                                    , $pos.y*cos($rotRad) - $pos.z*sin($rotRad) , $pos.y*sin($rotRad) + $pos.z*cos($rotRad)>>;
+	if($mode==1) $rotPos = << $pos.z*sin($rotRad) + $pos.x*cos($rotRad) , $pos.y                                    , $pos.z*cos($rotRad) - $pos.x*sin($rotRad)>>;
+	if($mode==2) $rotPos = << $pos.x*cos($rotRad) - $pos.y*sin($rotRad) , $pos.x*sin($rotRad) + $pos.y*cos($rotRad) , $pos.z  >>;
+	return $rotPos;
+}
+proc float[] QuaternionMultiplication(float $Q[], float $R[]){
+	float $quater[4];
+	float  $t1 = $Q[0];
+	vector $V1 = <<$Q[1],$Q[2],$Q[3]>>;
+	float  $t2 = $R[0];
+	vector $V2 = <<$R[1],$R[2],$R[3]>>;
+	$quater[0] = $t1*$t2-dot($V1,$V2);
+	vector $vec = ($t1*$V2)+($t2*$V1)+cross($V1,$V2);
+	$quater[1] = $vec.x;
+	$quater[2] = $vec.y;
+	$quater[3] = $vec.z;
+	return $quater;
+}
+proc vector QuaternionRotate(vector $p, vector $v, float $rad){
+	vector $moveP;
+	float $P[];
+	$P[0] = 0;
+	$P[1] = ($p.x);
+	$P[2] = ($p.y);
+	$P[3] = ($p.z);
+	float $Q[];
+	$Q[0] = cos($rad/2);
+	$Q[1] = ($v.x)*sin($rad/2);
+	$Q[2] = ($v.y)*sin($rad/2);
+	$Q[3] = ($v.z)*sin($rad/2);
+	float $R[];
+	$R[0] = cos($rad/2);
+	$R[1] = -($v.x)*sin($rad/2);
+	$R[2] = -($v.y)*sin($rad/2);
+	$R[3] = -($v.z)*sin($rad/2);
+	float $PQR[]=QuaternionMultiplication($R,$P);
+	$PQR=QuaternionMultiplication($PQR,$Q);
+	$moveP=<<$PQR[1],$PQR[2],$PQR[3]>>;
+	return $moveP;
+}
+proc vector[] QuaternionRotateArray(vector $pList[], vector $v, float $rad){
+	vector $afterPos[];
+	for($i=0; $i<size($pList); $i++){
+		$afterPos[$i] = QuaternionRotate($pList[$i],$v,$rad);
+	}
+	return $afterPos;
+}
+proc vector RotPosition(vector $pos,float $rotRad,int $mode){
+	vector $rotPos;
+	if($mode==0) $rotPos = << $pos.x                                    , $pos.y*cos($rotRad) - $pos.z*sin($rotRad) , $pos.y*sin($rotRad) + $pos.z*cos($rotRad)>>;
+	if($mode==1) $rotPos = << $pos.z*sin($rotRad) + $pos.x*cos($rotRad) , $pos.y                                    , $pos.z*cos($rotRad) - $pos.x*sin($rotRad)>>;
+	if($mode==2) $rotPos = << $pos.x*cos($rotRad) - $pos.y*sin($rotRad) , $pos.x*sin($rotRad) + $pos.y*cos($rotRad) , $pos.z  >>;
+	return $rotPos;
+}
+proc float DstancePos(vector $pos0,vector $pos1)
+{
+	float $dis;
+	$dis = 	 (($pos1.x)-($pos0.x))*(($pos1.x)-($pos0.x))
+			+(($pos1.y)-($pos0.y))*(($pos1.y)-($pos0.y))
+			+(($pos1.z)-($pos0.z))*(($pos1.z)-($pos0.z));
+	$dis=sqrt ($dis);
+	return $dis;
+}
+proc float[] ManipulatorPosition(){
+	string $linear=`currentUnit -q -linear`;
+	float $multiply = 1.0;
+	if($linear=="mm")$multiply=0.1;
+	if($linear=="cm")$multiply=1;
+	if($linear=="m" )$multiply=100;
+	if($linear=="in")$multiply=2.54;
+	if($linear=="ft")$multiply=30.48;
+	if($linear=="yd")$multiply=91.44;
+	$multiply=1.0/($multiply);
+	float $maniPosition[3];
+	string $currentTool=`currentCtx`;
+	if($currentTool=="moveSuperContext"){
+		$maniPosition = `manipMoveContext -q -p Move`;
+	}
+	if($currentTool=="RotateSuperContext"){
+		$maniPosition = `manipRotateContext -q -p Rotate`;
+	}
+	if($currentTool=="scaleSuperContext"){
+		$maniPosition = `manipScaleContext -q -p Scale`;
+	}
+	$maniPosition[0] = $maniPosition[0] * $multiply;
+	$maniPosition[1] = $maniPosition[1] * $multiply;
+	$maniPosition[2] = $maniPosition[2] * $multiply;
+	return $maniPosition;
+}
+proc string[] AriGetEdgeList(string  $getList_edges[],int $verMode){
+	global string $AriCircleVertexProgressBar; 
+	global string $gMainProgressBar;     
+	string $getList_vartex[];
+	for($i=0;$i<size($getList_edges);$i++){
+		string $edgeToUv[] = `polyListComponentConversion -tv $getList_edges[$i]`;
+		$edgeToUv = `filterExpand -selectionMask 31 $edgeToUv`;
+		$getList_vartex = stringArrayCatenate( $getList_vartex, $edgeToUv );
+	}
+	int $maxVal = size($getList_edges);
+	progressBar -e -maxValue ($maxVal) -pr 0  $AriCircleVertexProgressBar ;
+	progressBar -e -maxValue ($maxVal) -pr 0 -beginProgress  -isInterruptable true $gMainProgressBar;
+	int $breakTrue = false;
+	string $sort_edgeList[];
+	string $sort_vertexList[];
+	int $count=0;
+	for($i=0;$i<size($getList_edges);$i++){
+		if(stringArrayContains($getList_edges[$i], $sort_edgeList))continue;
+		int $verNum1=$i*2;
+		string $nowEdge;
+		string $workEdgeList[];
+		string $workVertexList[];
+		clear $workEdgeList;
+		clear $workVertexList;
+		int $workEdgeListCounter=0;
+		string $leadEdge;
+		int $loopTrue = false;
+		for($k=0;$k<2;$k++){
+			$nowEdge   = $getList_edges[$i];
+			$nowVertex = $getList_vartex[$i*2+$k];
+			int $n=0;
+			if(!stringArrayContains($nowVertex,$sort_vertexList)){
+				$workVertexList[0] = $nowVertex;
+				string $beforeEdge=$nowVertex;
+				while($n<100000){
+					for($j=0;$j<size($getList_edges);$j++){
+						if(                    $getList_edges[$j] == $nowEdge  )continue;
+						if(stringArrayContains($getList_edges[$j],   $workEdgeList))continue;
+						if(stringArrayContains($getList_edges[$j],   $sort_edgeList))continue;
+						int $verNum2=$j*2;
+						if($nowVertex == $getList_vartex[$verNum2]){
+							$nowEdge   = $getList_edges[$j];
+							$nowVertex = $getList_vartex[$verNum2+1];
+							if(!stringArrayContains($nowVertex,$workVertexList)){
+								$workEdgeList[$workEdgeListCounter]     = $nowEdge;
+								$workVertexList[$workEdgeListCounter+1] = $nowVertex;
+								$workEdgeListCounter++;
+							}
+							else{
+								$loopTrue = true;
+							}
+							break;
+						}
+						if($nowVertex == $getList_vartex[$verNum2+1]){
+							$nowEdge   = $getList_edges[$j];
+							$nowVertex = $getList_vartex[$verNum2];
+							if(!stringArrayContains($nowVertex,$workVertexList)){
+								$workEdgeList[$workEdgeListCounter]     = $nowEdge;
+								$workVertexList[$workEdgeListCounter+1] = $nowVertex;
+								$workEdgeListCounter++;
+							}
+							else{
+								$loopTrue = true;
+							}
+							break;
+						}
+					}
+					if($beforeEdge == $nowVertex)break;
+					$beforeEdge=$nowVertex;
+					$n++;
+				}
+			}
+			string $plusEdge_Work[]   = $workEdgeList;
+			string $plusVertex_Work[] = $workVertexList;
+			if($k==0){
+				for($j=0;$j<size($workEdgeList);$j++){
+					$plusEdge_Work[(size($workEdgeList))-$j-1] = $workEdgeList[$j];
+				}
+				for($j=0;$j<size($workVertexList);$j++){
+					$plusVertex_Work[(size($workVertexList))-$j-1] = $workVertexList[$j];
+				}
+			}
+			$sort_edgeList   = stringArrayCatenate( $sort_edgeList,   $plusEdge_Work );
+			$sort_vertexList = stringArrayCatenate( $sort_vertexList, $plusVertex_Work );
+			if($k==0){
+				if($plusEdge_Work[0] != $getList_edges[$i]){
+					$sort_edgeList[size($sort_edgeList)]=$getList_edges[$i];
+				}
+				else{
+					$loopTrue = true;
+				}
+			}
+			else{
+				string $sepaString="--";
+				if($loopTrue)$sepaString="--Loop";
+				$sort_edgeList[size($sort_edgeList)]     = $sepaString;
+				$sort_vertexList[size($sort_vertexList)] = $sepaString;
+			}
+			clear $workEdgeList;
+			clear $workVertexList;
+			$workEdgeListCounter=0;
+			int $sortSize = size($sort_edgeList);
+			progressBar -e -pr $sortSize $AriCircleVertexProgressBar ;
+			progressBar -e -pr $sortSize -isInterruptable true $gMainProgressBar;
+			if(`progressBar -query -isCancelled $gMainProgressBar`){
+				print ("中断---------------------------------\n");
+				$breakTrue = true;
+				break;
+			}
+		}
+		if($breakTrue)break;
+	}
+	if($breakTrue){
+		print"中断\n";
+	}
+	progressBar -e -pr 0 $AriCircleVertexProgressBar;	
+	progressBar -e -pr 0 $gMainProgressBar;
+	progressBar -e -endProgress $gMainProgressBar;
+	if($verMode) return $sort_vertexList;
+	else         return $sort_edgeList;
+}
+proc vector VectorAve(vector $vectorList[]){
+	vector $totalVal=<<0,0,0>>;
+	for($vec in $vectorList){
+		$totalVal = $totalVal+$vec;
+	}
+	vector $aveVal = $totalVal/size($vectorList);
+	return $aveVal;
+}
+proc vector VectorMaxMinAve(vector $vectorList[]){
+	vector $totalVal = <<0,0,0>>;
+	vector $firstPos = $vectorList[0];
+	float $maxX = $firstPos.x;
+	float $maxY = $firstPos.y;
+	float $maxZ = $firstPos.z;
+	float $minX = $firstPos.x;
+	float $minY = $firstPos.y;
+	float $minZ = $firstPos.z;
+	for($vec in $vectorList){
+		if($maxX < $vec.x) $maxX = $vec.x;
+		if($maxY < $vec.y) $maxY = $vec.y;
+		if($maxZ < $vec.z) $maxZ = $vec.z;
+		if($minX > $vec.x) $minX = $vec.x;
+		if($minY > $vec.y) $minY = $vec.y;
+		if($minZ > $vec.z) $minZ = $vec.z;
+	}
+	vector $aveVal =<<(($minX+$maxX)/2.0),(($minY+$maxY)/2.0),(($minZ+$maxZ)/2.0)>>;
+	return $aveVal;
+}
+global proc AriCircleVertex_PriorityGet(int $mode){
+	global string $AriCircleVertexPriorityVerList[];
+	global string $AriCircleVertexUI_TextField;
+	clear $AriCircleVertexPriorityVerList;
+	if($mode == 1){
+		string $selects[] = `ls -sl`;
+		string $vers[] = `polyListComponentConversion -tv $selects`;
+		$vers = `filterExpand -selectionMask 31 $vers`;
+		$AriCircleVertexPriorityVerList = $vers;
+		select $vers;
+	}
+	AriCircleVertex_changeUI();
+}
+global proc AriCircleVertex_PriorityVerSelects(){
+	global string $AriCircleVertexPriorityVerList[];
+	string $selectList[];
+	int $i=0;
+	for($ver in $AriCircleVertexPriorityVerList){
+		if(`objExists $ver`){
+			$selectList[$i] = $ver;
+			$i++;
+		}
+	}
+	$AriCircleVertexPriorityVerList = $selectList;
+	select $selectList;
+	print $selectList;
+	AriCircleVertex_changeUI();
+}
+global proc AriCircleVertex_SetAngle(float $angle){
+	global string $AriCircleVertexUI_FloatField[5];
+	floatField -e -v $angle $AriCircleVertexUI_FloatField[1];
+}
+proc float AriAlignmentCircle(string $verList_num[], float $distanceInput,int $moveTrue, int $circleTrue, int $distanceTrue, int $regularTrue, int $plantTrue){
+	global string $AriCircleVertexPriorityVerList[];
+	vector $verList_pos[];
+	for($i=0;$i<size($verList_num);$i++){
+		float $pos[] = `pointPosition $verList_num[$i]`;
+		$verList_pos[$i] = <<$pos[0],$pos[1],$pos[2]>>;
+	}
+	vector $centerPos = VectorMaxMinAve($verList_pos);
+	vector $vectorList[];
+	vector $triangleNormal[];
+	for($i=0;$i<size($verList_pos);$i++){
+		vector $vec1;
+		vector $vec2;
+		$vec1 = $verList_pos[$i]-$centerPos;
+		$vectorList[$i] = $vec1;
+		if($i+1<size($verList_pos))	$vec2 = $verList_pos[$i+1]-$centerPos;
+		else 						$vec2 = $verList_pos[0]-$centerPos;
+		$triangleNormal[$i] = cross($vec1,$vec2);
+		normalize($triangleNormal[$i]);
+	}
+	vector $centerNormal = VectorAve($triangleNormal);
+	$centerNormal = `unit $centerNormal`;
+	float $distance;
+	if(!$distanceTrue){
+		float $distanceTotal=0;
+		for($i=0; $i<size($verList_pos); $i++){
+			$distanceTotal = $distanceTotal + DstancePos($centerPos,$verList_pos[$i]);
+		}
+		$distance = $distanceTotal/size($verList_pos);
+	}
+	else{
+		$distance = $distanceInput;
+	}
+	float  $lastRot;
+	vector $lastRotVector;
+	if(!$moveTrue) return $distance;
+	if($regularTrue){
+		int $fixVerNumber;
+		int $priorityVerTrue = false;
+		string $prioityVer = "";
+		vector $prioityPos;
+		for($i=0; $i<size($verList_num); $i++){
+			if(stringArrayContains($verList_num[$i],$AriCircleVertexPriorityVerList)){
+				$priorityVerTrue = true;
+				$prioityVer = $verList_num[$i];
+				$prioityPos	= $verList_pos[$i];
+				$fixVerNumber = $i;
+			}
+		}
+		if($prioityVer!="")	select -add $prioityVer;
+		float $minAngle = 3.15;
+		int   $minAxis;
+		int   $minVerNum;
+		vector $axisX = <<1,0,0>>;
+		vector $axisY = <<0,1,0>>;
+		vector $axisZ = <<0,0,-1>>;
+		float $axisAngle = 0;
+		vector $axis = $axisY;
+		for($i=0;$i<size($vectorList);$i++){
+			$axisAngle = `angle $axis ($vectorList[$i])`;
+			if($minAngle > $axisAngle){
+				$minVerNum = $i;
+				$minAngle  = $axisAngle;
+			}
+		}
+		int $horizTrue = 0;
+		float $angleAbout = 0.01;
+		int $nextNum;
+		if(!$priorityVerTrue){
+			$nextNum = $minVerNum - 1;
+			if($nextNum<0)$nextNum = size($vectorList)-1;
+			$axisAngle = `angle $axis ($vectorList[$nextNum])`;
+			if($minAngle < $axisAngle+$angleAbout && $minAngle > $axisAngle-$angleAbout){
+				$horizTrue = 1;
+			}
+			$nextNum = $minVerNum + 1;
+			if(size($vectorList) <= $nextNum)$nextNum = 0;
+			$axisAngle = `angle $axis ($vectorList[$nextNum])`;
+			if($minAngle < $axisAngle+$angleAbout && $minAngle > $axisAngle-$angleAbout){
+				$horizTrue = 2;
+			}
+			$fixVerNumber = $minVerNum;
+		}
+		string $verListSort_num[];
+		vector $verListSort_pos[];
+		int $sortCounter = 0;
+		$i=0;
+		while($sortCounter < size($verList_num)){
+			if($verList_num[$i]==$verList_num[$fixVerNumber] || $sortCounter != 0){
+				$verListSort_num[$sortCounter] = $verList_num[$i];
+				$verListSort_pos[$sortCounter] = $verList_pos[$i];
+				$sortCounter++;
+			}
+			$i++;
+			if($i>=size($verList_num)) $i = $i-size($verList_num);
+		}
+		vector $movePosList[];
+		vector $basePosList[];
+		vector $baseNormal;
+		int $verTotal = size($verListSort_num);
+		float $rot = 0;
+		$rot = 360.0 / $verTotal;
+		for($i=0; $i<$verTotal; $i++){	
+			float $x;
+			float $y;
+			float $z;
+			float $rad = deg_to_rad($rot*$i);
+			$x = $distance * sin($rad);
+			$y = $distance * cos($rad);
+			$z = 0;
+			$basePosList[$i] = <<$x,$y,$z>>;
+		}
+		$baseNormal = <<0, 0 ,-1>>;
+		$movePosList = $basePosList;
+		vector $normalCross = cross($baseNormal,$centerNormal);
+		float  $normalAngle = `angle $baseNormal $centerNormal`;
+		$normalCross = vectorNormalize($normalCross);
+		if($normalCross.x==0 && $normalCross.y==0 && $normalCross.z==0){
+			$normalCross = <<1,0,0>>;
+		}
+		vector $fixPosLocal  = $verListSort_pos[0] - $centerPos;
+		vector $reMovefixPos = QuaternionRotate($fixPosLocal, $normalCross, $normalAngle);
+		vector $fixPosFrontVector = <<($reMovefixPos.x), ($reMovefixPos.y) ,0>>;
+		vector $fixCross =  cross($basePosList[0],$fixPosFrontVector);
+		float  $fixAngle = `angle $basePosList[0] $fixPosFrontVector`;
+		if($fixCross.z<0)$fixAngle = $fixAngle * -1;
+		for($i=0; $i<size($movePosList); $i++){
+			$movePosList[$i] = RotPosition($movePosList[$i], $fixAngle, 2);
+		}
+		$movePosList = QuaternionRotateArray($movePosList, $normalCross, -$normalAngle);
+		for($i=0; $i<size($verListSort_num); $i++){
+			vector $movePos = $movePosList[$i];
+			$movePos = $movePos + $centerPos;
+			move ($movePos.x) ($movePos.y) ($movePos.z) $verListSort_num[$i];
+		}
+	}
+	if(!$regularTrue){
+		string $currentTool=`currentCtx`;
+		int $currentToolTrue = false;
+		if($currentTool=="moveSuperContext")	$currentToolTrue=true;
+		if($currentTool=="RotateSuperContext")	$currentToolTrue=true;
+		if($currentTool=="scaleSuperContext")	$currentToolTrue=true;
+		if($currentToolTrue){
+			$centerPos = ManipulatorPosition();
+		}
+		for($i=0;$i<size($verList_num);$i++){
+			float $pos[] = `pointPosition $verList_num[$i]`;
+			$verList_pos[$i] = <<$pos[0],$pos[1],$pos[2]>>;
+			vector $movePos = $verList_pos[$i];
+			if($plantTrue){
+				vector $planePos = AriPointNormal_Point($centerPos, $centerNormal, $movePos);
+				$movePos = $planePos;
+			}
+			if($circleTrue){
+				vector $pointNormal = $movePos - $centerPos;
+				$pointNormal = `unit $pointNormal`;
+				$movePos = ($pointNormal*$distance)+$centerPos;
+			}
+			move ($movePos.x) ($movePos.y) ($movePos.z) $verList_num[$i];
+		}
+	}
+	return $distance;
+}
+proc float AriAlignmentSemicircle(string $verList_num[], float $inputAngle, int $moveTrue, int $circleTrue, int $angleTrue, int $regularTrue, int $plantTrue){
+	global string $AriCircleVertexUI_FloatField[5];
+	if(size($verList_num)<=2)return 0;
+	vector $verList_pos[];
+	for($i=0;$i<size($verList_num);$i++){
+		float $pos[] = `pointPosition $verList_num[$i]`;
+		$verList_pos[$i] = <<$pos[0],$pos[1],$pos[2]>>;
+	}
+	vector $target_first_pos = $verList_pos[0];
+	vector $target_end_pos   = $verList_pos[size($verList_pos)-1];
+	vector $target_vector    = $target_end_pos - $target_first_pos;
+	vector $centerPos = VectorMaxMinAve($verList_pos);
+	vector $vectorList[];
+	vector $triangleNormal[];
+	for($i=0;$i<size($verList_pos);$i++){
+		vector $vec1;
+		vector $vec2;
+		$vec1 = $verList_pos[$i]-$centerPos;
+		$vectorList[$i] = $vec1;
+		if($i+1<size($verList_pos))	$vec2 = $verList_pos[$i+1]-$centerPos;
+		else 						$vec2 = $verList_pos[0]-$centerPos;
+		$triangleNormal[$i] = cross($vec1,$vec2);
+		normalize($triangleNormal[$i]);
+	}
+	vector $centerNormal = VectorAve($triangleNormal);
+	if(!$angleTrue){
+		float $angleTotal_rad = 0;
+		for($i=1; $i<size($verList_pos)-1; $i++){
+			$angleTotal_rad = $angleTotal_rad + `angle ($verList_pos[$i] - $target_first_pos) ($verList_pos[$i] - $target_end_pos)`;
+		}
+		float $angleAbe_rad = $angleTotal_rad / (size($verList_pos)-2);
+		float $angleAbe_deg = rad_to_deg($angleAbe_rad);
+		$angleAbe_deg = 360 -($angleAbe_deg * 2);
+		$inputAngle = $angleAbe_deg;
+	}
+	float $distance = 1;
+	float $radAngle = deg_to_rad((360-$inputAngle)/2.0);
+	float $firstEndPosDistance = DstancePos($target_first_pos, $target_end_pos);
+	$distance = ($firstEndPosDistance/2) / sin($radAngle);
+	if(!$moveTrue) return $inputAngle;
+	print ("角度 "+$inputAngle+"\n");
+	print ("距離 "+$distance+"\n");
+	print ("中心法線"+$centerNormal+"\n");
+	vector $basePosList[];
+	vector $baseNormal;
+	vector $movePosList[];
+	int $verTotal = size($verList_num);
+	float $rot = 0;
+	$rot = $inputAngle / ($verTotal-1);
+	if($regularTrue){
+		for($i=0; $i<$verTotal; $i++){	
+			float $rad = deg_to_rad($rot*$i + 180-($inputAngle/2.0));
+			float $x = $distance * sin($rad);
+			float $y = $distance * cos($rad);
+			$basePosList[$i] = <<$x,$y,0>>;
+		}
+		$baseNormal = <<0, 0 ,-1>>;
+		$base_vector = <<-1, 0 ,0>>;
+		$movePosList = $basePosList;
+		vector $vector_cross = cross($base_vector,$target_vector);
+		float  $vector_angle = `angle $base_vector $target_vector`;
+		$vector_cross = vectorNormalize($vector_cross);
+		if($vector_cross.x==0 && $vector_cross.y==0 && $vector_cross.z==0){
+			$vector_cross = <<0,0,1 >>;
+		}
+		vector $rotTargetVec = QuaternionRotate($centerNormal, $vector_cross, $vector_angle);
+		vector $rotTargetFrontVec = <<0, ($rotTargetVec.y) ,($rotTargetVec.z)>>;
+		vector $first_cross =  cross($baseNormal,$rotTargetFrontVec);
+		float  $first_angle = `angle $baseNormal $rotTargetFrontVec`;
+		if($first_cross.x<0)$first_angle = $first_angle * -1;
+		for($i=0; $i<size($movePosList); $i++){
+			$movePosList[$i] = RotPosition($movePosList[$i], $first_angle, 0);
+		}
+		$movePosList = QuaternionRotateArray($movePosList, $vector_cross, -$vector_angle);
+		vector $translateVal = $target_first_pos - $movePosList[0];
+		for($i=0; $i<size($verList_num); $i++){
+			$movePosList[$i] = $movePosList[$i] + $translateVal;
+		}
+	}
+	if(!$regularTrue){
+		string $currentTool=`currentCtx`;
+		int $currentToolTrue = false;
+		if($currentTool=="moveSuperContext")	$currentToolTrue=true;
+		if($currentTool=="RotateSuperContext")	$currentToolTrue=true;
+		if($currentTool=="scaleSuperContext")	$currentToolTrue=true;
+		if($currentToolTrue){
+			$centerPos = ManipulatorPosition();
+		}
+		for($i=0; $i<size($verList_num); $i++){
+			float $pos[] = `pointPosition $verList_num[$i]`;
+			vector $vecPos = <<$pos[0],$pos[1],$pos[2]>>;
+			$movePosList[$i] = $vecPos;
+			vector $crossNormal    = cross($target_vector, $centerNormal);
+			vector $verticalNormal = cross($target_vector, $crossNormal);
+			if($verticalNormal==<<0,0,0>>)continue;
+			if($plantTrue){
+				vector $planePos = AriPointNormal_Point($target_first_pos, $verticalNormal, $movePosList[$i]);
+				$movePosList[$i] = $planePos;
+			}
+			if($circleTrue){
+				vector $translateVal = $target_first_pos - $movePosList[$i];
+				vector $circleCenter;
+				vector $target_first_end_center = ($target_first_pos + $target_end_pos)/2;
+				vector $crossNormalNormalize = vectorNormalize($crossNormal);
+				$circleCenter = (($distance)*cos(deg_to_rad($inputAngle/2))) * -$crossNormalNormalize + $target_first_end_center;
+				vector $planePosNormalize = vectorNormalize($movePosList[$i]-$circleCenter);
+				$movePosList[$i] = $distance * $planePosNormalize + $circleCenter;
+			}
+		}
+	}
+	for($i=0; $i<size($verList_num); $i++){
+		vector $movePos = $movePosList[$i];	
+		move ($movePos.x) ($movePos.y) ($movePos.z) $verList_num[$i];
+	}
+	return $distance;
+}
+/*
+proc float AriAlignmentDistance(string $verList_num[], float $distanceInput, int $moveMode){
+}
+*/
+global proc AriCircleVertex_GO(int $moveMode){
+	global string $AriCircleVertexUI_FloatField[5];
+	global string $AriCircleVertexUI_CB[5];
+	int $averageDistanceAngleTrue = !`checkBox -q -v $AriCircleVertexUI_CB[1]`;
+	int $moveTrue = true;
+	int $circleTrue = true;
+	int $distanceTrue = `checkBox -q -v $AriCircleVertexUI_CB[0]`;
+	int $angleTrue    = `checkBox -q -v $AriCircleVertexUI_CB[1]`;
+	int $regularTrue  = `checkBox -q -v $AriCircleVertexUI_CB[4]`;
+	int $plantTrue    = `checkBox -q -v $AriCircleVertexUI_CB[3]`;
+	if($moveMode==1){
+		$moveTrue     = false;
+		$circleTrue   = false;
+		$distanceTrue = false;
+		$angleTrue    = false;
+		$regularTrue  = false;
+		$plantTrue    = false;
+	}
+	if($moveMode==2){
+		$moveTrue     = false;
+		$circleTrue   = false;
+		$distanceTrue = false;
+		$angleTrue    = false;
+		$regularTrue  = false;
+		$plantTrue    = false;
+	}
+	if($moveMode==3){
+		$moveTrue     = true;
+		$circleTrue   = false;
+		$distanceTrue = false;
+		$angleTrue    = false;
+		$regularTrue  = false;
+		$plantTrue    = true;
+	}
+	float $distance;
+	float $angle;
+	if(!$distanceTrue){
+		$distance = 0;
+	}
+	else{
+		$distance = `floatField -q -v $AriCircleVertexUI_FloatField[0]`;
+	}
+	$distance = $distance/2.0;
+	if(!$angleTrue){
+		$angle = 0;
+	}
+	else{
+		$angle = `floatField -q -v $AriCircleVertexUI_FloatField[1]`;
+	}
+	string $selectList[] = `ls -sl`;
+	string $sortVerList[];
+	string $edges[] = `filterExpand -selectionMask 32 $selectList` ;
+	if(size($edges)>0) $sortVerList = AriGetEdgeList($edges,1);
+	string $faces[] = `filterExpand -selectionMask 34 $selectList` ;
+	if(size($faces)){
+		string $borderEdgeList[];
+		int    $borderCount=0;
+		string $edges[] = `polyListComponentConversion -toEdge $faces`;
+		$edges = `filterExpand -selectionMask 32 $edges`;
+		for($edge in $edges){
+			string $faces[] = `polyListComponentConversion -tf $edge`;
+			$faces = `filterExpand -selectionMask 34 $faces`;
+			if(size($faces)==1){
+				$borderEdgeList[$borderCount] = $edge;
+				$borderCount++;
+			}
+		}
+		select $faces;
+		ConvertSelectionToEdgePerimeter;
+		select -add $borderEdgeList;
+		string $selectEdgeList[] = `ls -sl`;
+		$edges = `filterExpand -selectionMask 32 $selectEdgeList` ;
+		$sortVerList = AriGetEdgeList($edges,1);
+		ConvertSelectionToFaces;
+		select $selectEdgeList;
+	}
+	if(size($sortVerList)<=0){
+		string $vers[] = `filterExpand -selectionMask 31 $selectList` ;
+		$sortVerList = $vers;
+		$sortVerList[size($sortVerList)]="--Loop";
+		if($regularTrue==true)return;
+	}
+	if(size($sortVerList)==1)return;
+	string $verList_num[];
+	float $distanceTotal = 0;
+	int   $totalDisCounter = 0;
+	float $angleTotal = 0;
+	int   $totalAngCounter = 0;
+	int $i=0;
+	for($ver in $sortVerList){
+		if($ver == "--Loop"){
+			float $getDis = AriAlignmentCircle ($verList_num, $distance, $moveTrue, $circleTrue, $distanceTrue, $regularTrue, $plantTrue);
+			clear $verList_num;
+			$i=0;
+			$distanceTotal = $distanceTotal + $getDis;
+			$totalDisCounter++;
+			continue;
+		}
+		if($ver == "--"){
+			float $getAng;
+			$getAng = AriAlignmentSemicircle ($verList_num, $angle, $moveTrue, $circleTrue, $angleTrue, $regularTrue, $plantTrue);
+			/*
+			int $splitTotal=4;
+			for($j=0; $j<size($verList_num)-$splitTotal; $j++){
+				string $splitVerList[];
+				int $l=0;
+				for($k=$j; $k<$j+$splitTotal; $k++){
+					print $k;
+					$splitVerList[$l] = $verList_num[$k];
+					$l++;
+				}
+				print "-----\n";
+				print $splitVerList;
+				print "----\n";
+				AriAlignmentSemicircle ($splitVerList, $angle, $moveMode);
+			}
+			*/
+			clear $verList_num;
+			$i=0;
+			$angleTotal = $angleTotal + $getAng;
+			$totalAngCounter++;
+			continue;
+		}
+		$verList_num[$i] = $ver;
+		$i++;
+	}
+	if($totalDisCounter != 0){
+		float $distanceAve = $distanceTotal / $totalDisCounter * 2;
+		if($moveMode==1) floatField -e -v $distanceAve $AriCircleVertexUI_FloatField[0];
+	}
+	if($totalAngCounter != 0){
+		float $angleAve = $angleTotal / $totalAngCounter;
+		if($moveMode==2) floatField -e -v $angleAve $AriCircleVertexUI_FloatField[1];
+	}
+	AriCircleVertex_Save();
+}
+global proc AriCircleVertex_changeUI(){
+	global string $AriCircleVertexUI_FloatField[5];
+	global string $AriCircleVertexUI_CB[5];
+	global string $AriCircleVertexUI_Button[3];
+	global string $AriCircleVertexUI_TextField;
+	global string $AriCircleVertexPriorityVerList[];
+	int $inputMode[];
+	$inputMode[0] = `checkBox -q -v $AriCircleVertexUI_CB[0]`;
+	$inputMode[1] = `checkBox -q -v $AriCircleVertexUI_CB[1]`;
+	$inputMode[4] = !`checkBox -q -v $AriCircleVertexUI_CB[4]`;
+	floatField -e -en $inputMode[0] $AriCircleVertexUI_FloatField[0];
+	floatField -e -en $inputMode[1] $AriCircleVertexUI_FloatField[1];
+	checkBox   -e -en $inputMode[4] $AriCircleVertexUI_CB[3];
+	int $size = size($AriCircleVertexPriorityVerList);
+	textField -e -text ($size+" Vertex") $AriCircleVertexUI_TextField;
+	if($size==0){
+		textField -e -bgc 0.2 0.2 0.2 $AriCircleVertexUI_TextField;
+		button -e -en false $AriCircleVertexUI_Button[0];
+	}
+	else{
+		textField -e -bgc 0.4 0.6 1   $AriCircleVertexUI_TextField;
+		button -e -en true $AriCircleVertexUI_Button[0];
+	}
+	AriCircleVertex_Save();
+}
+global proc AriCircleVertex_windowSize(){
+	window -e -h 60  AriCircleVertex;
+	AriCircleVertex_Save();
+}
+global proc AriCircleVertex(){
+	global string $AriCircleVertexUI_Frame[3];
+	global string $AriCircleVertexUI_FloatField[5];
+	global string $AriCircleVertexUI_TextField;
+	global string $AriCircleVertexUI_CB[5];
+	global string $AriCircleVertexUI_Button[3];
+	global string $AriCircleVertexProgressBar;
+	global string $gMainProgressBar ;
+	string $JPTrue;
+	if(`about -uil`=="ja_JP")$JPTrue = true;
+	else $JPTrue = false;
+	string $label_DiameterInput = "Diameter Input";
+	string $label_AngleInput    = "Angle Input";
+	string $label_GetPriority   = "GetPriority";
+	string $label_Select        = "Select";
+	string $label_Ring          = "Ring";
+	string $label_Contiguous    = "Contiguous";
+	string $label_Alignment     = "Alignment";
+	string $label_Regular       = "Regular";
+	string $label_Planarization = "Planarization";
+	if($JPTrue==true){
+		$label_DiameterInput = "直径入力(円)";
+		$label_AngleInput    = "角度入力(扇)";
+		$label_GetPriority   = "優先頂点取得";
+		$label_Select        = "Select";
+		$label_Ring          = "リング選択";
+		$label_Contiguous    = "隣接選択";
+		$label_Alignment     = "整列";
+		$label_Regular       = "正多角形化";
+		$label_Planarization = "平面化";
+	}
+	if((`window -ex  AriCircleVertex`)==true)deleteUI AriCircleVertex;
+	window -tlb 1 -title "AriCircleVertex"  -w 200 -h 120  AriCircleVertex;
+	$form = `formLayout `;
+	$AriCircleVertexUI_Frame[0] = `frameLayout  -l "Option" -cll true -cc "AriCircleVertex_windowSize()" -ec "AriCircleVertex_windowSize()"`;
+	columnLayout -adj true ;
+	rowLayout -nc 3  -adj 1;
+	$AriCircleVertexUI_CB[0] = `checkBox -l $label_DiameterInput -cc "AriCircleVertex_changeUI()"`;
+	$AriCircleVertexUI_FloatField[0]  = `floatField  -w 80 -v 1`;
+	button  -w 40 -l "Get" -c "AriCircleVertex_GO(1)";
+	setParent..;
+	rowLayout -nc 3  -adj 1;
+	$AriCircleVertexUI_CB[1] = `checkBox -l $label_AngleInput  -cc "AriCircleVertex_changeUI()"`;
+	$AriCircleVertexUI_FloatField[1]  = `floatField  -w 80 -v 180`;
+	popupMenu -b 3;
+		menuItem -l "30"  -c "AriCircleVertex_SetAngle(30)";
+		menuItem -l "45"  -c "AriCircleVertex_SetAngle(45)";
+		menuItem -l "60"  -c "AriCircleVertex_SetAngle(60)";
+		menuItem -l "90"  -c "AriCircleVertex_SetAngle(90)";
+		menuItem -l "120" -c "AriCircleVertex_SetAngle(120)";
+		menuItem -l "135" -c "AriCircleVertex_SetAngle(135)";
+		menuItem -l "180" -c "AriCircleVertex_SetAngle(180)";
+		menuItem -l "270" -c "AriCircleVertex_SetAngle(270)";
+	button  -w 40 -l "Get" -c "AriCircleVertex_GO(2)";
+	setParent..;
+	string $priorityRow = `rowLayout -nc 5 -ad5 1`;
+	$AriCircleVertexUI_TextField = `textField -ed false  -w 30`;
+	popupMenu -b 3;
+		menuItem -l $label_Select -c "AriCircleVertex_PriorityVerSelects";
+	$AriCircleVertexUI_Button[0] = `button  -w 36 -l "Clear"       -c "AriCircleVertex_PriorityGet(0)"`;
+	button  -w 80 -l $label_GetPriority -c "AriCircleVertex_PriorityGet(1)";
+	setParent..;
+	rowLayout -nc 3;
+	$AriCircleVertexUI_CB[4] = `checkBox -v true -l $label_Regular       -cc "AriCircleVertex_changeUI()"`;
+	$AriCircleVertexUI_CB[3] = `checkBox -v true -l $label_Planarization -cc "AriCircleVertex_changeUI()"`;
+	setParent..;
+	setParent..;
+	setParent..;
+	setParent..;
+	string $formRingButton = `formLayout `;
+	string $ringButton =`button -w 80 -l $label_Ring  -c "SelectEdgeRingSp"`;
+	string $ContiguousButton =`button -w 80 -l $label_Contiguous -c "SelectContiguousEdges"`;
+	popupMenu -pmc "SelectContiguousEdgesOptions";
+	string $goButton  = `button -bgc 0.2 0.8 0.5 -h 30 -l $label_Alignment -c "AriCircleVertex_GO(0)"`;
+		popupMenu -b 3;
+		menuItem -l $label_Planarization -c "AriCircleVertex_GO(3)";
+	setParent..;
+	formLayout -e
+	-af $ContiguousButton	"top" 0
+	-af $ContiguousButton	"left" 0
+	-ap $ContiguousButton	"bottom" 0 50  
+	-af $ringButton	"bottom" 0
+	-af $ringButton	"left" 0
+	-ac $ringButton	"top" 0 $ContiguousButton
+	-af $goButton	"bottom" 0 
+	-ac $goButton	"left" 0 $ringButton
+	-af $goButton	"right" 0
+	-af $goButton	"top" 0 
+	$formRingButton;
+	$AriCircleVertexProgressBar = `progressBar `;
+	setParent..;
+	formLayout -e 
+	-af $AriCircleVertexUI_Frame[0] "left"  0
+	-af $AriCircleVertexUI_Frame[0] "right" 0
+	-af $AriCircleVertexProgressBar	"bottom" 0  
+	-af $AriCircleVertexProgressBar	"left" 0
+	-af $AriCircleVertexProgressBar	"right" 0
+	-af $formRingButton	"left" 0
+	-af $formRingButton	"right" 0
+	-ac $formRingButton	"bottom" 0 $AriCircleVertexProgressBar
+	-ac $formRingButton	"top" 0 $AriCircleVertexUI_Frame[0]
+	$form;
+	showWindow;
+	AriCircleVertex_Load();
+	AriCircleVertex_changeUI();
+	AriCircleVertex_windowSize();
+}

@@ -1,0 +1,369 @@
+//--------------------------------------------------------------------------
+//
+// ScriptName : AriSplitPolygon
+// Contents   : 2組のエッジをつなぐようにポリゴンを分割します。
+// Author     : Ari
+// Since      : 2018/11
+// LastUpdate : 
+//
+//--------------------------------------------------------------------------
+
+
+
+proc vector intersectionPos(vector $P,vector $Q,vector $R,vector $S){
+	vector $a1,$a2,$a3,$b1,$b2,$b3,$c1,$c2;
+	float $D1,$D2,$D3,$D4,$D5,$D6,$t,$s;
+	vector $A,$B;
+	$a1=$P;
+	$a2=$Q;
+	$b1=$R;
+	$b2=$S;
+	$a3 = <<$a2.x - $a1.x ,$a2.y - $a1.y ,$a2.z - $a1.z>>;
+	$b3 = <<$b2.x - $b1.x ,$b2.y - $b1.y ,$b2.z - $b1.z>>;
+	$c1 = <<$a3.x*($b1.x-$a1.x),$a3.y*($b1.y-$a1.y),$a3.z*($b1.z-$a1.z)>>;
+	$D1 = $a3.x*$b3.x + $a3.y*$b3.y + $a3.z*$b3.z;
+	$D2 = $a3.x*$a3.x + $a3.y*$a3.y + $a3.z*$a3.z;
+	$D3 = $c1.x + $c1.y + $c1.z;
+	$c2 = <<$b3.x*($b1.x-$a1.x),$b3.y*($b1.y-$a1.y),$b3.z*($b1.z-$a1.z)>>;
+	$D5 = $b3.x*$b3.x + $b3.y*$b3.y + $b3.z*$b3.z;
+	$D6 = $c2.x + $c2.y + $c2.z;
+	$t = (($D1*$D6)-($D3*$D5))/(($D1*$D1)-($D2*$D5));
+	$s = ($D1*$t-$D6)/$D5;
+	$A=<<$a3.x*$t+$a1.x, $a3.y*$t+$a1.y, $a3.z*$t+$a1.z>>;
+	$B=<<$b3.x*$s+$b1.x, $b3.y*$s+$b1.y, $b3.z*$s+$b1.z>>;
+	return $A;
+}
+global proc vector linePointPos (vector $a1,vector $a2,vector $b1)
+{
+	vector $a3,$c1;
+	float $t;
+	vector $A,$B;
+	$a3=<< $a2.x-$a1.x , $a2.y-$a1.y , $a2.z-$a1.z>>;
+	$t= (-1*($a1.x-$b1.x)*$a3.x - ($a1.y-$b1.y)*$a3.y - ($a1.z-$b1.z)*$a3.z ) / ($a3.x*$a3.x + $a3.y*$a3.y + $a3.z*$a3.z);
+	$c1=<<($a3.x*$t+$a1.x),($a3.y*$t+$a1.y),($a3.z*$t+$a1.z)>>;
+	return $c1;
+}
+proc string[] getSelectTransformList(){
+	string $transformList[]=`ls -sl -tr`;
+	if(size($transformList)==0){
+		string $selects[] =`ls -sl`;
+		string $objects[] = `polyListComponentConversion $selects`;	
+		$transformList = `listRelatives -p -pa -type "transform" $objects`;
+	}
+	string $parentList[] = $transformList;
+	return $parentList;
+}
+proc string[] arrayReverse(string $baseArray[]){
+	string $reverseArray[];
+	for($j=0;$j<size($baseArray);$j++){
+		$reverseArray[(size($baseArray))-$j-1] = $baseArray[$j];
+	}
+	return $reverseArray;
+}
+proc float distanceVer(string $ver1,string $ver2)
+{
+	float $dis;
+	float $verPos0[];
+	float $verPos1[];
+	int $worldTrue = true;
+	if($worldTrue){
+		$verPos0 = `pointPosition -w $ver1`;
+		$verPos1 = `pointPosition -w $ver2`;
+	}
+	else{
+		$verPos0 = `pointPosition -l $ver1`;
+		$verPos1 = `pointPosition -l $ver2`;
+	}
+	$dis=	 ($verPos1[0]-$verPos0[0])*($verPos1[0]-$verPos0[0])
+					+($verPos1[1]-$verPos0[1])*($verPos1[1]-$verPos0[1])
+					+($verPos1[2]-$verPos0[2])*($verPos1[2]-$verPos0[2]);
+	$dis = sqrt ($dis);
+	return $dis;
+}
+proc float distancePos(vector $verPos1,vector $verPos0){
+	float $dis;
+	$dis = (($verPos1.x)-($verPos0.x))*(($verPos1.x)-($verPos0.x))
+		  +(($verPos1.y)-($verPos0.y))*(($verPos1.y)-($verPos0.y))
+		  +(($verPos1.z)-($verPos0.z))*(($verPos1.z)-($verPos0.z));
+	$dis = sqrt ($dis);
+	return $dis;
+}
+proc string[] AriGetEdgeList(string  $getList_edges[],int $verMode){
+	global string $gMainProgressBar;     
+	string $getList_vartex[];
+	for($i=0;$i<size($getList_edges);$i++){
+		string $edgeToUv[] = `polyListComponentConversion -tv $getList_edges[$i]`;
+		$edgeToUv = `filterExpand -selectionMask 31 $edgeToUv`;
+		$getList_vartex = stringArrayCatenate( $getList_vartex, $edgeToUv );
+	}
+	int $maxVal = size($getList_edges);
+	progressBar -e -maxValue ($maxVal) -pr 0 -beginProgress  -isInterruptable true $gMainProgressBar;
+	int $breakTrue = false;
+	string $sort_edgeList[];
+	string $sort_vertexList[];
+	int $count=0;
+	for($i=0;$i<size($getList_edges);$i++){
+		if(stringArrayContains($getList_edges[$i], $sort_edgeList))continue;
+		int $verNum1=$i*2;
+		string $nowEdge;
+		string $workEdgeList[];
+		string $workVertexList[];
+		clear $workEdgeList;
+		clear $workVertexList;
+		int $workEdgeListCounter=0;
+		string $leadEdge;
+		int $loopTrue = false;
+		for($k=0;$k<2;$k++){
+			$nowEdge   = $getList_edges[$i];
+			$nowVertex = $getList_vartex[$i*2+$k];
+			int $n=0;
+			if(!stringArrayContains($nowVertex,$sort_vertexList)){
+				$workVertexList[0] = $nowVertex;
+				string $beforeEdge=$nowVertex;
+				while($n<100000){
+					for($j=0;$j<size($getList_edges);$j++){
+						if(                    $getList_edges[$j] == $nowEdge  )continue;
+						if(stringArrayContains($getList_edges[$j],   $workEdgeList))continue;
+						if(stringArrayContains($getList_edges[$j],   $sort_edgeList))continue;
+						int $verNum2=$j*2;
+						if($nowVertex == $getList_vartex[$verNum2]){
+							$nowEdge   = $getList_edges[$j];
+							$nowVertex = $getList_vartex[$verNum2+1];
+							if(!stringArrayContains($nowVertex,$workVertexList)){
+								$workEdgeList[$workEdgeListCounter]     = $nowEdge;
+								$workVertexList[$workEdgeListCounter+1] = $nowVertex;
+								$workEdgeListCounter++;
+							}
+							else{
+								$loopTrue = true;
+							}
+							break;
+						}
+						if($nowVertex == $getList_vartex[$verNum2+1]){
+							$nowEdge   = $getList_edges[$j];
+							$nowVertex = $getList_vartex[$verNum2];
+							if(!stringArrayContains($nowVertex,$workVertexList)){
+								$workEdgeList[$workEdgeListCounter]     = $nowEdge;
+								$workVertexList[$workEdgeListCounter+1] = $nowVertex;
+								$workEdgeListCounter++;
+							}
+							else{
+								$loopTrue = true;
+							}
+							break;
+						}
+					}
+					if($beforeEdge == $nowVertex)break;
+					$beforeEdge=$nowVertex;
+					$n++;
+				}
+			}
+			string $plusEdge_Work[]   = $workEdgeList;
+			string $plusVertex_Work[] = $workVertexList;
+			if($k==0){
+				for($j=0;$j<size($workEdgeList);$j++){
+					$plusEdge_Work[(size($workEdgeList))-$j-1] = $workEdgeList[$j];
+				}
+				for($j=0;$j<size($workVertexList);$j++){
+					$plusVertex_Work[(size($workVertexList))-$j-1] = $workVertexList[$j];
+				}
+			}
+			$sort_edgeList   = stringArrayCatenate( $sort_edgeList,   $plusEdge_Work );
+			$sort_vertexList = stringArrayCatenate( $sort_vertexList, $plusVertex_Work );
+			if($k==0){
+				if($plusEdge_Work[0] != $getList_edges[$i]){
+					$sort_edgeList[size($sort_edgeList)]=$getList_edges[$i];
+				}
+				else{
+					$loopTrue = true;
+				}
+			}
+			else{
+				string $sepaString="--";
+				if($loopTrue)$sepaString="--Loop";
+				$sort_edgeList[size($sort_edgeList)]     = $sepaString;
+				$sort_vertexList[size($sort_vertexList)] = $sepaString;
+			}
+			clear $workEdgeList;
+			clear $workVertexList;
+			$workEdgeListCounter=0;
+			int $sortSize = size($sort_edgeList);
+			progressBar -e -pr $sortSize -isInterruptable true $gMainProgressBar;
+			if(`progressBar -query -isCancelled $gMainProgressBar`){
+				print ("中断---------------------------------\n");
+				$breakTrue = true;
+				break;
+			}
+		}
+		if($breakTrue)break;
+	}
+	if($breakTrue){
+		print"中断\n";
+	}
+	progressBar -e -pr 0 $gMainProgressBar;
+	progressBar -e -endProgress $gMainProgressBar;
+	if($verMode) return $sort_vertexList;
+	else         return $sort_edgeList;
+}
+proc int[] toEdgePoint(string $ver){
+	int $edgePoint[];
+	string $edgeA[] = `polyListComponentConversion -toEdge $ver`;
+	$edgeA = `filterExpand -selectionMask 32 $edgeA`;
+	string $infoEdge[] = `polyInfo -edgeToVertex $edgeA[0]`;
+	string $sepa[];
+	tokenize $infoEdge[0] " " $sepa;
+	int $verA = $sepa[2];
+	int $verB = $sepa[3];
+	tokenize $ver "[]" $sepa;
+	int $verNum = $sepa[1];
+	tokenize $edgeA[0] "[]" $sepa;
+	int $edgeNum = $sepa[1];
+	$edgePoint[0] = $edgeNum;
+	if($verA == $verNum){
+		$edgePoint[1] = 0;
+	}
+	if($verB == $verNum){
+		$edgePoint[1] = 1;
+	}
+	return $edgePoint;
+}
+proc splitVer(string $verA, string $verB){
+	string $objName;
+	string $sepa[];
+	tokenize $verA "." $sepa;
+	$objName = $sepa[0];
+	int $edgePointA[] = toEdgePoint($verA);
+	int $edgePointB[] = toEdgePoint($verB);
+	polySplit -ch 1 -sma 180 -ip $edgePointA[0] $edgePointA[1] -ip $edgePointB[0] $edgePointB[1] $objName;
+}
+proc splitEdgeVer(string $verList[], string $verA, string $verB){
+	string $sepa[];
+	tokenize $verA "." $sepa;	
+	string $objName = $sepa[0];
+	tokenize $verA "[ ]" $sepa;
+	int $verA_Num = $sepa[1];
+	string $edgesA[] = `polyListComponentConversion -toEdge $verA`;
+	$edgesA = `filterExpand -selectionMask 32 $edgesA`;
+	string $edgesB[] = `polyListComponentConversion -toEdge $verB`;
+	$edgesB = `filterExpand -selectionMask 32 $edgesB`;
+	string $commonEdge;
+	int $edgeNum;
+	for($edgeA in $edgesA){
+		if(stringArrayContains($edgeA,$edgesB)){
+			$commonEdge = $edgeA;
+			break;
+		}
+	}
+	tokenize $commonEdge "[ ]" $sepa;
+	$edgeNum = $sepa[1];
+	string $infoEdge[] = `polyInfo -edgeToVertex $commonEdge`;
+	tokenize $infoEdge[0] " " $sepa;
+	int $verL_Num = $sepa[2];
+	int $verR_Num = $sepa[3];
+	int $revTrue = false;
+	if($verL_Num == $verA_Num){
+		$revTrue = true;
+		$verList = arrayReverse($verList);
+	}
+	int $verSize = size($verList);
+	string $evaString = "";
+	int $counter = 1;
+	for($ver in $verList){
+		float $pos = 1-(1.0/($verSize+2-$counter));
+		int $getEdgeNum[] = toEdgePoint($ver);
+		polySplit -ch 1 -sma 180 -ip $getEdgeNum[0] $getEdgeNum[1] -ip $edgeNum $pos $objName;
+		$counter++;
+	}
+}
+global proc AriSplitPolygon(){
+	string $objTransform[] = getSelectTransformList();
+	if(size($objTransform)!=1)return;
+	string $obj = $objTransform[0];
+	string $selectList[] = `ls -sl`;
+	string $edgeList[] = `filterExpand -selectionMask 32 $selectList`;
+	string $verList[]  = `filterExpand -selectionMask 31 $selectList`;
+	int $mode_towVerTrue = false;
+	if(size($verList)==2)$mode_towVerTrue = true;
+	if(size($edgeList)==0 && size($verList)!=2){
+		return;
+	}
+	string $verListOrderA[];
+	string $verListOrderB[];
+	if($mode_towVerTrue == false){
+		string $verListOrder[] = AriGetEdgeList($edgeList,1);
+		int $i=0;
+		int $j=0;
+		for($edge in $verListOrder){
+			if($j==0){
+				if($edge=="--"){
+					$j=1;
+					$i=0;
+				}
+				else{
+					$verListOrderA[$i]=$edge;
+					$i++;
+				}
+			}
+			else{
+				if($edge=="--"){
+					$j=1;
+					$i=0;
+				}
+				else{
+					$verListOrderB[$i]=$edge;
+					$i++;
+				}
+			}
+		}
+		if(size($verListOrderB)==0)return;
+	}
+	else{
+		$verListOrderA[0] = $verList[0];
+		$verListOrderB[0] = $verList[1];
+	}
+	vector $objTranslate = `getAttr ($obj+".translate")`;
+	vector $objRotate    = `getAttr ($obj+".rotate")`;
+	vector $objScale     = `getAttr ($obj+".scale")`;
+	setAttr ($obj+".translate") 0 0 0;
+	setAttr ($obj+".rotate")    0 0 0;
+	setAttr ($obj+".scale")     1 1 1;
+	string $verA_Start = $verListOrderA[0];
+	string $verA_End   = $verListOrderA[size($verListOrderA)-1];
+	string $verB_Start = $verListOrderB[0];
+	string $verB_End   = $verListOrderB[size($verListOrderB)-1];
+	int $reverseTrue = false;
+	float $distance = 0;
+	float $distanceMax = 0;
+	vector $verA_Start_Pos = `pointPosition -w $verA_Start`;
+	vector $verB_Start_Pos = `pointPosition -w $verB_Start`;
+	vector $verA_End_Pos   = `pointPosition -w $verA_End`;
+	vector $verB_End_Pos   = `pointPosition -w $verB_End`;
+	float $angleA = `angle ($verB_Start_Pos - $verA_Start_Pos) ($verB_End_Pos - $verA_End_Pos)`;
+	float $angleB = `angle ($verB_Start_Pos - $verA_End_Pos)   ($verB_End_Pos - $verA_Start_Pos)`;
+	if($angleA > $angleB){
+		$reverseTrue = true;
+	}
+	if($reverseTrue == true){
+		$verListOrderB = arrayReverse($verListOrderB);
+	}
+	int $maxSize = size($verListOrderA);
+	if($maxSize > size($verListOrderB)){
+		$maxSize = size($verListOrderB);
+	}
+	string $crossSortA[]=$verListOrderA;
+	string $crossSortB[]=$verListOrderB;
+	for($i=0; $i<size($verListOrderA); $i++){
+		if($i%2==0)	$crossSortA[$i] = $verListOrderA[$i/2];
+		else		$crossSortA[$i] = $verListOrderA[size($verListOrderA)-1-$i/2];
+	}
+	for($i=0; $i<size($verListOrderB); $i++){
+		if($i%2==0)	$crossSortB[$i] = $verListOrderB[$i/2];
+		else		$crossSortB[$i] = $verListOrderB[size($verListOrderB)-1-$i/2];
+	}
+	for($i=0; $i<$maxSize; $i++){
+		splitVer($crossSortA[$i],$crossSortB[$i]);
+	}
+	setAttr ($obj+".translate") ($objTranslate.x) ($objTranslate.y) ($objTranslate.z);
+	setAttr ($obj+".rotate")    ($objRotate.x) ($objRotate.y) ($objRotate.z);
+	setAttr ($obj+".scale")     ($objScale.x) ($objScale.y) ($objScale.z);
+}

@@ -122,15 +122,6 @@
             "noDefaultPopup": true
         },
         {
-            "label": "Align To Circle",
-            "annotation": "Align into circlular shape for selected edge loop.",
-            "image1": "alignToCircle.png",
-            "imageOverlayLabel": "",
-            "command": "source _sort_circle_tool.mel;\n_sort_circle_tool;",
-            "sourceType": "mel",
-            "noDefaultPopup": true
-        },
-        {
             "label": "Mop Knit",
             "annotation": "Flatten geometry into uv space.",
             "image1": "shrinkwrap.png",
@@ -208,6 +199,15 @@
             "image1": "CutSewUVTool.png",
             "imageOverlayLabel": "",
             "command": "SetCutSewUVTool",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
+        {
+            "label": "UV Grid",
+            "annotation": "Make selected uv shells into grid shape.",
+            "image1": "AriUVGridding.png",
+            "imageOverlayLabel": "Grid",
+            "command": "AriUVGridding",
             "sourceType": "mel",
             "noDefaultPopup": true
         },

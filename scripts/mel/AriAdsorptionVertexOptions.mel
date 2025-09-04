@@ -1,0 +1,118 @@
+//--------------------------------------------------------------------------
+//
+// ScriptName : AriAdsorptionVertexOptions
+// Contents   : AriAdsorptionVertexのオプション
+// Author     : Ari
+// Since      : 2019/05
+// LastUpdate : 2021/06/13 エッジの直線状で吸着機能追加
+//            : 2020/07/05 固定の仕様変更
+// Help       : http://cgjishu.net/blog-entry-277.html
+//
+//--------------------------------------------------------------------------
+
+
+global proc AriAdsorptionVertexOptions_Save(){
+	global string $AriAdsorptionVertexOptions_UI_mergeCB;
+	global string $AriAdsorptionVertexOptions_UI_softCB;
+	global string $AriAdsorptionVertexOptions_UI_getfixCB;
+	global string $AriAdsorptionVertexOptions_UI_straightCB;
+	int $mergeTrue = true;
+	int $softTrue  = true;
+	int $getfixTrue = true;
+	int $straightTrue = false;
+	$mergeTrue    = `checkBox -q -v $AriAdsorptionVertexOptions_UI_mergeCB`;
+	$softTrue     = `checkBox -q -v $AriAdsorptionVertexOptions_UI_softCB`;
+	$getfixTrue   = `checkBox -q -v $AriAdsorptionVertexOptions_UI_getfixCB`;
+	$straightTrue = `checkBox -q -v $AriAdsorptionVertexOptions_UI_straightCB`;;
+	optionVar -intValue  "AriAdsorptionVertex_merge" $mergeTrue;
+	optionVar -intValue  "AriAdsorptionVertex_soft"  $softTrue;	
+	optionVar -intValue  "AriAdsorptionVertex_firstfix"  $getfixTrue;
+	optionVar -intValue  "AriAdsorptionVertex_straight"  $straightTrue;
+}
+global proc AriAdsorptionVertexOptions_UIChange(){
+	global string $AriAdsorptionVertexOptions_UI_mergeCB;
+	global string $AriAdsorptionVertexOptions_UI_softCB;
+	int $mergeTrue = false;
+	int $softTrue  = true;
+	$mergeTrue = `checkBox -q -v $AriAdsorptionVertexOptions_UI_mergeCB`;
+	checkBox -e -ed $mergeTrue $AriAdsorptionVertexOptions_UI_softCB;
+}
+global proc AriAdsorptionVertexOptions_FixGet(int $mode){
+	global string $AriAdsorptionVertexOptions_UI_fixTF;
+	global string $AriGetEdgeList_FixVertexList[];
+	if($mode==2){
+		clear $AriGetEdgeList_FixVertexList;
+	}
+	if($mode==1){
+		clear $AriGetEdgeList_FixVertexList;
+		string $selectList[] = `ls -sl`;
+		string $verList[] = `polyListComponentConversion -tv $selectList`;
+		$verList  = `filterExpand -selectionMask 31 $verList`;
+		$AriGetEdgeList_FixVertexList = $verList;
+	}
+	textField -e -text (size($AriGetEdgeList_FixVertexList)+" FixVertex") $AriAdsorptionVertexOptions_UI_fixTF;
+}
+global proc AriAdsorptionVertexOptions(){
+	global string $AriAdsorptionVertexOptions_UI_mergeCB;
+	global string $AriAdsorptionVertexOptions_UI_softCB;
+	global string $AriAdsorptionVertexOptions_UI_getfixCB;
+	global string $AriAdsorptionVertexOptions_UI_straightCB;
+	global string $AriAdsorptionVertexOptions_UI_fixTF;
+	int $mergeTrue = true;
+	int $softTrue  = true;
+	int $getfixTrue = true;
+	int $straightTrue = false;
+	if(`optionVar -exists "AriAdsorptionVertex_merge"`)		$mergeTrue  = `optionVar -q "AriAdsorptionVertex_merge"`;
+	if(`optionVar -exists "AriAdsorptionVertex_soft"`)		$softTrue   = `optionVar -q "AriAdsorptionVertex_soft"`;
+	if(`optionVar -exists "AriAdsorptionVertex_firstfix"`)	$getfixTrue = `optionVar -q "AriAdsorptionVertex_firstfix"`;
+	if(`optionVar -exists "AriAdsorptionVertex_straight"`)	$straightTrue = `optionVar -q "AriAdsorptionVertex_straight"`;
+	if((`window -ex  AriAdsorptionVertexOptionsW`)==true)deleteUI AriAdsorptionVertexOptionsW;
+	window -title "AriAdsorptionVertexOptions"  -tlb true -w 200 -h 50 AriAdsorptionVertexOptionsW;
+	string $form = `formLayout`;
+	string $column = `columnLayout -adj true`;
+	$AriAdsorptionVertexOptions_UI_straightCB   = `checkBox -l "Edge Straight  "  -v $straightTrue`;
+	separator -h 6;
+	rowLayout -nc 2 ;
+	$AriAdsorptionVertexOptions_UI_mergeCB  = `checkBox -l "Merge  " -v $mergeTrue -cc "AriAdsorptionVertexOptions_UIChange"`;
+	$AriAdsorptionVertexOptions_UI_softCB   = `checkBox -l "Soft  "  -v $softTrue`;
+	setParent..;
+	$AriAdsorptionVertexOptions_UI_getfixCB   = `checkBox -l "First Fix  "  -v $getfixTrue`;
+	rowLayout -nc 3 -adj 1;
+	$AriAdsorptionVertexOptions_UI_fixTF = `textField -w 50 -ed false`;
+	button -w 56 -l "Clear"  -c "AriAdsorptionVertexOptions_FixGet(2)";
+	setParent..;
+	separator -h 4;
+	setParent..;
+	string $buttonform = `formLayout`;
+	string $buttonSave       = `button       -l "Save"       -c "AriAdsorptionVertexOptions_Save();"`;
+	string $buttonSaveClose  = `button       -l "Save Close" -c "AriAdsorptionVertexOptions_Save(); deleteUI AriAdsorptionVertexOptionsW;"`;
+	string $buttonApply      = `button -h 38 -l "Apply"      -c "AriAdsorptionVertexOptions_Save(); AriAdsorptionVertex(); AriAdsorptionVertexOptions_FixGet(0);" -bgc 0.5 0.5 1`;
+	setParent..;
+	formLayout -e 
+	-af $buttonApply "bottom" 0  
+	-ap $buttonApply "left"   0 50
+	-af $buttonApply "right"  0
+	-af $buttonApply "top"    0 
+	-af $buttonSave	"top"    0
+	-ap $buttonSave	"bottom" 0 50
+	-af $buttonSave	"left"   0 
+	-ac $buttonSave	"right"  0 $buttonApply
+	-ac $buttonSaveClose	"top"    0 $buttonSave
+	-af $buttonSaveClose	"bottom" 0
+	-af $buttonSaveClose	"left"   0
+	-ac $buttonSaveClose	"right"  0 $buttonApply
+	$buttonform;
+	setParent..;
+	formLayout -e 
+	-af $column "top"    0
+	-af $column "left"   0
+	-af $column "right"  0
+	-ac $buttonform "top"    0 $column
+	-af $buttonform "bottom" 0
+	-af $buttonform "left"   0
+	-af $buttonform "right"  0
+	$form;
+	showWindow;
+	AriAdsorptionVertexOptions_FixGet(0);
+	AriAdsorptionVertexOptions_UIChange();
+}

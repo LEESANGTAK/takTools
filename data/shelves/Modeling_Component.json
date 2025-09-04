@@ -23,6 +23,15 @@
             "noDefaultPopup": true
         },
         {
+            "label": "Merge Border Edge",
+            "annotation": "Merge selected two border edges.",
+            "image1": "AriAdsorptionVertex.png",
+            "imageOverlayLabel": "",
+            "command": "AriAdsorptionVertex",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
+        {
             "label": "Poly Delete",
             "annotation": "Delete the selected Vertices / Edges.",
             "image1": "polyDelEdgeVertex.png",
@@ -131,6 +140,15 @@
             "noDefaultPopup": true
         },
         {
+            "label": "Connect Edges",
+            "annotation": "Connect selected two edge loops.",
+            "image1": "AriSplitPolygon.png",
+            "imageOverlayLabel": "",
+            "command": "AriSplitPolygon",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
+        {
             "label": "Split Edge Ring",
             "annotation": "Split selected edge ring.",
             "image1": "polySplitEdgeRing.png",
@@ -199,6 +217,24 @@
             "image1": "polyCrease.png",
             "imageOverlayLabel": "",
             "command": "python \"from maya.app.general import creaseSetEditor; creaseSetEditor.showCreaseSetEditor()\"",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
+        {
+            "label": "Circlular Vertex",
+            "annotation": "Make selected components to the circle shape.",
+            "image1": "AriCircleVertex.png",
+            "imageOverlayLabel": "",
+            "command": "AriCircleVertex",
+            "sourceType": "mel",
+            "noDefaultPopup": true
+        },
+        {
+            "label": "Align To Circle",
+            "annotation": "Align To Circle",
+            "image1": "alignToCircle.png",
+            "imageOverlayLabel": "",
+            "command": "source _sort_circle_tool.mel;\n_sort_circle_tool;",
             "sourceType": "mel",
             "noDefaultPopup": true
         }

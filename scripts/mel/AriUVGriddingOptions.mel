@@ -1,0 +1,196 @@
+//--------------------------------------------------------------------------
+// ScriptName : AriUVGriddingOptions
+// Contents   : AriUVGriddingのオプション
+// Since      : 2017/08/20 オプション新規作成
+//
+// LastUpdate : 2025/08/24 1UV選択、UnfoldUV機能追加。
+//              2020/02/11 自動カット機能、フェース選択でマッピング機能
+//                         UV裏返り防止機能追加。
+//              2018/10/28 選択無実行でオプション起動機能追加
+//--------------------------------------------------------------------------
+
+
+global proc AriUVGriddingOptions_Save(){
+	global string $AriUVGriddingOptions_UI_radioBT[4];
+	global string $AriUVGriddingOptions_UI_cutCB;
+	global string $AriUVGriddingOptions_UI_cutRadioB[];
+	global string $AriUVGriddingOptions_UI_reverseCB;
+	global string $AriUVGriddingOptions_UI_reverseRadioB[];
+	global string $AriUVGriddingOptions_UI_unfoldCB;
+	global string $AriUVGriddingOptions_UI_select1CB;
+	int $ratioMode   = 1;
+	int $cutMode     = 3;
+	int $reverseMode = 2;
+	int $unfoldMode  = 0;
+	int $select1     = 1;
+	if(`radioButton -q -sl $AriUVGriddingOptions_UI_radioBT[0]`) $ratioMode = 0;
+	if(`radioButton -q -sl $AriUVGriddingOptions_UI_radioBT[1]`) $ratioMode = 1;
+	if(`radioButton -q -sl $AriUVGriddingOptions_UI_radioBT[2]`) $ratioMode = 2;
+	$cutMode = `checkBox -q -v $AriUVGriddingOptions_UI_cutCB`;
+	$cutMode = $cutMode * 2;
+	if(`radioButton -q -sl $AriUVGriddingOptions_UI_cutRadioB[1]`)$cutMode = $cutMode + 1;
+	$reverseMode = `checkBox -q -v $AriUVGriddingOptions_UI_reverseCB`;
+	$reverseMode = $reverseMode  * 2;
+	if(`radioButton -q -sl $AriUVGriddingOptions_UI_reverseRadioB[1]`)$reverseMode = $reverseMode + 1; 
+	$unfoldMode  = `checkBox -q -v $AriUVGriddingOptions_UI_unfoldCB`;
+	$select1 = `checkBox -q -v $AriUVGriddingOptions_UI_select1CB`;
+	optionVar -intValue "AriUVGridding_ratio"   $ratioMode;
+	optionVar -intValue "AriUVGridding_cut"     $cutMode;
+	optionVar -intValue "AriUVGridding_reverse" $reverseMode;
+	optionVar -intValue "AriUVGridding_unfold"  $unfoldMode;
+	optionVar -intValue "AriUVGridding_select1" $select1;
+}
+global proc AriUVGriddingOptions_UIChange(){
+	global string $AriUVGriddingOptions_UI_cutCB;
+	global string $AriUVGriddingOptions_UI_cutRadioB[];
+	global string $AriUVGriddingOptions_UI_reverseCB;
+	global string $AriUVGriddingOptions_UI_reverseRadioB[];
+	int $cutMode     = `checkBox -q -v $AriUVGriddingOptions_UI_cutCB`;
+	int $reverseMode = `checkBox -q -v $AriUVGriddingOptions_UI_reverseCB`;
+	radioButton -e -ed $cutMode $AriUVGriddingOptions_UI_cutRadioB[0];
+	radioButton -e -ed $cutMode $AriUVGriddingOptions_UI_cutRadioB[1];
+	radioButton -e -ed $reverseMode $AriUVGriddingOptions_UI_reverseRadioB[0];
+	radioButton -e -ed $reverseMode $AriUVGriddingOptions_UI_reverseRadioB[1];
+}
+proc AriUVGriddingOptions_Load(){
+	global string $AriUVGriddingOptions_UI_radioBT[4];
+	global string $AriUVGriddingOptions_UI_cutCB;
+	global string $AriUVGriddingOptions_UI_cutRadioB[];
+	global string $AriUVGriddingOptions_UI_reverseCB;
+	global string $AriUVGriddingOptions_UI_reverseRadioB[];
+	global string $AriUVGriddingOptions_UI_unfoldCB;
+	global string $AriUVGriddingOptions_UI_select1CB;
+	int $ratio   = 1;
+	int $cut     = 3;
+	int $reverse = 2;
+	int $unfold  = 0;
+	int $select1 = 1;
+	if(`optionVar -exists "AriUVGridding_ratio"`)	$ratio   = `optionVar -q "AriUVGridding_ratio"`;
+	if(`optionVar -exists "AriUVGridding_cut"`)		$cut     = `optionVar -q "AriUVGridding_cut"`;
+	if(`optionVar -exists "AriUVGridding_reverse"`)	$reverse = `optionVar -q "AriUVGridding_reverse"`;
+	if(`optionVar -exists "AriUVGridding_unfold"`)	$unfold  = `optionVar -q "AriUVGridding_unfold"`;
+	if(`optionVar -exists "AriUVGridding_select1"`)	$select1  = `optionVar -q "AriUVGridding_select1"`;
+	radioButton -e -sl $AriUVGriddingOptions_UI_radioBT[$ratio];
+	if($cut/2 == 0) checkBox -e -v false $AriUVGriddingOptions_UI_cutCB;
+	else 		    checkBox -e -v true  $AriUVGriddingOptions_UI_cutCB;
+	radioButton -e -sl $AriUVGriddingOptions_UI_cutRadioB[$cut%2];
+	if($reverse/2 == 0) checkBox -e -v false $AriUVGriddingOptions_UI_reverseCB;
+	else 		 	    checkBox -e -v true  $AriUVGriddingOptions_UI_reverseCB;
+	radioButton -e -sl $AriUVGriddingOptions_UI_reverseRadioB[$reverse%2];
+	if($unfold == 0)checkBox -e -v false $AriUVGriddingOptions_UI_unfoldCB;
+	else 			checkBox -e -v true  $AriUVGriddingOptions_UI_unfoldCB;
+	if($select1 == 0)	checkBox -e -v false $AriUVGriddingOptions_UI_select1CB;
+	else 				checkBox -e -v true  $AriUVGriddingOptions_UI_select1CB;
+}
+global proc AriUVGriddingOptions_GO(){
+	AriUVGriddingOptions_Save();
+	AriUVGridding;
+}
+global proc AriUVGriddingOptions(){
+	global string $AriUVGriddingOptions_UI_radioBT[4];
+	global string $AriUVGriddingOptions_UI_cutCB;
+	global string $AriUVGriddingOptions_UI_cutRadioB[];
+	global string $AriUVGriddingOptions_UI_reverseCB;
+	global string $AriUVGriddingOptions_UI_reverseRadioB[];
+	global string $AriUVGriddingOptions_UI_unfoldCB;
+	global string $AriUVGriddingOptions_UI_select1CB;
+	int $jpTrue;
+	if(`about -uil`=="ja_JP")$jpTrue = true;
+	else $jpTrue = false;
+	string $label[2];
+	string $label_JP[2];
+	string $label_US[2];
+	$label_US[0] = "U  V";
+	$label_US[1] = "U+V";
+	$label_US[2] = "Rectangle";
+	string $label_Cut_US    = "Cut";
+	string $label_Near_US   = "Near";
+	string $label_Far_US    = "Far";
+	string $label_Revers_US = "Revers";
+	string $label_Unfold_US = "Unfold UV";
+	$label[0] =  "U  V";
+	$label[1] =  "U+V";
+	$label[2] =  "矩形";
+	string $label_Cut    = "Cut";
+	string $label_Near   = "Near";
+	string $label_Far    = "Far";	
+	string $label_Revers = "Revers";
+	string $label_Unfold = "Unfold UV";
+	if($jpTrue==false){
+		$label[0] = $label_US[0];
+		$label[1] = $label_US[1];
+		$label[2] = $label_US[2];
+		$label_Cut    = $label_Cut_US;
+		$label_Near   = $label_Near_US;
+		$label_Far    = $label_Far_US;
+		$label_Revers = $label_Revers_US;
+		$label_Unfold = $label_Unfold_US;
+	}
+	int $mode = 0;
+	if(`optionVar -exists "AriUVGridding_ratio"`)	$mode = `optionVar -q "AriUVGridding_ratio"`;
+	if((`window -ex  AriUVGriddingOptions`)==true)deleteUI AriUVGriddingOptions;
+	window -title "AriUVGriddingOptions" -tlb true -w 200 -h 50 AriUVGriddingOptions;
+	string $form = `formLayout`;
+	string $column = `columnLayout -adj true`;
+	rowLayout -nc 3 -cw3 60 60 60;
+		radioCollection;
+		$AriUVGriddingOptions_UI_radioBT[0] = `radioButton -label $label[0]`;
+		$AriUVGriddingOptions_UI_radioBT[1] = `radioButton -label $label[1]`;
+		$AriUVGriddingOptions_UI_radioBT[2] = `radioButton -label $label[2]`;
+	setParent..;
+	separator -h 4 -st "in";
+	rowLayout -nc 3;
+	$AriUVGriddingOptions_UI_cutCB     = `checkBox -l $label_Cut -w 80 -cc "AriUVGriddingOptions_UIChange()"`;
+	radioCollection;
+	$AriUVGriddingOptions_UI_cutRadioB[0] = `radioButton -w 60 -label $label_Near`;
+	$AriUVGriddingOptions_UI_cutRadioB[1] = `radioButton -w 60 -label $label_Far`;
+	setParent..;
+	separator -h 4 -st "in";
+	rowLayout -nc 3;
+	$AriUVGriddingOptions_UI_reverseCB = `checkBox -l $label_Revers -w 80 -cc "AriUVGriddingOptions_UIChange()"`;
+	radioCollection;
+	$AriUVGriddingOptions_UI_reverseRadioB[0] = `radioButton -w 60 -label "U"`;
+	$AriUVGriddingOptions_UI_reverseRadioB[1] = `radioButton -w 60 -label "V"`;
+	setParent..;
+	separator -h 10 -st "in";
+	rowLayout -nc 3;
+	$AriUVGriddingOptions_UI_select1CB = `checkBox  -l "Select 1 UV"`;
+	separator -h 20 -w 10  -hr false;
+	$AriUVGriddingOptions_UI_unfoldCB  = `checkBox -vis true -l $label_Unfold`;
+	setParent..;
+	separator -h 10 -st "in";
+	setParent..;
+	string $buttonform = `formLayout`;
+	string $buttonSave       = `button       -l "Save"       -c "AriUVGriddingOptions_Save();"`;
+	string $buttonSaveClose  = `button       -l "Save Close" -c "AriUVGriddingOptions_Save(); deleteUI AriUVGriddingOptions;"`;
+	string $buttonApply      = `button -h 38 -l "Apply"      -c "AriUVGriddingOptions_GO();" -bgc 0.5 0.5 1`;
+	setParent..;
+	formLayout -e 
+	-af $buttonApply "bottom" 0  
+	-ap $buttonApply "left"   0 50
+	-af $buttonApply "right"  0
+	-af $buttonApply "top"    0 
+	-af $buttonSave	"top"    0
+	-ap $buttonSave	"bottom" 0 50
+	-af $buttonSave	"left"   0 
+	-ac $buttonSave	"right"  0 $buttonApply
+	-ac $buttonSaveClose	"top"    0 $buttonSave
+	-af $buttonSaveClose	"bottom" 0
+	-af $buttonSaveClose	"left"   0
+	-ac $buttonSaveClose	"right"  0 $buttonApply
+	$buttonform;
+	setParent..; 
+	formLayout -e 
+	-af $column "top"    0
+	-af $column "left"   0
+	-af $column "right"  0
+	-ac $buttonform "top"    0 $column
+	-af $buttonform "bottom" 0
+	-af $buttonform "left"   0
+	-af $buttonform "right"  0
+	$form;
+	radioButton -e -sl $AriUVGriddingOptions_UI_radioBT[$mode];
+	showWindow;
+	AriUVGriddingOptions_Load();
+	AriUVGriddingOptions_UIChange();
+}
