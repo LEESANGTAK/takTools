@@ -66,6 +66,15 @@
             "command": "ReversePolygonNormals",
             "sourceType": "mel",
             "noDefaultPopup": true
+        },
+        {
+            "label": "Average Normal Border",
+            "annotation": "Set average vertex normal for selected border edges.",
+            "image1": "polySelectEdgeBorder.png",
+            "imageOverlayLabel": "",
+            "command": "def setAverageNormalBorder(borderEdges):\n    # Get selected border edges and meshes\n    selMeshes = list(set(cmds.ls(selBorderEdges, objectsOnly=True)))\n    \n    # Get border edge loops\n    mel.eval(\"SelectEdgeLoopSp\")\n    borderEdges = cmds.ls(sl=True, fl=True)\n    \n    # Set average normal for the temp combined mesh\n    tempMeshes = cmds.duplicate(selMeshes)\n    combinedTempMesh = cmds.polyUnite(tempMeshes, ch=False)\n    cmds.polyMergeVertex(combinedTempMesh, d=0.001, ch=False)\n    cmds.polyAverageNormal(combinedTempMesh)\n    \n    # Transfer averaged normal\n    for selMesh in selMeshes:\n        cmds.transferAttributes(combinedTempMesh, selMesh, transferNormals=1, searchMethod=3)\n    \n    cmds.delete(selMeshes, ch=True)\n    cmds.delete(combinedTempMesh)\n\nselBorderEdges = cmds.ls(sl=True, fl=True)\nsetAverageNormalBorder(selBorderEdges)",
+            "sourceType": "python",
+            "noDefaultPopup": true
         }
     ]
 }
