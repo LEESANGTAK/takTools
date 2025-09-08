@@ -560,20 +560,27 @@ def setAverageNormalBorder(meshes):
     cmds.polyAverageNormal(combinedTempMesh)
 
     # Get border edges
-    border_edges = []
+    borderEdgesInfo = {}
     for mesh in meshes:
-        border_edges.extend(getBorderEdges(mesh))
+        borderEdgesInfo[mesh] = getBorderEdges(mesh)
 
-    # Convert border edges to vertices
-    border_vertices = []
-    for edge in border_edges:
-        border_vertices.extend(cmds.ls(cmds.polyListComponentConversion(edge, toVertex=True), fl=True))
+    # Convert border edges to border vertices info
+    borderVerticesInfo = {}
+    for mesh, borderEdges in borderEdgesInfo.items():
+        borderVertices = []
+        for borderEdge in borderEdges:
+            borderVertices.extend(cmds.ls(cmds.polyListComponentConversion(borderEdge, toVertex=True), fl=True))
+        borderVerticesInfo[mesh] = list(set(borderVertices))
 
-    # Transfer vertex normal from the temporary mesh to border vertices
-    for borderVtx in border_vertices:
-        borderVtxPos = cmds.pointPosition(borderVtx, w=True)
-        normal = getNormalAtPosition(combinedTempMesh, borderVtxPos)
-        cmds.polyNormalPerVertex(borderVtx, xyz=normal)
+    # Use Maya API to set the vertex normal
+    for mesh, borderVertices in borderVerticesInfo.items():
+        dagPath = globalUtil.getDagPath(mesh)
+        meshFn = om.MFnMesh(dagPath)
+        for borderVtx in borderVertices:
+            borderVtxPos = cmds.pointPosition(borderVtx, w=True)
+            normal = getNormalAtPosition(combinedTempMesh, borderVtxPos)
+            vtxIndex = int(borderVtx.split('.vtx[')[-1].strip(']'))
+            meshFn.setVertexNormal(normal, vtxIndex, om.MSpace.kWorld)
 
     cmds.delete(meshes, ch=True)
     cmds.delete(combinedTempMesh)

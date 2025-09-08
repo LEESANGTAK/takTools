@@ -69,10 +69,10 @@
         },
         {
             "label": "Average Normal Border",
-            "annotation": "Set average vertex normal for selected border edges.",
+            "annotation": "Set average vertex normal for selected meshes.",
             "image1": "avgNormal.png",
             "imageOverlayLabel": "",
-            "command": "def setAverageNormalBorder(borderEdges):\n    # Get selected border edges and meshes\n    selMeshes = list(set(cmds.ls(selBorderEdges, objectsOnly=True)))\n    \n    # Get border edge loops\n    mel.eval(\"SelectEdgeLoopSp\")\n    borderEdges = cmds.ls(sl=True, fl=True)\n    \n    # Set average normal for the temp combined mesh\n    tempMeshes = cmds.duplicate(selMeshes)\n    combinedTempMesh = cmds.polyUnite(tempMeshes, ch=False)\n    cmds.polyMergeVertex(combinedTempMesh, d=0.001, ch=False)\n    cmds.polyAverageNormal(combinedTempMesh)\n    \n    # Transfer averaged normal\n    for selMesh in selMeshes:\n        cmds.transferAttributes(combinedTempMesh, selMesh, transferNormals=1, searchMethod=3)\n    \n    cmds.delete(selMeshes, ch=True)\n    cmds.delete(combinedTempMesh)\n\nselBorderEdges = cmds.ls(sl=True, fl=True)\nsetAverageNormalBorder(selBorderEdges)",
+            "command": "from importlib import reload\nfrom takTools.utils import mesh as meshUtil; reload(meshUtil)\n\nmeshes = cmds.ls(sl=True, objectsOnly=True)\nshapes = []\nfor mesh in meshes:\n    shapes.extend(cmds.listRelatives(mesh, s=True))\nintermediateShapes = [shape for shape in shapes if cmds.getAttr('{}.intermediateObject'.format(shape))]\n\nif intermediateShapes:\n    for shape in intermediateShapes:\n        cmds.setAttr('{}.intermediateObject'.format(shape), False)\n    meshUtil.setAverageNormalBorder(intermediateShapes)\n    for shape in intermediateShapes:\n        cmds.setAttr('{}.intermediateObject'.format(shape), True)\nelse:\n    meshUtil.setAverageNormalBorder(meshes)",
             "sourceType": "python",
             "noDefaultPopup": true
         }
