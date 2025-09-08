@@ -1,6 +1,5 @@
 import re
 
-import maya.OpenMaya as om1
 import maya.api.OpenMaya as om
 
 import pymel.core as pm
@@ -102,7 +101,7 @@ def getPoints(mesh):
     return fnMesh.getPoints()
 
 
-def getFaceNormalAtPosition(mesh, position):
+def getNormalAtPosition(mesh, position):
     meshFn = om.MFnMesh(globalUtil.getDagPath(mesh))
     point = om.MPoint(position)
     normal = meshFn.getClosestNormal(point, space=om.MSpace.kWorld)
@@ -550,3 +549,58 @@ def toggleDeformers(mesh=''):
             print('"{}": {} {}'.format(mesh, dfm, reverseEnv))
     else:
         print("No deformers found on {}.".format(mesh))
+
+
+def setAverageNormalBorder(meshes):
+    """Set average vertex normal for border edges of given meshes."""
+    # Create a temporary mesh for averaging normals
+    tempMeshes = cmds.duplicate(meshes)
+    combinedTempMesh = cmds.polyUnite(tempMeshes, ch=False)[0]
+    cmds.polyMergeVertex(combinedTempMesh, d=0.001, ch=False)
+    cmds.polyAverageNormal(combinedTempMesh)
+
+    # Get border edges
+    border_edges = []
+    for mesh in meshes:
+        border_edges.extend(getBorderEdges(mesh))
+
+    # Convert border edges to vertices
+    border_vertices = []
+    for edge in border_edges:
+        border_vertices.extend(cmds.ls(cmds.polyListComponentConversion(edge, toVertex=True), fl=True))
+
+    # Transfer vertex normal from the temporary mesh to border vertices
+    for borderVtx in border_vertices:
+        borderVtxPos = cmds.pointPosition(borderVtx, w=True)
+        normal = getNormalAtPosition(combinedTempMesh, borderVtxPos)
+        cmds.polyNormalPerVertex(borderVtx, xyz=normal)
+
+    cmds.delete(meshes, ch=True)
+    cmds.delete(combinedTempMesh)
+
+
+def getBorderEdges(mesh):
+    selection_list = om.MSelectionList()
+    selection_list.add(mesh)
+
+    try:
+        dag_path = selection_list.getDagPath(0)
+        border_edge_indices = []
+
+        edge_iter = om.MItMeshEdge(dag_path)
+        while not edge_iter.isDone():
+            if edge_iter.onBoundary():
+                border_edge_indices.append(edge_iter.index())
+            edge_iter.next()
+
+        if border_edge_indices:
+            mesh_name = dag_path.partialPathName()
+            border_edge_components = [f'{mesh_name}.e[{index}]' for index in border_edge_indices]
+        else:
+            print("Cannot find border edges.")
+
+        return border_edge_components
+
+    except Exception as e:
+        om.MGlobal.displayError(f"Error occurred: {e}")
+        return None
