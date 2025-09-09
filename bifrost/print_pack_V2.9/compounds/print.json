@@ -1,0 +1,1856 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::print",
+            "uriImported": "file:///print.json",
+            "metadata": [
+                {
+                    "metaName": "documentation",
+                    "metaType": "string",
+                    "metaValue": "../docs/ENU/print.md"
+                },
+                {
+                    "metaName": "icon",
+                    "metaType": "string",
+                    "metaValue": "../icons/print.png"
+                },
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-246 480"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "description_1"
+                                                },
+                                                {
+                                                    "metaName": "value_1"
+                                                },
+                                                {
+                                                    "metaName": "description_2"
+                                                },
+                                                {
+                                                    "metaName": "value_2"
+                                                },
+                                                {
+                                                    "metaName": "description_3"
+                                                },
+                                                {
+                                                    "metaName": "value_3"
+                                                },
+                                                {
+                                                    "metaName": "description_4"
+                                                },
+                                                {
+                                                    "metaName": "value_4"
+                                                },
+                                                {
+                                                    "metaName": "float_precision"
+                                                },
+                                                {
+                                                    "metaName": "array_offset"
+                                                },
+                                                {
+                                                    "metaName": "max_string_length"
+                                                },
+                                                {
+                                                    "metaName": "input_strings"
+                                                },
+                                                {
+                                                    "metaName": "separator"
+                                                },
+                                                {
+                                                    "metaName": "description_A1"
+                                                },
+                                                {
+                                                    "metaName": "array_1"
+                                                },
+                                                {
+                                                    "metaName": "description_A2"
+                                                },
+                                                {
+                                                    "metaName": "array_2"
+                                                },
+                                                {
+                                                    "metaName": "description_A3"
+                                                },
+                                                {
+                                                    "metaName": "array_3"
+                                                },
+                                                {
+                                                    "metaName": "description_A4"
+                                                },
+                                                {
+                                                    "metaName": "array_4"
+                                                },
+                                                {
+                                                    "metaName": "table_offset"
+                                                },
+                                                {
+                                                    "metaName": "table_number_of_lines"
+                                                },
+                                                {
+                                                    "metaName": "column_width"
+                                                },
+                                                {
+                                                    "metaName": "colored_lines"
+                                                },
+                                                {
+                                                    "metaName": "text_color"
+                                                },
+                                                {
+                                                    "metaName": "index_color"
+                                                },
+                                                {
+                                                    "metaName": "scale"
+                                                },
+                                                {
+                                                    "metaName": "line_width"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "31.000000"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "metaName": "input1",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "1500 997"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "stacking_method"
+                                                },
+                                                {
+                                                    "metaName": "auto_stack_WH_ratio"
+                                                },
+                                                {
+                                                    "metaName": "spacing"
+                                                },
+                                                {
+                                                    "metaName": "placement"
+                                                },
+                                                {
+                                                    "metaName": "draw_frames"
+                                                },
+                                                {
+                                                    "metaName": "translate"
+                                                },
+                                                {
+                                                    "metaName": "rotate"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "32.000000"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "metaName": "input2",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "838 1117"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "object_properties"
+                                                },
+                                                {
+                                                    "metaName": "object_dump"
+                                                },
+                                                {
+                                                    "metaName": "obj_prop_expression"
+                                                },
+                                                {
+                                                    "metaName": "object_dump_data"
+                                                },
+                                                {
+                                                    "metaName": "shift_order"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "33.000000"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "2540.36 811.176"
+                                        },
+                                        {
+                                            "metaName": "io_ports"
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "34.000000"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Rendering::Materials,assign_material"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Rendering::Materials,standard_surface_mat"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Rendering::Arnold,set_Arnold_strands_settings"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Print,auto_layout"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Logic,if"
+                },
+                {
+                    "metaName": "UILayout",
+                    "metaType": "string",
+                    "metaValue": "{\n    \"NodeLayout\": {\n        \"hideUndeclaredPorts\": false,\n        \"items\": [\n            {\n                \"expanded\": false,\n                \"group\": \"Values\",\n                \"items\": [\n                    {\n                        \"port\": \"description_1\"\n                    },\n                    {\n                        \"port\": \"value_1\"\n                    },\n                    {\n                        \"port\": \"description_2\"\n                    },\n                    {\n                        \"port\": \"value_2\"\n                    },\n                    {\n                        \"port\": \"description_3\"\n                    },\n                    {\n                        \"port\": \"value_3\"\n                    },\n                    {\n                        \"port\": \"description_4\"\n                    },\n                    {\n                        \"port\": \"value_4\"\n                    },\n                    {\n                        \"port\": \"input_strings\"\n                    },\n                    {\n                        \"expanded\": false,\n                        \"group\": \"Settings\",\n                        \"items\": [\n                            {\n                                \"port\": \"array_offset\"\n                            },\n                            {\n                                \"port\": \"max_string_length\"\n                            },\n                            {\n                                \"port\": \"separator\"\n                            }\n                        ]\n                    },\n                    {\n                        \"port\": \"separator1\"\n                    },\n                    {\n                        \"port\": \"prefix_description\"\n                    },\n                    {\n                        \"port\": \"prefix_value\"\n                    }\n                ]\n            },\n            {\n                \"expanded\": false,\n                \"group\": \"Arrays\",\n                \"items\": [\n                    {\n                        \"port\": \"description_A1\"\n                    },\n                    {\n                        \"port\": \"array_1\"\n                    },\n                    {\n                        \"port\": \"description_A2\"\n                    },\n                    {\n                        \"port\": \"array_2\"\n                    },\n                    {\n                        \"port\": \"description_A3\"\n                    },\n                    {\n                        \"port\": \"array_3\"\n                    },\n                    {\n                        \"port\": \"description_A4\"\n                    },\n                    {\n                        \"port\": \"array_4\"\n                    },\n                    {\n                        \"expanded\": false,\n                        \"group\": \"Settings\",\n                        \"items\": [\n                            {\n                                \"port\": \"float_precision1\"\n                            },\n                            {\n                                \"port\": \"index_color\"\n                            },\n                            {\n                                \"port\": \"colored_lines\"\n                            }\n                        ]\n                    }\n                ]\n            },\n            {\n                \"port\": \"shape\"\n            },\n            {\n                \"port\": \"kerning\"\n            },\n            {\n                \"expanded\": false,\n                \"group\": \"Object\",\n                \"items\": [\n                    {\n                        \"port\": \"object_dump\"\n                    },\n                    {\n                        \"port\": \"object_properties\"\n                    }\n                ]\n            },\n            {\n                \"expanded\": true,\n                \"group\": \"Table Settings\",\n                \"items\": [\n                    {\n                        \"port\": \"highlight_lines\"\n                    },\n                    {\n                        \"port\": \"postfix\"\n                    },\n                    {\n                        \"port\": \"prefix\"\n                    }\n                ]\n            },\n            {\n                \"port\": \"font_size\"\n            },\n            {\n                \"expanded\": false,\n                \"group\": \"Settings\",\n                \"items\": [\n                    {\n                        \"port\": \"text_color\"\n                    },\n                    {\n                        \"port\": \"line_width\"\n                    },\n                    {\n                        \"port\": \"line_width\"\n                    },\n                    {\n                        \"port\": \"column_width\"\n                    },\n                    {\n                        \"port\": \"line_space\"\n                    },\n                    {\n                        \"port\": \"vertical_column_spacing\"\n                    },\n                    {\n                        \"port\": \"rich_text\"\n                    },\n                    {\n                        \"port\": \"float_precision\"\n                    },\n                    {\n                        \"port\": \"obj_prop_expression\"\n                    },\n                    {\n                        \"port\": \"table_offset\"\n                    },\n                    {\n                        \"port\": \"table_number_of_lines\"\n                    },\n                    {\n                        \"port\": \"object_dump_data\"\n                    }\n                ]\n            },\n            {\n                \"expanded\": false,\n                \"group\": \"Transform\",\n                \"items\": [\n                    {\n                        \"port\": \"translate\"\n                    },\n                    {\n                        \"port\": \"rotate\"\n                    },\n                    {\n                        \"port\": \"scale\"\n                    }\n                ]\n            },\n            {\n                \"expanded\": false,\n                \"group\": \"Auto Arrange\",\n                \"items\": [\n                    {\n                        \"port\": \"stacking_method\"\n                    },\n                    {\n                        \"port\": \"auto_stack_WH_ratio\"\n                    },\n                    {\n                        \"port\": \"spacing\"\n                    },\n                    {\n                        \"port\": \"draw_frames\"\n                    },\n                    {\n                        \"port\": \"placement\"\n                    },\n                    {\n                        \"port\": \"shift_order\"\n                    },\n                    {\n                        \"port\": \"reverse_order\"\n                    }\n                ]\n            },\n            {\n                \"port\": \"transform\"\n            }\n        ]\n    }\n}\n"
+                },
+                {
+                    "metaName": "PortExpandedState",
+                    "metadata": [
+                        {
+                            "metaName": "Object",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "Auto Arrange",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "Transform",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "Arrays",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "Values",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        }
+                    ]
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-326 -524.132 3172 2804.26"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "440.5 255"
+                },
+                {
+                    "metaName": "zValue",
+                    "metaType": "string",
+                    "metaValue": "47.000000"
+                }
+            ],
+            "terminalStates": [
+                {
+                    "name": "Core::Graph::terminal::final",
+                    "enabled": "true"
+                },
+                {
+                    "name": "Core::Graph::terminal::proxy",
+                    "enabled": "false"
+                },
+                {
+                    "name": "Core::Graph::terminal::diagnostic",
+                    "enabled": "true"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "description_1",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 1"
+                },
+                {
+                    "portName": "value_1",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_2",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 2"
+                },
+                {
+                    "portName": "value_2",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_3",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 3"
+                },
+                {
+                    "portName": "value_3",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_4",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 4"
+                },
+                {
+                    "portName": "value_4",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "float_precision",
+                    "portDirection": "input",
+                    "portType": "float",
+                    "portDefault": "100f"
+                },
+                {
+                    "portName": "array_offset",
+                    "portDirection": "input",
+                    "portType": "uint",
+                    "portDefault": "0U"
+                },
+                {
+                    "portName": "max_string_length",
+                    "portDirection": "input",
+                    "portType": "long",
+                    "portDefault": "10000"
+                },
+                {
+                    "portName": "input_strings",
+                    "portDirection": "input",
+                    "portType": "array<string>",
+                    "portDefault": [],
+                    "isDefaultFanIn": "true"
+                },
+                {
+                    "portName": "separator",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "\\n"
+                },
+                {
+                    "portName": "description_A1",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Array 1"
+                },
+                {
+                    "portName": "array_1",
+                    "portDirection": "input",
+                    "portDefaultType": "array<string>",
+                    "portDefault": []
+                },
+                {
+                    "portName": "description_A2",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Array 2"
+                },
+                {
+                    "portName": "array_2",
+                    "portDirection": "input",
+                    "portDefaultType": "array<string>",
+                    "portDefault": []
+                },
+                {
+                    "portName": "description_A3",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Array 3"
+                },
+                {
+                    "portName": "array_3",
+                    "portDirection": "input",
+                    "portDefaultType": "array<string>",
+                    "portDefault": []
+                },
+                {
+                    "portName": "description_A4",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Array 4"
+                },
+                {
+                    "portName": "array_4",
+                    "portDirection": "input",
+                    "portDefaultType": "array<string>",
+                    "portDefault": []
+                },
+                {
+                    "portName": "table_offset",
+                    "portDirection": "input",
+                    "portType": "uint",
+                    "portDefault": "0U"
+                },
+                {
+                    "portName": "table_number_of_lines",
+                    "portDirection": "input",
+                    "portType": "long",
+                    "portDefault": "50"
+                },
+                {
+                    "portName": "column_width",
+                    "portDirection": "input",
+                    "portType": "float",
+                    "portDefault": "80f"
+                },
+                {
+                    "portName": "colored_lines",
+                    "portDirection": "input",
+                    "portType": "bool",
+                    "portDefault": "false"
+                },
+                {
+                    "portName": "text_color",
+                    "portDirection": "input",
+                    "portType": "Math::float3",
+                    "portDefault": {
+                        "x": "0.400000006f",
+                        "y": "1f",
+                        "z": "0.200000003f"
+                    },
+                    "metadata": [
+                        {
+                            "metaName": "UIWidget",
+                            "metaType": "string",
+                            "metaValue": "ColorPicker"
+                        }
+                    ]
+                },
+                {
+                    "portName": "index_color",
+                    "portDirection": "input",
+                    "portDefaultType": "Math::float3",
+                    "portDefault": {
+                        "x": "0.400000006f",
+                        "y": "1f",
+                        "z": "1f"
+                    },
+                    "metadata": [
+                        {
+                            "metaName": "UIWidget",
+                            "metaType": "string",
+                            "metaValue": "ColorPicker"
+                        }
+                    ]
+                },
+                {
+                    "portName": "scale",
+                    "portDirection": "input",
+                    "portType": "float",
+                    "portDefault": "1f"
+                },
+                {
+                    "portName": "object_properties",
+                    "portDirection": "input",
+                    "portType": "Object",
+                    "portDefault": {}
+                },
+                {
+                    "portName": "object_dump",
+                    "portDirection": "input",
+                    "portType": "Object",
+                    "portDefault": {}
+                },
+                {
+                    "portName": "stacking_method",
+                    "portDirection": "input",
+                    "portType": "long",
+                    "portDefault": "3",
+                    "metadata": [
+                        {
+                            "metaName": "UIWidget",
+                            "metaType": "string",
+                            "metaValue": "ComboBox"
+                        },
+                        {
+                            "metaName": "UIWidgetProp",
+                            "metaType": "string",
+                            "metaValue": "editable=false;items={Auto=0;\"Along X\"=1;\"Along Y\"=2;Quadrants=3}"
+                        }
+                    ]
+                },
+                {
+                    "portName": "auto_stack_WH_ratio",
+                    "portDirection": "input",
+                    "portType": "float",
+                    "portDefault": "0.949999988f"
+                },
+                {
+                    "portName": "spacing",
+                    "portDirection": "input",
+                    "portType": "float",
+                    "portDefault": "2f"
+                },
+                {
+                    "portName": "placement",
+                    "portDirection": "input",
+                    "portType": "long",
+                    "portDefault": "1",
+                    "metadata": [
+                        {
+                            "metaName": "UIWidget",
+                            "metaType": "string",
+                            "metaValue": "ComboBox"
+                        },
+                        {
+                            "metaName": "UIWidgetProp",
+                            "metaType": "string",
+                            "metaValue": "editable=false;items={Center=0;\"Center Above\"=1;\"Center Below\"=2;\"Upper Left\"=3;\"Upper Right\"=4;\"Lower Left\"=5;\"Lower Right\"=6}"
+                        }
+                    ]
+                },
+                {
+                    "portName": "draw_frames",
+                    "portDirection": "input",
+                    "portType": "bool",
+                    "portDefault": "true"
+                },
+                {
+                    "portName": "translate",
+                    "portDirection": "input",
+                    "portType": "Math::float3",
+                    "portDefault": {
+                        "x": "0f",
+                        "y": "0f",
+                        "z": "0f"
+                    }
+                },
+                {
+                    "portName": "rotate",
+                    "portDirection": "input",
+                    "portType": "Math::float3",
+                    "portDefault": {
+                        "x": "0f",
+                        "y": "0f",
+                        "z": "0f"
+                    }
+                },
+                {
+                    "portName": "obj_prop_expression",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "*"
+                },
+                {
+                    "portName": "object_dump_data",
+                    "portDirection": "input",
+                    "portType": "uint",
+                    "portDefault": "30U"
+                },
+                {
+                    "portName": "shift_order",
+                    "portDirection": "input",
+                    "portType": "long",
+                    "portDefault": "0"
+                },
+                {
+                    "portName": "line_width",
+                    "portDirection": "input",
+                    "portType": "float",
+                    "portDefault": "0.0399999991f"
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "print_static",
+                    "nodeType": "Print::print_static",
+                    "fanInPortNames": {
+                        "input_strings": [
+                            "array"
+                        ]
+                    },
+                    "terminalStates": [
+                        {
+                            "name": "Core::Graph::terminal::final",
+                            "enabled": "true"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::proxy",
+                            "enabled": "true"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::diagnostic",
+                            "enabled": "false"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "PortExpandedState",
+                            "metadata": [
+                                {
+                                    "metaName": "Four Values",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "input_strings",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Transform",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Layout",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Font",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1231.75 10"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "38.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "print_table",
+                    "nodeType": "Print::print_table",
+                    "terminalStates": [
+                        {
+                            "name": "Core::Graph::terminal::final",
+                            "enabled": "true"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::proxy",
+                            "enabled": "true"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::diagnostic",
+                            "enabled": "false"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1230 349"
+                        },
+                        {
+                            "metaName": "PortExpandedState",
+                            "metadata": [
+                                {
+                                    "metaName": "Highlight Lines",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Layout",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Transform",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Font",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "39.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "print_object_dump",
+                    "nodeType": "Print::print_object_dump",
+                    "terminalStates": [
+                        {
+                            "name": "Core::Graph::terminal::final",
+                            "enabled": "true"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::proxy",
+                            "enabled": "true"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::diagnostic",
+                            "enabled": "false"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1234 1306"
+                        },
+                        {
+                            "metaName": "PortExpandedState",
+                            "metadata": [
+                                {
+                                    "metaName": "Highlight Values",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Transform",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Layout",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Font",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "41.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "print_object_properties",
+                    "nodeType": "Print::print_object_properties",
+                    "terminalStates": [
+                        {
+                            "name": "Core::Graph::terminal::final",
+                            "enabled": "true"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::proxy",
+                            "enabled": "false"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::diagnostic",
+                            "enabled": "false"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1230 862"
+                        },
+                        {
+                            "metaName": "PortExpandedState",
+                            "metadata": [
+                                {
+                                    "metaName": "Highlight Lines",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Layout",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Transform",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "Font",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "40.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "terminal",
+                    "nodeType": "Core::Graph::terminal",
+                    "fanInPortNames": {
+                        "final": [],
+                        "proxy": [],
+                        "diagnostic": [
+                            "output"
+                        ]
+                    },
+                    "terminalStates": [
+                        {
+                            "name": "Core::Graph::terminal::final",
+                            "enabled": "false"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::proxy",
+                            "enabled": "false"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::diagnostic",
+                            "enabled": "true"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "PortExpandedState",
+                            "metadata": [
+                                {
+                                    "metaName": "diagnostic",
+                                    "metaType": "string",
+                                    "metaValue": "1"
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2515.36 984.176"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "35.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "auto_layout",
+                    "nodeType": "Print::auto_layout",
+                    "fanInPortNames": {
+                        "panels": [
+                            "static_text",
+                            "table",
+                            "object_dump",
+                            "properties_table"
+                        ]
+                    },
+                    "terminalStates": [
+                        {
+                            "name": "Core::Graph::terminal::final",
+                            "enabled": "true"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::proxy",
+                            "enabled": "false"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::diagnostic",
+                            "enabled": "false"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "PortExpandedState",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metaType": "string",
+                                    "metaValue": "1"
+                                },
+                                {
+                                    "metaName": "panels",
+                                    "metaType": "string",
+                                    "metaValue": "1"
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1881 856"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "37.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "set_Arnold_strands_settings",
+                    "nodeType": "Rendering::Arnold::set_Arnold_strands_settings",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2179.47 859.753"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "36.000000"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": ".description_1",
+                    "target": "print_static.description_1"
+                },
+                {
+                    "source": ".value_1",
+                    "target": "print_static.value_1"
+                },
+                {
+                    "source": ".description_2",
+                    "target": "print_static.description_2"
+                },
+                {
+                    "source": ".value_2",
+                    "target": "print_static.value_2"
+                },
+                {
+                    "source": ".description_3",
+                    "target": "print_static.description_3"
+                },
+                {
+                    "source": ".value_3",
+                    "target": "print_static.value_3"
+                },
+                {
+                    "source": ".description_4",
+                    "target": "print_static.description_4"
+                },
+                {
+                    "source": ".value_4",
+                    "target": "print_static.value_4"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "print_static.float_precision"
+                },
+                {
+                    "source": ".array_offset",
+                    "target": "print_static.array_offset"
+                },
+                {
+                    "source": ".max_string_length",
+                    "target": "print_static.max_string_length"
+                },
+                {
+                    "source": ".separator",
+                    "target": "print_static.separator"
+                },
+                {
+                    "source": ".description_A1",
+                    "target": "print_table.description_1"
+                },
+                {
+                    "source": ".array_1",
+                    "target": "print_table.array_1"
+                },
+                {
+                    "source": ".description_A2",
+                    "target": "print_table.description_2"
+                },
+                {
+                    "source": ".array_2",
+                    "target": "print_table.array_2"
+                },
+                {
+                    "source": ".description_A3",
+                    "target": "print_table.description_3"
+                },
+                {
+                    "source": ".array_3",
+                    "target": "print_table.array_3"
+                },
+                {
+                    "source": ".description_A4",
+                    "target": "print_table.description_4"
+                },
+                {
+                    "source": ".array_4",
+                    "target": "print_table.array_4"
+                },
+                {
+                    "source": ".table_offset",
+                    "target": "print_table.offset"
+                },
+                {
+                    "source": ".table_number_of_lines",
+                    "target": "print_table.number_of_lines"
+                },
+                {
+                    "source": ".colored_lines",
+                    "target": "print_table.colored_lines"
+                },
+                {
+                    "source": ".text_color",
+                    "target": "print_table.line_color"
+                },
+                {
+                    "source": ".index_color",
+                    "target": "print_table.index_color"
+                },
+                {
+                    "source": ".text_color",
+                    "target": "print_static.line_color"
+                },
+                {
+                    "source": ".column_width",
+                    "target": "print_table.column_width"
+                },
+                {
+                    "source": ".column_width",
+                    "target": "print_static.column_width"
+                },
+                {
+                    "source": ".separator",
+                    "target": "print_static.separator1"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "print_table.float_precision"
+                },
+                {
+                    "source": ".object_dump",
+                    "target": "print_object_dump.object"
+                },
+                {
+                    "source": ".object_properties",
+                    "target": "print_object_properties.object"
+                },
+                {
+                    "source": ".obj_prop_expression",
+                    "target": "print_object_dump.properties_expression"
+                },
+                {
+                    "source": ".obj_prop_expression",
+                    "target": "print_object_properties.properties_expression"
+                },
+                {
+                    "source": ".table_offset",
+                    "target": "print_object_properties.offset"
+                },
+                {
+                    "source": ".table_number_of_lines",
+                    "target": "print_object_properties.number_of_lines"
+                },
+                {
+                    "source": ".column_width",
+                    "target": "print_object_dump.column_width"
+                },
+                {
+                    "source": ".column_width",
+                    "target": "print_object_properties.column_width"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "print_object_dump.float_precision"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "print_object_properties.float_precision"
+                },
+                {
+                    "source": ".object_dump_data",
+                    "target": "print_object_dump.display_data_elements"
+                },
+                {
+                    "source": ".stacking_method",
+                    "target": "auto_layout.stacking_method"
+                },
+                {
+                    "source": ".auto_stack_WH_ratio",
+                    "target": "auto_layout.auto_layout_WH_ratio"
+                },
+                {
+                    "source": ".spacing",
+                    "target": "auto_layout.distance"
+                },
+                {
+                    "source": ".placement",
+                    "target": "auto_layout.placement_type"
+                },
+                {
+                    "source": ".draw_frames",
+                    "target": "auto_layout.draw_frames"
+                },
+                {
+                    "source": ".translate",
+                    "target": "auto_layout.translate"
+                },
+                {
+                    "source": ".rotate",
+                    "target": "auto_layout.rotate"
+                },
+                {
+                    "source": ".scale",
+                    "target": "auto_layout.scale"
+                },
+                {
+                    "source": ".shift_order",
+                    "target": "auto_layout.shift_order"
+                },
+                {
+                    "source": "print_static.static_text",
+                    "target": "auto_layout.panels.static_text"
+                },
+                {
+                    "source": "print_table.table",
+                    "target": "auto_layout.panels.table"
+                },
+                {
+                    "source": "print_object_dump.object_dump",
+                    "target": "auto_layout.panels.object_dump"
+                },
+                {
+                    "source": "print_object_properties.properties_table",
+                    "target": "auto_layout.panels.properties_table"
+                },
+                {
+                    "source": ".input_strings",
+                    "target": "print_static.input_strings.array"
+                },
+                {
+                    "source": "set_Arnold_strands_settings.out_strands",
+                    "target": "terminal.diagnostic.output"
+                },
+                {
+                    "source": "auto_layout.auto_layout",
+                    "target": "set_Arnold_strands_settings.strands"
+                },
+                {
+                    "source": ".text_color",
+                    "target": "print_object_properties.line_color"
+                },
+                {
+                    "source": ".text_color",
+                    "target": "print_object_dump.line_color"
+                },
+                {
+                    "source": ".line_width",
+                    "target": "print_static.line_width"
+                },
+                {
+                    "source": ".line_width",
+                    "target": "print_table.line_width"
+                },
+                {
+                    "source": ".line_width",
+                    "target": "print_object_properties.line_width"
+                },
+                {
+                    "source": ".line_width",
+                    "target": "print_object_dump.line_width"
+                },
+                {
+                    "source": ".text_color",
+                    "target": "auto_layout.line_color"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "print_static.input_strings",
+                    "valueType": "array<string>",
+                    "value": []
+                },
+                {
+                    "valueName": "print_static.column_width",
+                    "valueType": "float",
+                    "value": "80f"
+                },
+                {
+                    "valueName": "print_static.line_width",
+                    "valueType": "float",
+                    "value": "0.0715000033f"
+                },
+                {
+                    "valueName": "print_static.line_color",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "0.400000006f",
+                        "y": "1f",
+                        "z": "0.200000003f"
+                    }
+                },
+                {
+                    "valueName": "print_static.shape",
+                    "valueType": "Geometry::StrandShapes",
+                    "value": "Wire"
+                },
+                {
+                    "valueName": "print_static.kerning",
+                    "valueType": "float",
+                    "value": "0.200000003f"
+                },
+                {
+                    "valueName": "print_static.font_size",
+                    "valueType": "float",
+                    "value": "1f"
+                },
+                {
+                    "valueName": "print_static.line_space",
+                    "valueType": "float",
+                    "value": "1.39999998f"
+                },
+                {
+                    "valueName": "print_static.transform",
+                    "valueType": "Math::float4x4",
+                    "value": {
+                        "c0": {
+                            "x": "1f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c1": {
+                            "x": "0f",
+                            "y": "1f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c2": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "1f",
+                            "w": "0f"
+                        },
+                        "c3": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "1f"
+                        }
+                    }
+                },
+                {
+                    "valueName": "print_static.translate",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "0f",
+                        "y": "0f",
+                        "z": "0f"
+                    }
+                },
+                {
+                    "valueName": "print_static.rotate",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "0f",
+                        "y": "0f",
+                        "z": "0f"
+                    }
+                },
+                {
+                    "valueName": "print_static.scale",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "1f",
+                        "y": "1f",
+                        "z": "1f"
+                    }
+                },
+                {
+                    "valueName": "print_static.separator",
+                    "valueType": "string",
+                    "value": "\\n"
+                },
+                {
+                    "valueName": "print_static.draw_frame",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "print_static.camera",
+                    "valueType": "Math::float4x4",
+                    "value": {
+                        "c0": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c1": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c2": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c3": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        }
+                    }
+                },
+                {
+                    "valueName": "print_static.description_1",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_static.value_1",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_static.description_2",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_static.value_2",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_static.description_3",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_static.value_3",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_static.description_4",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_static.value_4",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_static.float_precision",
+                    "valueType": "float",
+                    "value": "100f"
+                },
+                {
+                    "valueName": "print_static.separator1",
+                    "valueType": "string",
+                    "value": "\\n"
+                },
+                {
+                    "valueName": "print_static.scroll_upwards",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "print_static.rich_text",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "print_static.tab_size",
+                    "valueType": "float",
+                    "value": "8f"
+                },
+                {
+                    "valueName": "print_static.prefix_description",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_static.prefix_value",
+                    "valueType": "string",
+                    "value": " = "
+                },
+                {
+                    "valueName": "print_static.max_character_limit",
+                    "valueType": "long",
+                    "value": "100000"
+                },
+                {
+                    "valueName": "print_static.array_offset",
+                    "valueType": "uint",
+                    "value": "0U"
+                },
+                {
+                    "valueName": "print_static.max_string_length",
+                    "valueType": "long",
+                    "value": "80"
+                },
+                {
+                    "valueName": "print_table.description_1",
+                    "valueType": "string",
+                    "value": "Array 1"
+                },
+                {
+                    "valueName": "print_table.array_1",
+                    "valueType": "array<string>",
+                    "value": []
+                },
+                {
+                    "valueName": "print_table.description_2",
+                    "valueType": "string",
+                    "value": "Array 2"
+                },
+                {
+                    "valueName": "print_table.array_2",
+                    "valueType": "array<string>",
+                    "value": []
+                },
+                {
+                    "valueName": "print_table.description_3",
+                    "valueType": "string",
+                    "value": "Array 3"
+                },
+                {
+                    "valueName": "print_table.array_3",
+                    "valueType": "array<string>",
+                    "value": []
+                },
+                {
+                    "valueName": "print_table.description_4",
+                    "valueType": "string",
+                    "value": "Array 4"
+                },
+                {
+                    "valueName": "print_table.array_4",
+                    "valueType": "array<string>",
+                    "value": []
+                },
+                {
+                    "valueName": "print_table.offset",
+                    "valueType": "uint",
+                    "value": "0U"
+                },
+                {
+                    "valueName": "print_table.number_of_lines",
+                    "valueType": "long",
+                    "value": "50"
+                },
+                {
+                    "valueName": "print_table.vertical_column_spacing",
+                    "valueType": "float",
+                    "value": "3f"
+                },
+                {
+                    "valueName": "print_table.float_precision",
+                    "valueType": "float",
+                    "value": "100f"
+                },
+                {
+                    "valueName": "print_table.line_width",
+                    "valueType": "float",
+                    "value": "0.0399999991f"
+                },
+                {
+                    "valueName": "print_table.line_color",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "0.400000006f",
+                        "y": "1f",
+                        "z": "0.200000003f"
+                    }
+                },
+                {
+                    "valueName": "print_table.shape",
+                    "valueType": "Geometry::StrandShapes",
+                    "value": "Wire"
+                },
+                {
+                    "valueName": "print_table.column_width",
+                    "valueType": "uint",
+                    "value": "80U"
+                },
+                {
+                    "valueName": "print_table.kerning",
+                    "valueType": "float",
+                    "value": "0.200000003f"
+                },
+                {
+                    "valueName": "print_table.font_size",
+                    "valueType": "float",
+                    "value": "1f"
+                },
+                {
+                    "valueName": "print_table.line_space",
+                    "valueType": "float",
+                    "value": "1.39999998f"
+                },
+                {
+                    "valueName": "print_table.transform",
+                    "valueType": "Math::float4x4",
+                    "value": {
+                        "c0": {
+                            "x": "1f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c1": {
+                            "x": "0f",
+                            "y": "1f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c2": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "1f",
+                            "w": "0f"
+                        },
+                        "c3": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "1f"
+                        }
+                    }
+                },
+                {
+                    "valueName": "print_table.translate",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "0f",
+                        "y": "0f",
+                        "z": "0f"
+                    }
+                },
+                {
+                    "valueName": "print_table.scale",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "1f",
+                        "y": "1f",
+                        "z": "1f"
+                    }
+                },
+                {
+                    "valueName": "print_table.camera",
+                    "valueType": "Math::float4x4",
+                    "value": {
+                        "c0": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c1": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c2": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c3": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        }
+                    }
+                },
+                {
+                    "valueName": "print_table.index_color",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "0.400000006f",
+                        "y": "1f",
+                        "z": "1f"
+                    }
+                },
+                {
+                    "valueName": "print_table.colored_lines",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "print_table.rich_text",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "print_table.highlight_lines",
+                    "valueType": "array<bool>",
+                    "value": []
+                },
+                {
+                    "valueName": "print_table.prefix",
+                    "valueType": "string",
+                    "value": "\\cq3"
+                },
+                {
+                    "valueName": "print_table.postfix",
+                    "valueType": "string",
+                    "value": "\\cd"
+                },
+                {
+                    "valueName": "print_object_dump.line_space",
+                    "valueType": "float",
+                    "value": "1.39999998f"
+                },
+                {
+                    "valueName": "print_object_dump.rich_text",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "print_object_dump.line_width",
+                    "valueType": "float",
+                    "value": "0.0399999991f"
+                },
+                {
+                    "valueName": "print_object_dump.line_color",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "0.400000006f",
+                        "y": "1f",
+                        "z": "0.200000003f"
+                    }
+                },
+                {
+                    "valueName": "print_object_dump.display_data_elements",
+                    "valueType": "uint",
+                    "value": "50U"
+                },
+                {
+                    "valueName": "print_object_dump.prefix",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_object_dump.postfix",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_object_properties.properties_expression",
+                    "valueType": "string",
+                    "value": "* !*_tag"
+                },
+                {
+                    "valueName": "print_object_properties.prefix",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_object_properties.postfix",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "print_object_properties.column_width",
+                    "valueType": "float",
+                    "value": "80f"
+                },
+                {
+                    "valueName": "print_object_properties.draw_frame",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "auto_layout.distance",
+                    "valueType": "float",
+                    "value": "2f"
+                },
+                {
+                    "valueName": "set_Arnold_strands_settings.match_ends",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "set_Arnold_strands_settings.mode_override",
+                    "valueType": "Rendering::Arnold::CurvesMode",
+                    "value": "Thick"
+                },
+                {
+                    "valueName": "set_Arnold_strands_settings.basis_override",
+                    "valueType": "Rendering::Arnold::CurvesBasis",
+                    "value": "Linear"
+                },
+                {
+                    "valueName": "set_Arnold_strands_settings.override_min_pixel_width",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "set_Arnold_strands_settings.min_pixel_width",
+                    "valueType": "float",
+                    "value": "3.22399998f"
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                },
+                {
+                    "name": "input1"
+                },
+                {
+                    "name": "input2"
+                }
+            ]
+        }
+    ]
+}

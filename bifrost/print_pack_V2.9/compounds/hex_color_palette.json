@@ -1,0 +1,144 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::hex_color_palette",
+            "uriImported": "file:///hex_color_palette.json",
+            "metadata": [
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes"
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "string_array"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "620 10"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-100.529 -157.059 1057.06 774.118"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "1931.58 -739.268"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "string_array",
+                    "portDirection": "output",
+                    "portType": "array<string>"
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "string_to_array",
+                    "nodeType": "Core::String::string_to_array",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "315 10"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value9",
+                    "valueType": "string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "10 83"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "value9.output",
+                    "target": "string_to_array.comma_separated_string"
+                },
+                {
+                    "source": "string_to_array.string_array",
+                    "target": ".string_array"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "string_to_array.comma_separated_string",
+                    "valueType": "string",
+                    "value": "0, 4, 6"
+                },
+                {
+                    "valueName": "value9.value",
+                    "valueType": "string",
+                    "value": "B8255F, 96C3EB, DB4035, 4073FF, FF9933, 884DFF, FAD000, AF38EB, AFB83B, EB96EB, 7ECC49, E05194, 299438, FF8D85,158FAD, FCC436,14AAF5,E9D063,3D81F5,12BA69,F2F2F2,DD493C,17CBCF,FDD6B4,197FB3,F26A40,AOCCOO,4C5E67,ED455E,FFE433,0DE3F2,FF6669,AED75B, 6ACCBC, FFB866,3F8DF3,F2A48C,4D4DE6,F96C39,4D71CB,F9C61F,59C0BB,EEEBDD\n,198063\n"
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

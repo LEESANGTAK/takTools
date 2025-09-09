@@ -1,0 +1,19 @@
+{
+  "AminoConfigurations": [
+    {
+      "vendorName": "Roland Reyer, Autodesk",
+      "libraryVersion": "1.0",
+      "libraryName": "Print Pack",
+      "jsonLibs": [
+        {
+          "path": "compounds",
+          "files": [ ]
+        },
+        {
+          "path": "graphs",
+          "files": [ ]
+        }
+      ]
+    }
+  ]
+}

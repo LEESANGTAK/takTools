@@ -1,0 +1,175 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::quaternion_to_degrees",
+            "metadata": [
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-403.236 77.7064"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "quaternion"
+                                                },
+                                                {
+                                                    "metaName": "rotation_order"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "449.706 28.1181"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "degrees"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-1121 -658 2242 1316"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "48.569 886.103"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "quaternion",
+                    "portDirection": "input"
+                },
+                {
+                    "portName": "rotation_order",
+                    "portDirection": "input",
+                    "portType": "Math::rotation_order",
+                    "portDefault": "XYZ"
+                },
+                {
+                    "portName": "degrees",
+                    "portDirection": "output"
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "quaternion_to_euler",
+                    "nodeType": "Core::Math::quaternion_to_euler",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-111.765 42.8235"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "radians_to_degrees",
+                    "nodeType": "Core::Conversion::radians_to_degrees",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "193.235 18.8235"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "quaternion_to_euler.euler_radians",
+                    "target": "radians_to_degrees.radians"
+                },
+                {
+                    "source": ".quaternion",
+                    "target": "quaternion_to_euler.quaternion"
+                },
+                {
+                    "source": ".rotation_order",
+                    "target": "quaternion_to_euler.rotation_order"
+                },
+                {
+                    "source": "radians_to_degrees.degrees",
+                    "target": ".degrees"
+                }
+            ],
+            "values": [],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

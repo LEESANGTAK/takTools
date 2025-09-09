@@ -1,0 +1,404 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::matrix_is_empty",
+            "metadata": [
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "matrix"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "is_empty"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "3785.19 1289.21"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "is_empty",
+                    "portDirection": "output",
+                    "portType": "bool"
+                },
+                {
+                    "portName": "matrix",
+                    "portDirection": "input",
+                    "portType": "Math::float4x4",
+                    "portDefault": {
+                        "c0": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c1": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c2": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c3": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        }
+                    }
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "add",
+                    "nodeType": "Core::Math::add",
+                    "multiInPortNames": [
+                        "x",
+                        "y",
+                        "z",
+                        "w",
+                        "x1",
+                        "y1",
+                        "z1",
+                        "w1",
+                        "x2",
+                        "y2",
+                        "z2",
+                        "w2",
+                        "x3",
+                        "y3",
+                        "z3",
+                        "w3"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2428.95 1873.21"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "equal",
+                    "nodeType": "Core::Logic::equal",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2703.99 2009.11"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value1",
+                    "valueType": "Math::float4x4",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2142.15 1961.99"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "PortExpandedState",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metaType": "string",
+                                    "metaValue": "1"
+                                },
+                                {
+                                    "metaName": "output.c0",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "output.c1",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "output.c2",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                },
+                                {
+                                    "metaName": "output.c3",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "value1.output.c0.x",
+                    "target": "add.first.x"
+                },
+                {
+                    "source": "value1.output.c0.y",
+                    "target": "add.first.y"
+                },
+                {
+                    "source": "value1.output.c0.z",
+                    "target": "add.first.z"
+                },
+                {
+                    "source": "value1.output.c0.w",
+                    "target": "add.first.w"
+                },
+                {
+                    "source": "value1.output.c1.x",
+                    "target": "add.first.x1"
+                },
+                {
+                    "source": "value1.output.c1.y",
+                    "target": "add.first.y1"
+                },
+                {
+                    "source": "value1.output.c1.z",
+                    "target": "add.first.z1"
+                },
+                {
+                    "source": "value1.output.c1.w",
+                    "target": "add.first.w1"
+                },
+                {
+                    "source": "value1.output.c2.x",
+                    "target": "add.first.x2"
+                },
+                {
+                    "source": "value1.output.c2.y",
+                    "target": "add.first.y2"
+                },
+                {
+                    "source": "value1.output.c2.z",
+                    "target": "add.first.z2"
+                },
+                {
+                    "source": "value1.output.c2.w",
+                    "target": "add.first.w2"
+                },
+                {
+                    "source": "value1.output.c3.x",
+                    "target": "add.first.x3"
+                },
+                {
+                    "source": "value1.output.c3.y",
+                    "target": "add.first.y3"
+                },
+                {
+                    "source": "value1.output.c3.z",
+                    "target": "add.first.z3"
+                },
+                {
+                    "source": "value1.output.c3.w",
+                    "target": "add.first.w3"
+                },
+                {
+                    "source": "add.output",
+                    "target": "equal.first"
+                },
+                {
+                    "source": "equal.output",
+                    "target": ".is_empty"
+                },
+                {
+                    "source": ".matrix",
+                    "target": "value1.value"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "value1.value",
+                    "valueType": "Math::float4x4",
+                    "value": {
+                        "c0": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c1": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c2": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        },
+                        "c3": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f",
+                            "w": "0f"
+                        }
+                    }
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

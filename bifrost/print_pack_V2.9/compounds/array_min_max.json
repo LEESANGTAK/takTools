@@ -1,0 +1,275 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::array_min_max",
+            "metadata": [
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "1362.72 -299.276"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "array"
+                                                },
+                                                {
+                                                    "metaName": "float_precision"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "2719.19 -397.197"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "min_max_info"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "1283 -826.756 1742 1022.51"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "385.759 -543.421"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "min_max_info",
+                    "portDirection": "output"
+                },
+                {
+                    "portName": "array",
+                    "portDirection": "input"
+                },
+                {
+                    "portName": "float_precision",
+                    "portDirection": "input",
+                    "portType": "float",
+                    "portDefault": "100f"
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "array_bounds3",
+                    "nodeType": "Core::Array::array_bounds",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1685.96 -327.076"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "string_join",
+                    "nodeType": "Core::String::string_join",
+                    "fanInPortNames": {
+                        "strings": [
+                            "output",
+                            "output1"
+                        ]
+                    },
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2376.98 -415.336"
+                        },
+                        {
+                            "metaName": "PortExpandedState",
+                            "metadata": [
+                                {
+                                    "metaName": "strings",
+                                    "metaType": "string",
+                                    "metaValue": "0"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value_to_string23",
+                    "nodeType": "Print::value_to_string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2059.48 -307.252"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value_to_string6",
+                    "nodeType": "Print::value_to_string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2068.5 -572"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "array_bounds3.max_bound",
+                    "target": "value_to_string23.value"
+                },
+                {
+                    "source": "value_to_string6.output",
+                    "target": "string_join.strings.output"
+                },
+                {
+                    "source": "value_to_string23.output",
+                    "target": "string_join.strings.output1"
+                },
+                {
+                    "source": "string_join.joined",
+                    "target": ".min_max_info"
+                },
+                {
+                    "source": ".array",
+                    "target": "array_bounds3.array"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "value_to_string23.float_precision"
+                },
+                {
+                    "source": "array_bounds3.min_bound",
+                    "target": "value_to_string6.value"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "value_to_string6.float_precision"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "string_join.separator",
+                    "valueType": "string",
+                    "value": ", "
+                },
+                {
+                    "valueName": "value_to_string23.description",
+                    "valueType": "string",
+                    "value": "Max: "
+                },
+                {
+                    "valueName": "value_to_string23.float_precision",
+                    "valueType": "float",
+                    "value": "100f"
+                },
+                {
+                    "valueName": "value_to_string23.auto_feed",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "value_to_string6.description",
+                    "valueType": "string",
+                    "value": "Min: "
+                },
+                {
+                    "valueName": "value_to_string6.float_precision",
+                    "valueType": "float",
+                    "value": "100f"
+                },
+                {
+                    "valueName": "value_to_string6.auto_feed",
+                    "valueType": "bool",
+                    "value": "false"
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

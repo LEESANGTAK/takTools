@@ -1,0 +1,1178 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::print_to_string",
+            "uriImported": "file:///print_to_string.json",
+            "metadata": [
+                {
+                    "metaName": "documentation",
+                    "metaType": "string",
+                    "metaValue": "../docs/ENU/four_values_to_string.md"
+                },
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-896.399 243.333"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "description_1"
+                                                },
+                                                {
+                                                    "metaName": "value_1"
+                                                },
+                                                {
+                                                    "metaName": "description_2"
+                                                },
+                                                {
+                                                    "metaName": "value_2"
+                                                },
+                                                {
+                                                    "metaName": "description_3"
+                                                },
+                                                {
+                                                    "metaName": "value_3"
+                                                },
+                                                {
+                                                    "metaName": "description_4"
+                                                },
+                                                {
+                                                    "metaName": "value_4"
+                                                },
+                                                {
+                                                    "metaName": "float_precision"
+                                                },
+                                                {
+                                                    "metaName": "separator"
+                                                },
+                                                {
+                                                    "metaName": "auto_feed"
+                                                },
+                                                {
+                                                    "metaName": "prefix_description"
+                                                },
+                                                {
+                                                    "metaName": "prefix_value"
+                                                },
+                                                {
+                                                    "metaName": "array_offset"
+                                                },
+                                                {
+                                                    "metaName": "max_string_length"
+                                                },
+                                                {
+                                                    "metaName": "description_5"
+                                                },
+                                                {
+                                                    "metaName": "value_5"
+                                                },
+                                                {
+                                                    "metaName": "description_6"
+                                                },
+                                                {
+                                                    "metaName": "value_6"
+                                                },
+                                                {
+                                                    "metaName": "description_7"
+                                                },
+                                                {
+                                                    "metaName": "value_7"
+                                                },
+                                                {
+                                                    "metaName": "description_8"
+                                                },
+                                                {
+                                                    "metaName": "value_8"
+                                                },
+                                                {
+                                                    "metaName": "description_9"
+                                                },
+                                                {
+                                                    "metaName": "value_9"
+                                                },
+                                                {
+                                                    "metaName": "description_10"
+                                                },
+                                                {
+                                                    "metaName": "value_10"
+                                                },
+                                                {
+                                                    "metaName": "description_11"
+                                                },
+                                                {
+                                                    "metaName": "value_11"
+                                                },
+                                                {
+                                                    "metaName": "description_12"
+                                                },
+                                                {
+                                                    "metaName": "value_12"
+                                                },
+                                                {
+                                                    "metaName": "description_13"
+                                                },
+                                                {
+                                                    "metaName": "value_13"
+                                                },
+                                                {
+                                                    "metaName": "description_14"
+                                                },
+                                                {
+                                                    "metaName": "value_14"
+                                                },
+                                                {
+                                                    "metaName": "description_15"
+                                                },
+                                                {
+                                                    "metaName": "value_15"
+                                                },
+                                                {
+                                                    "metaName": "description_16"
+                                                },
+                                                {
+                                                    "metaName": "value_16"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "1395.43 648.75"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "string"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Array,find_all_in_array"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::String,string_empty"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Array,remove_from_array"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::String,string_join"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Array,build_array"
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-1143.56 -365 3012.13 2184"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "-903.5 -141"
+                },
+                {
+                    "metaName": "zValue",
+                    "metaType": "string",
+                    "metaValue": "77.000000"
+                },
+                {
+                    "metaName": "UILayout",
+                    "metaType": "string",
+                    "metaValue": "{\n    \"NodeLayout\": {\n        \"hideUndeclaredPorts\": false,\n        \"items\": [\n            {\n                \"expanded\": false,\n                \"group\": \"Values 1\",\n                \"items\": [\n                    {\n                        \"port\": \"description_1\"\n                    },\n                    {\n                        \"port\": \"value_1\"\n                    },\n                    {\n                        \"port\": \"description_2\"\n                    },\n                    {\n                        \"port\": \"value_2\"\n                    },\n                    {\n                        \"port\": \"description_3\"\n                    },\n                    {\n                        \"port\": \"value_3\"\n                    },\n                    {\n                        \"port\": \"description_4\"\n                    },\n                    {\n                        \"port\": \"value_4\"\n                    }\n                ]\n            },\n            {\n                \"expanded\": false,\n                \"group\": \"Values 2\",\n                \"items\": [\n                    {\n                        \"port\": \"description_5\"\n                    },\n                    {\n                        \"port\": \"value_5\"\n                    },\n                    {\n                        \"port\": \"description_6\"\n                    },\n                    {\n                        \"port\": \"value_6\"\n                    },\n                    {\n                        \"port\": \"description_7\"\n                    },\n                    {\n                        \"port\": \"value_7\"\n                    },\n                    {\n                        \"port\": \"description_8\"\n                    },\n                    {\n                        \"port\": \"value_8\"\n                    }\n                ]\n            },\n            {\n                \"expanded\": false,\n                \"group\": \"Values 3\",\n                \"items\": [\n                    {\n                        \"port\": \"description_9\"\n                    },\n                    {\n                        \"port\": \"value_9\"\n                    },\n                    {\n                        \"port\": \"description_10\"\n                    },\n                    {\n                        \"port\": \"value_10\"\n                    },\n                    {\n                        \"port\": \"description_11\"\n                    },\n                    {\n                        \"port\": \"value_11\"\n                    },\n                    {\n                        \"port\": \"description_12\"\n                    },\n                    {\n                        \"port\": \"value_12\"\n                    }\n                ]\n            },\n            {\n                \"expanded\": false,\n                \"group\": \"Values 4\",\n                \"items\": [\n                    {\n                        \"port\": \"description_13\"\n                    },\n                    {\n                        \"port\": \"value_13\"\n                    },\n                    {\n                        \"port\": \"description_14\"\n                    },\n                    {\n                        \"port\": \"value_14\"\n                    },\n                    {\n                        \"port\": \"description_15\"\n                    },\n                    {\n                        \"port\": \"value_15\"\n                    },\n                    {\n                        \"port\": \"description_16\"\n                    },\n                    {\n                        \"port\": \"value_16\"\n                    }\n                ]\n            },\n            {\n                \"expanded\": false,\n                \"group\": \"Settings\",\n                \"items\": [\n                    {\n                        \"port\": \"float_precision\"\n                    },\n                    {\n                        \"port\": \"separator\"\n                    },\n                    {\n                        \"port\": \"auto_feed\"\n                    },\n                    {\n                        \"port\": \"prefix_description\"\n                    },\n                    {\n                        \"port\": \"prefix_value\"\n                    },\n                    {\n                        \"port\": \"array_offset\"\n                    },\n                    {\n                        \"port\": \"max_string_length\"\n                    }\n                ]\n            }\n        ]\n    }\n}\n"
+                },
+                {
+                    "metaName": "PortExpandedState",
+                    "metadata": [
+                        {
+                            "metaName": "Values 2",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "Values 1",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        }
+                    ]
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "description_1",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 1"
+                },
+                {
+                    "portName": "value_1",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_2",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 2"
+                },
+                {
+                    "portName": "value_2",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_3",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 3"
+                },
+                {
+                    "portName": "value_3",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_4",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 4"
+                },
+                {
+                    "portName": "value_4",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "float_precision",
+                    "portDirection": "input",
+                    "portType": "float",
+                    "portDefault": "100f"
+                },
+                {
+                    "portName": "separator",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "\\n"
+                },
+                {
+                    "portName": "auto_feed",
+                    "portDirection": "input",
+                    "portType": "bool",
+                    "portDefault": "false"
+                },
+                {
+                    "portName": "prefix_description",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "prefix_value",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": " = "
+                },
+                {
+                    "portName": "array_offset",
+                    "portDirection": "input",
+                    "portType": "uint",
+                    "portDefault": "0U"
+                },
+                {
+                    "portName": "max_string_length",
+                    "portDirection": "input",
+                    "portType": "long",
+                    "portDefault": "10000"
+                },
+                {
+                    "portName": "string",
+                    "portDirection": "output"
+                },
+                {
+                    "portName": "description_5",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 5"
+                },
+                {
+                    "portName": "value_5",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_6",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 6"
+                },
+                {
+                    "portName": "value_6",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_7",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 7"
+                },
+                {
+                    "portName": "value_7",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_8",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 8"
+                },
+                {
+                    "portName": "value_8",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_9",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 9"
+                },
+                {
+                    "portName": "value_9",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_10",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 10"
+                },
+                {
+                    "portName": "value_10",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_11",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 11"
+                },
+                {
+                    "portName": "value_11",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_12",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 12"
+                },
+                {
+                    "portName": "value_12",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_13",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 13"
+                },
+                {
+                    "portName": "value_13",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_14",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 14"
+                },
+                {
+                    "portName": "value_14",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_15",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 15"
+                },
+                {
+                    "portName": "value_15",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                },
+                {
+                    "portName": "description_16",
+                    "portDirection": "input",
+                    "portType": "string",
+                    "portDefault": "Value 16"
+                },
+                {
+                    "portName": "value_16",
+                    "portDirection": "input",
+                    "portDefaultType": "string",
+                    "portDefault": ""
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "four_values_to_string",
+                    "nodeType": "Print::four_values_to_string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-299.5 -325"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "four_values_to_string1",
+                    "nodeType": "Print::four_values_to_string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-320.5 217"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "four_values_to_string2",
+                    "nodeType": "Print::four_values_to_string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-330.5 737"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "four_values_to_string3",
+                    "nodeType": "Print::four_values_to_string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-328.5 1267"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "build_array",
+                    "nodeType": "Core::Array::build_array",
+                    "multiInPortNames": [
+                        "joined",
+                        "joined1",
+                        "joined2",
+                        "joined3"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "188.152 640.052"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "string_join1",
+                    "nodeType": "Core::String::string_join",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1062.13 751.208"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "remove_from_array",
+                    "nodeType": "Core::Array::remove_from_array",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "725.669 639.476"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "find_all_in_array",
+                    "nodeType": "Core::Array::find_all_in_array",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "457.763 768.979"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": ".value_3",
+                    "target": "four_values_to_string.value_3"
+                },
+                {
+                    "source": ".value_4",
+                    "target": "four_values_to_string.value_4"
+                },
+                {
+                    "source": ".description_1",
+                    "target": "four_values_to_string.description_1"
+                },
+                {
+                    "source": ".value_1",
+                    "target": "four_values_to_string.value_1"
+                },
+                {
+                    "source": ".description_2",
+                    "target": "four_values_to_string.description_2"
+                },
+                {
+                    "source": ".value_2",
+                    "target": "four_values_to_string.value_2"
+                },
+                {
+                    "source": ".description_3",
+                    "target": "four_values_to_string.description_3"
+                },
+                {
+                    "source": ".description_4",
+                    "target": "four_values_to_string.description_4"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "four_values_to_string.float_precision"
+                },
+                {
+                    "source": ".separator",
+                    "target": "four_values_to_string.separator"
+                },
+                {
+                    "source": ".auto_feed",
+                    "target": "four_values_to_string.auto_feed"
+                },
+                {
+                    "source": ".prefix_description",
+                    "target": "four_values_to_string.prefix_description"
+                },
+                {
+                    "source": ".prefix_value",
+                    "target": "four_values_to_string.prefix_value"
+                },
+                {
+                    "source": ".array_offset",
+                    "target": "four_values_to_string.array_offset"
+                },
+                {
+                    "source": ".max_string_length",
+                    "target": "four_values_to_string.max_string_length"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "four_values_to_string1.float_precision"
+                },
+                {
+                    "source": ".separator",
+                    "target": "four_values_to_string1.separator"
+                },
+                {
+                    "source": ".auto_feed",
+                    "target": "four_values_to_string1.auto_feed"
+                },
+                {
+                    "source": ".prefix_description",
+                    "target": "four_values_to_string1.prefix_description"
+                },
+                {
+                    "source": ".prefix_value",
+                    "target": "four_values_to_string1.prefix_value"
+                },
+                {
+                    "source": ".array_offset",
+                    "target": "four_values_to_string1.array_offset"
+                },
+                {
+                    "source": ".max_string_length",
+                    "target": "four_values_to_string1.max_string_length"
+                },
+                {
+                    "source": ".description_5",
+                    "target": "four_values_to_string1.description_1"
+                },
+                {
+                    "source": ".value_5",
+                    "target": "four_values_to_string1.value_1"
+                },
+                {
+                    "source": ".description_6",
+                    "target": "four_values_to_string1.description_2"
+                },
+                {
+                    "source": ".value_6",
+                    "target": "four_values_to_string1.value_2"
+                },
+                {
+                    "source": ".description_7",
+                    "target": "four_values_to_string1.description_3"
+                },
+                {
+                    "source": ".value_7",
+                    "target": "four_values_to_string1.value_3"
+                },
+                {
+                    "source": ".description_8",
+                    "target": "four_values_to_string1.description_4"
+                },
+                {
+                    "source": ".value_8",
+                    "target": "four_values_to_string1.value_4"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "four_values_to_string2.float_precision"
+                },
+                {
+                    "source": ".separator",
+                    "target": "four_values_to_string2.separator"
+                },
+                {
+                    "source": ".auto_feed",
+                    "target": "four_values_to_string2.auto_feed"
+                },
+                {
+                    "source": ".prefix_description",
+                    "target": "four_values_to_string2.prefix_description"
+                },
+                {
+                    "source": ".prefix_value",
+                    "target": "four_values_to_string2.prefix_value"
+                },
+                {
+                    "source": ".array_offset",
+                    "target": "four_values_to_string2.array_offset"
+                },
+                {
+                    "source": ".max_string_length",
+                    "target": "four_values_to_string2.max_string_length"
+                },
+                {
+                    "source": ".description_9",
+                    "target": "four_values_to_string2.description_1"
+                },
+                {
+                    "source": ".value_9",
+                    "target": "four_values_to_string2.value_1"
+                },
+                {
+                    "source": ".description_10",
+                    "target": "four_values_to_string2.description_2"
+                },
+                {
+                    "source": ".value_10",
+                    "target": "four_values_to_string2.value_2"
+                },
+                {
+                    "source": ".description_11",
+                    "target": "four_values_to_string2.description_3"
+                },
+                {
+                    "source": ".value_11",
+                    "target": "four_values_to_string2.value_3"
+                },
+                {
+                    "source": ".description_12",
+                    "target": "four_values_to_string2.description_4"
+                },
+                {
+                    "source": ".value_12",
+                    "target": "four_values_to_string2.value_4"
+                },
+                {
+                    "source": ".float_precision",
+                    "target": "four_values_to_string3.float_precision"
+                },
+                {
+                    "source": ".separator",
+                    "target": "four_values_to_string3.separator"
+                },
+                {
+                    "source": ".auto_feed",
+                    "target": "four_values_to_string3.auto_feed"
+                },
+                {
+                    "source": ".prefix_description",
+                    "target": "four_values_to_string3.prefix_description"
+                },
+                {
+                    "source": ".prefix_value",
+                    "target": "four_values_to_string3.prefix_value"
+                },
+                {
+                    "source": ".array_offset",
+                    "target": "four_values_to_string3.array_offset"
+                },
+                {
+                    "source": ".max_string_length",
+                    "target": "four_values_to_string3.max_string_length"
+                },
+                {
+                    "source": ".description_13",
+                    "target": "four_values_to_string3.description_1"
+                },
+                {
+                    "source": ".value_13",
+                    "target": "four_values_to_string3.value_1"
+                },
+                {
+                    "source": ".description_14",
+                    "target": "four_values_to_string3.description_2"
+                },
+                {
+                    "source": ".value_14",
+                    "target": "four_values_to_string3.value_2"
+                },
+                {
+                    "source": ".description_15",
+                    "target": "four_values_to_string3.description_3"
+                },
+                {
+                    "source": ".value_15",
+                    "target": "four_values_to_string3.value_3"
+                },
+                {
+                    "source": ".description_16",
+                    "target": "four_values_to_string3.description_4"
+                },
+                {
+                    "source": ".value_16",
+                    "target": "four_values_to_string3.value_4"
+                },
+                {
+                    "source": "four_values_to_string.joined",
+                    "target": "build_array.first.joined"
+                },
+                {
+                    "source": "four_values_to_string1.joined",
+                    "target": "build_array.first.joined1"
+                },
+                {
+                    "source": "four_values_to_string2.joined",
+                    "target": "build_array.first.joined2"
+                },
+                {
+                    "source": "four_values_to_string3.joined",
+                    "target": "build_array.first.joined3"
+                },
+                {
+                    "source": "string_join1.joined",
+                    "target": ".string"
+                },
+                {
+                    "source": "build_array.array",
+                    "target": "remove_from_array.array"
+                },
+                {
+                    "source": "build_array.array",
+                    "target": "find_all_in_array.array"
+                },
+                {
+                    "source": "find_all_in_array.indices",
+                    "target": "remove_from_array.indices_to_remove"
+                },
+                {
+                    "source": "remove_from_array.out_array",
+                    "target": "string_join1.strings"
+                },
+                {
+                    "source": ".separator",
+                    "target": "string_join1.separator"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "four_values_to_string.value_1",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string.value_2",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string.value_3",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string.value_4",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.description_1",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.value_1",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.description_2",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.value_2",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.description_3",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.value_3",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.description_4",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.value_4",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.float_precision",
+                    "valueType": "float",
+                    "value": "100f"
+                },
+                {
+                    "valueName": "four_values_to_string1.separator",
+                    "valueType": "string",
+                    "value": "\\n"
+                },
+                {
+                    "valueName": "four_values_to_string1.auto_feed",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "four_values_to_string1.prefix_description",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string1.prefix_value",
+                    "valueType": "string",
+                    "value": " = "
+                },
+                {
+                    "valueName": "four_values_to_string1.array_offset",
+                    "valueType": "uint",
+                    "value": "0U"
+                },
+                {
+                    "valueName": "four_values_to_string1.max_string_length",
+                    "valueType": "long",
+                    "value": "93"
+                },
+                {
+                    "valueName": "four_values_to_string2.description_1",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string2.value_1",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string2.description_2",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string2.value_2",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string2.description_3",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string2.value_3",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string2.description_4",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string2.value_4",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string2.float_precision",
+                    "valueType": "float",
+                    "value": "100f"
+                },
+                {
+                    "valueName": "four_values_to_string2.separator",
+                    "valueType": "string",
+                    "value": "\\n"
+                },
+                {
+                    "valueName": "four_values_to_string2.auto_feed",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "four_values_to_string2.prefix_description",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string2.prefix_value",
+                    "valueType": "string",
+                    "value": " = "
+                },
+                {
+                    "valueName": "four_values_to_string2.array_offset",
+                    "valueType": "uint",
+                    "value": "0U"
+                },
+                {
+                    "valueName": "four_values_to_string2.max_string_length",
+                    "valueType": "long",
+                    "value": "93"
+                },
+                {
+                    "valueName": "four_values_to_string3.description_1",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string3.value_1",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string3.description_2",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string3.value_2",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string3.description_3",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string3.value_3",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string3.description_4",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string3.value_4",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string3.float_precision",
+                    "valueType": "float",
+                    "value": "100f"
+                },
+                {
+                    "valueName": "four_values_to_string3.separator",
+                    "valueType": "string",
+                    "value": "\\n"
+                },
+                {
+                    "valueName": "four_values_to_string3.auto_feed",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "four_values_to_string3.prefix_description",
+                    "valueType": "string",
+                    "value": ""
+                },
+                {
+                    "valueName": "four_values_to_string3.prefix_value",
+                    "valueType": "string",
+                    "value": " = "
+                },
+                {
+                    "valueName": "four_values_to_string3.array_offset",
+                    "valueType": "uint",
+                    "value": "0U"
+                },
+                {
+                    "valueName": "four_values_to_string3.max_string_length",
+                    "valueType": "long",
+                    "value": "93"
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

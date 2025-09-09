@@ -1,0 +1,466 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::value_to_hex",
+            "uriImported": "file:///value_to_hex.json",
+            "metadata": [
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Math,clamp"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::String,build_string"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Math,divide"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Math,add"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::String,get_from_string"
+                },
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-786 -112"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "value"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "1667 -223"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "hex"
+                                                },
+                                                {
+                                                    "metaName": "lowerdigit"
+                                                },
+                                                {
+                                                    "metaName": "higher_digit"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-840.496 -642 2115.19 1578"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "-99.5 -594"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "value",
+                    "portDirection": "input",
+                    "portDefaultType": "float",
+                    "portDefault": "0f"
+                },
+                {
+                    "portName": "hex",
+                    "portDirection": "output",
+                    "portType": "string"
+                },
+                {
+                    "portName": "lowerdigit",
+                    "portDirection": "output"
+                },
+                {
+                    "portName": "higher_digit",
+                    "portDirection": "output"
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "build_string",
+                    "nodeType": "Core::String::build_string",
+                    "fanInPortNames": {
+                        "strings": [
+                            "character",
+                            "character1"
+                        ]
+                    },
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1361.5 -223"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "divide",
+                    "nodeType": "Core::Math::divide",
+                    "multiInPortNames": [
+                        "long",
+                        "output1"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "692 233"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "get_from_string",
+                    "nodeType": "Core::String::get_from_string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1050 -231"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "get_from_string1",
+                    "nodeType": "Core::String::get_from_string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1064.5 -5"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "modulo",
+                    "nodeType": "Core::Math::modulo",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "738 -362"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "multiply",
+                    "nodeType": "Core::Math::multiply",
+                    "multiInPortNames": [
+                        "output1",
+                        "value"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-147 -329"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "round_to_floor",
+                    "nodeType": "Core::Math::round_to_floor",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "110 -318"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "to_long",
+                    "nodeType": "Core::Type_Conversion::to_long",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "396 -297"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value",
+                    "valueType": "float",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-477 -345"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value2",
+                    "valueType": "string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "726 -44"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value3",
+                    "valueType": "long",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "399 391"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "clamp",
+                    "nodeType": "Core::Math::clamp",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-470.5 -142"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "build_string.joined",
+                    "target": ".hex"
+                },
+                {
+                    "source": "divide.output",
+                    "target": "get_from_string1.index"
+                },
+                {
+                    "source": "get_from_string.character",
+                    "target": "build_string.strings.character1"
+                },
+                {
+                    "source": "get_from_string1.character",
+                    "target": "build_string.strings.character"
+                },
+                {
+                    "source": "modulo.remainder",
+                    "target": "get_from_string.index"
+                },
+                {
+                    "source": "multiply.output",
+                    "target": "round_to_floor.value"
+                },
+                {
+                    "source": "round_to_floor.floor",
+                    "target": "to_long.from"
+                },
+                {
+                    "source": "to_long.long",
+                    "target": "divide.first.long"
+                },
+                {
+                    "source": "to_long.long",
+                    "target": "modulo.value"
+                },
+                {
+                    "source": "value.output",
+                    "target": "multiply.first.output1"
+                },
+                {
+                    "source": "value2.output",
+                    "target": "get_from_string.string"
+                },
+                {
+                    "source": "value2.output",
+                    "target": "get_from_string1.string"
+                },
+                {
+                    "source": "value3.output",
+                    "target": "divide.first.output1"
+                },
+                {
+                    "source": "clamp.clamped",
+                    "target": "multiply.first.value"
+                },
+                {
+                    "source": ".value",
+                    "target": "clamp.value"
+                },
+                {
+                    "source": "get_from_string.character",
+                    "target": ".lowerdigit"
+                },
+                {
+                    "source": "get_from_string1.character",
+                    "target": ".higher_digit"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "modulo.value",
+                    "valueType": "long",
+                    "value": "16"
+                },
+                {
+                    "valueName": "modulo.divisor",
+                    "valueType": "long",
+                    "value": "16"
+                },
+                {
+                    "valueName": "value.value",
+                    "valueType": "float",
+                    "value": "255f"
+                },
+                {
+                    "valueName": "value2.value",
+                    "valueType": "string",
+                    "value": "0123456789ABCDEF"
+                },
+                {
+                    "valueName": "value3.value",
+                    "valueType": "long",
+                    "value": "16"
+                },
+                {
+                    "valueName": "clamp.max",
+                    "valueType": "float",
+                    "value": "1f"
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

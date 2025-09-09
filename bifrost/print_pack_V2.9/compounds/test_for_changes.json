@@ -1,0 +1,615 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::test_for_changes",
+            "uriImported": "file:///print_static.json",
+            "metadata": [
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Logic,not"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Array,build_array"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Logic,if"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Print,float_to_string"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::String,number_to_string"
+                },
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "10 281"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "input_strings"
+                                                },
+                                                {
+                                                    "metaName": "strands"
+                                                },
+                                                {
+                                                    "metaName": "stored_strands"
+                                                },
+                                                {
+                                                    "metaName": "force_print"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "925 209"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "strands1"
+                                                },
+                                                {
+                                                    "metaName": "force"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-564 -290 2242 1316"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "2245 -208"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "input_strings",
+                    "portDirection": "input",
+                    "portType": "array<string>",
+                    "portDefault": [],
+                    "isDefaultFanIn": "true"
+                },
+                {
+                    "portName": "strands",
+                    "portDirection": "input",
+                    "portDefaultType": "Amino::Object",
+                    "portDefault": {}
+                },
+                {
+                    "portName": "stored_strands",
+                    "portDirection": "input",
+                    "linkedFeedbackPort": "strands1"
+                },
+                {
+                    "portName": "force_print",
+                    "portDirection": "input",
+                    "portType": "bool",
+                    "portDefault": "false"
+                },
+                {
+                    "portName": "strands1",
+                    "portDirection": "output"
+                },
+                {
+                    "portName": "force",
+                    "portDirection": "output"
+                }
+            ],
+            "compounds": [
+                {
+                    "name": "check_changes",
+                    "uriImported": "file:///print_static.json",
+                    "metadata": [
+                        {
+                            "metaName": "io_nodes",
+                            "metadata": [
+                                {
+                                    "metaName": "io_inodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "input",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "10 272"
+                                                },
+                                                {
+                                                    "metaName": "io_ports",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "force_print"
+                                                        },
+                                                        {
+                                                            "metaName": "input_strings"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "metaName": "io_onodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "output",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "1578 114"
+                                                },
+                                                {
+                                                    "metaName": "io_ports",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "output1"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "ViewportRect",
+                            "metaType": "string",
+                            "metaValue": "-417 -477 2242 1316"
+                        }
+                    ],
+                    "ports": [
+                        {
+                            "portName": "force_print",
+                            "portDirection": "input",
+                            "portType": "bool"
+                        },
+                        {
+                            "portName": "input_strings",
+                            "portDirection": "input",
+                            "portType": "array<string>"
+                        },
+                        {
+                            "portName": "output1",
+                            "portDirection": "output"
+                        }
+                    ],
+                    "compounds": [
+                        {
+                            "name": "store_previous",
+                            "uriImported": "file:///print_static.json",
+                            "metadata": [
+                                {
+                                    "metaName": "ViewportRect",
+                                    "metaType": "string",
+                                    "metaValue": "-1280 -663 2242 1316"
+                                },
+                                {
+                                    "metaName": "io_nodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_inodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "input",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "DisplayMode",
+                                                            "metaType": "string",
+                                                            "metaValue": "2"
+                                                        },
+                                                        {
+                                                            "metaName": "LayoutPos",
+                                                            "metaType": "string",
+                                                            "metaValue": "-895 -60.5"
+                                                        },
+                                                        {
+                                                            "metaName": "io_ports",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "print_strings"
+                                                                },
+                                                                {
+                                                                    "metaName": "stored"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "io_onodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "output",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "DisplayMode",
+                                                            "metaType": "string",
+                                                            "metaValue": "2"
+                                                        },
+                                                        {
+                                                            "metaName": "LayoutPos",
+                                                            "metaType": "string",
+                                                            "metaValue": "-500 -62.5"
+                                                        },
+                                                        {
+                                                            "metaName": "io_ports",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "current"
+                                                                },
+                                                                {
+                                                                    "metaName": "previous"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "ports": [
+                                {
+                                    "portName": "print_strings",
+                                    "portDirection": "input"
+                                },
+                                {
+                                    "portName": "stored",
+                                    "portDirection": "input",
+                                    "portType": "string",
+                                    "linkedFeedbackPort": "current"
+                                },
+                                {
+                                    "portName": "current",
+                                    "portDirection": "output",
+                                    "portType": "string"
+                                },
+                                {
+                                    "portName": "previous",
+                                    "portDirection": "output"
+                                }
+                            ],
+                            "compoundNodes": [],
+                            "connections": [
+                                {
+                                    "source": ".print_strings",
+                                    "target": ".current"
+                                },
+                                {
+                                    "source": ".stored",
+                                    "target": ".previous"
+                                }
+                            ],
+                            "reservedNodeNames": [
+                                {
+                                    "name": "input"
+                                },
+                                {
+                                    "name": "output"
+                                }
+                            ]
+                        }
+                    ],
+                    "compoundNodes": [
+                        {
+                            "nodeName": "store_previous",
+                            "nodeType": "store_previous",
+                            "metadata": [
+                                {
+                                    "metaName": "DisplayMode",
+                                    "metaType": "string",
+                                    "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "590 28"
+                                }
+                            ]
+                        },
+                        {
+                            "nodeName": "and1",
+                            "nodeType": "Core::Logic::and",
+                            "metadata": [
+                                {
+                                    "metaName": "DisplayMode",
+                                    "metaType": "string",
+                                    "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "1219 113"
+                                }
+                            ]
+                        },
+                        {
+                            "nodeName": "equal",
+                            "nodeType": "Core::Logic::equal",
+                            "metadata": [
+                                {
+                                    "metaName": "DisplayMode",
+                                    "metaType": "string",
+                                    "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "917 5"
+                                }
+                            ]
+                        },
+                        {
+                            "nodeName": "not",
+                            "nodeType": "Core::Logic::not",
+                            "metadata": [
+                                {
+                                    "metaName": "DisplayMode",
+                                    "metaType": "string",
+                                    "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "926 243"
+                                }
+                            ]
+                        },
+                        {
+                            "nodeName": "string_join",
+                            "nodeType": "Core::String::string_join",
+                            "metadata": [
+                                {
+                                    "metaName": "DisplayMode",
+                                    "metaType": "string",
+                                    "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "313 121"
+                                }
+                            ]
+                        }
+                    ],
+                    "connections": [
+                        {
+                            "source": "store_previous.current",
+                            "target": "equal.first"
+                        },
+                        {
+                            "source": "store_previous.previous",
+                            "target": "equal.second"
+                        },
+                        {
+                            "source": "and1.output",
+                            "target": ".output1"
+                        },
+                        {
+                            "source": "equal.output",
+                            "target": "and1.first"
+                        },
+                        {
+                            "source": "not.output",
+                            "target": "and1.second"
+                        },
+                        {
+                            "source": "string_join.joined",
+                            "target": "store_previous.print_strings"
+                        },
+                        {
+                            "source": ".force_print",
+                            "target": "not.value"
+                        },
+                        {
+                            "source": ".input_strings",
+                            "target": "string_join.strings"
+                        }
+                    ],
+                    "values": [
+                        {
+                            "valueName": "string_join.separator",
+                            "valueType": "string",
+                            "value": ""
+                        }
+                    ],
+                    "reservedNodeNames": [
+                        {
+                            "name": "input"
+                        },
+                        {
+                            "name": "output"
+                        }
+                    ]
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "check_changes",
+                    "nodeType": "check_changes",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "331 17"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "if3",
+                    "nodeType": "Core::Logic::if",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "620 209"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "not",
+                    "nodeType": "Core::Logic::not",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "656.5 -16"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "check_changes.output1",
+                    "target": "if3.condition"
+                },
+                {
+                    "source": "check_changes.output1",
+                    "target": "not.value"
+                },
+                {
+                    "source": "if3.output",
+                    "target": ".strands1"
+                },
+                {
+                    "source": "not.output",
+                    "target": ".force"
+                },
+                {
+                    "source": ".input_strings",
+                    "target": "check_changes.input_strings"
+                },
+                {
+                    "source": ".strands",
+                    "target": "if3.false_case"
+                },
+                {
+                    "source": ".force_print",
+                    "target": "check_changes.force_print"
+                },
+                {
+                    "source": ".stored_strands",
+                    "target": "if3.true_case"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "check_changes.force_print",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "check_changes.input_strings",
+                    "valueType": "array<string>",
+                    "value": []
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

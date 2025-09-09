@@ -1,0 +1,482 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::commands_and_palette",
+            "uriImported": "stream:/stream",
+            "metadata": [
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "14.1765 831.94"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "commands1"
+                                                },
+                                                {
+                                                    "metaName": "parameter_lengths1"
+                                                },
+                                                {
+                                                    "metaName": "hex_color_palette1"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "38.000000"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "1250.76 1278.18"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "commands"
+                                                },
+                                                {
+                                                    "metaName": "parameter_lengths"
+                                                },
+                                                {
+                                                    "metaName": "hex_color_palette"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "39.000000"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Print,print"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Logic,if"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Array,array_is_empty"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Array,array_size"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Array,sort_array_with_indices"
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-315 647.336 1872 1357.33"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "-158 631"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "zValue",
+                    "metaType": "string",
+                    "metaValue": "57.000000"
+                }
+            ],
+            "terminalStates": [
+                {
+                    "name": "Core::Graph::terminal::diagnostic",
+                    "enabled": "true"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "commands",
+                    "portDirection": "output",
+                    "portType": "array<string>"
+                },
+                {
+                    "portName": "parameter_lengths",
+                    "portDirection": "output",
+                    "portType": "array<long>"
+                },
+                {
+                    "portName": "hex_color_palette",
+                    "portDirection": "output",
+                    "portType": "array<string>"
+                },
+                {
+                    "portName": "commands1",
+                    "portDirection": "input",
+                    "portType": "array<string>",
+                    "linkedFeedbackPort": "commands"
+                },
+                {
+                    "portName": "parameter_lengths1",
+                    "portDirection": "input",
+                    "portType": "array<long>",
+                    "linkedFeedbackPort": "parameter_lengths"
+                },
+                {
+                    "portName": "hex_color_palette1",
+                    "portDirection": "input",
+                    "portType": "array<string>",
+                    "linkedFeedbackPort": "hex_color_palette"
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "value",
+                    "valueType": "string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-235.471 1253.77"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "41.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value1",
+                    "valueType": "string",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-234.44 1496.77"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "40.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "hex_color_palette",
+                    "nodeType": "Print::hex_color_palette",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "69.529 1667.77"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "31.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "string_to_array",
+                    "nodeType": "Core::String::string_to_array",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "69.529 1181.77"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "32.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "string_to_array1",
+                    "nodeType": "Core::String::string_to_array",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "69.529 1424.77"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "33.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "array_is_empty",
+                    "nodeType": "Core::Array::array_is_empty",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "379.5 967"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "34.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "if",
+                    "nodeType": "Core::Logic::if",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "751.5 1092"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "35.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "if1",
+                    "nodeType": "Core::Logic::if",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "752.5 1324"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "36.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "if2",
+                    "nodeType": "Core::Logic::if",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "758.5 1546"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "37.000000"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "value.output",
+                    "target": "string_to_array.comma_separated_string"
+                },
+                {
+                    "source": "value1.output",
+                    "target": "string_to_array1.comma_separated_string"
+                },
+                {
+                    "source": "hex_color_palette.string_array",
+                    "target": "if2.true_case"
+                },
+                {
+                    "source": "string_to_array.string_array",
+                    "target": "if.true_case"
+                },
+                {
+                    "source": "string_to_array1.long_int_array",
+                    "target": "if1.true_case"
+                },
+                {
+                    "source": "array_is_empty.empty",
+                    "target": "if.condition"
+                },
+                {
+                    "source": "array_is_empty.empty",
+                    "target": "if1.condition"
+                },
+                {
+                    "source": "array_is_empty.empty",
+                    "target": "if2.condition"
+                },
+                {
+                    "source": "if.output",
+                    "target": ".commands"
+                },
+                {
+                    "source": "if1.output",
+                    "target": ".parameter_lengths"
+                },
+                {
+                    "source": "if2.output",
+                    "target": ".hex_color_palette"
+                },
+                {
+                    "source": ".commands1",
+                    "target": "array_is_empty.array"
+                },
+                {
+                    "source": ".commands1",
+                    "target": "if.false_case"
+                },
+                {
+                    "source": ".parameter_lengths1",
+                    "target": "if1.false_case"
+                },
+                {
+                    "source": ".hex_color_palette1",
+                    "target": "if2.false_case"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "value.value",
+                    "valueType": "string",
+                    "value": "CS,CQ,CN,CP,CD,CR,N,T,FI,FB,FU,FC,FD,FS,FF,AL,AR,AC,I"
+                },
+                {
+                    "valueName": "value1.value",
+                    "valueType": "string",
+                    "value": "6,1,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,2"
+                },
+                {
+                    "valueName": "string_to_array.comma_separated_string",
+                    "valueType": "string",
+                    "value": "0, 4, 6"
+                },
+                {
+                    "valueName": "string_to_array1.comma_separated_string",
+                    "valueType": "string",
+                    "value": "0, 4, 6"
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

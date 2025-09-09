@@ -103,7 +103,11 @@ def createModuleFile():
     contentsBlock = '''+ MAYAVERSION:{0} {1} {2} {3}
 MAYA_SCRIPT_PATH +:= scripts/mel
 MAYA_PLUG_IN_PATH +:= plug-ins/{0}
-BIFROST_LIB_CONFIG_FILES +:= bifrost/bifrost_lib_config.json
+BIFROST_LIB_CONFIG_FILES +:= bifrost/Tak/bifrost_lib_config.json
+BIFROST_LIB_CONFIG_FILES +:= bifrost/VHH/bifrost_lib_config.json
+BIFROST_LIB_CONFIG_FILES +:= bifrost/Hyuu/packs/Hyuu/HyuuPackConfig.json
+BIFROST_LIB_CONFIG_FILES +:= bifrost/MJCG_compounds/bifrost_lib_config.json
+BIFROST_LIB_CONFIG_FILES +:= bifrost/print_pack_V2.9/bifrost_lib_config.json
 '''
     contents = ''
     for availVersion in AVAILABLE_VERSIONS:

@@ -1,0 +1,363 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Print::vector3_to_hex",
+            "metadata": [
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-1198 -90"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "color"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "874 14"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "hex_color"
+                                                },
+                                                {
+                                                    "metaName": "R"
+                                                },
+                                                {
+                                                    "metaName": "G"
+                                                },
+                                                {
+                                                    "metaName": "B"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Print,value_to_hex"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Math,clamp"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::String,build_string"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Math,divide"
+                },
+                {
+                    "metaName": "_recentNode_",
+                    "metaType": "string",
+                    "metaValue": "BifrostGraph,Core::Math,add"
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-547 -578 1764 1316"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "-304.667 -164.38"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "color",
+                    "portDirection": "input",
+                    "portDefaultType": "Math::float3",
+                    "portDefault": {
+                        "x": "1f",
+                        "y": "0f",
+                        "z": "0f"
+                    },
+                    "metadata": [
+                        {
+                            "metaName": "UIWidget",
+                            "metaType": "string",
+                            "metaValue": "ColorPicker"
+                        }
+                    ]
+                },
+                {
+                    "portName": "hex_color",
+                    "portDirection": "output"
+                },
+                {
+                    "portName": "R",
+                    "portDirection": "output"
+                },
+                {
+                    "portName": "G",
+                    "portDirection": "output"
+                },
+                {
+                    "portName": "B",
+                    "portDirection": "output"
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "vector3_to_scalar",
+                    "nodeType": "Core::Conversion::vector3_to_scalar",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-445 -94"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "build_string",
+                    "nodeType": "Core::String::build_string",
+                    "fanInPortNames": {
+                        "strings": [
+                            "hex",
+                            "hex1",
+                            "hex2"
+                        ]
+                    },
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "PortExpandedState",
+                            "metadata": [
+                                {
+                                    "metaName": "strings",
+                                    "metaType": "string",
+                                    "metaValue": "1"
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "436 -48"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "clamp",
+                    "nodeType": "Core::Math::clamp",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-896 -86"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value_to_hex1",
+                    "nodeType": "Print::value_to_hex",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "131 -393"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value_to_hex2",
+                    "nodeType": "Print::value_to_hex",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "131 -150"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "value_to_hex3",
+                    "nodeType": "Print::value_to_hex",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "131 92"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "build_string.joined",
+                    "target": ".hex_color"
+                },
+                {
+                    "source": "clamp.clamped",
+                    "target": "vector3_to_scalar.vector3"
+                },
+                {
+                    "source": ".color",
+                    "target": "clamp.value"
+                },
+                {
+                    "source": "vector3_to_scalar.x",
+                    "target": "value_to_hex1.value"
+                },
+                {
+                    "source": "value_to_hex1.hex",
+                    "target": "build_string.strings.hex"
+                },
+                {
+                    "source": "value_to_hex1.hex",
+                    "target": ".R"
+                },
+                {
+                    "source": "vector3_to_scalar.y",
+                    "target": "value_to_hex2.value"
+                },
+                {
+                    "source": "value_to_hex2.hex",
+                    "target": "build_string.strings.hex1"
+                },
+                {
+                    "source": "value_to_hex2.hex",
+                    "target": ".G"
+                },
+                {
+                    "source": "vector3_to_scalar.z",
+                    "target": "value_to_hex3.value"
+                },
+                {
+                    "source": "value_to_hex3.hex",
+                    "target": "build_string.strings.hex2"
+                },
+                {
+                    "source": "value_to_hex3.hex",
+                    "target": ".B"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "clamp.max",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "1f",
+                        "y": "1f",
+                        "z": "1f"
+                    }
+                },
+                {
+                    "valueName": "value_to_hex1.value",
+                    "valueType": "float",
+                    "value": "0f"
+                },
+                {
+                    "valueName": "value_to_hex2.value",
+                    "valueType": "float",
+                    "value": "0f"
+                },
+                {
+                    "valueName": "value_to_hex3.value",
+                    "valueType": "float",
+                    "value": "0f"
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}
