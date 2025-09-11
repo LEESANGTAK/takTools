@@ -1,0 +1,25 @@
+{
+    "AminoConfigurations": [
+        {
+            "vendorName": "Autodesk",
+            "libraryVersion": "",
+            "libraryName": "ExecutorCustomObjectTranslation",
+            "typesTranslationlibs": [
+                {
+                    "path": "${EXECUTOR_CUSTOM_OBJECT_TRANSLATION_LIB_PATH}",
+                    "files": [
+                        "ExecutorCustomObjectTranslation"
+                    ]
+                }
+            ],
+            "jsonLibs": [
+              {
+                "path": "${CONFIG_JSON_FILES}",
+                "files": [
+                  "ExecutorCustomObject.json"
+                ]
+              }
+            ]
+        }
+    ]
+}

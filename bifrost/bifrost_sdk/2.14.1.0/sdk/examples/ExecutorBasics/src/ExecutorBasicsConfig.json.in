@@ -1,0 +1,17 @@
+{
+    "AminoConfigurations": [
+        {
+            "vendorName": "Autodesk",
+            "libraryVersion": "",
+            "libraryName": "ExecutorBasicsTranslation",
+            "typesTranslationlibs": [
+                {
+                    "path": "${EXECUTOR_BASICS_TRANSLATION_LIB_PATH}",
+                    "files": [
+                        "ExecutorBasicsTranslation"
+                    ]
+                }
+            ]
+        }
+    ]
+}

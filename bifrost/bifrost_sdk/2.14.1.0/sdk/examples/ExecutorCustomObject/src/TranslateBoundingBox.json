@@ -1,0 +1,215 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Examples::SDK::TranslateBoundingBox",
+            "ports": [
+                {
+                    "portName": "inBB",
+                    "portDirection": "input",
+                    "portType": "Examples::SDK::BoundingBox",
+                    "portDefault": {
+                        "min": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f"
+                        },
+                        "max": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f"
+                        }
+                    }
+                },
+                {
+                    "portName": "outBB",
+                    "portDirection": "output",
+                    "portType": "Examples::SDK::BoundingBox"
+                },
+                {
+                    "portName": "translation",
+                    "portDirection": "input",
+                    "portType": "Math::float3"
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "value",
+                    "valueType": "Examples::SDK::BoundingBox"
+                },
+                {
+                    "nodeName": "value1",
+                    "valueType": "Examples::SDK::BoundingBox",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "valuenode_defaultvalue",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "391.5 -152"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "101.000000"
+                        },
+                        {
+                            "metaName": "PortExpandedState"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "add",
+                    "nodeType": "Core::Math::add",
+                    "multiInPortNames": [
+                        "min",
+                        "translation"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "94.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "84.5 -173"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "add1",
+                    "nodeType": "Core::Math::add",
+                    "multiInPortNames": [
+                        "max",
+                        "translation"
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": ".inBB",
+                    "target": "value.value"
+                },
+                {
+                    "source": "value1.output",
+                    "target": ".outBB"
+                },
+                {
+                    "source": "value.output.min",
+                    "target": "add.first.min"
+                },
+                {
+                    "source": ".translation",
+                    "target": "add.first.translation"
+                },
+                {
+                    "source": "add.output",
+                    "target": "value1.value.min"
+                },
+                {
+                    "source": "value.output.max",
+                    "target": "add1.first.max"
+                },
+                {
+                    "source": ".translation",
+                    "target": "add1.first.translation"
+                },
+                {
+                    "source": "add1.output",
+                    "target": "value1.value.max"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "value.value",
+                    "valueType": "Examples::SDK::BoundingBox",
+                    "value": {
+                        "min": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f"
+                        },
+                        "max": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f"
+                        }
+                    }
+                },
+                {
+                    "valueName": "value1.value",
+                    "valueType": "Examples::SDK::BoundingBox",
+                    "value": {
+                        "min": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f"
+                        },
+                        "max": {
+                            "x": "0f",
+                            "y": "0f",
+                            "z": "0f"
+                        }
+                    }
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}

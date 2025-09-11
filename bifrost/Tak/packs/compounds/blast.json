@@ -12,7 +12,7 @@
     "compounds": [
         {
             "name": "User::Compounds::blast",
-            "uriImported": "stream:/stream",
+            "uriImported": "file:///blast.json",
             "metadata": [
                 {
                     "metaName": "io_nodes",
@@ -53,7 +53,7 @@
                                         {
                                             "metaName": "zValue",
                                             "metaType": "string",
-                                            "metaValue": "41.000000"
+                                            "metaValue": "37.000000"
                                         }
                                     ]
                                 }
@@ -86,7 +86,7 @@
                                         {
                                             "metaName": "zValue",
                                             "metaType": "string",
-                                            "metaValue": "36.000000"
+                                            "metaValue": "34.000000"
                                         }
                                     ]
                                 }
@@ -120,9 +120,14 @@
                     "metaValue": "BifrostGraph,ValHallen::Helpers,find_in_string_array"
                 },
                 {
+                    "metaName": "NodeWidthOffset",
+                    "metaType": "string",
+                    "metaValue": "0"
+                },
+                {
                     "metaName": "ViewportRect",
                     "metaType": "string",
-                    "metaValue": "127.102 -323.44 2610.44 867.141"
+                    "metaValue": "125.508 -323.333 2614.32 868"
                 },
                 {
                     "metaName": "DisplayMode",
@@ -130,19 +135,14 @@
                     "metaValue": "2"
                 },
                 {
-                    "metaName": "NodeWidthOffset",
+                    "metaName": "zValue",
                     "metaType": "string",
-                    "metaValue": "0"
+                    "metaValue": "44.000000"
                 },
                 {
                     "metaName": "LayoutPos",
                     "metaType": "string",
-                    "metaValue": "72.6753 669.966"
-                },
-                {
-                    "metaName": "zValue",
-                    "metaType": "string",
-                    "metaValue": "235.000000"
+                    "metaValue": "-183.166 -140.667"
                 }
             ],
             "terminalStates": [
@@ -183,7 +183,7 @@
             "compounds": [
                 {
                     "name": "string_to_int_array",
-                    "uriImported": "stream:/stream",
+                    "uriImported": "file:///blast.json",
                     "metadata": [
                         {
                             "metaName": "documentation",
@@ -694,8 +694,13 @@
                 },
                 {
                     "name": "iterate",
-                    "uriImported": "stream:/stream",
+                    "uriImported": "file:///blast.json",
                     "metadata": [
+                        {
+                            "metaName": "icon",
+                            "metaType": "string",
+                            "metaValue": "<NATIVE>../icons/LoopIterate.svg"
+                        },
                         {
                             "metaName": "icon",
                             "metaType": "string",
@@ -1055,7 +1060,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "47.000000"
+                            "metaValue": "42.000000"
                         }
                     ]
                 },
@@ -1076,7 +1081,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "34.000000"
+                            "metaValue": "33.000000"
                         }
                     ]
                 },
@@ -1097,7 +1102,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "33.000000"
+                            "metaValue": "32.000000"
                         }
                     ]
                 },
@@ -1139,7 +1144,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "54.000000"
+                            "metaValue": "46.000000"
                         }
                     ]
                 },
@@ -1156,14 +1161,14 @@
                             "metaValue": "2"
                         },
                         {
-                            "metaName": "zValue",
-                            "metaType": "string",
-                            "metaValue": "48.000000"
-                        },
-                        {
                             "metaName": "LayoutPos",
                             "metaType": "string",
                             "metaValue": "-161.359 993.487"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "43.000000"
                         }
                     ]
                 },
@@ -1184,7 +1189,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "37.000000"
+                            "metaValue": "35.000000"
                         }
                     ]
                 },
@@ -1198,14 +1203,14 @@
                             "metaValue": "2"
                         },
                         {
-                            "metaName": "zValue",
-                            "metaType": "string",
-                            "metaValue": "50.000000"
-                        },
-                        {
                             "metaName": "LayoutPos",
                             "metaType": "string",
                             "metaValue": "198.587 10.3198"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "44.000000"
                         }
                     ]
                 },
@@ -1226,42 +1231,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "53.000000"
-                        }
-                    ]
-                },
-                {
-                    "nodeName": "print_array",
-                    "nodeType": "Print::print_array",
-                    "terminalStates": [
-                        {
-                            "name": "Core::Graph::terminal::final",
-                            "enabled": "false"
-                        },
-                        {
-                            "name": "Core::Graph::terminal::proxy",
-                            "enabled": "false"
-                        },
-                        {
-                            "name": "Core::Graph::terminal::diagnostic",
-                            "enabled": "true"
-                        }
-                    ],
-                    "metadata": [
-                        {
-                            "metaName": "DisplayMode",
-                            "metaType": "string",
-                            "metaValue": "2"
-                        },
-                        {
-                            "metaName": "LayoutPos",
-                            "metaType": "string",
-                            "metaValue": "1794.05 215.526"
-                        },
-                        {
-                            "metaName": "zValue",
-                            "metaType": "string",
-                            "metaValue": "40.000000"
+                            "metaValue": "45.000000"
                         }
                     ]
                 },
@@ -1282,7 +1252,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "45.000000"
+                            "metaValue": "41.000000"
                         }
                     ]
                 },
@@ -1303,7 +1273,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "42.000000"
+                            "metaValue": "38.000000"
                         }
                     ]
                 },
@@ -1324,7 +1294,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "43.000000"
+                            "metaValue": "39.000000"
                         }
                     ]
                 },
@@ -1360,7 +1330,7 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "44.000000"
+                            "metaValue": "40.000000"
                         }
                     ]
                 }
@@ -1431,10 +1401,6 @@
                     "target": "if1.true_case"
                 },
                 {
-                    "source": "if1.output",
-                    "target": "print_array.array"
-                },
-                {
                     "source": ".group",
                     "target": "string_find.string"
                 },
@@ -1478,73 +1444,6 @@
                     "valueName": "iterate.value",
                     "valueType": "array<long>",
                     "value": []
-                },
-                {
-                    "valueName": "print_array.array",
-                    "valueType": "array<Math::float3>",
-                    "value": []
-                },
-                {
-                    "valueName": "print_array.number_of_lines",
-                    "valueType": "long",
-                    "value": "100"
-                },
-                {
-                    "valueName": "print_array.number_of_columns",
-                    "valueType": "uint",
-                    "value": "6U"
-                },
-                {
-                    "valueName": "print_array.horizontal_gap",
-                    "valueType": "float",
-                    "value": "0.5f"
-                },
-                {
-                    "valueName": "print_array.vertical_offset_min",
-                    "valueType": "float",
-                    "value": "0f"
-                },
-                {
-                    "valueName": "print_array.vertical_gap",
-                    "valueType": "float",
-                    "value": "2f"
-                },
-                {
-                    "valueName": "print_array.line_width",
-                    "valueType": "float",
-                    "value": "0.0500000007f"
-                },
-                {
-                    "valueName": "print_array.line_color",
-                    "valueType": "Math::float3",
-                    "value": {
-                        "x": "0.400000006f",
-                        "y": "1f",
-                        "z": "0.200000003f"
-                    }
-                },
-                {
-                    "valueName": "print_array.line_space",
-                    "valueType": "float",
-                    "value": "1.39999998f"
-                },
-                {
-                    "valueName": "print_array.color_start",
-                    "valueType": "Math::float3",
-                    "value": {
-                        "x": "0.400000006f",
-                        "y": "1f",
-                        "z": "0.200000003f"
-                    }
-                },
-                {
-                    "valueName": "print_array.color_end",
-                    "valueType": "Math::float3",
-                    "value": {
-                        "x": "1f",
-                        "y": "1f",
-                        "z": "0.200000003f"
-                    }
                 },
                 {
                     "valueName": "string_find.find",
