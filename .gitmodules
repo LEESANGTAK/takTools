@@ -1,0 +1,7 @@
+[submodule "bifrost/Hyuuu"]
+	path = bifrost/Hyuuu
+	url = https://github.com/LEESANGTAK/Hyuuu.git
+
+[submodule "bifrost/VHH"]
+	path = bifrost/VHH
+	url = https://github.com/LEESANGTAK/VHH.git
