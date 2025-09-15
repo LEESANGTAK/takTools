@@ -779,6 +779,7 @@ def maxInfluencesGUI(parent='', *args):
     cmds.button(label='Check Max Influences', c=checkMaxInfluences)
     cmds.rowColumnLayout(numberOfColumns=2, columnSpacing=[(1, 2), (2, 2)])
     cmds.optionMenu('maxInfsOptMenu', label='Max Influences:')
+    cmds.menuItem(label='2')
     cmds.menuItem(label='4')
     cmds.menuItem(label='8')
     cmds.menuItem(label='12')
