@@ -1,0 +1,752 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "User::Compounds::split_LR_target",
+            "metadata": [
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "target"
+                                                },
+                                                {
+                                                    "metaName": "source"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "48.000000"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-113.938 287.224"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "target_L"
+                                                },
+                                                {
+                                                    "metaName": "target_R"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "3060 463"
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "32.000000"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-58.0437 -16.2255 3155.38 1146.02"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "639.912 37.2182"
+                },
+                {
+                    "metaName": "zValue",
+                    "metaType": "string",
+                    "metaValue": "245.000000"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "target",
+                    "portDirection": "input",
+                    "portType": "Object",
+                    "portDefault": {}
+                },
+                {
+                    "portName": "source",
+                    "portDirection": "input",
+                    "portType": "Object",
+                    "portDefault": {}
+                },
+                {
+                    "portName": "target_L",
+                    "portDirection": "output",
+                    "portType": "Object"
+                },
+                {
+                    "portName": "target_R",
+                    "portDirection": "output",
+                    "portType": "Object"
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "add",
+                    "nodeType": "Core::Math::add",
+                    "multiInPortNames": [
+                        "point_position",
+                        "output1"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2450 390"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "33.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "add1",
+                    "nodeType": "Core::Math::add",
+                    "multiInPortNames": [
+                        "point_position",
+                        "output1"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2450 673"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "35.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "array_bounds",
+                    "nodeType": "Core::Array::array_bounds",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1230 290"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "38.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "change_range",
+                    "nodeType": "Core::Math::change_range",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "NodeValueDisplay",
+                            "metadata": [
+                                {
+                                    "metaName": "show",
+                                    "metaType": "string",
+                                    "metaValue": "1"
+                                },
+                                {
+                                    "metaName": "format",
+                                    "metaType": "string",
+                                    "metaValue": "Change range [{from_start}, {from_end}] to [{to_start}, {to_end}]"
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1535 317"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "39.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "evaluate_fcurve",
+                    "nodeType": "Core::FCurve::evaluate_fcurve",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1840 10"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "42.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "evaluate_fcurve1",
+                    "nodeType": "Core::FCurve::evaluate_fcurve",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1840 471"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "43.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "get_point_position",
+                    "nodeType": "Geometry::Properties::get_point_position",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1535 83"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "44.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "get_point_position1",
+                    "nodeType": "Geometry::Properties::get_point_position",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "620 488"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "45.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "multiply",
+                    "nodeType": "Core::Math::multiply",
+                    "multiInPortNames": [
+                        "output1",
+                        "output2"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2145 300"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "36.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "multiply1",
+                    "nodeType": "Core::Math::multiply",
+                    "multiInPortNames": [
+                        "output1",
+                        "output2"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2145 583"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "40.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "pass",
+                    "nodeType": "Core::Graph::pass",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "315 613"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "46.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "set_point_position",
+                    "nodeType": "Geometry::Properties::set_point_position",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2755 366"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "34.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "set_point_position1",
+                    "nodeType": "Geometry::Properties::set_point_position",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2755 585"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "41.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "subtract",
+                    "nodeType": "Core::Math::subtract",
+                    "multiInPortNames": [
+                        "point_position",
+                        "point_position1"
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1840 228"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "47.000000"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "vector3_to_scalar",
+                    "nodeType": "Core::Conversion::vector3_to_scalar",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "925 188"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "37.000000"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "get_point_position1.point_position",
+                    "target": "add.first.point_position"
+                },
+                {
+                    "source": "multiply.output",
+                    "target": "add.first.output1"
+                },
+                {
+                    "source": "add.output",
+                    "target": "set_point_position.positions"
+                },
+                {
+                    "source": "get_point_position1.point_position",
+                    "target": "add1.first.point_position"
+                },
+                {
+                    "source": "multiply1.output",
+                    "target": "add1.first.output1"
+                },
+                {
+                    "source": "add1.output",
+                    "target": "set_point_position1.positions"
+                },
+                {
+                    "source": "vector3_to_scalar.x",
+                    "target": "array_bounds.array"
+                },
+                {
+                    "source": "array_bounds.min_bound",
+                    "target": "change_range.from_start"
+                },
+                {
+                    "source": "array_bounds.max_bound",
+                    "target": "change_range.from_end"
+                },
+                {
+                    "source": "vector3_to_scalar.x",
+                    "target": "change_range.value"
+                },
+                {
+                    "source": "change_range.result",
+                    "target": "evaluate_fcurve.x"
+                },
+                {
+                    "source": "change_range.result",
+                    "target": "evaluate_fcurve1.x"
+                },
+                {
+                    "source": "evaluate_fcurve.y",
+                    "target": "multiply.first.output2"
+                },
+                {
+                    "source": "evaluate_fcurve1.y",
+                    "target": "multiply1.first.output2"
+                },
+                {
+                    "source": ".target",
+                    "target": "get_point_position.geometry"
+                },
+                {
+                    "source": "get_point_position.point_position",
+                    "target": "subtract.first.point_position"
+                },
+                {
+                    "source": "pass.output",
+                    "target": "get_point_position1.geometry"
+                },
+                {
+                    "source": "get_point_position1.point_position",
+                    "target": "subtract.first.point_position1"
+                },
+                {
+                    "source": "get_point_position1.point_position",
+                    "target": "vector3_to_scalar.vector3"
+                },
+                {
+                    "source": "subtract.output",
+                    "target": "multiply.first.output1"
+                },
+                {
+                    "source": "subtract.output",
+                    "target": "multiply1.first.output1"
+                },
+                {
+                    "source": ".source",
+                    "target": "pass.input"
+                },
+                {
+                    "source": "pass.output",
+                    "target": "set_point_position.geometry"
+                },
+                {
+                    "source": "pass.output",
+                    "target": "set_point_position1.geometry"
+                },
+                {
+                    "source": "set_point_position.out_geometry",
+                    "target": ".target_L"
+                },
+                {
+                    "source": "set_point_position1.out_geometry",
+                    "target": ".target_R"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "change_range.to_end",
+                    "valueType": "float",
+                    "value": "1f"
+                },
+                {
+                    "valueName": "change_range.clamp",
+                    "valueType": "bool",
+                    "value": "true"
+                },
+                {
+                    "valueName": "evaluate_fcurve.fcurve",
+                    "valueType": "Math::FCurve",
+                    "value": {
+                        "version": "1",
+                        "preExtrapolation": "0",
+                        "postExtrapolation": "0",
+                        "points": [
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "1",
+                                    "pcn": {
+                                        "xp": "-0.40000000000000002",
+                                        "yp": "0",
+                                        "x": "0",
+                                        "y": "0",
+                                        "xn": "0.40000000000000002",
+                                        "yn": "0"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "2",
+                                    "pcn": {
+                                        "xp": "0.36416700000000002",
+                                        "yp": "-0.033593999999999999",
+                                        "x": "0.40000000000000002",
+                                        "y": "0",
+                                        "xn": "0.43583300000000003",
+                                        "yn": "0.033593999999999999"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "1",
+                                    "pcn": {
+                                        "xp": "0.49249999999999999",
+                                        "yp": "0.89249999999999996",
+                                        "x": "0.59999999999999998",
+                                        "y": "1",
+                                        "xn": "0.70750000000000002",
+                                        "yn": "1.1074999999999999"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "1",
+                                    "pcn": {
+                                        "xp": "0.59999999999999998",
+                                        "yp": "1",
+                                        "x": "1",
+                                        "y": "1",
+                                        "xn": "1.3999999999999999",
+                                        "yn": "1"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "valueName": "evaluate_fcurve1.fcurve",
+                    "valueType": "Math::FCurve",
+                    "value": {
+                        "version": "1",
+                        "preExtrapolation": "0",
+                        "postExtrapolation": "0",
+                        "points": [
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "1",
+                                    "pcn": {
+                                        "xp": "-0.40000000000000002",
+                                        "yp": "1",
+                                        "x": "0",
+                                        "y": "1",
+                                        "xn": "0.40000000000000002",
+                                        "yn": "1"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "2",
+                                    "pcn": {
+                                        "xp": "0.36416700000000002",
+                                        "yp": "0.96640599999999999",
+                                        "x": "0.40000000000000002",
+                                        "y": "1",
+                                        "xn": "0.43583300000000003",
+                                        "yn": "1.0335939999999999"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "1",
+                                    "pcn": {
+                                        "xp": "0.49249999999999999",
+                                        "yp": "-0.1075",
+                                        "x": "0.59999999999999998",
+                                        "y": "0",
+                                        "xn": "0.70750000000000002",
+                                        "yn": "0.1075"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "1",
+                                    "pcn": {
+                                        "xp": "0.59999999999999998",
+                                        "yp": "0",
+                                        "x": "1",
+                                        "y": "0",
+                                        "xn": "1.3999999999999999",
+                                        "yn": "0"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}
