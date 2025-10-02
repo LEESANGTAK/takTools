@@ -5,3 +5,7 @@
 [submodule "bifrost/VHH"]
 	path = bifrost/VHH
 	url = https://github.com/unkaval/VHH.git
+
+[submodule "bifrost/Bifrost-TKCMPack"]
+	path = bifrost/Bifrost-TKCMPack
+	url = https://github.com/TKCM/Bifrost-TKCMPack.git
