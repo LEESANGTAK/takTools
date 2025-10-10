@@ -25,10 +25,19 @@
         {
             "label": "Retopo",
             "annotation": "Retopo Option",
-            "image1": "polyTriangulate.png",
+            "image1": "polyRetopo.png",
             "imageOverlayLabel": "",
             "command": "PolyRetopoOptions",
             "sourceType": "mel",
+            "noDefaultPopup": true
+        },
+        {
+            "label": "quadrangulate",
+            "annotation": "Quadrangulate for selected meshes.",
+            "image1": "polyQuad.png",
+            "imageOverlayLabel": "",
+            "command": "from importlib import reload\nfrom takTools.utils import bifrost as bfUtil; reload(bfUtil)\n\nfor mesh in cmds.ls(sl=True, dag=True, type='mesh', ni=True):\n    meshTrsf = cmds.listRelatives(mesh, p=True)[0]\n    dupMesh = cmds.duplicate(mesh, n='{}_quad'.format(meshTrsf))[0]\n    bfUtil.quadrangulate(dupMesh)",
+            "sourceType": "python",
             "noDefaultPopup": true
         },
         {

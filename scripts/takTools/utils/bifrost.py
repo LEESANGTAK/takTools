@@ -1,6 +1,7 @@
 from maya import cmds
 import pymel.core as pm
 from . import mesh as meshUtil
+from . import material as matUtil
 
 try:
     if not pm.pluginInfo('bifrostGraph', q=True, loaded=True):
@@ -26,11 +27,11 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
     # Build bifrost graph node
     bfGraph = pm.createNode('bifrostGraphShape')
 
-    ## Create input and output
+    # Create input and output
     pm.vnnNode(bfGraph, '/input', createOutputPort=('inMesh', 'Object'))
     pm.vnnNode(bfGraph, '/output', createInputPort=('outMeshes', 'array<Object>'))
 
-    ## Create a mesh_to_volume node and set parameters
+    # Create a mesh_to_volume node and set parameters
     pm.vnnCompound(bfGraph, '/', addNode='BifrostGraph,Geometry::Converters,mesh_to_volume')
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('volume_mode', '0'))  # Set to solid mode
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('store_level_set', '1'))  # This produce more fitted mesh to the input mesh
@@ -38,11 +39,11 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('min_hole_radius', str(minHoleRadius)))
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('detail_size', str(detailSize)))
 
-    ## Create a volume_to_mesh node and add a input port
+    # Create a volume_to_mesh node and add a input port
     pm.vnnCompound(bfGraph, '/', addNode='BifrostGraph,Geometry::Converters,volume_to_mesh')
     pm.vnnNode(bfGraph, '/volume_to_mesh', createInputPort=('volumes.volume', 'auto'))
 
-    ## Connect nodes
+    # Connect nodes
     pm.vnnConnect(bfGraph, '/input.inMesh', '/mesh_to_volume.mesh')
     pm.vnnConnect(bfGraph, '/mesh_to_volume.volume', '/volume_to_mesh.volumes.volume')
     pm.vnnConnect(bfGraph, '/volume_to_mesh.meshes', '/output.outMeshes')
@@ -178,3 +179,35 @@ def showConvertToCageMeshUI(parent=None, *args):
     pm.button(label='Apply', c=applyBtnCallback)
 
     pm.showWindow(winName)
+
+
+def quadrangulate(mesh):
+    # Build bifrost graph node
+    bfGraph = cmds.createNode('bifrostGraphShape')
+
+    # Create input and output
+    cmds.vnnNode(bfGraph, '/input', createOutputPort=('inMesh', 'Object'))
+    cmds.vnnNode(bfGraph, '/output', createInputPort=('outMesh', 'Object'))
+
+    # Create a quadrangulate_mesh node and set parameters
+    cmds.vnnCompound(bfGraph, '/', addNode='BifrostGraph,TKCM::Modeling_Toolbox,quadrangulate_mesh')
+
+    # Connect bifrost nodes
+    cmds.vnnConnect(bfGraph, '/input.inMesh', '/quadrangulate_mesh.mesh')
+    cmds.vnnConnect(bfGraph, '/quadrangulate_mesh.new_mesh', '/output.outMesh')
+
+    # Connect maya nodes
+    cmds.connectAttr(mesh + '.worldMesh', bfGraph + '.inMesh')
+    bfGeoToMaya = cmds.createNode('bifrostGeoToMaya')
+    quadMesh = cmds.createNode('mesh')
+    cmds.connectAttr(bfGraph + '.outMesh', bfGeoToMaya + '.bifrostGeo')
+    cmds.connectAttr(bfGeoToMaya + '.mayaMesh[0]', quadMesh + '.inMesh')
+
+    # Clean up
+    cmds.delete(quadMesh, ch=True)
+    matUtil.copyMaterial(mesh, quadMesh)
+
+    cmds.delete(cmds.listRelatives(bfGraph, p=True))
+    cmds.delete(mesh)
+
+    cmds.rename(cmds.listRelatives(quadMesh, parent=True)[0], mesh)
