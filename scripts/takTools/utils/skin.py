@@ -117,6 +117,10 @@ def copySkin(source, target, components=None):
     targetMesh = target.node() if isinstance(target, pm.MeshVertex) else target
     trgSkinClst = getSkinCluster(targetMesh.name())
 
+    targetMeshShapeVis = targetMesh.getShape().visibility.get()
+    if not targetMeshShapeVis:
+        targetMesh.getShape().visibility.set(True)
+
     if not trgSkinClst:
         trgSkinClst = pm.skinCluster(srcJointInfs, targetMesh, dr=4, tsb=True, nw=1)
         pm.skinCluster(trgSkinClst, e=True, ug=True, ai=srcGeoInfs)
@@ -147,6 +151,8 @@ def copySkin(source, target, components=None):
     if trgSkinMethod != 2:  # Set skinning method as same as source skin cluster if not Weighted Blended
         pm.PyNode(trgSkinClst).skinningMethod.set(srcSkinMethod)
     pm.PyNode(trgSkinClst).useComponents.set(pm.PyNode(srcSkinClst).useComponents.get())
+
+    targetMesh.getShape().visibility.set(targetMeshShapeVis)
 
     return trgSkinClst
 
