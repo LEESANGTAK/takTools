@@ -44,7 +44,7 @@ def duplicateFace(faces=None):
     # Duplicate meshes and delete unselected faces
     dupMeshes = []
     for mesh, faces in meshFacesInfo.items():
-        dupMesh = cmds.duplicate(mesh)[0]
+        dupMesh = cmds.duplicate(mesh, rc=True)[0]
         dupFaces = [face.replace(mesh, dupMesh) for face in faces]
 
         allFacesSet = set(cmds.ls(f"{dupMesh}.f[*]", fl=True))
@@ -83,6 +83,8 @@ def separateFace(faces=None):
         faces = cmds.ls(sl=True, fl=True)
     separateedMesh = duplicateFace(faces)
     cmds.delete(faces)
+    cmds.select(separateedMesh, r=True)
+
     return separateedMesh
 
 
