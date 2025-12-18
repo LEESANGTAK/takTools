@@ -1,6 +1,8 @@
 import os
 import json
+from PIL import Image
 
+from maya import cmds
 import pymel.core as pm
 
 
@@ -131,3 +133,51 @@ def importMaterials(filePath):
                 pm.warning('"{}" is not exists.'.format(mesh))
                 continue
             assignMaterial(mesh, mat)
+
+
+def atlasTextures(meshes, atlasImageWidthHeight=4096, atlasImagePath="C:/Users/stakl/Downloads/atlas_D.PNG"):
+    # Calculate the size of the rows and columns
+    rowColumnSize = 0
+    numMeshes = len(meshes)
+    if 2 <= numMeshes <= 4:
+        rowColumnSize = 2
+    elif 5 <= numMeshes <= 9:
+        rowColumnSize = 3
+    elif 10 <= numMeshes <= 16:
+        rowColumnSize = 4
+
+    # Calculate the scale value that scales down a texture
+    scaleValue = 1.0/rowColumnSize
+    imgWidthHeight = atlasImageWidthHeight * scaleValue
+
+    atlasImage = Image.new('RGBA', (atlasImageWidthHeight, atlasImageWidthHeight), (0, 0, 0, 0))
+
+    # Resize and layout images
+    for row in range(rowColumnSize):
+        for col in range(rowColumnSize):
+            meshIndex = (row * rowColumnSize) + col
+
+            try:
+                meshes[meshIndex]
+            except IndexError:
+                atlasImage.save(atlasImagePath)
+                return
+
+            material = getMaterials(meshes[meshIndex])[0]
+            imgPath = getImagePath(str(material))
+
+            image = Image.open(imgPath)
+            image = image.resize((int(imgWidthHeight), int(imgWidthHeight)), Image.LANCZOS)
+
+            pivotX = imgWidthHeight * col
+            pivotY = imgWidthHeight * ((rowColumnSize-1) - row)  # Image's origin is top-left but UV's origin is bottom-left
+            atlasImage.paste(image, (int(pivotX), int(pivotY)))
+
+    atlasImage.save(atlasImagePath)
+
+
+def getImagePath(material):
+    imgPath = None
+    texture = cmds.listConnections(material, type='file')[0]
+    imgPath = cmds.getAttr(f'{texture}.fileTextureName')
+    return imgPath
