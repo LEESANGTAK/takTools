@@ -95,3 +95,34 @@ def normalizeCardUVs(selections):
         cmds.delete(dupMesh)
 
     cmds.select(mesh, r=True)
+
+
+def atlasUV(meshes):
+    # Calculate the size of the rows and columns
+    rowColumnSize = 0
+    numMeshes = len(meshes)
+    if 2 <= numMeshes <= 4:
+        rowColumnSize = 2
+    elif 5 <= numMeshes <= 9:
+        rowColumnSize = 3
+    elif 10 <= numMeshes <= 16:
+        rowColumnSize = 4
+
+    # Calculate the scale value that scales down a mesh's UV
+    scaleValue = 1.0/rowColumnSize
+
+    # Resize and layout UVs
+    for row in range(rowColumnSize):
+        for col in range(rowColumnSize):
+            meshIndex = (row * rowColumnSize) + col
+            uValue = scaleValue * row
+            vValue = scaleValue * col
+
+            try:
+                cmds.select(meshes[meshIndex], r=True)
+            except IndexError:
+                return
+
+            cmds.polyNormalizeUV(normalizeType=1, preserveAspectRatio=False, centerOnTile=False)
+            cmds.polyEditUV(pu=0, pv=0, su=scaleValue, sv=scaleValue)
+            cmds.polyEditUV(pu=0, pv=0, u=uValue, v=vValue)
