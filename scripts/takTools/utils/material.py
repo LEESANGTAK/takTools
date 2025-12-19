@@ -135,7 +135,7 @@ def importMaterials(filePath):
             assignMaterial(mesh, mat)
 
 
-def atlasTextures(meshes, atlasImageWidthHeight=4096, atlasImagePath="C:/Users/stakl/Downloads/atlas_D.PNG"):
+def atlasTextures(meshes, atlasImageWidthHeight=4096, atlasImagePath='', type='diffuse'):
     # Calculate the size of the rows and columns
     rowColumnSize = 0
     numMeshes = len(meshes)
@@ -150,12 +150,15 @@ def atlasTextures(meshes, atlasImageWidthHeight=4096, atlasImagePath="C:/Users/s
     scaleValue = 1.0/rowColumnSize
     imgWidthHeight = atlasImageWidthHeight * scaleValue
 
-    atlasImage = Image.new('RGBA', (atlasImageWidthHeight, atlasImageWidthHeight), (0, 0, 0, 0))
+    atlasImage = Image.new('RGBA', (atlasImageWidthHeight, atlasImageWidthHeight), (0, 0, 0, 1))
 
     # Resize and layout images
     for row in range(rowColumnSize):
         for col in range(rowColumnSize):
             meshIndex = (row * rowColumnSize) + col
+
+            if not cmds.objExists(meshes[meshIndex]):
+                continue
 
             try:
                 meshes[meshIndex]
@@ -164,7 +167,17 @@ def atlasTextures(meshes, atlasImageWidthHeight=4096, atlasImagePath="C:/Users/s
                 return
 
             material = getMaterials(meshes[meshIndex])[0]
-            imgPath = getImagePath(str(material))
+            print('Material:', material)
+
+            if type == 'diffuse':
+                imgPath = getDiffuseTexturePath(str(material))
+            elif type == 'normal':
+                imgPath = getNormalTexturePath(str(material))
+
+            print('Image Path:', imgPath)
+
+            if not imgPath:
+                continue
 
             image = Image.open(imgPath)
             image = image.resize((int(imgWidthHeight), int(imgWidthHeight)), Image.LANCZOS)
@@ -176,8 +189,20 @@ def atlasTextures(meshes, atlasImageWidthHeight=4096, atlasImagePath="C:/Users/s
     atlasImage.save(atlasImagePath)
 
 
-def getImagePath(material):
+def getDiffuseTexturePath(material):
     imgPath = None
-    texture = cmds.listConnections(material, type='file')[0]
-    imgPath = cmds.getAttr(f'{texture}.fileTextureName')
+    texture = cmds.listConnections(f'{material}.color', type='file')
+    print('Texture:', texture)
+    if texture:
+        imgPath = cmds.getAttr(f'{texture[0]}.fileTextureName')
+    return imgPath
+
+
+def getNormalTexturePath(material):
+    imgPath = None
+    bump2dNode = cmds.listConnections(material, type='bump2d')
+    if bump2dNode:
+        texture = cmds.listConnections(bump2dNode[0], type='file')
+        if texture:
+            imgPath = cmds.getAttr(f'{texture[0]}.fileTextureName')
     return imgPath

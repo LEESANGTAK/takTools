@@ -118,11 +118,13 @@ def atlasUVs(meshes):
             uValue = scaleValue * col
             vValue = scaleValue * row
 
+            if not cmds.objExists(meshes[meshIndex]):
+                continue
+
             try:
                 cmds.select(f'{meshes[meshIndex]}.map[*]', r=True)
             except IndexError:
                 return
 
-            # cmds.polyNormalizeUV(normalizeType=1, preserveAspectRatio=False, centerOnTile=False)
             cmds.polyEditUV(pu=0, pv=0, su=scaleValue, sv=scaleValue)
             cmds.polyEditUV(pu=0, pv=0, u=uValue, v=vValue)

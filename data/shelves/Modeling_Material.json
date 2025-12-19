@@ -30,6 +30,15 @@
             "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.solidColMat()",
             "sourceType": "python",
             "noDefaultPopup": true
+        },
+        {
+            "label": "Atlas",
+            "annotation": "Atlas uvs and textures",
+            "image1": "defaultFourQuadLayout.png",
+            "imageOverlayLabel": "Atlas",
+            "command": "from takTools.modeling import atlasManager as am\nfrom importlib import reload; reload(am)\n\nam = am.AtlasManager()\nam.show()\n",
+            "sourceType": "python",
+            "noDefaultPopup": true
         }
     ]
 }
