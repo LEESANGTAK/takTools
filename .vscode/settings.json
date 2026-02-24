@@ -1,3 +1,7 @@
 {
-    "cmake.sourceDirectory": "D:/tools/maya/modules/takTools/bifrost/Tak"
+    "cmake.sourceDirectory": "D:/tools/maya/modules/takTools/bifrost/Tak",
+    "files.exclude": {
+        "**/*.pyc": true,
+        "**/__pycache__": true
+    }
 }
