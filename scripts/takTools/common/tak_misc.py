@@ -1078,8 +1078,7 @@ def crvFromSels(*args):
 
 
 def zeroVtx(*args):
-    cmds.select(cmds.polyListComponentConversion(toVertex=True))
-    selVtxs = cmds.ls(sl=True, fl=True)
+    selVtxs = cmds.ls(cmds.polyListComponentConversion(toVertex=True), fl=True)
     for vtx in selVtxs:
         vtxPos = cmds.pointPosition(vtx, world=True)
         cmds.xform(vtx, ws=True, t=(0, vtxPos[1], vtxPos[2]))
@@ -1628,8 +1627,10 @@ def snapToBrdrVtx():
     '''
     Snap selected vertices to the target geometry's closest border vertex.
     '''
-    srcVtxLs = cmds.ls(sl=True, fl=True)
-    trgGeo = srcVtxLs.pop(-1)
+    sels = cmds.ls(sl=True, fl=True)
+    trgGeo = sels.pop(-1)
+
+    srcVtxLs = cmds.ls(cmds.polyListComponentConversion(sels, toVertex=True), fl=True)
 
     # Get target geometry's border vertex list.
     # For calculation efficiency, just caculate with target geometry's border vertices.
@@ -1638,34 +1639,28 @@ def snapToBrdrVtx():
     trgVtxLs = cmds.ls(sl=True, fl=True)
     cmds.polySelectConstraint(dis=True)
 
-    # Seek closest vertex on target geometry.
+    # Find closest vertex on target geometry.
     for srcVtx in srcVtxLs:
-        # Initialize variables.
-        dist = 1000000
-        closestTrgVtx = ''
-        finalTrgVtxVec = 0
+        srcVtxPoint = OpenMaya.MPoint(*cmds.pointPosition(srcVtx, world=True))
 
-        # Get source vertex's vector in world space.
-        srcVtxPos = cmds.pointPosition(srcVtx, world=True)
-        srcVtxVec = OpenMaya.MVector(*srcVtxPos)
-
+        # Calculate distance between source and target vertex.
+        trgVtxsDistanceInfo = {}
         for trgVtx in trgVtxLs:
-            # Get target vertex's vector in world space.
-            trgVtxPos = cmds.pointPosition(trgVtx, world=True)
-            trgVtxVec = OpenMaya.MVector(*trgVtxPos)
+            trgVtxPoint = OpenMaya.MPoint(*cmds.pointPosition(trgVtx, world=True))
+            delta = trgVtxPoint - srcVtxPoint
+            trgVtxsDistanceInfo[trgVtx] = delta.length()
+        
+        sortedTrgVtxs = sorted(trgVtxsDistanceInfo.items(), key=lambda x: x[1])
+        closestTrgVtx = sortedTrgVtxs[0][0]
+        finalTrgVtxPos = cmds.pointPosition(closestTrgVtx, world=True)
 
-            # Calculate distance between source and target vertex.
-            delta = trgVtxVec - srcVtxVec
-
-            if delta.length() < dist:
-                dist = delta.length()
-                closestTrgVtx = trgVtx
-                finalTrgVtxVec = trgVtxVec
-            else:
-                continue
+        if 'vtx[711]' in srcVtx:
+            print(srcVtx, closestTrgVtx, finalTrgVtxPos)
 
         # Move source vertex to closest target vertex.
-        cmds.xform(srcVtx, ws=True, t=[finalTrgVtxVec.x, finalTrgVtxVec.y, finalTrgVtxVec.z])
+        cmds.xform(srcVtx, ws=True, t=finalTrgVtxPos)
+    
+    cmds.select(cl=True)
     cmds.select(srcVtxLs, r=True)
 
 
