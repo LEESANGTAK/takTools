@@ -494,7 +494,7 @@ def makeSym(*args):
 
             # mirror geometry
             mirrorNode = cmds.polyMirrorFace(objName, ws = True, direction = 1, ch = True)
-            cmds.polyMirrorFace(mirrorNode, e = True, pivotX = 0.0)
+            cmds.polyMirrorFace(mirrorNode, e = True, pivotX = 0.0, mergeThreshold = 0.001)
 
         # If user select 'x to -x' mean right to left.
         if symOpt == 2:
