@@ -1078,6 +1078,7 @@ def crvFromSels(*args):
 
 
 def zeroVtx(*args):
+    cmds.select(cmds.polyListComponentConversion(toVertex=True))
     selVtxs = cmds.ls(sl=True, fl=True)
     for vtx in selVtxs:
         vtxPos = cmds.pointPosition(vtx, world=True)
