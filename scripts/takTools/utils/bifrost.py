@@ -22,7 +22,7 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
 
     # It takes long time and produce desatisfiying result when set too low or too high values
     detailSize = max(detailSize, 0.01)
-    minHoleRadius = min(mesh.boundingBox().width(), mesh.boundingBox().height(), mesh.boundingBox().depth()) / 3
+    # minHoleRadius = min(mesh.boundingBox().width(), mesh.boundingBox().height(), mesh.boundingBox().depth()) / 4.0
 
     # Build bifrost graph node
     bfGraph = pm.createNode('bifrostGraphShape')
@@ -36,7 +36,7 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('volume_mode', '0'))  # Set to solid mode
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('store_level_set', '1'))  # This produce more fitted mesh to the input mesh
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('store_fog_density', '0'))
-    pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('min_hole_radius', str(minHoleRadius)))
+    pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('min_hole_radius', '0.01'))
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('detail_size', str(detailSize)))
 
     # Create a volume_to_mesh node and add a input port
@@ -162,7 +162,7 @@ def showConvertToCageMeshUI(parent=None, *args):
     pm.frameLayout(label='Volume Mesh Settings')
     pm.rowColumnLayout(numberOfColumns=2)
     pm.text(label='Detail Size: ', ann='When this value set to higher the resulting mesh will be more closed to the input mesh.')
-    pm.floatField('detailSizeFloatFld', v=0.02, min=0.01, pre=3)
+    pm.floatField('detailSizeFloatFld', v=0.01, min=0.01, pre=3)
 
     pm.setParent('..')
     pm.setParent('..')
