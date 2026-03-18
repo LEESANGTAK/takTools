@@ -5,6 +5,15 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
+            "label": "ironRig",
+            "annotation": "Launch ironRig UI",
+            "image1": "ironRig.png",
+            "imageOverlayLabel": "",
+            "command": "import sys\n\n# Deleted the ironRig-related modules so they would be reloaded\nmodules_to_reload = [m for m in sys.modules if 'ironRig.gui' in m]\nfor m in modules_to_reload:\n    del sys.modules[m]\n\n\nimport ironRig.gui.maya_launcher as launcher\nlauncher.launch_in_maya()\n",
+            "sourceType": "python",
+            "noDefaultPopup": true
+        },
+        {
             "label": "Rig Builder",
             "annotation": "Show rig builder GUI.",
             "image1": "HIKcreateControlRig.png",
