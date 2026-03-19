@@ -144,7 +144,7 @@
             "annotation": "Creating hair guide curves from polygon tube.",
             "image1": "menuIconHair.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.modeling.hairTools as hairTools\nimport imp\nimportlib.reload(hairTools)\nhairTools.hairballUI()",
+            "command": "import takTools.modeling.hairTools as hairTools\nimport importlib\nimportlib.reload(hairTools)\nhairTools.hairballUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -153,7 +153,7 @@
             "annotation": "Create water drop.",
             "image1": "waterDropGenerator_shelfIcon.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.modeling.waterDropUI as waterDropUI\nimport imp\nimportlib.reload(waterDropUI)",
+            "command": "import takTools.modeling.waterDropUI as waterDropUI\nimport importlib\nimportlib.reload(waterDropUI)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -171,7 +171,7 @@
             "annotation": "Boolean hard surface modeling",
             "image1": "polyBooleansDifference.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.modeling.speedCut as speedCut\nimport imp\nimportlib.reload(speedCut)",
+            "command": "import takTools.modeling.speedCut as speedCut\nimport importlib\nimportlib.reload(speedCut)",
             "sourceType": "python",
             "noDefaultPopup": true
         },

@@ -27,7 +27,7 @@
             "annotation": "Assign solid color material with grabed color.",
             "image1": "solColorMat.bmp",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.solidColMat()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.solidColMat()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -45,7 +45,7 @@
             "annotation": "Duplicate material and assign duplicated material.",
             "image1": "material_assign.png",
             "imageOverlayLabel": "dupAssign",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.dupMatAndAssign()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.dupMatAndAssign()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -54,7 +54,7 @@
             "annotation": "Assign the material of first selection to the others",
             "image1": "material_assign.png",
             "imageOverlayLabel": "copy",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.copyMat()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.copyMat()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -63,7 +63,7 @@
             "annotation": "Assign random color lamber.",
             "image1": "ranColLam.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.ranColLam()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.ranColLam()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -72,7 +72,7 @@
             "annotation": "Copy all uv sets and material from source to target.",
             "image1": "copyUV.png",
             "imageOverlayLabel": "mat",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.copyUvMat()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.copyUvMat()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -90,7 +90,7 @@
             "annotation": "Copy selected objects texture",
             "image1": "out_file.png",
             "imageOverlayLabel": "copy",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.copyTexRenameUI()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.copyTexRenameUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -108,7 +108,7 @@
             "annotation": "Cut selected geometry with selected joints. Select first joints and geometry last.",
             "image1": "cutPlaneJoints.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.cutGeoWithJnts()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.cutGeoWithJnts()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

@@ -18,7 +18,7 @@
             "annotation": "import takTools.fx.q...ation_manager.main()",
             "image1": "qualoth_icon.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.fx.qualoth_simulation_manager as qualoth_simulation_manager\nimport imp\nimportlib.reload(qualoth_simulation_manager)\nqualoth_simulation_manager.main()",
+            "command": "import takTools.fx.qualoth_simulation_manager as qualoth_simulation_manager\nimport importlib\nimportlib.reload(qualoth_simulation_manager)\nqualoth_simulation_manager.main()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -27,7 +27,7 @@
             "annotation": "nCloth set up with skined geometry.",
             "image1": "nClothCreate.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.tak_nClothSetUp as tak_nClothSetUp\nimport imp\nimportlib.reload(tak_nClothSetUp)\ntak_nClothSetUp.nClothSetUp()",
+            "command": "import takTools.rigging.tak_nClothSetUp as tak_nClothSetUp\nimport importlib\nimportlib.reload(tak_nClothSetUp)\ntak_nClothSetUp.nClothSetUp()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -36,7 +36,7 @@
             "annotation": "Create locator matching to selected transforms.",
             "image1": "locator.png",
             "imageOverlayLabel": "space",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.spaceLoc()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.spaceLoc()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -45,7 +45,7 @@
             "annotation": "Create curve with selected objects.",
             "image1": "curveEP.png",
             "imageOverlayLabel": "selected",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.crvFromSelsUi()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.crvFromSelsUi()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -72,7 +72,7 @@
             "annotation": "Create curve from edge ring with an selected edge.",
             "image1": "curveFromEdgeRing.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.utils.mesh as meshUtil\nimport imp\nimportlib.reload(meshUtil)\nselEdge = pm.selected()[0]\nmeshUtil.curveFromEdgeRing(selEdge, \"{0}_crv\".format(selEdge.node().getTransform()))\n",
+            "command": "import takTools.utils.mesh as meshUtil\nimport importlib\nimportlib.reload(meshUtil)\nselEdge = pm.selected()[0]\nmeshUtil.curveFromEdgeRing(selEdge, \"{0}_crv\".format(selEdge.node().getTransform()))\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -126,7 +126,7 @@
             "annotation": "Arrange selected object in grid",
             "image1": "hsRearrange.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tm\nimport imp\nimportlib.reload(tm)\n\ntm.arrangeObjectUI()",
+            "command": "import takTools.common.tak_misc as tm\nimport importlib\nimportlib.reload(tm)\n\ntm.arrangeObjectUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -153,7 +153,7 @@
             "annotation": "Create sliding softMod control for selected geometry.",
             "image1": "softMod.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\n\ntak_misc.setupSoftModCtrl()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\n\ntak_misc.setupSoftModCtrl()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -162,7 +162,7 @@
             "annotation": "Convert soft selection to cluster.",
             "image1": "cluster.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.utils.cluster as clusterUtils\nimport imp\nimportlib.reload(clusterUtils)\n\nclusterUtils.softSelectionToCluster()",
+            "command": "import takTools.utils.cluster as clusterUtils\nimport importlib\nimportlib.reload(clusterUtils)\n\nclusterUtils.softSelectionToCluster()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -171,7 +171,7 @@
             "annotation": "Convert mash to joints",
             "image1": "mashToJoints.png",
             "imageOverlayLabel": "",
-            "command": "from maya import cmds\nfrom takTools.utils import MASH as mashUtil\nimport imp\nimportlib.reload(mashUtil)\n\nwaiter = cmds.ls(sl=True)[0]\njoints = mashUtil.buildJoints(waiter)\nmashUtil.buildSkinMesh(waiter, joints)",
+            "command": "from maya import cmds\nfrom takTools.utils import MASH as mashUtil\nimport importlib\nimportlib.reload(mashUtil)\n\nwaiter = cmds.ls(sl=True)[0]\njoints = mashUtil.buildJoints(waiter)\nmashUtil.buildSkinMesh(waiter, joints)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -189,7 +189,7 @@
             "annotation": "Set up auto swim feature for FK controllers.",
             "image1": "autoSwim.bmp",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.tak_autoSwim as tak_autoSwim\nimport imp\nimportlib.reload(tak_autoSwim)\ntak_autoSwim.UI()",
+            "command": "import takTools.rigging.tak_autoSwim as tak_autoSwim\nimport importlib\nimportlib.reload(tak_autoSwim)\ntak_autoSwim.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

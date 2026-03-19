@@ -9,7 +9,7 @@
             "annotation": "Snap to X 0 for selected vertex(s).",
             "image1": "zeroVtx.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.zeroVtx()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.zeroVtx()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -18,7 +18,7 @@
             "annotation": "Snap selected vertices to the target geometry's closest border vertex.",
             "image1": "snapToClosestBorderVtx.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.snapToBrdrVtx()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.snapToBrdrVtx()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

@@ -27,7 +27,7 @@
             "annotation": "Tak auto rigging",
             "image1": "takAutoRig.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.autoRigging as ar\nimport imp\nimportlib.reload(ar)\n\ntry:\n    arui.close()\n    arui.deleteLater()\nexcept:\n    pass\n\narui = ar.ui.mainUI.MainUI()\narui.show()",
+            "command": "import takTools.rigging.autoRigging as ar\nimport importlib\nimportlib.reload(ar)\n\ntry:\n    arui.close()\n    arui.deleteLater()\nexcept:\n    pass\n\narui = ar.ui.mainUI.MainUI()\narui.show()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -45,7 +45,7 @@
             "annotation": "Advanced skeleton utils",
             "image1": "AS.png",
             "imageOverlayLabel": "Utils",
-            "command": "from AdvancedSkeleton import advancedSkeletonHelperUI as ashUI\nimport imp\nimportlib.reload(ashUI)\n\ntry:\n    ashUIObj.close()\nexcept:\n    pass\n\nashUIObj = ashUI.AdvancedSkeletonHelperUI()\nashUIObj.show()\n",
+            "command": "from AdvancedSkeleton import advancedSkeletonHelperUI as ashUI\nimport importlib\nimportlib.reload(ashUI)\n\ntry:\n    ashUIObj.close()\nexcept:\n    pass\n\nashUIObj = ashUI.AdvancedSkeletonHelperUI()\nashUIObj.show()\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -63,7 +63,7 @@
             "annotation": "Additional functions for the 'IH_buildSpIkChain.mel' script.",
             "image1": "kinSplineHandle.png",
             "imageOverlayLabel": "Utils",
-            "command": "import takTools.rigging.tak_addFuncForIHBuildSpIkChain as tak_addFuncForIHBuildSpIkChain\nimport imp\nimportlib.reload(tak_addFuncForIHBuildSpIkChain)\ntak_addFuncForIHBuildSpIkChain.ui()",
+            "command": "import takTools.rigging.tak_addFuncForIHBuildSpIkChain as tak_addFuncForIHBuildSpIkChain\nimport importlib\nimportlib.reload(tak_addFuncForIHBuildSpIkChain)\ntak_addFuncForIHBuildSpIkChain.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -90,7 +90,7 @@
             "annotation": "Multi connect",
             "image1": "multiConnections.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.tak_multiConnectAttr as tak_multiConnectAttr\nimport imp\nimportlib.reload(tak_multiConnectAttr)\ntak_multiConnectAttr.UI()",
+            "command": "import takTools.rigging.tak_multiConnectAttr as tak_multiConnectAttr\nimport importlib\nimportlib.reload(tak_multiConnectAttr)\ntak_multiConnectAttr.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -99,7 +99,7 @@
             "annotation": "Constraint to multiple objects, first select driver then selcet other drivens",
             "image1": "multiConstraint.bmp",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.tak_mulConst as tak_mulConst\nimport imp\nimportlib.reload(tak_mulConst)\ntak_mulConst.UI()",
+            "command": "import takTools.rigging.tak_mulConst as tak_mulConst\nimport importlib\nimportlib.reload(tak_mulConst)\ntak_mulConst.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -108,7 +108,7 @@
             "annotation": "Make group",
             "image1": "group.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.tak_group as tak_group\nimport imp\nimportlib.reload(tak_group)\ntak_group.UI()",
+            "command": "import takTools.rigging.tak_group as tak_group\nimport importlib\nimportlib.reload(tak_group)\ntak_group.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -117,7 +117,7 @@
             "annotation": "Create controllers",
             "image1": "control.bmp",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.tak_createCtrl as tak_createCtrl\nimport imp\nimportlib.reload(tak_createCtrl)\ntak_createCtrl.UI()",
+            "command": "import takTools.rigging.tak_createCtrl as tak_createCtrl\nimport importlib\nimportlib.reload(tak_createCtrl)\ntak_createCtrl.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -126,7 +126,7 @@
             "annotation": "Mirror selected controllers",
             "image1": "control.bmp",
             "imageOverlayLabel": "mirror",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.mirCtrlShapeUi()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.mirCtrlShapeUi()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -135,7 +135,7 @@
             "annotation": "Mirror selected controller one to one.",
             "image1": "control.bmp",
             "imageOverlayLabel": "mir1to1",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.mirConSel()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.mirConSel()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -144,7 +144,7 @@
             "annotation": "Mirror selected objects",
             "image1": "polyMirrorGeometry.png",
             "imageOverlayLabel": "object",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.mirObjUi()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.mirObjUi()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -153,7 +153,7 @@
             "annotation": "Copy or mirror set driven keyframes",
             "image1": "menuIconKeys.png",
             "imageOverlayLabel": "copy",
-            "command": "import takTools.rigging.tak_copyMirrorSDK as tak_copyMirrorSDK\nimport imp\nimportlib.reload(tak_copyMirrorSDK)\ntak_copyMirrorSDK.UI()",
+            "command": "import takTools.rigging.tak_copyMirrorSDK as tak_copyMirrorSDK\nimport importlib\nimportlib.reload(tak_copyMirrorSDK)\ntak_copyMirrorSDK.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -171,7 +171,7 @@
             "annotation": "Match transform",
             "image1": "out_transform.png",
             "imageOverlayLabel": "match",
-            "command": "import takTools.rigging.tak_matchTransform as tak_matchTransform\nimport imp\nimportlib.reload(tak_matchTransform)\ntak_matchTransform.UI()",
+            "command": "import takTools.rigging.tak_matchTransform as tak_matchTransform\nimport importlib\nimportlib.reload(tak_matchTransform)\ntak_matchTransform.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -180,7 +180,7 @@
             "annotation": "Attribute manager",
             "image1": "attributes.png",
             "imageOverlayLabel": "manager",
-            "command": "import takTools.rigging.tak_attrManager as tak_attrManager\nimport imp\nimportlib.reload(tak_attrManager)\ntak_attrManager.ui()",
+            "command": "import takTools.rigging.tak_attrManager as tak_attrManager\nimport importlib\nimportlib.reload(tak_attrManager)\ntak_attrManager.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -189,7 +189,7 @@
             "annotation": "Transfer selected transform channel values to the parent. If item is a joint, transfer rotate values to joint orient values.",
             "image1": "zeroDepth.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.utils.transform as tu\nimport imp\nimportlib.reload(tu)\n\nsels = pm.selected()\nfor sel in sels:\n    tu.zeroOutChannels(sel)",
+            "command": "import takTools.utils.transform as tu\nimport importlib\nimportlib.reload(tu)\n\nsels = pm.selected()\nfor sel in sels:\n    tu.zeroOutChannels(sel)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -198,7 +198,7 @@
             "annotation": "Set up space switching.",
             "image1": "ghostingObjectTypeLocator.png",
             "imageOverlayLabel": "switch",
-            "command": "import takTools.rigging.tak_setupSpaceSwitching as tak_setupSpaceSwitching\nimport imp\nimportlib.reload(tak_setupSpaceSwitching)\ntak_setupSpaceSwitching.ui()",
+            "command": "import takTools.rigging.tak_setupSpaceSwitching as tak_setupSpaceSwitching\nimport importlib\nimportlib.reload(tak_setupSpaceSwitching)\ntak_setupSpaceSwitching.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -207,7 +207,7 @@
             "annotation": "Show GUI for attaching objects to a surface",
             "image1": "attachIt.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.tak_attachIt as tak_attachIt\nimport imp\nimportlib.reload(tak_attachIt)\ntak_attachIt.UI()",
+            "command": "import takTools.rigging.tak_attachIt as tak_attachIt\nimport importlib\nimportlib.reload(tak_attachIt)\ntak_attachIt.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -216,7 +216,7 @@
             "annotation": "Show pickwalk designer GUI",
             "image1": "pickwalkDesigner.png",
             "imageOverlayLabel": "",
-            "command": "from takPickwalkDesigner import pdWindow\nimport imp\nimportlib.reload(pdWindow)\n\ntry:\n    pdWin.close()\nexcept:\n    pass\n\npdWin = pdWindow.PDWindow()\n",
+            "command": "from takPickwalkDesigner import pdWindow\nimport importlib\nimportlib.reload(pdWindow)\n\ntry:\n    pdWin.close()\nexcept:\n    pass\n\npdWin = pdWindow.PDWindow()\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -225,7 +225,7 @@
             "annotation": "Show clean up rig GUI",
             "image1": "cleanUpRig.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.tak_cleanUpRig as tak_cleanUpRig\nimport imp\nimportlib.reload(tak_cleanUpRig)\ntak_cleanUpRig.ui()",
+            "command": "import takTools.rigging.tak_cleanUpRig as tak_cleanUpRig\nimport importlib\nimportlib.reload(tak_cleanUpRig)\ntak_cleanUpRig.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         }

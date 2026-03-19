@@ -9,7 +9,7 @@
             "annotation": "Create a skeleton and manage skeleton poses.",
             "image1": "takSkeleton.png",
             "imageOverlayLabel": "",
-            "command": "import takSkeleton as ts\nimport imp\nimportlib.reload(ts)\nts.gui.showUI()",
+            "command": "import takSkeleton as ts\nimport importlib\nimportlib.reload(ts)\nts.gui.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -36,7 +36,7 @@
             "annotation": "\"takRigLogic\" pose editor.",
             "image1": "noPreview.png",
             "imageOverlayLabel": "",
-            "command": "import imp\nimport editPoseGUI\nimportlib.reload(editPoseGUI)\ngui = editPoseGUI.EditPoseGUI()\ngui.show()",
+            "command": "import importlib\nimport editPoseGUI\nimportlib.reload(editPoseGUI)\ngui = editPoseGUI.EditPoseGUI()\ngui.show()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -54,7 +54,7 @@
             "annotation": "Show tak skin weights GUI",
             "image1": "paintSkinWeights.png",
             "imageOverlayLabel": "takSkin",
-            "command": "import takTools.rigging.tak_skinWeights as tak_skinWeights\nimport imp\nimportlib.reload(tak_skinWeights)\ntak_skinWeights.showUI()",
+            "command": "import takTools.rigging.tak_skinWeights as tak_skinWeights\nimport importlib\nimportlib.reload(tak_skinWeights)\ntak_skinWeights.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -72,7 +72,7 @@
             "annotation": "Select surface(s) and a joint.",
             "image1": "smoothSkin.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.smoothSkinBind()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.smoothSkinBind()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -90,7 +90,7 @@
             "annotation": "Create range of motion for selected object.",
             "image1": "updateMotionTrail.png",
             "imageOverlayLabel": "range",
-            "command": "import takTools.rigging.tak_ROM as tak_ROM\nimport imp\nimportlib.reload(tak_ROM)\ntak_ROM.UI()",
+            "command": "import takTools.rigging.tak_ROM as tak_ROM\nimport importlib\nimportlib.reload(tak_ROM)\ntak_ROM.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -117,7 +117,7 @@
             "annotation": "tf_smoothSkinWeight",
             "image1": "tf_smoothSkin.bmp",
             "imageOverlayLabel": "",
-            "command": "import takTools.rigging.averageVertexSkinWeightBrush as averageVertexSkinWeightBrush\nimport imp\nimportlib.reload(averageVertexSkinWeightBrush)\naverageVertexSkinWeightBrush.paint()",
+            "command": "import takTools.rigging.averageVertexSkinWeightBrush as averageVertexSkinWeightBrush\nimport importlib\nimportlib.reload(averageVertexSkinWeightBrush)\naverageVertexSkinWeightBrush.paint()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -153,7 +153,7 @@
             "annotation": "Add source influences to target and copy skin weights. When component selected, copy from geometry to components.",
             "image1": "copySkinWeight.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.addInfCopySkin()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.addInfCopySkin()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -162,7 +162,7 @@
             "annotation": "Duplicate selected faces as skin mesh.",
             "image1": "polyDuplicateFacet.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.utils.skin as skinUtil\nimport imp\nimportlib.reload(skinUtil)\nskinUtil.duplicateSkinMesh()",
+            "command": "import takTools.utils.skin as skinUtil\nimport importlib\nimportlib.reload(skinUtil)\nskinUtil.duplicateSkinMesh()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -171,7 +171,7 @@
             "annotation": "Copy skin from source geometry to target vertices overlaped.",
             "image1": "polyConvertToVertices.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.utils.skin as skinUtil\nimport imp\nimportlib.reload(skinUtil)\nsels = cmds.ls(sl=True)\ntrg = sels.pop(-1)\nfor src in sels: skinUtil.copySkinOverlapVertices(src, trg)",
+            "command": "import takTools.utils.skin as skinUtil\nimport importlib\nimportlib.reload(skinUtil)\nsels = cmds.ls(sl=True)\ntrg = sels.pop(-1)\nfor src in sels: skinUtil.copySkinOverlapVertices(src, trg)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -180,7 +180,7 @@
             "annotation": "Add influences. Select influences and geometry.",
             "image1": "addWrapInfluence.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.addInfUI()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.addInfUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -198,7 +198,7 @@
             "annotation": "Show bSkinSaver GUI.",
             "image1": "save.png",
             "imageOverlayLabel": "skin",
-            "command": "import takTools.rigging.bSkinSaver as bSkinSaver\nimport imp\nimportlib.reload(bSkinSaver)\nbSkinSaver.showUI()",
+            "command": "import takTools.rigging.bSkinSaver as bSkinSaver\nimport importlib\nimportlib.reload(bSkinSaver)\nbSkinSaver.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -207,7 +207,7 @@
             "annotation": "Set up helper joints",
             "image1": "kinJoint.png",
             "imageOverlayLabel": "helper",
-            "command": "import takTools.rigging.tak_helperJoint as tak_helperJoint\nimport imp\nimportlib.reload(tak_helperJoint)\ntak_helperJoint.ui()",
+            "command": "import takTools.rigging.tak_helperJoint as tak_helperJoint\nimport importlib\nimportlib.reload(tak_helperJoint)\ntak_helperJoint.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -216,7 +216,7 @@
             "annotation": "Corrective blend shape tools.",
             "image1": "blendShape.png",
             "imageOverlayLabel": "corrective",
-            "command": "import takTools.rigging.tak_correctiveBS as tak_correctiveBS\nimport imp\nimportlib.reload(tak_correctiveBS)\nposCorObj = tak_correctiveBS.UI()",
+            "command": "import takTools.rigging.tak_correctiveBS as tak_correctiveBS\nimport importlib\nimportlib.reload(tak_correctiveBS)\nposCorObj = tak_correctiveBS.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -225,7 +225,7 @@
             "annotation": "Build left and right target geometry from a symmetrical expression",
             "image1": "LRTarget.png",
             "imageOverlayLabel": "L/R",
-            "command": "import takTools.rigging.tak_LRTarget as tak_LRTarget\nimport imp\nimportlib.reload(tak_LRTarget)\ntak_LRTarget.UI()",
+            "command": "import takTools.rigging.tak_LRTarget as tak_LRTarget\nimport importlib\nimportlib.reload(tak_LRTarget)\ntak_LRTarget.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -243,7 +243,7 @@
             "annotation": "Edit Deform Member",
             "image1": "menuIconDeformations.png",
             "imageOverlayLabel": "member",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.editDfmMemberUI()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport importlib\nimportlib.reload(tak_misc)\ntak_misc.editDfmMemberUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         }
