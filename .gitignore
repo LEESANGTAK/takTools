@@ -1,3 +1,15 @@
+# Build artifacts
 build
 
+# Python cache
 *.pyc
+*.pyo
+__pycache__/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
