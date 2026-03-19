@@ -4,7 +4,39 @@ Contact: https://ta-note.com
 
 Description:
 This module is the library that relatively simple functions.
+
+NOTE: Functions have been organized into separate modules for better maintainability:
+  - tak_skin.py: Skin weight related functions
+  - tak_display.py: Display, color, and viewport related functions
+  - tak_mirror.py: Mirror related functions
+
+For backward compatibility, all functions are still accessible through this module.
 """
+
+# ------------------------------------------------------------------
+# Re-export from separated modules for backward compatibility.
+# New code should import from the specific sub-modules directly.
+# ------------------------------------------------------------------
+from .tak_skin import (  # noqa: F401
+    TransSkinWeights, addInfUI, addInf, addInfCopySkin,
+    smoothSkinBind, copySkinByName, copyUvRiggedMesh,
+    editDfmMemberUI, editDfmMember, selAffectedVertex, selInflu,
+)
+from .tak_display import (  # noqa: F401
+    Wire, wireOnOff, iso, isoAdd, isoRmv,
+    hideShowViewPoly, hideShowViewJnt, hideShowViewCrv,
+    hideShowViewWire, hideShowViewMdl, turnOffShp,
+    drawJntStyle, djsChangeCmd, SelHilightTogg,
+    setShapeColorRGB, setJntColorUI, setJntColor,
+    displayType, dtChangeCmd, lineWidth, changeLineWidth,
+    useDfltMat, combinedTexture,
+)
+from .tak_mirror import (  # noqa: F401
+    mirJntUi, mirrorJnt, mirrorYZPlane,
+    mirObjUi, typeRadBtnGrpCC, mirrorObj,
+    mirCtrlShapeUi, mirCtrlShape, mirConSel,
+    mirrorCtrlsUI, mirrorCtrls, mirrorObject,
+)
 
 from imp import reload
 
