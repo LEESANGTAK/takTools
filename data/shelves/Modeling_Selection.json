@@ -9,7 +9,7 @@
             "annotation": "Select every Nth edge",
             "image1": "selectSkipedEdgeRing.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.selEveryNUI()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.selEveryNUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

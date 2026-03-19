@@ -1,4 +1,4 @@
-import imp
+import importlib
 
 from . import general
 from . import module
@@ -6,7 +6,7 @@ from . import controller
 from . import enums
 from . import bSkinSaver
 
-imp.reload(general)
-imp.reload(module)
-imp.reload(controller)
-imp.reload(enums)
+importlib.reload(general)
+importlib.reload(module)
+importlib.reload(controller)
+importlib.reload(enums)

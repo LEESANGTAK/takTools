@@ -1,4 +1,4 @@
-from imp import reload
+from importlib import reload
 
 from . import baseWidget; reload(baseWidget)
 from . import decorators; reload(decorators)

@@ -18,7 +18,7 @@
             "annotation": "Delete Support Edges",
             "image1": "delSupportEdges.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.delSupportEdgesUI()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.delSupportEdgesUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -117,7 +117,7 @@
             "annotation": "Create symmetry mesh on x axis.",
             "image1": "symmetrize.png",
             "imageOverlayLabel": "X",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.symmetry('x')",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.symmetry('x')",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -126,7 +126,7 @@
             "annotation": "Create symmetry mesh on z axis.",
             "image1": "symmetrize.png",
             "imageOverlayLabel": "Z",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.symmetry('z')",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.symmetry('z')",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -135,7 +135,7 @@
             "annotation": "Mirror selected object.",
             "image1": "polyMirrorGeometry.png",
             "imageOverlayLabel": "object",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.mirObjUi()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.mirObjUi()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -153,7 +153,7 @@
             "annotation": "Separate mesh with edge loop",
             "image1": "separateEdge.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sepGeoWithEdge()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.sepGeoWithEdge()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -162,7 +162,7 @@
             "annotation": "Separate mesh with face",
             "image1": "separateFace.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sepGeoWithFace()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.sepGeoWithFace()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -171,7 +171,7 @@
             "annotation": "Combine and merge vertex.",
             "image1": "polyUnite.png",
             "imageOverlayLabel": "merge",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.cbMrgGeo()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.cbMrgGeo()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -180,7 +180,7 @@
             "annotation": "Combine and rename with parent.",
             "image1": "polyUnite.png",
             "imageOverlayLabel": "rename",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.combineAndRenameWithParentName()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.combineAndRenameWithParentName()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -189,7 +189,7 @@
             "annotation": "Combine and assign random color.",
             "image1": "render_rampShader.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.combineAndAssignRandomMat()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.combineAndAssignRandomMat()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

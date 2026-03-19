@@ -7,7 +7,7 @@ from distutils.dir_util import copy_tree
 
 from maya import cmds, mel
 
-from imp import reload
+from importlib import reload
 from .pipeline import takMayaResourceBrowser as tmrb; reload(tmrb)
 from .common import iconMaker as im; reload(im)
 from .utils import system as sysUtil
@@ -301,7 +301,7 @@ def writeShelvesToFile(*args):
 def restore(*args):
     answer = cmds.confirmDialog(title='Warning', message='Restore Tak Tools from the shelf files.\nUnsaved data will be lost.\nAre you sure?', button=['Yes','No'], defaultButton='Yes', cancelButton='No', dismissString='No')
     if answer == 'Yes':
-        from imp import reload
+        from importlib import reload
         from takTools import tak_tools as tt; reload(tt)
         tt.UI()
 
@@ -1190,8 +1190,8 @@ def showSearchResults(*args):
             cmds.text(label=location)
 
             # Action buttons
-            cmds.button(label='üìç', annotation='Locate Tool', c=lambda x, r=result: locateTool(r))
-            cmds.button(label='‚ñ∂', annotation='Run Tool', c=lambda x, r=result: runToolFromSearch(r))
+            cmds.button(label='?ìç', annotation='Locate Tool', c=lambda x, r=result: locateTool(r))
+            cmds.button(label='??, annotation='Run Tool', c=lambda x, r=result: runToolFromSearch(r))
 
             cmds.setParent('..')
 

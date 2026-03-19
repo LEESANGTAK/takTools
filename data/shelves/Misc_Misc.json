@@ -9,7 +9,7 @@
             "annotation": "Remove unknown nodes, plugins, callbacks, scriptjobs",
             "image1": "cleanupScene.png",
             "imageOverlayLabel": "",
-            "command": "from takTools.utils import globalUtil;import imp;imp.reload(globalUtil); globalUtil.cleanupMayaScene()",
+            "command": "from takTools.utils import globalUtil;import importlib;importlib.reload(globalUtil); globalUtil.cleanupMayaScene()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -18,7 +18,7 @@
             "annotation": "Clear output window",
             "image1": "menuIconWindow.png",
             "imageOverlayLabel": "",
-            "command": "from takTools.utils import system as sysUtil\nimport imp\nimp.reload(sysUtil)\n\nsysUtil.clearOutputWindow()",
+            "command": "from takTools.utils import system as sysUtil\nimport imp\nimportlib.reload(sysUtil)\n\nsysUtil.clearOutputWindow()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -36,7 +36,7 @@
             "annotation": "Create an icon image",
             "image1": "UVEditorSnapshot.png",
             "imageOverlayLabel": "",
-            "command": "from takTools.common import iconMaker\nimport imp\nimp.reload(iconMaker)\n\ngui = iconMaker.IconMakerGUI()\ngui.show()",
+            "command": "from takTools.common import iconMaker\nimport imp\nimportlib.reload(iconMaker)\n\ngui = iconMaker.IconMakerGUI()\ngui.show()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -45,7 +45,7 @@
             "annotation": "Save specific scene information as a file.",
             "image1": "save.png",
             "imageOverlayLabel": "info",
-            "command": "import takTools.pipeline.tak_saveSceneInfo as tak_saveSceneInfo\nimport imp\nimp.reload(tak_saveSceneInfo)\ntak_saveSceneInfo.ui()",
+            "command": "import takTools.pipeline.tak_saveSceneInfo as tak_saveSceneInfo\nimport imp\nimportlib.reload(tak_saveSceneInfo)\ntak_saveSceneInfo.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -54,7 +54,7 @@
             "annotation": "Create folder structure.",
             "image1": "folder-new.png",
             "imageOverlayLabel": "project",
-            "command": "import takTools.pipeline.tak_prjFolderSetup as tak_prjFolderSetup\nimport imp\nimp.reload(tak_prjFolderSetup)\ntak_prjFolderSetup.UI()",
+            "command": "import takTools.pipeline.tak_prjFolderSetup as tak_prjFolderSetup\nimport imp\nimportlib.reload(tak_prjFolderSetup)\ntak_prjFolderSetup.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -63,7 +63,7 @@
             "annotation": "Load or reload or delete references.",
             "image1": "reference.png",
             "imageOverlayLabel": "manager",
-            "command": "import takTools.pipeline.tak_fileRef as tak_fileRef\nimport imp\nimp.reload(tak_fileRef)\ntak_fileRef.UI()",
+            "command": "import takTools.pipeline.tak_fileRef as tak_fileRef\nimport imp\nimportlib.reload(tak_fileRef)\ntak_fileRef.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -72,7 +72,7 @@
             "annotation": "Rename refrence node and namespace.",
             "image1": "reference.png",
             "imageOverlayLabel": "rename",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.renameRefNode()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.renameRefNode()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -81,7 +81,7 @@
             "annotation": "Change line width.",
             "image1": "WireFrame.png",
             "imageOverlayLabel": "width",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.lineWidth()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.lineWidth()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -90,7 +90,7 @@
             "annotation": "Shake selected camera.",
             "image1": "Camera.png",
             "imageOverlayLabel": "Shake",
-            "command": "import takTools.utils.camera as camUtils\nimport imp\nimp.reload(camUtils)\n\ncam = pm.selected()[0]\ncamUtils.shakeCamera(cam)\n",
+            "command": "import takTools.utils.camera as camUtils\nimport imp\nimportlib.reload(camUtils)\n\ncam = pm.selected()[0]\ncamUtils.shakeCamera(cam)\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -99,7 +99,7 @@
             "annotation": "Bake selected camera",
             "image1": "Camera.png",
             "imageOverlayLabel": "bake",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.bakeCam()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.bakeCam()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -108,7 +108,7 @@
             "annotation": "Bake selected camera to use in AE.",
             "image1": "Camera.png",
             "imageOverlayLabel": "AE",
-            "command": "import takTools.pipeline.tak_mayaCamToAE as tak_mayaCamToAE\nimport imp\nimp.reload(tak_mayaCamToAE)\ntak_mayaCamToAE.ui()",
+            "command": "import takTools.pipeline.tak_mayaCamToAE as tak_mayaCamToAE\nimport imp\nimportlib.reload(tak_mayaCamToAE)\ntak_mayaCamToAE.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -117,7 +117,7 @@
             "annotation": "Export selected camera for using in 3ds Max.",
             "image1": "Camera.png",
             "imageOverlayLabel": "Max",
-            "command": "import takTools.pipeline.tak_mayaCamToMax as tak_mayaCamToMax\nimport imp\nimp.reload(tak_mayaCamToMax)\ntak_mayaCamToMax.mayaCamToMax()",
+            "command": "import takTools.pipeline.tak_mayaCamToMax as tak_mayaCamToMax\nimport imp\nimportlib.reload(tak_mayaCamToMax)\ntak_mayaCamToMax.mayaCamToMax()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -126,7 +126,7 @@
             "annotation": "Create camera following selected object.",
             "image1": "Camera.png",
             "imageOverlayLabel": "follow",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.followingCam()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.followingCam()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -135,7 +135,7 @@
             "annotation": "Create locators per frame with selected object.",
             "image1": "trackingLoc.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.trackingLoc()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.trackingLoc()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -153,7 +153,7 @@
             "annotation": "Attach specular sphere to selected vertex(s) or selected two edges.",
             "image1": "specSphere.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.attachSpecSphere()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.attachSpecSphere()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -162,7 +162,7 @@
             "annotation": "Batch playblast.",
             "image1": "playblast.png",
             "imageOverlayLabel": "batch",
-            "command": "import takTools.pipeline.tak_batchPB as tak_batchPB\nimport imp\nimp.reload(tak_batchPB)\ntak_batchPB.batchPB()",
+            "command": "import takTools.pipeline.tak_batchPB as tak_batchPB\nimport imp\nimportlib.reload(tak_batchPB)\ntak_batchPB.batchPB()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -171,7 +171,7 @@
             "annotation": "Save and load render layer set up.",
             "image1": "render_renderLayer.png",
             "imageOverlayLabel": "save",
-            "command": "import takTools.pipeline.tak_saveRenderLayer as tak_saveRenderLayer\nimport imp\nimp.reload(tak_saveRenderLayer)\nrenLyrSaveObj = tak_saveRenderLayer.SaveRenderLayer()\nrenLyrSaveObj.UI()",
+            "command": "import takTools.pipeline.tak_saveRenderLayer as tak_saveRenderLayer\nimport imp\nimportlib.reload(tak_saveRenderLayer)\nrenLyrSaveObj = tak_saveRenderLayer.SaveRenderLayer()\nrenLyrSaveObj.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -180,7 +180,7 @@
             "annotation": "Edit maya ascii file contents.",
             "image1": "SP_FileIcon.png",
             "imageOverlayLabel": "edit",
-            "command": "import takTools.pipeline.tak_editMayaAsciiFile as tak_editMayaAsciiFile\nimport imp\nimp.reload(tak_editMayaAsciiFile)\ntak_editMayaAsciiFile.ui()",
+            "command": "import takTools.pipeline.tak_editMayaAsciiFile as tak_editMayaAsciiFile\nimport imp\nimportlib.reload(tak_editMayaAsciiFile)\ntak_editMayaAsciiFile.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -195,10 +195,10 @@
         },
         {
             "label": "Visual Function Curve",
-            "annotation": "from takTools.utils import drawingFuncCurves as dfc\nimport imp\nimp.reload(dfc)\n...",
+            "annotation": "from takTools.utils import drawingFuncCurves as dfc\nimport imp\nimportlib.reload(dfc)\n...",
             "image1": "sineCurveProfile.png",
             "imageOverlayLabel": "f(x)",
-            "command": "from takTools.utils import drawingFuncCurves as dfc\nimport imp\nimp.reload(dfc)\n\ndfc.showUI()",
+            "command": "from takTools.utils import drawingFuncCurves as dfc\nimport imp\nimportlib.reload(dfc)\n\ndfc.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         }

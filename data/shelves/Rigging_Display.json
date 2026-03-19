@@ -36,7 +36,7 @@
             "annotation": "Change the joint style",
             "image1": "out_joint.png",
             "imageOverlayLabel": "style",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.drawJntStyle()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.drawJntStyle()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -45,7 +45,7 @@
             "annotation": "Change display type.",
             "image1": "menuIconDisplay.png",
             "imageOverlayLabel": "type",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.displayType()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.displayType()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -54,7 +54,7 @@
             "annotation": "Display affected objects",
             "image1": "eye.png",
             "imageOverlayLabel": "affect",
-            "command": "import takTools.utils.display as dp\nimport imp\nimp.reload(dp)\ndp.displayAffectedToggle()",
+            "command": "import takTools.utils.display as dp\nimport imp\nimportlib.reload(dp)\ndp.displayAffectedToggle()",
             "sourceType": "python",
             "noDefaultPopup": true
         }

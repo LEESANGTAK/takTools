@@ -38,7 +38,7 @@ from .tak_mirror import (  # noqa: F401
     mirrorCtrlsUI, mirrorCtrls, mirrorObject,
 )
 
-from imp import reload
+from importlib import reload
 
 import os
 import random

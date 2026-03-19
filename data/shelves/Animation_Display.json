@@ -45,7 +45,7 @@
             "annotation": "Frame Range HUD Toggle",
             "image1": "out_frameCache.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.utils.display as dpUtil;import imp;imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();",
+            "command": "import takTools.utils.display as dpUtil;import importlib;importlib.reload(dpUtil);dpUtil.frameRangeHUDToggle();",
             "sourceType": "python",
             "noDefaultPopup": true
         }

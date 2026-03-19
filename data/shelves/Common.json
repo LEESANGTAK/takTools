@@ -5,7 +5,7 @@
             "annotation": "Set maya preferences for a scene.",
             "image1": "render.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.pipeline.tak_shotSetUp as tak_shotSetUp\nimport imp\nimp.reload(tak_shotSetUp)\ntak_shotSetUp.UI()",
+            "command": "import takTools.pipeline.tak_shotSetUp as tak_shotSetUp\nimport imp\nimportlib.reload(tak_shotSetUp)\ntak_shotSetUp.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -23,7 +23,7 @@
             "annotation": "Open with current working directory.",
             "image1": "fileOpen.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.openCWD()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.openCWD()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -32,7 +32,7 @@
             "annotation": "Save as in current working directory.",
             "image1": "fileSave.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.saveCWD()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.saveCWD()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -158,7 +158,7 @@
             "annotation": "Toggle wire mode for selection.",
             "image1": "UVTBWireFrame.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.Wire()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.Wire()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -167,7 +167,7 @@
             "annotation": "Show material preset GUI.",
             "image1": "hypershade.png",
             "imageOverlayLabel": "preset",
-            "command": "import takTools.modeling.tak_matPreset as tak_matPreset\nimport imp\nimp.reload(tak_matPreset)\ntak_matPreset.MatPreset.ui()",
+            "command": "import takTools.modeling.tak_matPreset as tak_matPreset\nimport imp\nimportlib.reload(tak_matPreset)\ntak_matPreset.MatPreset.ui()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -176,7 +176,7 @@
             "annotation": "Set a rgb color for selected shape.",
             "image1": "colorPresetSpectrum.png",
             "imageOverlayLabel": "",
-            "command": "from takTools.common import tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.setShapeColorRGB()",
+            "command": "from takTools.common import tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.setShapeColorRGB()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -185,7 +185,7 @@
             "annotation": "Set a indexed color for selected shape.",
             "image1": "hairPaintSpecular.png",
             "imageOverlayLabel": "object",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.setJntColorUI()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.setJntColorUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -194,7 +194,7 @@
             "annotation": "Set ouliner color",
             "image1": "hairPaintSpecular.png",
             "imageOverlayLabel": "outliner",
-            "command": "import takTools.common.tak_outlinerColor as tc\nimport imp\nimp.reload(tc)\ntc.showUI()",
+            "command": "import takTools.common.tak_outlinerColor as tc\nimport imp\nimportlib.reload(tc)\ntc.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -203,7 +203,7 @@
             "annotation": "Sorting selected items in outliner.",
             "image1": "sortName.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.sortOutl()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.sortOutl()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -212,7 +212,7 @@
             "annotation": "Renamer",
             "image1": "quickRename.png",
             "imageOverlayLabel": "",
-            "command": "from takRenamer import main;import imp;imp.reload(main);main.showUI()",
+            "command": "from takRenamer import main;import importlib;importlib.reload(main);main.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -221,7 +221,7 @@
             "annotation": "Clean up model.",
             "image1": "cleanUpMesh.bmp",
             "imageOverlayLabel": "",
-            "command": "import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport imp\nimp.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()",
+            "command": "import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport imp\nimportlib.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

@@ -9,7 +9,7 @@
             "annotation": "Droplet Creator",
             "image1": "droplet.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.modeling.tak_dropletCreator as tdc\nimport imp\nimp.reload(tdc)\ntdc.UI()",
+            "command": "import takTools.modeling.tak_dropletCreator as tdc\nimport imp\nimportlib.reload(tdc)\ntdc.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         }

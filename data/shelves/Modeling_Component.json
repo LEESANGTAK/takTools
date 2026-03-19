@@ -9,7 +9,7 @@
             "annotation": "Snap to X 0 for selected vertex(s).",
             "image1": "zeroVtx.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.zeroVtx()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.zeroVtx()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -18,7 +18,7 @@
             "annotation": "Snap selected vertices to the target geometry's closest border vertex.",
             "image1": "snapToClosestBorderVtx.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.snapToBrdrVtx()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.snapToBrdrVtx()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -198,7 +198,7 @@
             "annotation": "Extract the currently selected faces from their shell and shows a manipulator to adjust their offset",
             "image1": "polyChipOff.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.utils.mesh as meshUtils;import imp;imp.reload(meshUtils);meshUtils.extractFace()",
+            "command": "import takTools.utils.mesh as meshUtils;import importlib;importlib.reload(meshUtils);meshUtils.extractFace()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -207,7 +207,7 @@
             "annotation": "Duplicate the currently selected faces in a new shell and shows a manipulator to adjust their offset",
             "image1": "polyDuplicateFacet.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.utils.mesh as meshUtils;import imp;imp.reload(meshUtils);meshUtils.duplicateFace()",
+            "command": "import takTools.utils.mesh as meshUtils;import importlib;importlib.reload(meshUtils);meshUtils.duplicateFace()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

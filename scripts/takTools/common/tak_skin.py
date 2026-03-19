@@ -7,7 +7,7 @@ Skin weight related utility functions.
 Separated from tak_misc.py for better organization.
 """
 
-from imp import reload
+from importlib import reload
 
 import os
 import re

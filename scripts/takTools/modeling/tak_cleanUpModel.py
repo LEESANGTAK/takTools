@@ -14,7 +14,7 @@ reload(tak_cleanUpModel)
 tak_cleanUpModel.UI()
 '''
 
-from imp import reload
+from importlib import reload
 
 import os
 import re

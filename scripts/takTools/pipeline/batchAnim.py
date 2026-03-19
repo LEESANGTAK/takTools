@@ -50,7 +50,7 @@ def __batchAnimCallback(*args):
         for mayaFile in mayaFiles:
             job = subprocess.Popen([
                     MAYAPY,
-                    '-c', 'import maya.standalone; maya.standalone.initialize(); from takTools.pipeline import batchAnim;import imp;imp.reload(batchAnim); batchAnim.exportAnim("{}")'.format(mayaFile)
+                    '-c', 'import maya.standalone; maya.standalone.initialize(); from takTools.pipeline import batchAnim;import importlib;importlib.reload(batchAnim); batchAnim.exportAnim("{}")'.format(mayaFile)
                 ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,

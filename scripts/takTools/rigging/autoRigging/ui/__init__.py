@@ -1,5 +1,5 @@
-import imp
+import importlib
 
 from . import mainUI
 
-imp.reload(mainUI)
+importlib.reload(mainUI)

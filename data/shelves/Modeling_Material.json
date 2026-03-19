@@ -9,7 +9,7 @@
             "annotation": "Assign the material of first selection to the others",
             "image1": "material_assign.png",
             "imageOverlayLabel": "copy",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.copyMat()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.copyMat()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -18,7 +18,7 @@
             "annotation": "Assign random color lamber.",
             "image1": "ranColLam.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.ranColLam()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.ranColLam()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -27,7 +27,7 @@
             "annotation": "Assign solid color material with grabed color.",
             "image1": "solColorMat.bmp",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.solidColMat()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.solidColMat()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

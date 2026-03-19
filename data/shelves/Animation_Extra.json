@@ -9,7 +9,7 @@
             "annotation": "Delete keys and set default value",
             "image1": "deleteKeys.bmp",
             "imageOverlayLabel": "0 0 0",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.delKeySetDflt()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.delKeySetDflt()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -18,7 +18,7 @@
             "annotation": "Delete keys for selected controls",
             "image1": "deleteKeys.bmp",
             "imageOverlayLabel": "",
-            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimp.reload(tak_misc)\ntak_misc.delKey()",
+            "command": "import takTools.common.tak_misc as tak_misc\nimport imp\nimportlib.reload(tak_misc)\ntak_misc.delKey()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -36,7 +36,7 @@
             "annotation": "Offset keyframe for selected object(s).",
             "image1": "setKeyframe.png",
             "imageOverlayLabel": "offset",
-            "command": "import takTools.animation.tak_offsetKeyframe as tak_offsetKeyframe\nimport imp\nimp.reload(tak_offsetKeyframe)\ntak_offsetKeyframe.UI()",
+            "command": "import takTools.animation.tak_offsetKeyframe as tak_offsetKeyframe\nimport imp\nimportlib.reload(tak_offsetKeyframe)\ntak_offsetKeyframe.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -54,7 +54,7 @@
             "annotation": "Create procedure oscillate animation.",
             "image1": "oscillateMaker.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.animation.tak_oscillateMaker as tak_oscillateMaker\nimport imp\nimp.reload(tak_oscillateMaker)\ntak_oscillateMaker.UI()",
+            "command": "import takTools.animation.tak_oscillateMaker as tak_oscillateMaker\nimport imp\nimportlib.reload(tak_oscillateMaker)\ntak_oscillateMaker.UI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -81,7 +81,7 @@
             "annotation": "Dynamic Spine Baker",
             "image1": "kinSplineHandle.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.animation.dynamicSplineBaker as dsb\nimport imp\nimp.reload(dsb)\ndsb.DynamicSplineBaker()",
+            "command": "import takTools.animation.dynamicSplineBaker as dsb\nimport imp\nimportlib.reload(dsb)\ndsb.DynamicSplineBaker()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -99,7 +99,7 @@
             "annotation": "Retargeting source animation to target.",
             "image1": "takRetargeterIcon.png",
             "imageOverlayLabel": "",
-            "command": "import takRetargeter.ui as tru\nimport imp\nimp.reload(tru)\n\ntry:\n    trUI.close()\nexcept:\n    pass\n\ntrUI = tru.takRetargeterUI.TakRetargeterUI()\ntrUI.show()",
+            "command": "import takRetargeter.ui as tru\nimport imp\nimportlib.reload(tru)\n\ntry:\n    trUI.close()\nexcept:\n    pass\n\ntrUI = tru.takRetargeterUI.TakRetargeterUI()\ntrUI.show()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -108,7 +108,7 @@
             "annotation": "Link Constraint",
             "image1": "out_parentConstraint.png",
             "imageOverlayLabel": "",
-            "command": "from takMaxAniTools import linkConstraintUI as linkCnstUI\nimport imp\nimp.reload(linkCnstUI)\n\nui = linkCnstUI.LinkConstraintUI()\nui.show()",
+            "command": "from takMaxAniTools import linkConstraintUI as linkCnstUI\nimport imp\nimportlib.reload(linkCnstUI)\n\nui = linkCnstUI.LinkConstraintUI()\nui.show()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -117,7 +117,7 @@
             "annotation": "Publish animation.",
             "image1": "out_timeEditorAnimSource.png",
             "imageOverlayLabel": "",
-            "command": "import takAniPublisher.aniPublisherCtrl as apctrl\nimport imp\nimp.reload(apctrl)\n\napCtrl = apctrl.AniPublisherCtrl()\napCtrl.showUI()",
+            "command": "import takAniPublisher.aniPublisherCtrl as apctrl\nimport imp\nimportlib.reload(apctrl)\n\napCtrl = apctrl.AniPublisherCtrl()\napCtrl.showUI()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

@@ -1,4 +1,4 @@
-import imp
+import importlib
 
 from . import base
 from . import simpleFK
@@ -8,10 +8,10 @@ from . import vertebra
 from . import singleJoints
 from . import hair
 
-imp.reload(base)
-imp.reload(simpleFK)
-imp.reload(limb)
-imp.reload(spline)
-imp.reload(vertebra)
-imp.reload(singleJoints)
-imp.reload(hair)
+importlib.reload(base)
+importlib.reload(simpleFK)
+importlib.reload(limb)
+importlib.reload(spline)
+importlib.reload(vertebra)
+importlib.reload(singleJoints)
+importlib.reload(hair)

@@ -13,7 +13,7 @@ def showMenu():
 
     cmds.menuItem(
         label="Custom Shelf",
-        command="import takTools.tak_tools as tt\nimport imp;imp.reload(tt)\ntt.UI()",
+        command="import takTools.tak_tools as tt\nimport importlib;importlib.reload(tt)\ntt.UI()",
         sourceType="python",
         parent=customMenu
     )
@@ -28,13 +28,13 @@ def showMenu():
     cmds.menuItem(
         label="Clean Model",
         image="cleanUpMesh.bmp",
-        command="import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport imp;imp.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()",
+        command="import takTools.modeling.tak_cleanUpModel as tak_cleanUpModel\nimport importlib;importlib.reload(tak_cleanUpModel)\ntak_cleanUpModel.UI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="XGen Manager",
         image="xgenManager.png",
-        command="import takXgenManager.xgenManager as xgm\nimport imp;imp.reload(xgm)\nxgm.XGenManager.showUI()",
+        command="import takXgenManager.xgenManager as xgm\nimport importlib;importlib.reload(xgm)\nxgm.XGenManager.showUI()",
         sourceType="python"
     )
     cmds.menuItem(
@@ -55,27 +55,27 @@ def showMenu():
     cmds.menuItem(
         label="Skin Tool",
         image="smoothSkin.png",
-        command="import takTools.rigging.tak_skinWeights as tak_skinWeights\nimport imp;imp.reload(tak_skinWeights)\ntak_skinWeights.SkinWeights()",
+        command="import takTools.rigging.tak_skinWeights as tak_skinWeights\nimport importlib;importlib.reload(tak_skinWeights)\ntak_skinWeights.SkinWeights()",
         sourceType="python"
     )
     cmds.menuItem(
         label="bSkinSaver",
         image="save.png",
-        command="import takTools.rigging.bSkinSaver as bSkinSaver\nimport imp;imp.reload(bSkinSaver)\nbSkinSaver.showUI()",
+        command="import takTools.rigging.bSkinSaver as bSkinSaver\nimport importlib;importlib.reload(bSkinSaver)\nbSkinSaver.showUI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Select Vertices",
         image="selAffectedVertex.png",
         ann="Select affected vertices with selected joint.",
-        command="import takTools.common.tak_misc as tak_misc\nimport imp;imp.reload(tak_misc)\ntak_misc.selAffectedVertex()",
+        command="import takTools.common.tak_misc as tak_misc\nimport importlib;importlib.reload(tak_misc)\ntak_misc.selAffectedVertex()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Select Joints",
         image="selectInfluences.bmp",
         ann="Select skin joints with selected mesh.",
-        command="import takTools.common.tak_misc as tak_misc\nimport imp;imp.reload(tak_misc)\ntak_misc.selInflu()",
+        command="import takTools.common.tak_misc as tak_misc\nimport importlib;importlib.reload(tak_misc)\ntak_misc.selInflu()",
         sourceType="python"
     )
 
@@ -84,52 +84,52 @@ def showMenu():
     cmds.menuItem(
         label="Auto Rigging",
         image="takAutoRig.png",
-        command="import takTools.rigging.autoRigging as ar\nimport imp;imp.reload(ar)\n\ntry:\n    arui.close()\n    arui.deleteLater()\nexcept:\n    pass\n\narui = ar.ui.mainUI.MainUI()\narui.show()",
+        command="import takTools.rigging.autoRigging as ar\nimport importlib;importlib.reload(ar)\n\ntry:\n    arui.close()\n    arui.deleteLater()\nexcept:\n    pass\n\narui = ar.ui.mainUI.MainUI()\narui.show()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Controller",
         image="circle.png",
-        command="import takTools.rigging.tak_createCtrl as tak_createCtrl\nimport imp;imp.reload(tak_createCtrl)\ntak_createCtrl.UI()",
+        command="import takTools.rigging.tak_createCtrl as tak_createCtrl\nimport importlib;importlib.reload(tak_createCtrl)\ntak_createCtrl.UI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Group",
         image="out_transform.png",
-        command="import takTools.rigging.tak_group as tak_group\nimport imp;imp.reload(tak_group)\ntak_group.UI()",
+        command="import takTools.rigging.tak_group as tak_group\nimport importlib;importlib.reload(tak_group)\ntak_group.UI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Attribute Manager",
         image="attributes.png",
-        command="import takTools.rigging.tak_attrManager as tak_attrManager;import imp;imp.reload(tak_attrManager);tak_attrManager.ui()",
+        command="import takTools.rigging.tak_attrManager as tak_attrManager;import importlib;importlib.reload(tak_attrManager);tak_attrManager.ui()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Mirror Object",
         image="polyMirrorGeometry.png",
-        command="import takTools.common.tak_misc as tak_misc\nimport imp;imp.reload(tak_misc)\ntak_misc.mirObjUi()",
+        command="import takTools.common.tak_misc as tak_misc\nimport importlib;importlib.reload(tak_misc)\ntak_misc.mirObjUi()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Range of Motion",
         image="ROM.png",
         ann="Create range of motion for selected object",
-        command="import takTools.rigging.tak_ROM as tak_ROM\nimport imp;imp.reload(tak_ROM)\ntak_ROM.UI()",
+        command="import takTools.rigging.tak_ROM as tak_ROM\nimport importlib;importlib.reload(tak_ROM)\ntak_ROM.UI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Multi Constraint",
         image="multiConstraint.bmp",
         ann="Constraint to multiple objects, first select driver then selcet other drivens",
-        command="import takTools.rigging.tak_mulConst as tak_mulConst\nimport imp;imp.reload(tak_mulConst)\ntak_mulConst.UI()",
+        command="import takTools.rigging.tak_mulConst as tak_mulConst\nimport importlib;importlib.reload(tak_mulConst)\ntak_mulConst.UI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Copy Mirror SDK",
         image="tak_copySDK.bmp",
         ann="Copy or mirror set driven keyframes",
-        command="import takTools.rigging.tak_copyMirrorSDK as tak_copyMirrorSDK\nimport imp;imp.reload(tak_copyMirrorSDK)\ntak_copyMirrorSDK.UI()",
+        command="import takTools.rigging.tak_copyMirrorSDK as tak_copyMirrorSDK\nimport importlib;importlib.reload(tak_copyMirrorSDK)\ntak_copyMirrorSDK.UI()",
         sourceType="python"
     )
 
@@ -138,48 +138,48 @@ def showMenu():
     cmds.menuItem(
         label="Clean Rig",
         image="cleanUpRig.png",
-        command="import takTools.rigging.tak_cleanUpRig as tak_cleanUpRig\nimport imp;imp.reload(tak_cleanUpRig)\ntak_cleanUpRig.ui()",
+        command="import takTools.rigging.tak_cleanUpRig as tak_cleanUpRig\nimport importlib;importlib.reload(tak_cleanUpRig)\ntak_cleanUpRig.ui()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Attach It",
         image="attachIt.png",
-        command="import takTools.rigging.tak_attachIt as tak_attachIt\nimport imp;imp.reload(tak_attachIt)\ntak_attachIt.UI()",
+        command="import takTools.rigging.tak_attachIt as tak_attachIt\nimport importlib;importlib.reload(tak_attachIt)\ntak_attachIt.UI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Arrange Objects",
         image="arrangeObjs.png",
         ann="Arrange selected object in grid",
-        command="import takTools.common.tak_misc as tm\nimport imp;imp.reload(tm)\n\ntm.arrangeObjectUI()",
+        command="import takTools.common.tak_misc as tm\nimport importlib;importlib.reload(tm)\n\ntm.arrangeObjectUI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="LR Target",
         image="LRTarget.bmp",
         ann="Split facial expression to left and right target.",
-        command="import takTools.rigging.tak_LRTarget as tak_LRTarget\nimport imp;imp.reload(tak_LRTarget)\ntak_LRTarget.UI()",
+        command="import takTools.rigging.tak_LRTarget as tak_LRTarget\nimport importlib;importlib.reload(tak_LRTarget)\ntak_LRTarget.UI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Corrective Blendshape",
         image="correctiveBS.png",
         ann="Corrective blend shape tools.",
-        command="import takTools.rigging.tak_correctiveBS as tak_correctiveBS\nimport imp;imp.reload(tak_correctiveBS)\nposCorObj = tak_correctiveBS.UI()",
+        command="import takTools.rigging.tak_correctiveBS as tak_correctiveBS\nimport importlib;importlib.reload(tak_correctiveBS)\nposCorObj = tak_correctiveBS.UI()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Sliding Control",
         image="softMod.png",
         ann="Create sliding softMod control for selected geometry.",
-        command="import takTools.common.tak_misc as tak_misc\nimport imp;imp.reload(tak_misc)\n\ntak_misc.setupSoftModCtrl()",
+        command="import takTools.common.tak_misc as tak_misc\nimport importlib;importlib.reload(tak_misc)\n\ntak_misc.setupSoftModCtrl()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Sort Outliner",
         image="sortName.png",
         ann="Sorting selected items in outliner.",
-        command="import takTools.common.tak_misc as tak_misc\nimport imp;imp.reload(tak_misc)\ntak_misc.sortOutl()",
+        command="import takTools.common.tak_misc as tak_misc\nimport importlib;importlib.reload(tak_misc)\ntak_misc.sortOutl()",
         sourceType="python"
     )
     cmds.menuItem(
@@ -195,7 +195,7 @@ def showMenu():
     cmds.menuItem(
         label="Move All",
         image="moveAll.png",
-        command="import takMaxAniTools as tmat\nimport imp;imp.reload(tmat)\ntmat.moveAll.setupMoveAll()",
+        command="import takMaxAniTools as tmat\nimport importlib;importlib.reload(tmat)\ntmat.moveAll.setupMoveAll()",
         sourceType="python"
     )
 
@@ -214,13 +214,13 @@ def showMenu():
         label="Remove Panel Callbacks",
         image="menuIconPanels.png",
         ann="Remove model panel callbacks.",
-        command="import takTools.utils.mayaUI as uiUtils\nimport imp;imp.reload(uiUtils)\n\nuiUtils.removeModelPanelCallbacks()",
+        command="import takTools.utils.mayaUI as uiUtils\nimport importlib;importlib.reload(uiUtils)\n\nuiUtils.removeModelPanelCallbacks()",
         sourceType="python"
     )
     cmds.menuItem(
         label="Cleanup Scene",
         image="cleanupScene.png",
         ann="Remove unknown nodes and plugins.",
-        command="import takTools.utils.globalUtil as gUtil;import imp;imp.reload(gUtil);gUtil.cleanupMayaScene()",
+        command="import takTools.utils.globalUtil as gUtil;import importlib;importlib.reload(gUtil);gUtil.cleanupMayaScene()",
         sourceType="python"
     )

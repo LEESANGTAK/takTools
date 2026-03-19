@@ -1,11 +1,11 @@
-import imp
+import importlib
 
 from . import base
 from . import module
 from . import ui
 from . import utils
 
-imp.reload(base)
-imp.reload(module)
-imp.reload(ui)
-imp.reload(utils)
+importlib.reload(base)
+importlib.reload(module)
+importlib.reload(ui)
+importlib.reload(utils)

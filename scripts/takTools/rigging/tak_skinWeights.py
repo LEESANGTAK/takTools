@@ -22,7 +22,7 @@ from maya.api import OpenMaya as om
 from maya.api import OpenMayaAnim as oma
 
 # Custom Modules
-from imp import reload
+from importlib import reload
 from ..rigging import All_Deformers_2_SkinCluster as ad2sc; reload(ad2sc)
 from ..utils import skin as skinUtil; reload(skinUtil)
 from ..utils import bifrost as bfUtil; reload(bfUtil)
