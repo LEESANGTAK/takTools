@@ -1190,8 +1190,8 @@ def showSearchResults(*args):
             cmds.text(label=location)
 
             # Action buttons
-            cmds.button(label='?ìç', annotation='Locate Tool', c=lambda x, r=result: locateTool(r))
-            cmds.button(label='??, annotation='Run Tool', c=lambda x, r=result: runToolFromSearch(r))
+            cmds.button(label='Locate', annotation='Locate Tool', c=lambda x, r=result: locateTool(r))
+            cmds.button(label='Run', annotation='Run Tool', c=lambda x, r=result: runToolFromSearch(r))
 
             cmds.setParent('..')
 
