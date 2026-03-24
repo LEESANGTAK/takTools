@@ -22,7 +22,7 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
 
     # It takes long time and produce desatisfiying result when set too low or too high values
     detailSize = max(detailSize, 0.01)
-    # minHoleRadius = min(mesh.boundingBox().width(), mesh.boundingBox().height(), mesh.boundingBox().depth()) / 4.0
+    minHoleRadius = min(mesh.boundingBox().width(), mesh.boundingBox().height(), mesh.boundingBox().depth()) / 4.0
 
     # Build bifrost graph node
     bfGraph = pm.createNode('bifrostGraphShape')
