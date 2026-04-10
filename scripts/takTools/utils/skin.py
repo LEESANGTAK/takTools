@@ -226,6 +226,21 @@ def separateSkinMesh():
     cmds.delete(tempSkinMesh)
 
 
+def mergeSkinMeshes():
+    sels = cmds.ls(sl=True, objectsOnly=True)
+    skinMeshes = cmds.filterExpand(sels, sm=12)
+    dupMeshes = cmds.duplicate(skinMeshes, rc=True)
+    mergedSkinMesh = cmds.polyUnite(dupMeshes, ch=False, n='mergedSkin#')[0]
+    cmds.polyMergeVertex(mergedSkinMesh, am=True, d=0.01, ch=False)
+    cmds.delete(mergedSkinMesh, ch=True)
+    cmds.delete(dupMeshes)
+    
+    for skinMesh in skinMeshes:
+        copySkinOverlapVertices(skinMesh, mergedSkinMesh, 0.1)
+    
+    cmds.select(mergedSkinMesh, r=True)
+
+
 def addInfluences():
     sels = pm.selected()
     jnts = pm.ls(sels, type='joint')

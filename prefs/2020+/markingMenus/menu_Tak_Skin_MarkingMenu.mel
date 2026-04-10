@@ -361,27 +361,6 @@
         menuEditorMenuItem19;
 
     menuItem
-        -label "Rigidify Skin" 
-        -divider 0
-        -subMenu 0
-        -tearOff 0
-        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.rigidifySkin()\");\n" 
-        -optionBox 0
-        -enable 1
-        -visible 1
-        -data 0
-        -allowOptionBoxes 1
-        -postMenuCommandOnce 0
-        -enableCommandRepeat 1
-        -image "rigidBind.png" 
-        -echoCommand 0
-        -italicized 0
-        -boldFont 1
-        -sourceType "mel" 
-        -longDivider 1
-        menuEditorMenuItem22;
-
-    menuItem
         -label "Duplicate Skin" 
         -divider 0
         -subMenu 0
@@ -424,6 +403,46 @@
         menuEditorMenuItem17;
 
     menuItem
+        -label "Merge Skin" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.mergeSkinMeshes()\");\n" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "polyUnite.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem27;
+
+    menuItem
+        -label "separator" 
+        -divider 1
+        -dividerLabel "separator" 
+        -subMenu 0
+        -tearOff 0
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem26;
+
+    menuItem
         -label "Edit Skin Mesh" 
         -divider 0
         -subMenu 0
@@ -464,6 +483,27 @@
         -sourceType "mel" 
         -longDivider 1
         menuEditorMenuItem25;
+
+    menuItem
+        -label "Rigidify Skin" 
+        -divider 0
+        -subMenu 0
+        -tearOff 0
+        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.rigidifySkin()\");\n" 
+        -optionBox 0
+        -enable 1
+        -visible 1
+        -data 0
+        -allowOptionBoxes 1
+        -postMenuCommandOnce 0
+        -enableCommandRepeat 1
+        -image "rigidBind.png" 
+        -echoCommand 0
+        -italicized 0
+        -boldFont 1
+        -sourceType "mel" 
+        -longDivider 1
+        menuEditorMenuItem22;
 
     menuItem
         -label "Sculpt Skin Weights" 
