@@ -48,7 +48,7 @@ def duplicateFace(faces=None):
         dupFaces = [face.replace(mesh, dupMesh) for face in faces]
 
         allFacesSet = set(cmds.ls(f"{dupMesh}.f[*]", fl=True))
-        selFacesSet = set(dupFaces)
+        selFacesSet = set(cmds.ls(dupFaces, fl=True))
         delFaces = list(allFacesSet - selFacesSet)
         cmds.delete(delFaces)
 
