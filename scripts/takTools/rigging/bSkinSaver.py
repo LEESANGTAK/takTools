@@ -42,6 +42,12 @@ elif 2025 <= MAYA_VERSION:
 EXT = '.sw'
 
 
+def getSelectedGeometries():
+    selShapes = cmds.ls(sl=True, dag=True, ni=True, type=['mesh', 'nurbsCurve', 'nurbsSurface'])
+    selGeos = cmds.filterExpand(selShapes, sm=[9, 10, 12])
+    return selGeos
+
+
 def showUI():
     global mainWin
     mainWin = bSkinSaverUI()
@@ -49,9 +55,9 @@ def showUI():
 
     dirName = os.path.dirname(mainWin.objectsFileLine.text())
     fileName = 'fileName{}'.format(EXT)
-    sels = cmds.ls(sl=True)
-    if sels:
-        fileName = sels[0] + EXT
+    selGeos = getSelectedGeometries()
+    if selGeos:
+        fileName = selGeos[0] + EXT
     mainWin.objectsFileLine.setText(os.path.join(dirName, fileName))
 
 
@@ -580,11 +586,16 @@ def bSaveVertexSkinValues(inputFile, ignoreSoftSelection):
 
 
 def bSaveSkinValues(inputFile, geometry=False):
+    selGeos = getSelectedGeometries()
+    if not selGeos:
+        cmds.warning('no geometries selected')
+        return
 
     timeBefore = time.time()
 
     output = open(inputFile, 'w')
 
+    cmds.select(selGeos, r=True)
     selection = OpenMaya.MSelectionList()
     OpenMaya.MGlobal.getActiveSelectionList(selection)
 
@@ -594,61 +605,54 @@ def bSaveSkinValues(inputFile, geometry=False):
         node = OpenMaya.MDagPath()
         component = OpenMaya.MObject()
         iterate.getDagPath (node, component)
-        if not node.hasFn(OpenMaya.MFn.kTransform):
-            print(OpenMaya.MFnDagNode(node).name() + ' is not a Transform node (need to select transform node of polyMesh)')
-        else:
-            objectName = OpenMaya.MFnDagNode(node).name()
+        objectName = OpenMaya.MFnDagNode(node).name()
+        if geometry:
+            nicePath = inputFile.replace('\\', '/')
+            dirPath = os.path.dirname(nicePath)
+            abcFileName = os.path.basename(nicePath).replace(EXT, '.abc')
+            mel.eval('AbcExport -j "-frameRange 0 0 -stripNamespaces -uvWrite -worldSpace -writeUVSets -dataFormat ogawa -root {0} -file {1}/{2}";'.format(objectName, dirPath, abcFileName))
 
-            if geometry:
-                nicePath = inputFile.replace('\\', '/')
-                dirPath = os.path.dirname(nicePath)
-                abcFileName = os.path.basename(nicePath).replace(EXT, '.abc')
-                mel.eval('AbcExport -j "-frameRange 0 0 -stripNamespaces -uvWrite -worldSpace -writeUVSets -dataFormat ogawa -root {0} -file {1}/{2}";'.format(objectName, dirPath, abcFileName))
+        newTransform = OpenMaya.MFnTransform(node)
+        for childIndex in range(newTransform.childCount()):
+            childObject = newTransform.child(childIndex)
+            if childObject.hasFn(OpenMaya.MFn.kMesh) or childObject.hasFn(OpenMaya.MFn.kNurbsSurface) or childObject.hasFn(OpenMaya.MFn.kCurve):
+                skinCluster = bFindSkinCluster(OpenMaya.MFnDagNode(childObject).partialPathName())
+                if skinCluster is not False:
+                    bSkinPath = OpenMaya.MDagPath()
+                    fnSkinCluster = OpenMayaAnim.MFnSkinCluster(skinCluster)
+                    fnSkinCluster.getPathAtIndex(0,bSkinPath)
+                    influenceArray = OpenMaya.MDagPathArray()
+                    fnSkinCluster.influenceObjects(influenceArray)
+                    influentsCount = influenceArray.length()
+                    output.write(objectName + '\n')
 
-            newTransform = OpenMaya.MFnTransform(node)
-            for childIndex in range(newTransform.childCount()):
-                childObject = newTransform.child(childIndex)
-                if childObject.hasFn(OpenMaya.MFn.kMesh) or childObject.hasFn(OpenMaya.MFn.kNurbsSurface) or childObject.hasFn(OpenMaya.MFn.kCurve):
-                    skinCluster = bFindSkinCluster(OpenMaya.MFnDagNode(childObject).partialPathName())
-                    if skinCluster is not False:
-                        bSkinPath = OpenMaya.MDagPath()
-                        fnSkinCluster = OpenMayaAnim.MFnSkinCluster(skinCluster)
-                        fnSkinCluster.getPathAtIndex(0,bSkinPath)
-                        influenceArray = OpenMaya.MDagPathArray()
-                        fnSkinCluster.influenceObjects(influenceArray)
-                        influentsCount = influenceArray.length()
-                        output.write(objectName + '\n')
+                    for k in range(influentsCount):
+                        jointTokens = str(influenceArray[k].fullPathName()).split('|')
+                        jointTokens = jointTokens[len(jointTokens)-1].split(':')
+                        output.write(jointTokens[len(jointTokens)-1] + '\n')
 
-                        for k in range(influentsCount):
-                            jointTokens = str(influenceArray[k].fullPathName()).split('|')
-                            jointTokens = jointTokens[len(jointTokens)-1].split(':')
-                            output.write(jointTokens[len(jointTokens)-1] + '\n')
-
-                        output.write('============\n')
+                    output.write('============\n')
 
 
-                        fnVtxComp = OpenMaya.MFnSingleIndexedComponent()
-                        vtxComponents = OpenMaya.MObject()
-                        vtxComponents = fnVtxComp.create( OpenMaya.MFn.kMeshVertComponent )
+                    fnVtxComp = OpenMaya.MFnSingleIndexedComponent()
+                    vtxComponents = OpenMaya.MObject()
+                    vtxComponents = fnVtxComp.create( OpenMaya.MFn.kMeshVertComponent )
 
-                        vertexCount = OpenMaya.MFnMesh(bSkinPath).numVertices()
-                        for i in range(vertexCount):
-                            fnVtxComp.addElement( i )
+                    vertexCount = OpenMaya.MFnMesh(bSkinPath).numVertices()
+                    for i in range(vertexCount):
+                        fnVtxComp.addElement( i )
 
-                        WeightArray = OpenMaya.MFloatArray()
-                        scriptUtil = OpenMaya.MScriptUtil()
-                        infCountPtr = scriptUtil.asUintPtr()
-                        fnSkinCluster.getWeights(bSkinPath, vtxComponents, WeightArray, infCountPtr)
-                        infCount = OpenMaya.MScriptUtil.getUint(infCountPtr)
+                    WeightArray = OpenMaya.MFloatArray()
+                    scriptUtil = OpenMaya.MScriptUtil()
+                    infCountPtr = scriptUtil.asUintPtr()
+                    fnSkinCluster.getWeights(bSkinPath, vtxComponents, WeightArray, infCountPtr)
+                    infCount = OpenMaya.MScriptUtil.getUint(infCountPtr)
 
-                        for i in range(vertexCount):
-                            #saveString = ' '.join(map(str,WeightArray[i*infCount : (i+1)*infCount]))
-                            saveString = ' '.join(['0' if x == 0 else str(x) for n,x in enumerate(WeightArray[i*infCount : (i+1)*infCount])])
+                    for i in range(vertexCount):
+                        saveString = ' '.join(['0' if x == 0 else str(x) for n,x in enumerate(WeightArray[i*infCount : (i+1)*infCount])])
+                        output.write(saveString + '\n')
 
-                            output.write(saveString + '\n')
-
-                        output.write('\n')
-
+                    output.write('\n')
 
         iterate.next()
 
