@@ -234,10 +234,10 @@ def mergeSkinMeshes():
     cmds.polyMergeVertex(mergedSkinMesh, am=True, d=0.01, ch=False)
     cmds.delete(mergedSkinMesh, ch=True)
     cmds.delete(dupMeshes)
-    
+
     for skinMesh in skinMeshes:
         copySkinOverlapVertices(skinMesh, mergedSkinMesh, 0.1)
-    
+
     cmds.select(mergedSkinMesh, r=True)
 
 
@@ -347,18 +347,17 @@ def updateBindPose(rootJoint):
     :type rootJoint: str
     """
     parent = cmds.listRelatives(rootJoint, p=True)
-    if parent:
-        if cmds.nodeType(parent[0]) == 'joint':
-            cmds.error('Joint "{}" has parent joint. Please use the root joint of the hierarchy.'.format(rootJoint))
-            return
-        else:
-            cmds.parent(rootJoint, world=True)
+    if parent and cmds.nodeType(parent[0]) == 'joint':
+        cmds.error('Joint "{}" has parent joint. Please use the root joint of the hierarchy.'.format(rootJoint))
+        return
 
-    cmds.delete(cmds.dagPose(rootJoint, q=True, bindPose=True))
-    cmds.dagPose(cmds.ls(rootJoint, dag=True), n='bindPose', save=True, bindPose=True)
-
-    if parent:
-        cmds.parent(rootJoint, parent[0])
+    joints = cmds.ls(rootJoint, dag=True, type='joint')
+    bindPoses = cmds.dagPose(rootJoint, q=True, bindPose=True)
+    if len(bindPoses) > 1:
+        cmds.delete(bindPoses)
+        cmds.dagPose(joints, n='bindPose', save=True, bindPose=True)
+    else:
+        cmds.dagPose(joints, n=bindPoses[0], reset=True)
 
 
 def goToBindPose(rootJoint):
