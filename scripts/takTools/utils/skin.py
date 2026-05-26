@@ -229,6 +229,9 @@ def separateSkinMesh():
 def mergeSkinMeshes():
     sels = cmds.ls(sl=True, objectsOnly=True)
     skinMeshes = cmds.filterExpand(sels, sm=12)
+    if len(skinMeshes) != len([getSkinCluster(mesh) for mesh in skinMeshes if getSkinCluster(mesh)]):
+        cmds.warning('All selected meshes must have skin cluster. Please check then try again.')
+        return
     dupMeshes = cmds.duplicate(skinMeshes, rc=True)
     mergedSkinMesh = cmds.polyUnite(dupMeshes, ch=False, n='mergedSkin#')[0]
     cmds.polyMergeVertex(mergedSkinMesh, am=True, d=0.01, ch=False)
