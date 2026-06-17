@@ -74,6 +74,10 @@ def duplicateFace(faces=None):
     else:
         dupMesh = dupMeshes[0]
 
+    cleanupMesh(dupMesh)
+
+    cmds.select(dupMesh, r=True)
+
     return dupMesh
 
 
