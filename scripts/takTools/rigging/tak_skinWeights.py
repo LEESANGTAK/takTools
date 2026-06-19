@@ -95,6 +95,7 @@ class SkinWeights(object):
         self.uiWidgets['updateBindPoseMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Update Bind Pose', c=updateBindPose, ann='Update bind pose for selected root joint.')
         cmds.menuItem(divider=True)
         self.uiWidgets['hammerMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Hammer', c="mel.eval('weightHammerVerts;')", ann='Set average weights with neighbor vertices.')
+        self.uiWidgets['conformMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Conform', c=skinUtil.conformSkin, ann='Conform skin weights for the selected faces.')
         self.uiWidgets['rigidifyMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Simplify', c=skinUtil.simplifySkin, ann='Simplify skin for selected vertices. It is good for thin surface like collar.')
         self.uiWidgets['mirrorMenuItem'] = cmds.menuItem(p=self.uiWidgets['editMenu'], label='Mirror', c=skinUtil.mirrorSkin, ann='Mirror skin weights positive X to negative X.')
         cmds.menuItem(optionBox=True, c='mel.eval("MirrorSkinWeightsOptions;")')

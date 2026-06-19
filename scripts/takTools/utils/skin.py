@@ -81,6 +81,138 @@ def mirrorSkin(*args):
     cmds.copySkinWeights(mirrorMode='YZ', surfaceAssociation='closestPoint', influenceAssociation=['closestJoint', 'oneToOne'])
 
 
+def addInfCopySkin(source=None, targets=None):
+    '''
+    Add source skin geometry's influences to the target geoemtry if not exists in the target skin geometry.
+    And copy skin weights.
+    '''
+
+    removeLockWeightsInputConnection()
+
+    # When no source and no targets are given, get the first selected object as source and the rest as targets.
+    if not source and not targets:
+        sels = cmds.ls(os=True, fl=True)
+
+        # Filter components and geometries
+        components = cmds.filterExpand(sels, sm=[28, 31, 32, 34]) or []  # Components that in a object set are filtered also
+        geometries = cmds.filterExpand(sels, sm=[9, 10, 12]) or []
+
+        # Get source and targets depends on selection state
+        if components and len(geometries) == 1:  # When components are selected as targets
+            source = geometries[0]
+            targets = components
+        elif len(geometries) > 1:  # When geometries are selected as targets
+            source = sels[0]
+            targets = sels[1:]
+            # Store shape visibility state and turn on visibility for targets
+            targetsShapeVisInfo = []
+            for trgSkinGeo in targets:
+                shapes = cmds.listRelatives(trgSkinGeo, s=True, ni=True)
+                if shapes:
+                    shapeVisStateInfo = {}
+                    for shape in shapes:
+                        visState = cmds.getAttr(f'{shape}.visibility')
+                        shapeVisStateInfo[shape] = visState
+                        cmds.setAttr(f'{shape}.visibility', True)
+                    targetsShapeVisInfo.append(shapeVisStateInfo)
+                else:
+                    targets.remove(trgSkinGeo)
+                    cmds.warning(f'"{trgSkinGeo}" has no valid shapes. Skip copy skin operation for the "{trgSkinGeo}".')
+
+    # Store shape visibility state and turn on visibility for the source
+    srcShape = source if cmds.nodeType(source) == 'mesh' else cmds.listRelatives(source, s=True, ni=True)[0]
+    srcShapeVisState = cmds.getAttr('{}.visibility'.format(srcShape))
+    cmds.setAttr('{}.visibility'.format(srcShape), True)
+
+    # Check if targets are valid
+    if not targets:
+        cmds.error('No targets found.')
+    if not isinstance(targets, list):
+        cmds.error('Targets should be a list')
+
+    # Get source skin cluster and influences
+    cmds.select(source, r=True)
+    srcSkinClst = mel.eval('findRelatedSkinCluster("%s");' % source)
+    srcInfs = cmds.skinCluster(srcSkinClst, q=True, inf=True)
+
+    trgSkinClsts = []
+    if components:
+        # Get targets info
+        componentShapes = list(set(cmds.ls(components, objectsOnly=True)))
+        componentObjects = [cmds.listRelatives(shape, parent=True)[0] for shape in componentShapes]
+        targetsInfo = {}
+        for object in componentObjects:
+            objectComponents = [component for component in components if object in component]
+            targetsInfo[object] = objectComponents
+
+        for trgSkinGeo, targetComponents in targetsInfo.items():
+            trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
+
+            # Bind target skin geo with source influences if target skin geo has not a skin cluster
+            if not trgSkinClst:
+                cmds.skinCluster(srcInfs, trgSkinGeo, mi=4, dr=4, tsb=True, omi=False, nw=1)
+                trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
+
+            # Add source influences if not in the target influences
+            trgInfs = cmds.skinCluster(trgSkinClst, q=True, inf=True)
+            for srcInf in srcInfs:
+                if srcInf in trgInfs:
+                    continue
+                cmds.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ai=srcInf)
+                cmds.setAttr('%s.liw' % srcInf, False)
+
+            # Copy skin weights from source to target components
+            cmds.select(source, targetComponents, r=True)
+            cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
+            trgSkinClsts.append(trgSkinClst)
+    else:
+        for trgSkinGeo in targets:
+            trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
+
+            if not trgSkinClst:
+                cmds.skinCluster(srcInfs, trgSkinGeo, mi=4, dr=4, tsb=True, omi=False, nw=1)
+                trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % trgSkinGeo)
+
+            cmds.select(trgSkinGeo, r=True)
+            trgInfs = cmds.skinCluster(trgSkinClst, q=True, inf=True)
+
+            for inf in srcInfs:
+                if inf in trgInfs:
+                    continue
+                else:
+                    cmds.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ai=inf)
+                    cmds.setAttr('%s.liw' % inf, False)
+
+            cmds.select(source, trgSkinGeo, r=True)
+            cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
+
+            trgSkinClsts.append(trgSkinClst)
+
+        # Restore targets shapes visiblity state
+        for targetVisInfo in targetsShapeVisInfo:
+            for trgShape, visState in targetVisInfo.items():
+                cmds.setAttr(f'{trgShape}.visibility', visState)
+
+    # Restore source shapes visibility state
+    cmds.setAttr(f'{srcShape}.visibility', srcShapeVisState)
+
+    for trgSkinClst in trgSkinClsts:
+        srcSkinMethod = max(cmds.getAttr('%s.skinningMethod' % srcSkinClst), 0)
+        trgSkinMethod = max(cmds.getAttr('%s.skinningMethod' % trgSkinClst), 0)
+        if trgSkinMethod != 2:  # Set skinning method as same as source skin cluster if not Weighted Blended
+            cmds.setAttr('%s.skinningMethod' % trgSkinClst, srcSkinMethod)
+        srcUseComponent = cmds.getAttr('%s.useComponents' % srcSkinClst)
+        cmds.setAttr('%s.useComponents' % trgSkinClst, srcUseComponent)
+        srcNormalize = cmds.getAttr('%s.normalizeWeights' % srcSkinClst)
+        cmds.setAttr('%s.normalizeWeights' % trgSkinClst, srcNormalize)
+        srcMaintainMI = cmds.getAttr('%s.maintainMaxInfluences' % srcSkinClst)
+        cmds.setAttr('%s.maintainMaxInfluences' % trgSkinClst, srcMaintainMI)
+        srcMI = cmds.getAttr('%s.maxInfluences' % srcSkinClst)
+        cmds.setAttr('%s.maxInfluences' % trgSkinClst, srcMI)
+
+    cmds.select(source, targets, r=True)
+
+
 def copySkin(source, target, components=None):
     """
     Copy source geometry skin weights to target geometry.
@@ -521,3 +653,16 @@ def simplifySkin(*args):
 
     cmds.selectMode(component=True)
     cmds.select(selComponents, r=True)
+
+
+def conformSkin(*args):
+    selFaces = cmds.filterExpand(cmds.ls(sl=True, fl=True), sm=[34])
+    if not selFaces:
+        cmds.error('Please select faces to conform skin weights.')
+        return
+    cmds.InvertSelection()
+    dupSkinMesh = duplicateSkinMesh()
+    cmds.select(selFaces, dupSkinMesh, r=True)
+    addInfCopySkin()
+    cmds.delete(dupSkinMesh)
+    cmds.select(cl=True)
