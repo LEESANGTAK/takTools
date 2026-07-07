@@ -7,7 +7,7 @@
 //
 runTimeCommand
 	-label ""
-	-annotation "Tak_Display_MarkingMenu (Press)"
+	-annotation "Tak_Skin_MarkingMenu (Press)"
 	-longAnnotation ""
 	-category "User Marking Menus"
 	-image ""
@@ -17,12 +17,27 @@ runTimeCommand
 	-helpUrl ""
 	-hotkeyCtx ""
 	-commandLanguage "mel"
-	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Display_MarkingMenu\";\n")
-	Tak_Display_MarkingMenu_Press;
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Skin_MarkingMenu\";\n")
+	Tak_Skin_MarkingMenu_Press;
 
 runTimeCommand
 	-label ""
-	-annotation "Tak_Selection_MarkingMenu (Release)"
+	-annotation "Toggle display wireframe of meshes."
+	-longAnnotation ""
+	-category "Custom Scripts.Display"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("import takTools.common.tak_misc as tak_misc\nimport imp; imp.reload(tak_misc)\ntak_misc.wireOnOff()")
+	toggleWire;
+
+runTimeCommand
+	-label ""
+	-annotation "Tak_Display_MarkingMenu (Release)"
 	-longAnnotation ""
 	-category "User Marking Menus"
 	-image ""
@@ -33,7 +48,7 @@ runTimeCommand
 	-hotkeyCtx ""
 	-commandLanguage "mel"
 	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
-	Tak_Selection_MarkingMenu_Release;
+	Tak_Display_MarkingMenu_Release;
 
 runTimeCommand
 	-label ""
@@ -67,82 +82,7 @@ runTimeCommand
 
 runTimeCommand
 	-label ""
-	-annotation "Tak_Rigging_MarkingMenu (Press)"
-	-longAnnotation ""
-	-category "User Marking Menus"
-	-image ""
-	-tags ""
-	-keywords ""
-	-plugin ""
-	-helpUrl ""
-	-hotkeyCtx ""
-	-commandLanguage "mel"
-	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Rigging_MarkingMenu\";\n")
-	Tak_Rigging_MarkingMenu_Press;
-
-runTimeCommand
-	-label ""
-	-annotation "Tak_Display_MarkingMenu (Release)"
-	-longAnnotation ""
-	-category "User Marking Menus"
-	-image ""
-	-tags ""
-	-keywords ""
-	-plugin ""
-	-helpUrl ""
-	-hotkeyCtx ""
-	-commandLanguage "mel"
-	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
-	Tak_Display_MarkingMenu_Release;
-
-runTimeCommand
-	-label ""
-	-annotation "Toggle display wireframe of meshes."
-	-longAnnotation ""
-	-category "Custom Scripts.Display"
-	-image ""
-	-tags ""
-	-keywords ""
-	-plugin ""
-	-helpUrl ""
-	-hotkeyCtx ""
-	-commandLanguage "python"
-	-command ("import takTools.common.tak_misc as tak_misc\nimport imp; imp.reload(tak_misc)\ntak_misc.wireOnOff()")
-	toggleWire;
-
-runTimeCommand
-	-label ""
-	-annotation "Tak_Rigging_MarkingMenu (Release)"
-	-longAnnotation ""
-	-category "User Marking Menus"
-	-image ""
-	-tags ""
-	-keywords ""
-	-plugin ""
-	-helpUrl ""
-	-hotkeyCtx ""
-	-commandLanguage "mel"
-	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
-	Tak_Rigging_MarkingMenu_Release;
-
-runTimeCommand
-	-label ""
-	-annotation "Toggle selection mode"
-	-longAnnotation ""
-	-category "Custom Scripts.Select"
-	-image ""
-	-tags ""
-	-keywords ""
-	-plugin ""
-	-helpUrl ""
-	-hotkeyCtx ""
-	-commandLanguage "python"
-	-command ("objMode = cmds.selectMode(q=True, object=True)\nif not objMode:\n    cmds.selectMode(object=True)\nelse:\n    cmds.selectMode(component=True)\n")
-	toggleComponentMode;
-
-runTimeCommand
-	-label ""
-	-annotation "Toggle deformers for selected meshes"
+	-annotation "Create a joint on center of selected objects."
 	-longAnnotation ""
 	-category "Custom Scripts.Rigging"
 	-image ""
@@ -152,12 +92,12 @@ runTimeCommand
 	-helpUrl ""
 	-hotkeyCtx ""
 	-commandLanguage "python"
-	-command ("from imp import reload\nfrom takTools.utils import mesh as meshUtil\nreload(meshUtil)\n\nmeshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\nfor mesh in meshes:\n\tmeshUtil.toggleDeformers(mesh)\n")
-	toggleDeformers;
+	-command ("from imp import reload\nfrom takTools.utils import joint as jntUtil; reload(jntUtil)\n\n\nsels = cmds.ls(sl=True, fl=True)\n\n# Handle if components exists in selection\nedgesFaces = cmds.filterExpand(sels, sm=[32, 34])\nif edgesFaces:\n    vertices = cmds.ls(cmds.polyListComponentConversion(sels, toVertex=True), fl=True)\n    sels = list(set(sels) - set(edgesFaces))\n    sels.extend(vertices)\n\njntUtil.createOnCenter(sels)")
+	createJointOnCenter;
 
 runTimeCommand
 	-label ""
-	-annotation "Tak_Skin_MarkingMenu (Press)"
+	-annotation "Tak_Selection_MarkingMenu (Release)"
 	-longAnnotation ""
 	-category "User Marking Menus"
 	-image ""
@@ -167,8 +107,8 @@ runTimeCommand
 	-helpUrl ""
 	-hotkeyCtx ""
 	-commandLanguage "mel"
-	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Skin_MarkingMenu\";\n")
-	Tak_Skin_MarkingMenu_Press;
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Selection_MarkingMenu_Release;
 
 runTimeCommand
 	-label ""
@@ -187,7 +127,82 @@ runTimeCommand
 
 runTimeCommand
 	-label ""
-	-annotation "Create a joint on center of selected objects."
+	-annotation "Tak_Rigging_MarkingMenu (Release)"
+	-longAnnotation ""
+	-category "User Marking Menus"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }")
+	Tak_Rigging_MarkingMenu_Release;
+
+runTimeCommand
+	-label ""
+	-annotation "Tak_Rigging_MarkingMenu (Press)"
+	-longAnnotation ""
+	-category "User Marking Menus"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Rigging_MarkingMenu\";\n")
+	Tak_Rigging_MarkingMenu_Press;
+
+runTimeCommand
+	-label ""
+	-annotation "Toggle selection mode"
+	-longAnnotation ""
+	-category "Custom Scripts.Select"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("objMode = cmds.selectMode(q=True, object=True)\nif not objMode:\n    cmds.selectMode(object=True)\nelse:\n    cmds.selectMode(component=True)\n")
+	toggleComponentMode;
+
+runTimeCommand
+	-label ""
+	-annotation "Select joints that has children joints."
+	-longAnnotation ""
+	-category "Custom Scripts.Select"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"noEndJnts = []\");\npython(\"sels = pm.ls(sl=True)\");\npython(\"for sel in sels: noEndJnts.extend(jntUtils.getJointsExceptEnd(sel))\");\npython(\"pm.select(noEndJnts, r=True)\");")
+	selectNoEndJoints;
+
+runTimeCommand
+	-label ""
+	-annotation "Tak_Display_MarkingMenu (Press)"
+	-longAnnotation ""
+	-category "User Marking Menus"
+	-image ""
+	-tags ""
+	-keywords ""
+	-plugin ""
+	-helpUrl ""
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("if (`popupMenu -exists tempMM`) { deleteUI tempMM; }\npopupMenu -button 1 -ctl false -alt false -sh true -allowOptionBoxes true -parent `findPanelPopupParent` -mm 1 tempMM; \nsource \"menu_Tak_Display_MarkingMenu\";\n")
+	Tak_Display_MarkingMenu_Press;
+
+runTimeCommand
+	-label ""
+	-annotation "Toggle deformers for selected meshes"
 	-longAnnotation ""
 	-category "Custom Scripts.Rigging"
 	-image ""
@@ -197,8 +212,8 @@ runTimeCommand
 	-helpUrl ""
 	-hotkeyCtx ""
 	-commandLanguage "python"
-	-command ("from imp import reload\nfrom takTools.utils import joint as jntUtil; reload(jntUtil)\n\n\nsels = cmds.ls(sl=True, fl=True)\n\n# Handle if components exists in selection\nedgesFaces = cmds.filterExpand(sels, sm=[32, 34])\nif edgesFaces:\n    vertices = cmds.ls(cmds.polyListComponentConversion(sels, toVertex=True), fl=True)\n    sels = list(set(sels) - set(edgesFaces))\n    sels.extend(vertices)\n\njntUtil.createOnCenter(sels)")
-	createJointOnCenter;
+	-command ("from imp import reload\nfrom takTools.utils import mesh as meshUtil\nreload(meshUtil)\n\nmeshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\nfor mesh in meshes:\n\tmeshUtil.toggleDeformers(mesh)\n")
+	toggleDeformers;
 
 //
 // The name commands referenced by the hotkeys
@@ -317,6 +332,18 @@ nameCommand
 	-command ("ToggleColorFeedback")
 	ToggleColorFeedbackNameCommand;
 
+nameCommand
+	-annotation "Focus Tak Tools Search Field"
+	-sourceType "mel"
+	-command ("cmds.setFocus(\"searchField\")")
+	takToolsFocusSearch;
+
+nameCommand
+	-annotation "selectNoEndJointsNameCommand"
+	-sourceType "mel"
+	-command ("selectNoEndJoints")
+	selectNoEndJointsNameCommand;
+
 //
 // The user hotkeys
 //
@@ -327,51 +354,51 @@ hotkeySet -source "Maya_Default" -current takTools;
 //
 // The hotkey contexts and hotkeys
 //
-hotkey -keyShortcut "f" -alt -name ("ToggleColorFeedbackNameCommand");
-hotkey -keyShortcut "z" -alt -sht -name ("GoToBindPoseNameCommand");
-hotkey -keyShortcut "!" -name ("Tak_Display_MarkingMenu_PressNameCommand");
-hotkey -keyShortcut "!" -releaseName ("Tak_Display_MarkingMenu_ReleaseNameCommand");
-hotkey -keyShortcut "s" -ctl -alt -name ("toggleComponentModeNameCommand");
 hotkey -keyShortcut "s" -alt -sht -name ("");
-hotkey -keyShortcut "w" -ctl -alt -name ("");
-hotkey -keyShortcut "c" -ctl -name ("");
-hotkey -keyShortcut "e" -ctl -alt -name ("SelectEdgeLoopSpNameCommand");
-hotkey -keyShortcut "c" -alt -sht -name ("createJointOnCenterNameCommand");
-hotkey -keyShortcut "a" -ctl -alt -name ("SelectHierarchyNameCommand");
-hotkey -keyShortcut "d" -ctl -alt -name ("");
-hotkey -keyShortcut "v" -ctl -name ("");
-hotkey -keyShortcut "w" -alt -name ("toggleWireNameCommand");
-hotkey -keyShortcut "$" -releaseName ("Tak_Skin_MarkingMenu_ReleaseNameCommand");
-hotkey -keyShortcut "$" -name ("Tak_Skin_MarkingMenu_PressNameCommand");
-hotkey -keyShortcut "c" -ctl -sht -name ("CreateCameraFromViewNameCommand");
-hotkey -keyShortcut "x" -alt -sht -name ("toggleDeformersNameCommand");
-hotkey -keyShortcut "w" -alt -sht -name ("");
-hotkey -keyShortcut "c" -sht -releaseName ("");
-hotkey -keyShortcut "f" -alt -sht -name ("");
-hotkey -keyShortcut "c" -sht -name ("");
-hotkey -keyShortcut "e" -alt -sht -name ("");
-hotkey -keyShortcut "#" -releaseName ("Tak_Rigging_MarkingMenu_ReleaseNameCommand");
-hotkey -keyShortcut "z" -ctl -alt -name ("");
 hotkey -keyShortcut "c" -alt -name ("toggleVertexColorNameCommand");
+hotkey -keyShortcut "d" -ctl -alt -name ("selectNoEndJointsNameCommand");
+hotkey -keyShortcut "z" -ctl -alt -name ("");
+hotkey -keyShortcut "f" -alt -sht -name ("takToolsFocusSearch");
+hotkey -keyShortcut "s" -ctl -alt -name ("toggleComponentModeNameCommand");
+hotkey -keyShortcut "#" -releaseName ("Tak_Rigging_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "w" -alt -name ("toggleWireNameCommand");
 hotkey -keyShortcut "#" -name ("Tak_Rigging_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "w" -alt -sht -name ("");
+hotkey -keyShortcut "e" -alt -sht -name ("");
+hotkey -keyShortcut "x" -alt -sht -name ("toggleDeformersNameCommand");
+hotkey -keyShortcut "v" -ctl -name ("");
 hotkey -keyShortcut "@" -releaseName ("Tak_Selection_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "c" -ctl -sht -name ("CreateCameraFromViewNameCommand");
 hotkey -keyShortcut "@" -name ("Tak_Selection_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "c" -sht -releaseName ("");
 hotkey -keyShortcut "F8" -name ("SelectToggleModeNameCommand");
-hotkeyCtx -type "Editor" -addClient "profilerPanel";
-hotkeyCtx -type "Editor" -addClient "hyperGraphPanel";
+hotkey -keyShortcut "f" -alt -name ("ToggleColorFeedbackNameCommand");
+hotkey -keyShortcut "$" -releaseName ("Tak_Skin_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "c" -sht -name ("");
+hotkey -keyShortcut "$" -name ("Tak_Skin_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "!" -name ("Tak_Display_MarkingMenu_PressNameCommand");
+hotkey -keyShortcut "e" -ctl -alt -name ("SelectEdgeLoopSpNameCommand");
+hotkey -keyShortcut "z" -alt -sht -name ("GoToBindPoseNameCommand");
+hotkey -keyShortcut "!" -releaseName ("Tak_Display_MarkingMenu_ReleaseNameCommand");
+hotkey -keyShortcut "c" -ctl -name ("");
+hotkey -keyShortcut "a" -ctl -alt -name ("SelectHierarchyNameCommand");
+hotkey -keyShortcut "w" -ctl -alt -name ("");
+hotkey -keyShortcut "c" -alt -sht -name ("createJointOnCenterNameCommand");
 hotkeyCtx -type "Editor" -addClient "outlinerPanel";
-hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel";
-hotkeyCtx -type "Editor" -addClient "nodeEditorPanel";
 hotkeyCtx -type "Editor" -addClient "timeEditorPanel";
-hotkeyCtx -type "Editor" -addClient "posePanel";
 hotkeyCtx -type "Editor" -addClient "hyperShadePanel";
+hotkeyCtx -type "Editor" -addClient "nodeEditorPanel";
 hotkeyCtx -type "Editor" -addClient "graphEditor";
 hotkeyCtx -type "Editor" -addClient "shapePanel";
+hotkeyCtx -type "Editor" -addClient "hyperGraphPanel";
+hotkeyCtx -type "Editor" -addClient "profilerPanel";
+hotkeyCtx -type "Editor" -addClient "posePanel";
+hotkeyCtx -type "Editor" -addClient "polyTexturePlacementPanel";
+hotkeyCtx -type "Tool" -addClient "bpDraw";
+hotkeyCtx -type "Tool" -addClient "xgmIGBrush";
 hotkeyCtx -type "Tool" -addClient "polyCutUV";
+hotkeyCtx -type "Tool" -addClient "texCutContext";
+hotkeyCtx -type "Tool" -addClient "texSculptCacheContext";
+hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush";
 hotkeyCtx -type "Tool" -addClient "Unfold3DBrush";
 hotkeyCtx -type "Tool" -addClient "sculptMeshCache";
-hotkeyCtx -type "Tool" -addClient "texSculptCacheContext";
-hotkeyCtx -type "Tool" -addClient "xgmIGBrush";
-hotkeyCtx -type "Tool" -addClient "texCutContext";
-hotkeyCtx -type "Tool" -addClient "bpDraw";
-hotkeyCtx -type "Tool" -addClient "SymmetrizeUVBrush";
