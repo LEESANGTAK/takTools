@@ -10,7 +10,7 @@ except:
     pass
 
 
-def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, delHistory=True):
+def convertToCageMesh(meshes, thickening=0.5, faceCount=500, symmetry=False, delHistory=True):
     dupMeshes = pm.duplicate(meshes, rc=True)
     pm.parent(dupMeshes, world=True)
 
@@ -21,7 +21,6 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
         mesh = dupMeshes[0]
 
     # It takes long time and produce desatisfiying result when set too low or too high values
-    detailSize = max(detailSize, 0.01)
     minHoleRadius = min(mesh.boundingBox().width(), mesh.boundingBox().height(), mesh.boundingBox().depth()) / 4.0
 
     # Build bifrost graph node
@@ -34,10 +33,10 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
     # Create a mesh_to_volume node and set parameters
     pm.vnnCompound(bfGraph, '/', addNode='BifrostGraph,Geometry::Converters,mesh_to_volume')
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('volume_mode', '0'))  # Set to solid mode
+    pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('thickening', str(thickening)))  # Set to solid mode
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('store_level_set', '1'))  # This produce more fitted mesh to the input mesh
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('store_fog_density', '0'))
     pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('min_hole_radius', '0.01'))
-    pm.vnnNode(bfGraph, '/mesh_to_volume', setPortDefaultValues=('detail_size', str(detailSize)))
 
     # Create a volume_to_mesh node and add a input port
     pm.vnnCompound(bfGraph, '/', addNode='BifrostGraph,Geometry::Converters,volume_to_mesh')
@@ -53,13 +52,13 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
     pm.vnnNode(bfGraph, "/input", createOutputPort=("offset", "float"))
     pm.vnnConnect(bfGraph, "/input.offset", "/mesh_to_volume.offset")
 
+    pm.vnnNode(bfGraph, "/input", createOutputPort=("thickening", "float"))
+    pm.vnnConnect(bfGraph, "/input.thickening", "/mesh_to_volume.thickening")
+    bfGraph.thickening.set(thickening)
+
     pm.vnnNode(bfGraph, "/input", createOutputPort=("min_hole_radius", "float"))
     pm.vnnConnect(bfGraph, "/input.min_hole_radius", "/mesh_to_volume.min_hole_radius")
     bfGraph.min_hole_radius.set(minHoleRadius)
-
-    pm.vnnNode(bfGraph, "/input", createOutputPort=("detail_size", "float"))
-    pm.vnnConnect(bfGraph, "/input.detail_size", "/mesh_to_volume.detail_size")
-    bfGraph.detail_size.set(detailSize)
 
     pm.addAttr(ln='faceCount', at='long', keyable=True)
     bfGraph.faceCount.set(faceCount)
@@ -89,10 +88,10 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
             axis=1,
             replaceOriginal=True,
             preprocessMesh=True,
-            preserveHardEdges=False,
+            preserveHardEdges=True,
             topologyRegularity=1.0,
             faceUniformity=1.0,
-            anisotropy=0.75,
+            anisotropy=0.5,
             targetFaceCount=faceCount,
             targetFaceCountTolerance=10,
         )[0]
@@ -103,10 +102,10 @@ def convertToCageMesh(meshes, detailSize=0.02, faceCount=500, symmetry=False, de
             ch=False,
             replaceOriginal=True,
             preprocessMesh=True,
-            preserveHardEdges=False,
+            preserveHardEdges=True,
             topologyRegularity=1.0,
             faceUniformity=1.0,
-            anisotropy=0.75,
+            anisotropy=0.5,
             targetFaceCount=faceCount,
             targetFaceCountTolerance=10,
         )[0]
@@ -139,12 +138,12 @@ def showConvertToCageMeshUI(parent=None, *args):
 
         srcMeshes = meshes or faceMeshes
 
-        detailSize = pm.floatField('detailSizeFloatFld', q=True, v=True)
-        faceCount = pm. intFieldGrp('faceCountIntFld', q=True, v1=True)
+        thickening = pm.floatField('thickeningFloatFld', q=True, v=True)
+        faceCount = pm.intFieldGrp('faceCountIntFld', q=True, v1=True)
         symmetry = pm.checkBoxGrp('retopoOptions', q=True, v1=True)
         delHistory = pm.checkBoxGrp('retopoOptions', q=True, v2=True)
 
-        convertToCageMesh(srcMeshes, detailSize, faceCount, symmetry, delHistory)
+        convertToCageMesh(srcMeshes, thickening, faceCount, symmetry, delHistory)
 
         if faceMeshes:
             pm.delete(faceMeshes)
@@ -161,8 +160,8 @@ def showConvertToCageMeshUI(parent=None, *args):
 
     pm.frameLayout(label='Volume Mesh Settings')
     pm.rowColumnLayout(numberOfColumns=2)
-    pm.text(label='Detail Size: ', ann='When this value set to higher the resulting mesh will be more closed to the input mesh.')
-    pm.floatField('detailSizeFloatFld', v=0.01, min=0.01, pre=3)
+    pm.text(label='Thickening: ', ann='Controls the thickness of the generated volume mesh.')
+    pm.floatField('thickeningFloatFld', v=0.5, min=0.1, pre=3)
 
     pm.setParent('..')
     pm.setParent('..')
