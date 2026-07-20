@@ -8,6 +8,7 @@ Description:
 import json
 
 from maya import mel
+from maya import cmds
 import pymel.core as pm
 
 import xgenm as xg
@@ -142,3 +143,33 @@ def findStackedGuides(guides):
                 stackedGuides.extend([guides[i], guides[i+1+j]])
 
     return list(set(stackedGuides))
+
+
+def createGuidesCurveForUE(curves=[]):
+    attr_name = 'groom_guide'
+
+    # get curves from selection
+    if not curves:
+        curves = cmds.ls(sl=True, dag=True, type='nurbsCurve')
+
+    # create new group
+    guides_group = cmds.createNode('transform', name='guides')
+
+    # tag group as groom_guide
+    cmds.addAttr(guides_group, longName=attr_name, attributeType='short', defaultValue=1, keyable=True)
+
+    # forces Maya's alembic to export curves as one group.
+    cmds.addAttr(guides_group, longName='riCurves', attributeType='bool', defaultValue=1, keyable=True)
+
+    # add attribute scope
+    # forces Maya's alembic to export data as GeometryScope::kConstantScope
+    cmds.addAttr(guides_group, longName='{}_AbcGeomScope'.format(attr_name), dataType='string', keyable=True)
+    cmds.setAttr('{}.{}_AbcGeomScope'.format(guides_group, attr_name), 'con', type='string')
+
+    # parent curves under guides group
+    for crv in curves:
+        crvTransform = cmds.listRelatives(crv, p=True)
+        cmds.parent(crv, guides_group, shape=True, relative=True)
+        # Delete empty curve transform
+        cmds.delete(crvTransform)
+
