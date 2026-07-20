@@ -218,7 +218,7 @@ def create_from_selection(method='min_angle', curvature=DEFAULT_CURVATURE, rootL
 
     # Get selected vertices and meshes
     sels = cmds.ls(sl=True, fl=True)
-    selected_vertices = cmds.filterExpand(sels, sm=31)
+    selected_vertices = cmds.filterExpand(sels, sm=[28, 31])
     selected_meshes = cmds.filterExpand(sels, sm=12)
 
     if not selected_vertices and not selected_meshes:
