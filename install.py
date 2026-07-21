@@ -107,6 +107,7 @@ BIFROST_LIB_CONFIG_FILES +:= bifrost/VHH/bifrost_lib_config.json
 BIFROST_LIB_CONFIG_FILES +:= bifrost/Tak/packs/bifrost_lib_config.json
 BIFROST_LIB_CONFIG_FILES +:= bifrost/Hyuu/packs/Hyuu/HyuuPackConfig.json
 BIFROST_LIB_CONFIG_FILES +:= bifrost/MJCG_compounds/bifrost_lib_config.json
+BIFROST_LIB_CONFIG_FILES +:= bifrost/rebel_pack.5.0/bifrost_lib_config.json
 BIFROST_LIB_CONFIG_FILES +:= bifrost/print_pack_V2.9/bifrost_lib_config.json
 BIFROST_LIB_CONFIG_FILES +:= bifrost/Bifrost-TKCMPack/pack/TKCM_config.json
 '''
