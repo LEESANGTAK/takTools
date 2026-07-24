@@ -11,89 +11,9 @@
     "types": [],
     "compounds": [
         {
-            "name": "Tak::SOP::delete_strand_in_sphere",
+            "name": "Tak::SOP::delete_strands_in_sphere",
             "uriImported": "stream:/bifrostGraphShape1",
             "metadata": [
-                {
-                    "metaName": "io_nodes",
-                    "metadata": [
-                        {
-                            "metaName": "io_inodes",
-                            "metadata": [
-                                {
-                                    "metaName": "input",
-                                    "metadata": [
-                                        {
-                                            "metaName": "DisplayMode",
-                                            "metaType": "string",
-                                            "metaValue": "2"
-                                        },
-                                        {
-                                            "metaName": "io_ports",
-                                            "metadata": [
-                                                {
-                                                    "metaName": "strand"
-                                                },
-                                                {
-                                                    "metaName": "radius"
-                                                },
-                                                {
-                                                    "metaName": "position"
-                                                },
-                                                {
-                                                    "metaName": "invert"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "metaName": "zValue",
-                                            "metaType": "string",
-                                            "metaValue": "46.000000"
-                                        },
-                                        {
-                                            "metaName": "LayoutPos",
-                                            "metaType": "string",
-                                            "metaValue": "-281.375 215.874"
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "metaName": "io_onodes",
-                            "metadata": [
-                                {
-                                    "metaName": "output",
-                                    "metadata": [
-                                        {
-                                            "metaName": "DisplayMode",
-                                            "metaType": "string",
-                                            "metaValue": "2"
-                                        },
-                                        {
-                                            "metaName": "io_ports",
-                                            "metadata": [
-                                                {
-                                                    "metaName": "out_geometry"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "metaName": "zValue",
-                                            "metaType": "string",
-                                            "metaValue": "45.000000"
-                                        },
-                                        {
-                                            "metaName": "LayoutPos",
-                                            "metaType": "string",
-                                            "metaValue": "2016.85 178.921"
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
                 {
                     "metaName": "_recentNode_",
                     "metaType": "string",
@@ -120,17 +40,95 @@
                     "metaValue": "BifrostGraph,MJCG::Geometry::Strands,update_strands_orientations"
                 },
                 {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-281.375 215.874"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "strands"
+                                                },
+                                                {
+                                                    "metaName": "radius"
+                                                },
+                                                {
+                                                    "metaName": "position"
+                                                },
+                                                {
+                                                    "metaName": "invert"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "36.000000"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "2016.85 178.921"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "out_geometry"
+                                                },
+                                                {
+                                                    "metaName": "point_indices"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "35.000000"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
                     "metaName": "backdrop",
                     "metadata": [
                         {
                             "metaName": "type",
                             "metaType": "string",
                             "metaValue": "backdrop"
-                        },
-                        {
-                            "metaName": "title",
-                            "metaType": "string",
-                            "metaValue": "delete detected strand's points"
                         },
                         {
                             "metaName": "coords",
@@ -141,13 +139,18 @@
                             "metaName": "fontScaleOffset",
                             "metaType": "string",
                             "metaValue": "0"
+                        },
+                        {
+                            "metaName": "title",
+                            "metaType": "string",
+                            "metaValue": "Delete detected strand's points"
                         }
                     ]
                 },
                 {
                     "metaName": "ViewportRect",
                     "metaType": "string",
-                    "metaValue": "-315.434 22.3023 2592.67 950.506"
+                    "metaValue": "-81.2535 7.64583 2077.12 760.667"
                 },
                 {
                     "metaName": "DisplayMode",
@@ -155,20 +158,20 @@
                     "metaValue": "2"
                 },
                 {
-                    "metaName": "zValue",
-                    "metaType": "string",
-                    "metaValue": "147.000000"
-                },
-                {
                     "metaName": "LayoutPos",
                     "metaType": "string",
-                    "metaValue": "-171.622 676.66"
+                    "metaValue": "-277.023 -758.809"
+                },
+                {
+                    "metaName": "zValue",
+                    "metaType": "string",
+                    "metaValue": "369.000000"
                 }
             ],
             "terminalStates": [
                 {
                     "name": "Core::Graph::terminal::diagnostic",
-                    "enabled": "true"
+                    "enabled": "false"
                 },
                 {
                     "name": "Core::Graph::terminal::proxy",
@@ -177,7 +180,7 @@
             ],
             "ports": [
                 {
-                    "portName": "strand",
+                    "portName": "strands",
                     "portDirection": "input",
                     "portType": "Object",
                     "portDefault": {}
@@ -199,15 +202,20 @@
                     }
                 },
                 {
+                    "portName": "invert",
+                    "portDirection": "input",
+                    "portType": "bool",
+                    "portDefault": "false"
+                },
+                {
                     "portName": "out_geometry",
                     "portDirection": "output",
                     "portType": "Object"
                 },
                 {
-                    "portName": "invert",
-                    "portDirection": "input",
-                    "portType": "bool",
-                    "portDefault": "true"
+                    "portName": "point_indices",
+                    "portDirection": "output",
+                    "portType": "array<long>"
                 }
             ],
             "compounds": [
@@ -215,83 +223,6 @@
                     "name": "detect_strands_in_sphere",
                     "uriImported": "stream:/bifrostGraphShape1",
                     "metadata": [
-                        {
-                            "metaName": "io_nodes",
-                            "metadata": [
-                                {
-                                    "metaName": "io_inodes",
-                                    "metadata": [
-                                        {
-                                            "metaName": "input",
-                                            "metadata": [
-                                                {
-                                                    "metaName": "DisplayMode",
-                                                    "metaType": "string",
-                                                    "metaValue": "2"
-                                                },
-                                                {
-                                                    "metaName": "LayoutPos",
-                                                    "metaType": "string",
-                                                    "metaValue": "-450 -61"
-                                                },
-                                                {
-                                                    "metaName": "io_ports",
-                                                    "metadata": [
-                                                        {
-                                                            "metaName": "strands3"
-                                                        },
-                                                        {
-                                                            "metaName": "radius"
-                                                        },
-                                                        {
-                                                            "metaName": "position"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "metaName": "zValue",
-                                                    "metaType": "string",
-                                                    "metaValue": "31.000000"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "metaName": "io_onodes",
-                                    "metadata": [
-                                        {
-                                            "metaName": "output",
-                                            "metadata": [
-                                                {
-                                                    "metaName": "DisplayMode",
-                                                    "metaType": "string",
-                                                    "metaValue": "2"
-                                                },
-                                                {
-                                                    "metaName": "io_ports",
-                                                    "metadata": [
-                                                        {
-                                                            "metaName": "out_geometry"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "metaName": "LayoutPos",
-                                                    "metaType": "string",
-                                                    "metaValue": "1668.76 -88.8767"
-                                                },
-                                                {
-                                                    "metaName": "zValue",
-                                                    "metaType": "string",
-                                                    "metaValue": "36.000000"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        },
                         {
                             "metaName": "_recentNode_",
                             "metaType": "string",
@@ -318,6 +249,86 @@
                             "metaValue": "BifrostGraph,Core::Array,find_all_in_array"
                         },
                         {
+                            "metaName": "io_nodes",
+                            "metadata": [
+                                {
+                                    "metaName": "io_inodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "input",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-450 -61"
+                                                },
+                                                {
+                                                    "metaName": "io_ports",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "strands"
+                                                        },
+                                                        {
+                                                            "metaName": "radius"
+                                                        },
+                                                        {
+                                                            "metaName": "position"
+                                                        },
+                                                        {
+                                                            "metaName": "invert"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "31.000000"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "metaName": "io_onodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "output",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "1668.76 -88.8767"
+                                                },
+                                                {
+                                                    "metaName": "io_ports",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "out_geometry"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "metaName": "zValue",
+                                                    "metaType": "string",
+                                                    "metaValue": "32.000000"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
                             "metaName": "backdrop",
                             "metadata": [
                                 {
@@ -333,19 +344,19 @@
                                 {
                                     "metaName": "title",
                                     "metaType": "string",
-                                    "metaValue": "diagnostic for detected strand"
+                                    "metaValue": "Diagnostic for detected strand"
                                 }
                             ]
                         },
                         {
                             "metaName": "ViewportRect",
                             "metaType": "string",
-                            "metaValue": "-22.9167 573.333 2749.5 1008"
+                            "metaValue": "-317.775 -121.938 2233.16 817.812"
                         }
                     ],
                     "ports": [
                         {
-                            "portName": "strands3",
+                            "portName": "strands",
                             "portDirection": "input",
                             "portType": "Object"
                         },
@@ -363,6 +374,10 @@
                             "portName": "out_geometry",
                             "portDirection": "output",
                             "portType": "Object"
+                        },
+                        {
+                            "portName": "invert",
+                            "portDirection": "input"
                         }
                     ],
                     "compounds": [
@@ -370,6 +385,11 @@
                             "name": "update_detected_points_data",
                             "uriImported": "stream:/bifrostGraphShape1",
                             "metadata": [
+                                {
+                                    "metaName": "icon",
+                                    "metaType": "string",
+                                    "metaValue": "<NATIVE>../icons/LoopIterate.svg"
+                                },
                                 {
                                     "metaName": "icon",
                                     "metaType": "string",
@@ -425,11 +445,6 @@
                                                             "metaValue": "2"
                                                         },
                                                         {
-                                                            "metaName": "LayoutPos",
-                                                            "metaType": "string",
-                                                            "metaValue": "-1848.72 -265.179"
-                                                        },
-                                                        {
                                                             "metaName": "io_ports",
                                                             "metadata": [
                                                                 {
@@ -458,7 +473,12 @@
                                                         {
                                                             "metaName": "zValue",
                                                             "metaType": "string",
-                                                            "metaValue": "31.000000"
+                                                            "metaValue": "55.000000"
+                                                        },
+                                                        {
+                                                            "metaName": "LayoutPos",
+                                                            "metaType": "string",
+                                                            "metaValue": "-1968.25 -208.862"
                                                         }
                                                     ]
                                                 }
@@ -491,7 +511,7 @@
                                                         {
                                                             "metaName": "zValue",
                                                             "metaType": "string",
-                                                            "metaValue": "44.000000"
+                                                            "metaValue": "37.000000"
                                                         }
                                                     ]
                                                 }
@@ -510,12 +530,12 @@
                                         {
                                             "metaName": "coords",
                                             "metaType": "string",
-                                            "metaValue": "-1548.22 -957.64 1204.54 617.729"
+                                            "metaValue": "-1548.22 -957.64 1272.8 617.729"
                                         },
                                         {
                                             "metaName": "title",
                                             "metaType": "string",
-                                            "metaValue": "Get strand indices"
+                                            "metaValue": "get point indices of the current strand"
                                         }
                                     ]
                                 },
@@ -535,14 +555,34 @@
                                         {
                                             "metaName": "title",
                                             "metaType": "string",
-                                            "metaValue": "check any point in the sphere per strand"
+                                            "metaValue": "Check any point in the sphere per strand"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "metaName": "backdrop2",
+                                    "metadata": [
+                                        {
+                                            "metaName": "type",
+                                            "metaType": "string",
+                                            "metaValue": "backdrop"
+                                        },
+                                        {
+                                            "metaName": "coords",
+                                            "metaType": "string",
+                                            "metaValue": "536.334 -32.325 776.726 289"
+                                        },
+                                        {
+                                            "metaName": "title",
+                                            "metaType": "string",
+                                            "metaValue": "intersecting if sum of the bool results is grater than 0"
                                         }
                                     ]
                                 },
                                 {
                                     "metaName": "ViewportRect",
                                     "metaType": "string",
-                                    "metaValue": "133.062 12.8096 2044.83 749.658"
+                                    "metaValue": "-753.4 -84.0426 2389.93 875.224"
                                 }
                             ],
                             "ports": [
@@ -606,7 +646,7 @@
                                     ]
                                 },
                                 {
-                                    "nodeName": "get_from_array",
+                                    "nodeName": "current_strand_end_index",
                                     "nodeType": "Core::Array::get_from_array",
                                     "metadata": [
                                         {
@@ -627,7 +667,7 @@
                                     ]
                                 },
                                 {
-                                    "nodeName": "get_from_array1",
+                                    "nodeName": "current_strand_start_index",
                                     "nodeType": "Core::Array::get_from_array",
                                     "metadata": [
                                         {
@@ -648,7 +688,7 @@
                                     ]
                                 },
                                 {
-                                    "nodeName": "subtract",
+                                    "nodeName": "points_size_of_the_current_strand",
                                     "nodeType": "Core::Math::subtract",
                                     "multiInPortNames": [
                                         "value",
@@ -673,7 +713,7 @@
                                     ]
                                 },
                                 {
-                                    "nodeName": "strand_indices",
+                                    "nodeName": "point_indices_of_the_current_strand",
                                     "nodeType": "Core::Array::sequence_array",
                                     "metadata": [
                                         {
@@ -703,19 +743,19 @@
                                             "metaValue": "2"
                                         },
                                         {
-                                            "metaName": "zValue",
-                                            "metaType": "string",
-                                            "metaValue": "52.000000"
-                                        },
-                                        {
                                             "metaName": "LayoutPos",
                                             "metaType": "string",
                                             "metaValue": "-281.788 -243.072"
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "41.000000"
                                         }
                                     ]
                                 },
                                 {
-                                    "nodeName": "distance",
+                                    "nodeName": "distance_from_the_sphere_center",
                                     "nodeType": "Core::Math::distance",
                                     "metadata": [
                                         {
@@ -724,19 +764,19 @@
                                             "metaValue": "2"
                                         },
                                         {
-                                            "metaName": "zValue",
-                                            "metaType": "string",
-                                            "metaValue": "47.000000"
-                                        },
-                                        {
                                             "metaName": "LayoutPos",
                                             "metaType": "string",
                                             "metaValue": "45.947 -136.08"
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "39.000000"
                                         }
                                     ]
                                 },
                                 {
-                                    "nodeName": "less_or_equal",
+                                    "nodeName": "check_points_in_the_sphere",
                                     "nodeType": "Core::Logic::less_or_equal",
                                     "metadata": [
                                         {
@@ -747,12 +787,12 @@
                                         {
                                             "metaName": "zValue",
                                             "metaType": "string",
-                                            "metaValue": "48.000000"
+                                            "metaValue": "53.000000"
                                         },
                                         {
                                             "metaName": "LayoutPos",
                                             "metaType": "string",
-                                            "metaValue": "233.812 92.877"
+                                            "metaValue": "260.669 80.5675"
                                         }
                                     ]
                                 },
@@ -773,7 +813,7 @@
                                         {
                                             "metaName": "zValue",
                                             "metaType": "string",
-                                            "metaValue": "45.000000"
+                                            "metaValue": "38.000000"
                                         }
                                     ]
                                 },
@@ -789,12 +829,12 @@
                                         {
                                             "metaName": "zValue",
                                             "metaType": "string",
-                                            "metaValue": "55.000000"
+                                            "metaValue": "51.000000"
                                         },
                                         {
                                             "metaName": "LayoutPos",
                                             "metaType": "string",
-                                            "metaValue": "512.762 74.1247"
+                                            "metaValue": "546.334 60.6962"
                                         }
                                     ]
                                 },
@@ -810,12 +850,12 @@
                                         {
                                             "metaName": "zValue",
                                             "metaType": "string",
-                                            "metaValue": "56.000000"
+                                            "metaValue": "50.000000"
                                         },
                                         {
                                             "metaName": "LayoutPos",
                                             "metaType": "string",
-                                            "metaValue": "822.742 80.0129"
+                                            "metaValue": "822.742 53.1557"
                                         }
                                     ]
                                 },
@@ -844,14 +884,14 @@
                                             ]
                                         },
                                         {
-                                            "metaName": "zValue",
-                                            "metaType": "string",
-                                            "metaValue": "57.000000"
-                                        },
-                                        {
                                             "metaName": "LayoutPos",
                                             "metaType": "string",
-                                            "metaValue": "1125.06 65.5798"
+                                            "metaValue": "1078.06 47.675"
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "52.000000"
                                         }
                                     ]
                                 },
@@ -865,14 +905,14 @@
                                             "metaValue": "2"
                                         },
                                         {
-                                            "metaName": "zValue",
-                                            "metaType": "string",
-                                            "metaValue": "58.000000"
-                                        },
-                                        {
                                             "metaName": "LayoutPos",
                                             "metaType": "string",
                                             "metaValue": "1478.22 316.795"
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "45.000000"
                                         }
                                     ]
                                 }
@@ -880,42 +920,42 @@
                             "connections": [
                                 {
                                     "source": "increment.output",
-                                    "target": "get_from_array.index"
+                                    "target": "current_strand_end_index.index"
                                 },
                                 {
-                                    "source": "get_from_array.value",
-                                    "target": "subtract.first.value"
+                                    "source": "current_strand_end_index.value",
+                                    "target": "points_size_of_the_current_strand.first.value"
                                 },
                                 {
-                                    "source": "get_from_array1.value",
-                                    "target": "subtract.first.value1"
+                                    "source": "current_strand_start_index.value",
+                                    "target": "points_size_of_the_current_strand.first.value1"
                                 },
                                 {
-                                    "source": "get_from_array1.value",
-                                    "target": "strand_indices.start"
+                                    "source": "current_strand_start_index.value",
+                                    "target": "point_indices_of_the_current_strand.start"
                                 },
                                 {
-                                    "source": "subtract.output",
-                                    "target": "strand_indices.size"
+                                    "source": "points_size_of_the_current_strand.output",
+                                    "target": "point_indices_of_the_current_strand.size"
                                 },
                                 {
-                                    "source": "strand_indices.sequence",
+                                    "source": "point_indices_of_the_current_strand.sequence",
                                     "target": "strand_point_positions.index"
                                 },
                                 {
-                                    "source": "strand_indices.sequence",
+                                    "source": "point_indices_of_the_current_strand.sequence",
                                     "target": "update_array_for_detected_strand_points.index"
                                 },
                                 {
                                     "source": "strand_point_positions.value",
-                                    "target": "distance.first"
+                                    "target": "distance_from_the_sphere_center.first"
                                 },
                                 {
-                                    "source": "distance.distance",
-                                    "target": "less_or_equal.first"
+                                    "source": "distance_from_the_sphere_center.distance",
+                                    "target": "check_points_in_the_sphere.first"
                                 },
                                 {
-                                    "source": "less_or_equal.output",
+                                    "source": "check_points_in_the_sphere.output",
                                     "target": "to_unsigned_int.from"
                                 },
                                 {
@@ -940,7 +980,7 @@
                                 },
                                 {
                                     "source": ".current_index",
-                                    "target": "get_from_array1.index"
+                                    "target": "current_strand_start_index.index"
                                 },
                                 {
                                     "source": ".current_index",
@@ -948,11 +988,11 @@
                                 },
                                 {
                                     "source": ".strand_offset",
-                                    "target": "get_from_array1.array"
+                                    "target": "current_strand_start_index.array"
                                 },
                                 {
                                     "source": ".strand_offset",
-                                    "target": "get_from_array.array"
+                                    "target": "current_strand_end_index.array"
                                 },
                                 {
                                     "source": ".point_position",
@@ -960,11 +1000,11 @@
                                 },
                                 {
                                     "source": ".radius",
-                                    "target": "less_or_equal.second"
+                                    "target": "check_points_in_the_sphere.second"
                                 },
                                 {
                                     "source": ".position",
-                                    "target": "distance.second"
+                                    "target": "distance_from_the_sphere_center.second"
                                 },
                                 {
                                     "source": ".detected_indices",
@@ -982,7 +1022,7 @@
                                     "value": "1"
                                 },
                                 {
-                                    "valueName": "strand_indices.step",
+                                    "valueName": "point_indices_of_the_current_strand.step",
                                     "valueType": "uint",
                                     "value": "1U"
                                 },
@@ -1029,12 +1069,12 @@
                                 {
                                     "metaName": "zValue",
                                     "metaType": "string",
-                                    "metaValue": "47.000000"
+                                    "metaValue": "50.000000"
                                 },
                                 {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
-                                    "metaValue": "558.313 288.149"
+                                    "metaValue": "482.822 289.104"
                                 }
                             ]
                         },
@@ -1055,12 +1095,12 @@
                                 {
                                     "metaName": "zValue",
                                     "metaType": "string",
-                                    "metaValue": "50.000000"
+                                    "metaValue": "49.000000"
                                 },
                                 {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
-                                    "metaValue": "-181.742 279.652"
+                                    "metaValue": "-134.919 298.764"
                                 }
                             ]
                         },
@@ -1074,14 +1114,14 @@
                                     "metaValue": "2"
                                 },
                                 {
-                                    "metaName": "zValue",
-                                    "metaType": "string",
-                                    "metaValue": "49.000000"
-                                },
-                                {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
                                     "metaValue": "190.513 508.572"
+                                },
+                                {
+                                    "metaName": "zValue",
+                                    "metaType": "string",
+                                    "metaValue": "38.000000"
                                 }
                             ]
                         },
@@ -1095,14 +1135,14 @@
                                     "metaValue": "2"
                                 },
                                 {
-                                    "metaName": "zValue",
-                                    "metaType": "string",
-                                    "metaValue": "51.000000"
-                                },
-                                {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
                                     "metaValue": "881.413 -73.523"
+                                },
+                                {
+                                    "metaName": "zValue",
+                                    "metaType": "string",
+                                    "metaValue": "40.000000"
                                 }
                             ]
                         },
@@ -1116,14 +1156,14 @@
                                     "metaValue": "2"
                                 },
                                 {
-                                    "metaName": "zValue",
-                                    "metaType": "string",
-                                    "metaValue": "37.000000"
-                                },
-                                {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
                                     "metaValue": "1002.28 942.716"
+                                },
+                                {
+                                    "metaName": "zValue",
+                                    "metaType": "string",
+                                    "metaValue": "33.000000"
                                 }
                             ]
                         },
@@ -1137,14 +1177,14 @@
                                     "metaValue": "2"
                                 },
                                 {
-                                    "metaName": "zValue",
-                                    "metaType": "string",
-                                    "metaValue": "39.000000"
-                                },
-                                {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
                                     "metaValue": "979.411 1200.38"
+                                },
+                                {
+                                    "metaName": "zValue",
+                                    "metaType": "string",
+                                    "metaValue": "35.000000"
                                 }
                             ]
                         },
@@ -1158,14 +1198,14 @@
                                     "metaValue": "2"
                                 },
                                 {
-                                    "metaName": "zValue",
-                                    "metaType": "string",
-                                    "metaValue": "38.000000"
-                                },
-                                {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
                                     "metaValue": "1259.25 1072.85"
+                                },
+                                {
+                                    "metaName": "zValue",
+                                    "metaType": "string",
+                                    "metaValue": "34.000000"
                                 }
                             ]
                         },
@@ -1177,6 +1217,11 @@
                                     "metaName": "DisplayMode",
                                     "metaType": "string",
                                     "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "1526.42 957.333"
                                 },
                                 {
                                     "metaName": "NodeValueDisplay",
@@ -1196,12 +1241,7 @@
                                 {
                                     "metaName": "zValue",
                                     "metaType": "string",
-                                    "metaValue": "40.000000"
-                                },
-                                {
-                                    "metaName": "LayoutPos",
-                                    "metaType": "string",
-                                    "metaValue": "1526.42 957.333"
+                                    "metaValue": "36.000000"
                                 }
                             ]
                         },
@@ -1212,7 +1252,7 @@
                                 "final": [],
                                 "proxy": [],
                                 "diagnostic": [
-                                    "out_geometry"
+                                    "out_geometry1"
                                 ]
                             },
                             "terminalStates": [
@@ -1236,14 +1276,24 @@
                                     "metaValue": "2"
                                 },
                                 {
-                                    "metaName": "zValue",
-                                    "metaType": "string",
-                                    "metaValue": "41.000000"
+                                    "metaName": "PortExpandedState",
+                                    "metadata": [
+                                        {
+                                            "metaName": "diagnostic",
+                                            "metaType": "string",
+                                            "metaValue": "1"
+                                        }
+                                    ]
                                 },
                                 {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
-                                    "metaValue": "2110.5 906.696"
+                                    "metaValue": "2104.01 900.203"
+                                },
+                                {
+                                    "metaName": "zValue",
+                                    "metaType": "string",
+                                    "metaValue": "42.000000"
                                 }
                             ]
                         },
@@ -1257,14 +1307,14 @@
                                     "metaValue": "2"
                                 },
                                 {
-                                    "metaName": "zValue",
-                                    "metaType": "string",
-                                    "metaValue": "42.000000"
-                                },
-                                {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
                                     "metaValue": "1810.61 944.181"
+                                },
+                                {
+                                    "metaName": "zValue",
+                                    "metaType": "string",
+                                    "metaValue": "41.000000"
                                 }
                             ]
                         }
@@ -1275,8 +1325,16 @@
                             "target": "set_geo_property.data"
                         },
                         {
+                            "source": "update_detected_points_data.output",
+                            "target": "find_all_in_array.array"
+                        },
+                        {
                             "source": "get_strands_structure.point_count",
                             "target": "initial_detected_points_data.new_size"
+                        },
+                        {
+                            "source": "get_strands_structure.point_count",
+                            "target": "resize_array1.new_size"
                         },
                         {
                             "source": "get_strands_structure.strand_count",
@@ -1299,28 +1357,8 @@
                             "target": ".out_geometry"
                         },
                         {
-                            "source": ".strands3",
-                            "target": "get_strands_structure.strands"
-                        },
-                        {
-                            "source": ".strands3",
-                            "target": "set_geo_property.geometry"
-                        },
-                        {
-                            "source": ".radius",
-                            "target": "update_detected_points_data.radius"
-                        },
-                        {
-                            "source": ".position",
-                            "target": "update_detected_points_data.position"
-                        },
-                        {
-                            "source": "get_strands_structure.point_count",
-                            "target": "resize_array1.new_size"
-                        },
-                        {
-                            "source": "update_detected_points_data.output",
-                            "target": "find_all_in_array.array"
+                            "source": "set_geo_property.out_geometry",
+                            "target": "set_geo_property1.geometry"
                         },
                         {
                             "source": "resize_array1.resized",
@@ -1335,16 +1373,32 @@
                             "target": "set_geo_property1.data"
                         },
                         {
-                            "source": "set_geo_property.out_geometry",
-                            "target": "set_geo_property1.geometry"
-                        },
-                        {
                             "source": "set_geo_property1.out_geometry",
                             "target": "set_strands_shape.strands"
                         },
                         {
                             "source": "set_strands_shape.out_strands",
-                            "target": "terminal.diagnostic.out_geometry"
+                            "target": "terminal.diagnostic.out_geometry1"
+                        },
+                        {
+                            "source": ".strands",
+                            "target": "get_strands_structure.strands"
+                        },
+                        {
+                            "source": ".strands",
+                            "target": "set_geo_property.geometry"
+                        },
+                        {
+                            "source": ".radius",
+                            "target": "update_detected_points_data.radius"
+                        },
+                        {
+                            "source": ".position",
+                            "target": "update_detected_points_data.position"
+                        },
+                        {
+                            "source": ".invert",
+                            "target": "find_all_in_array.invert"
                         }
                     ],
                     "values": [
@@ -1393,6 +1447,11 @@
                             "value": "1U"
                         },
                         {
+                            "valueName": "find_all_in_array.invert",
+                            "valueType": "bool",
+                            "value": "false"
+                        },
+                        {
                             "valueName": "set_in_array.value",
                             "valueType": "Math::float3",
                             "value": {
@@ -1405,6 +1464,31 @@
                             "valueName": "set_geo_property1.property",
                             "valueType": "string",
                             "value": "color"
+                        },
+                        {
+                            "valueName": "set_geo_property1.target",
+                            "valueType": "string",
+                            "value": "point_component"
+                        },
+                        {
+                            "valueName": "set_geo_property1.interpolation_mode",
+                            "valueType": "Geometry::Common::DataInterpolationMode",
+                            "value": "Linear"
+                        },
+                        {
+                            "valueName": "set_strands_shape.strands",
+                            "valueType": "Object",
+                            "value": {}
+                        },
+                        {
+                            "valueName": "set_strands_shape.shape",
+                            "valueType": "Geometry::StrandShapes",
+                            "value": "Ribbon"
+                        },
+                        {
+                            "valueName": "set_strands_shape.screen_aligned",
+                            "valueType": "bool",
+                            "value": "true"
                         },
                         {
                             "valueName": "set_strands_shape.default_size",
@@ -1444,14 +1528,14 @@
                             "metaValue": "0"
                         },
                         {
-                            "metaName": "zValue",
-                            "metaType": "string",
-                            "metaValue": "49.000000"
-                        },
-                        {
                             "metaName": "LayoutPos",
                             "metaType": "string",
-                            "metaValue": "193.668 21.456"
+                            "metaValue": "193.379 21.457"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "38.000000"
                         }
                     ]
                 },
@@ -1465,14 +1549,14 @@
                             "metaValue": "2"
                         },
                         {
-                            "metaName": "zValue",
-                            "metaType": "string",
-                            "metaValue": "44.000000"
-                        },
-                        {
                             "metaName": "LayoutPos",
                             "metaType": "string",
                             "metaValue": "1254.81 489.248"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "34.000000"
                         }
                     ]
                 },
@@ -1486,14 +1570,14 @@
                             "metaValue": "2"
                         },
                         {
-                            "metaName": "zValue",
-                            "metaType": "string",
-                            "metaValue": "32.000000"
-                        },
-                        {
                             "metaName": "LayoutPos",
                             "metaType": "string",
                             "metaValue": "1541.52 565.553"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "31.000000"
                         }
                     ]
                 },
@@ -1507,14 +1591,14 @@
                             "metaValue": "2"
                         },
                         {
-                            "metaName": "zValue",
-                            "metaType": "string",
-                            "metaValue": "43.000000"
-                        },
-                        {
                             "metaName": "LayoutPos",
                             "metaType": "string",
                             "metaValue": "999.912 747.396"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "33.000000"
                         }
                     ]
                 },
@@ -1526,6 +1610,11 @@
                             "metaName": "DisplayMode",
                             "metaType": "string",
                             "metaValue": "2"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "684.182 511.896"
                         },
                         {
                             "metaName": "NodeValueDisplay",
@@ -1545,28 +1634,39 @@
                         {
                             "metaName": "zValue",
                             "metaType": "string",
-                            "metaValue": "42.000000"
-                        },
-                        {
-                            "metaName": "LayoutPos",
-                            "metaType": "string",
-                            "metaValue": "684.182 511.896"
+                            "metaValue": "32.000000"
                         }
                     ]
                 }
             ],
             "connections": [
                 {
-                    "source": "find_all_in_array.indices",
-                    "target": "delete_points.points_to_delete"
+                    "source": "detect_strands_in_sphere.out_geometry",
+                    "target": "get_geo_property.geometry"
+                },
+                {
+                    "source": "detect_strands_in_sphere.out_geometry",
+                    "target": "delete_points.geometry"
                 },
                 {
                     "source": "delete_points.out_geometry",
                     "target": "erase_geo_properties.geometry"
                 },
                 {
-                    "source": ".strand",
-                    "target": "detect_strands_in_sphere.strands3"
+                    "source": "erase_geo_properties.out_geometry",
+                    "target": ".out_geometry"
+                },
+                {
+                    "source": "find_all_in_array.indices",
+                    "target": "delete_points.points_to_delete"
+                },
+                {
+                    "source": "get_geo_property.data",
+                    "target": "find_all_in_array.array"
+                },
+                {
+                    "source": ".strands",
+                    "target": "detect_strands_in_sphere.strands"
                 },
                 {
                     "source": ".radius",
@@ -1577,29 +1677,21 @@
                     "target": "detect_strands_in_sphere.position"
                 },
                 {
-                    "source": "detect_strands_in_sphere.out_geometry",
-                    "target": "get_geo_property.geometry"
-                },
-                {
-                    "source": "get_geo_property.data",
-                    "target": "find_all_in_array.array"
-                },
-                {
                     "source": ".invert",
                     "target": "find_all_in_array.invert"
                 },
                 {
-                    "source": "erase_geo_properties.out_geometry",
-                    "target": ".out_geometry"
+                    "source": ".invert",
+                    "target": "detect_strands_in_sphere.invert"
                 },
                 {
-                    "source": "detect_strands_in_sphere.out_geometry",
-                    "target": "delete_points.geometry"
+                    "source": "find_all_in_array.indices",
+                    "target": ".point_indices"
                 }
             ],
             "values": [
                 {
-                    "valueName": "detect_strands_in_sphere.strands3",
+                    "valueName": "detect_strands_in_sphere.strands",
                     "valueType": "Object",
                     "value": {}
                 },
