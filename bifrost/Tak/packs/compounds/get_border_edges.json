@@ -11,7 +11,7 @@
     "types": [],
     "compounds": [
         {
-            "name": "User::Compounds::get_border_edges",
+            "name": "Tak::get_border_edges",
             "uriImported": "stream:/bifrostGraphShape1",
             "metadata": [
                 {

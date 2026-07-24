@@ -11,7 +11,7 @@
     "types": [],
     "compounds": [
         {
-            "name": "User::Compounds::blast",
+            "name": "Tak::SOP::blast",
             "uriImported": "file:///blast.json",
             "metadata": [
                 {

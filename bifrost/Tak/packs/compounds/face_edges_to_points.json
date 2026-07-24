@@ -11,7 +11,7 @@
     "types": [],
     "compounds": [
         {
-            "name": "User::Compounds::face_edges_to_points",
+            "name": "Tak::face_edges_to_points",
             "uriImported": "stream:/bifrostGraphShape1",
             "metadata": [
                 {
