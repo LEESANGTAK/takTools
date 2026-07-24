@@ -11,9 +11,19 @@
     "types": [],
     "compounds": [
         {
-            "name": "User::Compounds::split_LR_target",
+            "name": "Tak::SOP::split_LR_target",
             "uriImported": "file:///split_LR_target.json",
             "metadata": [
+                {
+                    "metaName": "documentation",
+                    "metaType": "string",
+                    "metaValue": "../docs/split_LR_target.md"
+                },
+                {
+                    "metaName": "icon",
+                    "metaType": "string",
+                    "metaValue": "../icons/split_LR_target.png"
+                },
                 {
                     "metaName": "io_nodes",
                     "metadata": [
