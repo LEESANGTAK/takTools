@@ -19,6 +19,7 @@ import time
 
 
 DEFAULT_CURVATURE = 3.0  # Default curvature value for the curve creation
+TIME_OUT_THRESHOLD = 3.0  # Time threshold in seconds for the curve creation process
 
 
 def thin_line(points, point_cloud_thickness=5, skipCount=0):
@@ -75,7 +76,11 @@ def sort_points_on_regression_line(points, regression_lines, index, sorted_point
     regression_line_prev = regression_lines[index][1] - regression_lines[index][0]
     point_tree = cKDTree(points)
 
+    start_time = time.time()
     while True:
+        if time.time() - start_time > TIME_OUT_THRESHOLD:
+            break
+
         v = regression_lines[index][1] - regression_lines[index][0]
         if np.dot(regression_line_prev, v) < 0:
             v = regression_lines[index][0] - regression_lines[index][1]
@@ -237,9 +242,14 @@ def create_from_selection(method='min_angle', curvature=DEFAULT_CURVATURE, rootL
             arcLength = 0.0
             minArcLen = 0.001
             tempCurvature = curvature
+            start_time = time.time()
             while (arcLength < minArcLen):
                 if tempCurvature < 0.1:
                     cmds.warning("Can't create a curve from '{}'.".format(mesh))
+                    break
+
+                if time.time() - start_time > TIME_OUT_THRESHOLD:
+                    cmds.warning("Timed out while creating a curve from '{}'.".format(mesh))
                     break
 
                 crv = create(vertices, method, tempCurvature)
