@@ -1,4 +1,3 @@
-import logging
 from maya.api import OpenMaya as om
 import pymel.core as pm
 
@@ -16,16 +15,13 @@ from . import matrix as matrixUtil
 from . import material as matUtil
 
 
-logger = logging.getLogger(__name__)
-
-
 def buildJoints(waiter):
     allNodes = mapi.getAllNodesInNetwork(waiter)
 
     # Check a MASH_Python node
     pythonNode = findMashNode(allNodes, "MASH_Python")
     if not pythonNode:
-        logger.error('Needs a MASH_Python node.')
+        print('Needs a MASH_Python node.')
         pm.select(waiter, r=True, ne=True)
         return
 
@@ -62,7 +58,7 @@ def buildSkinMesh(waiter, joints):
 
     if not isBeforeWaiter(pythonNode):
         # If MASH_ID node placed in after MASH_Python node, object id can't retrived.
-        logger.error('{pythonNode} node must be placed before MASH_Waiter node. That is {pythonNode} node must be placed on the top of the stack in the MASH Editor.'.format(pythonNode=pythonNode))
+        print('{pythonNode} node must be placed before MASH_Waiter node. That is {pythonNode} node must be placed on the top of the stack in the MASH Editor.'.format(pythonNode=pythonNode))
         return
 
     md = omash.MASHData(pythonNode)

@@ -11,13 +11,7 @@ You can resize images in directory
 import os
 import re
 import argparse
-import logging
 from PIL import Image
-
-logging.basicConfig()
-logger = logging.getLogger('resizeImage')
-logger.setLevel(logging.DEBUG)
-
 
 def main():
 	""" Add arguments and parsing """
@@ -52,11 +46,12 @@ def resizeImage(directory, scale, search, replace, suffix):
 		None
 	"""
 	if not os.path.exists(directory):
-		logger.error('There is no such directory')
+		print('There is no such directory')
+		return
 
 	imageFiles = [f for f in os.listdir(directory) if os.path.splitext(f)[-1] in IMAGE_EXTENSIONS]
 	if not imageFiles:
-		logger.warning('There is no image in directory')
+		print('There is no image in directory')
 		return
 
 	for f in imageFiles:

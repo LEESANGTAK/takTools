@@ -15,12 +15,7 @@ tak_editMayaAsciiFile.ui()
 
 import maya.cmds as cmds
 import os
-import logging
 import shutil
-
-logger = logging.getLogger('EditMayaASCII')
-logger.setLevel(logging.WARNING)
-
 
 def ui():
     winName = 'editMaWin'
@@ -89,7 +84,7 @@ def main(*args):
 
         # If file is not modified print warning and continue to next file
         if hash(contents) == hash(newContents):
-            logger.warning('Not found search string. {0} is unchanged.'.format(filePath))
+            cmds.warning('Not found search string. {0} is unchanged.'.format(filePath))
             unchangedFiles.append(filePath)
             continue
 

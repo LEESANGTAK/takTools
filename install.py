@@ -8,7 +8,7 @@ Description:
 
 import os
 import sys
-import imp
+import importlib
 from distutils.dir_util import copy_tree
 
 from maya import cmds, mel
@@ -18,7 +18,7 @@ MODULE_NAME = os.path.dirname(__file__).rsplit('/', 1)[-1]
 MODULE_PATH = os.path.dirname(__file__).replace('\\', '/')
 MAYA_VERSION = int(cmds.about(version=True))
 # Need to modify below depend on module
-AVAILABLE_VERSIONS = [2018, 2020, 2022, 2023, 2024, 2025]
+AVAILABLE_VERSIONS = [2018, 2020, 2022, 2023, 2024, 2025, 2027]
 MODULE_VERSION = 'any'
 
 
@@ -51,7 +51,10 @@ def runScripts():
     os.putenv('MayaVersion', str(MAYA_VERSION))
     os.system('{}/bat/install_python_packages.bat'.format(MODULE_PATH))
 
-    imp.load_source('', '{}/scripts/userSetup.py'.format(MODULE_PATH))
+    # importlib.load_source('', '{}/scripts/userSetup.py'.format(MODULE_PATH))
+    spec = importlib.util.spec_from_file_location('userSetup', '{}/scripts/userSetup.py'.format(MODULE_PATH))
+    userSetup = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(userSetup)
 
 
 def copyFiles():
@@ -110,6 +113,7 @@ BIFROST_LIB_CONFIG_FILES +:= bifrost/MJCG_compounds/bifrost_lib_config.json
 BIFROST_LIB_CONFIG_FILES +:= bifrost/rebel_pack.5.0/bifrost_lib_config.json
 BIFROST_LIB_CONFIG_FILES +:= bifrost/print_pack_V2.9/bifrost_lib_config.json
 BIFROST_LIB_CONFIG_FILES +:= bifrost/Bifrost-TKCMPack/pack/TKCM_config.json
+
 '''
     contents = ''
     for availVersion in AVAILABLE_VERSIONS:

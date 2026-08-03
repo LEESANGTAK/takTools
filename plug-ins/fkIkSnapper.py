@@ -57,8 +57,6 @@ pm.loadPlugin('fkIkSnapper')
 pm.createNode('fkIkSnapper')
 """
 
-import logging
-
 import pymel.core as pm
 from maya.api import OpenMaya as om
 
@@ -66,10 +64,6 @@ from maya.api import OpenMaya as om
 def maya_useNewAPI():
     """ Say to maya that using api 2.0 """
     pass
-
-
-logger = logging.getLogger("FkIkSnapper")
-logger.setLevel(logging.INFO)
 
 NODE_NAME = "fkIkSnapper"
 NODE_ID = om.MTypeId(0x00002746)
@@ -224,7 +218,7 @@ class FkIkSnapper(om.MPxNode):
 
     @staticmethod
     def _snapFkToIk(fkCtrls, ikJnts):
-        logger.info("Snap fk controllers to ik joints.")
+        om.MGlobal.displayInfo("Snap fk controllers to ik joints.")
         for fkCtrl, ikJnt in zip(fkCtrls, ikJnts):
             ikJntTrans = pm.xform(ikJnt, q=True, t=True, ws=True)
             ikJntRot = pm.xform(ikJnt, q=True, ro=True, ws=True)
@@ -234,7 +228,7 @@ class FkIkSnapper(om.MPxNode):
 
     @staticmethod
     def _snapIkToFk(ikCtrl, pvCtrl, fkJnts):
-        logger.info("Snap ik controllers to fk joints.")
+        om.MGlobal.displayInfo("Snap ik controllers to fk joints.")
         fkEndJntTrans = pm.xform(fkJnts[-1], q=True, t=True, ws=True)
         fkEndJntRot = pm.xform(fkJnts[-1], q=True, ro=True, ws=True)
 
@@ -264,12 +258,12 @@ class FkIkSnapper(om.MPxNode):
 
     @staticmethod
     def _cleanupCallbacks():
-        logger.info("Remove Callbacks")
+        om.MGlobal.displayInfo("Remove Callbacks")
         eventMsgId = FkIkSnapper.callbackIdInfo[FkIkSnapper.EVENT_MSG_ID]
         dgMsgId = FkIkSnapper.callbackIdInfo[FkIkSnapper.DG_MSG_ID]
         nodeMsgId = FkIkSnapper.callbackIdInfo[FkIkSnapper.NODE_MSG_ID]
 
-        logger.debug("eventMsgId: {0}, eventMsgId: {1}, nodeMsgId: {2}".format(eventMsgId, dgMsgId, nodeMsgId))
+        om.MGlobal.displayInfo("eventMsgId: {0}, eventMsgId: {1}, nodeMsgId: {2}".format(eventMsgId, dgMsgId, nodeMsgId))
 
         if eventMsgId:
             om.MEventMessage.removeCallbacks(eventMsgId)

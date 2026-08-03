@@ -1,10 +1,4 @@
-import logging
-
 import pymel.core as pm
-
-
-logger = logging.getLogger("Rig Optimizer")
-logger.setLevel(logging.DEBUG)
 
 
 class RigOptimizer(object):
@@ -23,7 +17,7 @@ class RigOptimizer(object):
 
         for attr in self.__dict__.keys():
             nodes = getattr(self, attr)
-            logger.info("{0}: {1}".format(attr, len(nodes)))
+            print("{0}: {1}".format(attr, len(nodes)))
 
     def optimize(self):
         self.optimizeConstraints()
@@ -76,7 +70,7 @@ class RigOptimizer(object):
 
             pm.delete(const)
 
-        logger.debug("notConvertedConstraints: {0}".format(notConvertedConstraints))
+        print("notConvertedConstraints: {0}".format(notConvertedConstraints))
 
     def getConstraintInfo(self, const):
         constInfo = {
