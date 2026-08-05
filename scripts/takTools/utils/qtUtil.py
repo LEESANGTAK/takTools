@@ -1,7 +1,10 @@
 import os
 from PySide2 import QtCore, QtGui, QtWidgets
 
-import pymel.core as pm
+from maya import cmds
+from maya import OpenMayaUI as omui
+from shiboken2 import wrapInstance
+from PySide2 import QtWidgets
 
 
 class ScreenCapture(QtWidgets.QDialog):
@@ -91,17 +94,17 @@ def duplicateImage(imagePath, suffix='_copy'):
 
 
 def editScriptEditorHorizontal(consoleSide='left'):
-    panel = None
-    allPanels = pm.getPanel(all=True)
-    for item in allPanels:
-        if "scriptEditorPanel" in item:
-            panel = item
+    panel = next((item for item in cmds.getPanel(all=True) if "scriptEditorPanel" in item), None)
 
     if not panel:
         print("Not found script editor panel.")
         return
 
-    qtpanel = panel.asQtObject()
+    ptr = omui.MQtUtil.findControl(panel)
+    if not ptr:
+        ptr = omui.MQtUtil.findLayout(panel)
+
+    qtpanel = wrapInstance(int(ptr), QtWidgets.QWidget)
 
     menuBar, mainWidget = qtpanel.children()[1:]
 

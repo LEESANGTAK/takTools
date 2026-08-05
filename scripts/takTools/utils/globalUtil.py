@@ -1,5 +1,4 @@
 import os
-import pymel.core as pm
 import maya.OpenMaya as om
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
@@ -7,9 +6,9 @@ import maya.cmds as cmds
 
 def enableChildNodes(rootNode, nodeType='constraint', enable=False):
     nodeStateTable = {0: 2, 1: 0}
-    cnsts = pm.listRelatives(rootNode, ad=True, type=nodeType)
+    cnsts = cmds.listRelatives(rootNode, ad=True, type=nodeType, fullPath=True) or []
     for cnst in cnsts:
-        cnst.nodeState.set(nodeStateTable[enable])
+        cmds.setAttr('{0}.nodeState'.format(cnst), nodeStateTable[enable])
 
 
 def getDagPath(nodeName, apiVersion=2):
@@ -39,8 +38,7 @@ def getTopDagNode(dagNodes):
     return topDagNode
 
 def getShapeFromComponent(component):
-    shapeName = component.split('.')[0]
-    return pm.PyNode(shapeName)
+    return str(component).split('.')[0]
 
 
 def findMultiAttributeEmptyIndex(node, attribute):
@@ -53,11 +51,14 @@ def findMultiAttributeEmptyIndex(node, attribute):
     Returns:
         Available index
     """
-    node = pm.PyNode(node)
-    id = 0
-    while node.attr(attribute)[id].isConnected():
-        id += 1
-    return id
+    index = 0
+    while True:
+        attrName = '{0}.{1}[{2}]'.format(node, attribute, index)
+        connections = cmds.listConnections(attrName, source=True, destination=False, plugs=True)
+        if connections:
+            index += 1
+            continue
+        return index
 
 
 def getLogicalIndices(node, attribute):
@@ -114,39 +115,40 @@ def cleanupMayaScene():
 
 
 def removeModelPanelCallbacks():
-    for item in pm.lsUI(editors=True):
-        if isinstance(item, pm.ui.ModelEditor):
-            pm.modelEditor(item, edit=True, editorChanged="")
+    for item in cmds.lsUI(editors=True) or []:
+        try:
+            cmds.modelEditor(item, edit=True, editorChanged="")
+        except RuntimeError:
+            pass
 
 
 def removeUnknowns():
     # Remove unknown nodes
-    unknownNodes = pm.ls(type="unknown")
+    unknownNodes = cmds.ls(type="unknown") or []
     for node in unknownNodes:
-        pm.lockNode(node, lock=False)
-        pm.delete(node)
+        cmds.lockNode(node, lock=False)
+        cmds.delete(node)
 
     # Remove unknown plugins
-    unknownPlugins = pm.unknownPlugin(q=True, l=True)
-    if unknownPlugins:
-        for plugin in unknownPlugins:
-            pm.unknownPlugin(plugin, r=True)
+    unknownPlugins = cmds.unknownPlugin(q=True, l=True) or []
+    for plugin in unknownPlugins:
+        cmds.unknownPlugin(plugin, r=True)
 
 
 def removeVaccine():
     # Remove script jobs
-    jobs = cmds.scriptJob(lj=True)
+    jobs = cmds.scriptJob(lj=True) or []
     for job in jobs:
         if "antivirus" in job or 'vaccine' in job:
-            id = job.split(":")[0]
-            if id.isdigit():
-                cmds.scriptJob(k=int(id), f=True)
+            jobId = job.split(":")[0]
+            if jobId.isdigit():
+                cmds.scriptJob(k=int(jobId), f=True)
 
     # Remove script nodes
     for sNode in ['breed_gene', 'vaccine_gene']:
         try:
-            pm.delete(sNode)
-        except:
+            cmds.delete(sNode)
+        except RuntimeError:
             pass
 
     # Remove python files
@@ -158,10 +160,10 @@ def removeVaccine():
 
 
 def unlockNodes():
-    pm.lockNode('initialShadingGroup', lock=False, lockUnpublished=False)
-    for node in pm.ls():
-        if pm.lockNode(node, q=True):
-            pm.lockNode(node, lock=False)
+    cmds.lockNode('initialShadingGroup', lock=False, lockUnpublished=False)
+    for node in cmds.ls() or []:
+        if cmds.lockNode(node, q=True):
+            cmds.lockNode(node, lock=False)
 
 
 def setWireColorBySide(obj):
@@ -169,7 +171,7 @@ def setWireColorBySide(obj):
     LEFT_COLOR = 6
     CENTER_COLOR = 17
 
-    posX = round(pm.xform(obj, q=True, ws=True, t=True)[0], 6)
+    posX = round(cmds.xform(obj, q=True, ws=True, t=True)[0], 6)
     print(posX)
     if posX < 0.0:
         color = RIGHT_COLOR
@@ -178,14 +180,14 @@ def setWireColorBySide(obj):
     else:
         color = CENTER_COLOR
 
-    shps = pm.listRelatives(obj, s=True)
+    shps = cmds.listRelatives(obj, s=True, fullPath=True) or []
     if shps:
         for shp in shps:
-            pm.setAttr('%s|%s.overrideEnabled' % (obj, shp), 1)
-            pm.setAttr('%s|%s.overrideColor' % (obj, shp), color)
+            cmds.setAttr('{0}.overrideEnabled'.format(shp), 1)
+            cmds.setAttr('{0}.overrideColor'.format(shp), color)
     else:
-        pm.setAttr('%s.overrideEnabled' % (obj), 1)
-        pm.setAttr('%s.overrideColor' % (obj), color)
+        cmds.setAttr('{0}.overrideEnabled'.format(obj), 1)
+        cmds.setAttr('{0}.overrideColor'.format(obj), color)
 
 
 def cloneAttribute(sourceObj, targetObj, attribute, prefix='', suffix='', unreal=True, connect=True):
@@ -194,41 +196,59 @@ def cloneAttribute(sourceObj, targetObj, attribute, prefix='', suffix='', unreal
     example:
 from utils import globalUtil as gUtil
 
-sels = pm.selected()
+sels = cmds.ls(sl=True)
 
 sourceObj = sels[0]
 targetObj = sels[1]
 
-for attr in pm.listAttr(sourceObj, ud=True):
+for attr in cmds.listAttr(sourceObj, ud=True):
     gUtil.cloneAttribute(sourceObj, targetObj, attr)
     """
 
-    srcAttr = pm.PyNode('{0}.{1}'.format(sourceObj, attribute))
+    sourceObj = str(sourceObj)
+    targetObj = str(targetObj)
+    srcAttrName = '{0}.{1}'.format(sourceObj, attribute)
+    trgAttrName = prefix + attribute + suffix
+
     if unreal:
         attrType = 'double'
     else:
-        attrType = srcAttr.type()
-    targetObj = pm.PyNode(targetObj)
-    trgAttrName = prefix + attribute + suffix
+        try:
+            attrType = cmds.getAttr(srcAttrName, type=True)
+        except RuntimeError:
+            attrType = 'double'
+
+    keyable = False
+    try:
+        keyable = cmds.getAttr(srcAttrName, keyable=True)
+    except RuntimeError:
+        pass
 
     if attrType == 'enum':
-        enumInfo = sorted(srcAttr.getEnums().items(), key=lambda item: item[1])
-        enumNames = [item[0] for item in enumInfo]
-        pm.addAttr(targetObj, longName=trgAttrName, at='enum', en=enumNames, keyable=srcAttr.isKeyable())
+        enumInfo = cmds.attributeQuery(attribute, node=sourceObj, listEnum=True) or []
+        enumNames = []
+        if enumInfo:
+            enumNames = enumInfo[0].split(':') if isinstance(enumInfo[0], str) else enumInfo
+        cmds.addAttr(targetObj, longName=trgAttrName, attributeType='enum', enumName=':'.join(enumNames), keyable=keyable)
     else:
         try:
-            pm.addAttr(targetObj, longName=trgAttrName, at=attrType, min=srcAttr.getMin(), max=srcAttr.getMax(), keyable=srcAttr.isKeyable())
-        except:
-            pm.addAttr(targetObj, longName=trgAttrName, at=attrType, keyable=srcAttr.isKeyable())
+            minVal = cmds.attributeQuery(attribute, node=sourceObj, minimum=True)[0]
+            maxVal = cmds.attributeQuery(attribute, node=sourceObj, maximum=True)[0]
+            cmds.addAttr(targetObj, longName=trgAttrName, attributeType=attrType, min=minVal, max=maxVal, keyable=keyable)
+        except Exception:
+            try:
+                cmds.addAttr(targetObj, longName=trgAttrName, attributeType=attrType, keyable=keyable)
+            except Exception:
+                cmds.addAttr(targetObj, longName=trgAttrName, keyable=keyable)
 
     if connect:
-        srcAttr >> targetObj.attr(trgAttrName)
+        cmds.connectAttr(srcAttrName, '{0}.{1}'.format(targetObj, trgAttrName), force=True)
 
 
 def createSet(suffix='_vtxs_set'):
-    sels = pm.selected(fl=True)
+    sels = cmds.ls(sl=True, fl=True)
     if sels:
-        result = pm.promptDialog(
+        result = cmds.promptDialog(
             title='Create Set',
             message='Enter Name:',
             button=['OK', 'Cancel'],
@@ -237,8 +257,8 @@ def createSet(suffix='_vtxs_set'):
             dismissString='Cancel'
         )
         if result == 'OK':
-            text = pm.promptDialog(query=True, text=True)
-            objSet = pm.sets(n=text+suffix)
+            text = cmds.promptDialog(query=True, text=True)
+            cmds.sets(n=text+suffix)
 
 
 def getDeformerWeights(deformerName, mesh, valueRange=[0.0, 1.0]):

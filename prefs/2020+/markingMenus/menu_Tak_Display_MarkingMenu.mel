@@ -1,186 +1,186 @@
 
     menuItem
-        -label "Add Selected Items" 
+        -label "Add Selected Items"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.isoAdd()\");" 
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.isoAdd()\");"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "N" 
+        -radialPosition "N"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "isolateAdd.bmp" 
+        -image "isolateAdd.bmp"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem1;
 
     menuItem
-        -label "Remove Selected Items" 
+        -label "Remove Selected Items"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.isoRmv()\");" 
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.isoRmv()\");"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "NE" 
+        -radialPosition "NE"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "isolateRemove.bmp" 
+        -image "isolateRemove.bmp"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem2;
 
     menuItem
-        -label "Show Joint" 
+        -label "Show Joint"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $curPanel = `getPanel -withFocus`;\n    modelEditor -e -joints true $curPanel;\n}" 
+        -command "{\n    string $curPanel = `getPanel -withFocus`;\n    modelEditor -e -joints true $curPanel;\n}"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "E" 
+        -radialPosition "E"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "kinJoint.png" 
+        -image "kinJoint.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem7;
 
     menuItem
-        -label "Wire On/Off" 
+        -label "Wire On/Off"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.wireOnOff()\");" 
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.wireOnOff()\");"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "NW" 
+        -radialPosition "NW"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "WireFrame.png" 
+        -image "WireFrame.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem8;
 
     menuItem
-        -label "Curve Vis" 
+        -label "Curve Vis"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.hideShowViewCrv()\");" 
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.hideShowViewCrv()\");"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "S" 
+        -radialPosition "S"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "menuIconCurves.png" 
+        -image "menuIconCurves.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem4;
 
     menuItem
-        -label "Polygon Vis" 
+        -label "Polygon Vis"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.hideShowViewPoly()\");" 
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.hideShowViewPoly()\");"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "SW" 
+        -radialPosition "SW"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "menuIconPolygons.png" 
+        -image "menuIconPolygons.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem6;
 
     menuItem
-        -label "Hide Joint" 
+        -label "Hide Joint"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n\tstring $curPanel = `getPanel -withFocus`;\n\tmodelEditor -e -joints false $curPanel;\n}" 
+        -command "{\n\tstring $curPanel = `getPanel -withFocus`;\n\tmodelEditor -e -joints false $curPanel;\n}"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "SE" 
+        -radialPosition "SE"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "kinJoint.png" 
+        -image "kinJoint.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem3;
 
     menuItem
-        -label "Model Only" 
+        -label "Model Only"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.display as disUtils\");\npython(\"import imp; imp.reload(disUtils)\");\n\n\npython(\"disUtils.displayModelOnlyToggle()\");" 
+        -command "python(\"import takTools.utils.display as disUtils\");\npython(\"import imp; imp.reload(disUtils)\");\n\n\npython(\"disUtils.displayModelOnlyToggle()\");"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "W" 
+        -radialPosition "W"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "Objects.png" 
+        -image "Objects.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem5;
 
     menuItem
-        -label "X-Ray Joints" 
+        -label "X-Ray Joints"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -jointXray $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -jointXray true $modelPan;\n    } else {\n        modelEditor -e -jointXray false $modelPan;\n    }\n}" 
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -jointXray $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -jointXray true $modelPan;\n    } else {\n        modelEditor -e -jointXray false $modelPan;\n    }\n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -188,20 +188,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "XRayJoints.png" 
+        -image "XRayJoints.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem18;
 
     menuItem
-        -label "Wireframe On Shaded" 
+        -label "Wireframe On Shaded"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -wireframeOnShaded $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -wireframeOnShaded true $modelPan;\n    } else {\n        modelEditor -e -wireframeOnShaded false $modelPan;\n    }\n}" 
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $xRayState = `modelEditor -q -wireframeOnShaded $modelPan`;\n    if ($xRayState == 0) {\n        modelEditor -e -wireframeOnShaded true $modelPan;\n    } else {\n        modelEditor -e -wireframeOnShaded false $modelPan;\n    }\n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -209,20 +209,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "WireFrameOnShaded.png" 
+        -image "WireFrameOnShaded.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem21;
 
     menuItem
-        -label "Use Default Material" 
+        -label "Use Default Material"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $curState = `modelEditor -q -useDefaultMaterial $modelPan`;\n    if ($curState == 0) {\n        modelEditor -e -useDefaultMaterial true $modelPan;\n    } else {\n        modelEditor -e -useDefaultMaterial false $modelPan;\n    }\n}" 
+        -command "{\n    string $modelPan = `getPanel -withFocus`;\n    int $curState = `modelEditor -q -useDefaultMaterial $modelPan`;\n    if ($curState == 0) {\n        modelEditor -e -useDefaultMaterial true $modelPan;\n    } else {\n        modelEditor -e -useDefaultMaterial false $modelPan;\n    }\n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -230,20 +230,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "UseDefaultMaterial.png" 
+        -image "UseDefaultMaterial.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem23;
 
     menuItem
-        -label "Ambient Occlusion" 
+        -label "Ambient Occlusion"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    int $curState = python(\"cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')\");\n    string $cmd = `format -stringArg (1-$curState) \"cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', ^1s)\"`;\n    python($cmd);\n}" 
+        -command "{\n    int $curState = python(\"cmds.getAttr('hardwareRenderingGlobals.ssaoEnable')\");\n    string $cmd = `format -stringArg (1-$curState) \"cmds.setAttr('hardwareRenderingGlobals.ssaoEnable', ^1s)\"`;\n    python($cmd);\n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -251,20 +251,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "SSAO.png" 
+        -image "SSAO.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem26;
 
     menuItem
-        -label "MultisampleAA" 
+        -label "MultisampleAA"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    int $curState = python(\"cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')\");\n    string $cmd = `format -stringArg (1-$curState) \"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', ^1s)\"`;\n    python($cmd);\n}" 
+        -command "{\n    int $curState = python(\"cmds.getAttr('hardwareRenderingGlobals.multiSampleEnable')\");\n    string $cmd = `format -stringArg (1-$curState) \"cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', ^1s)\"`;\n    python($cmd);\n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -272,18 +272,18 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "MultisampleAA.png" 
+        -image "MultisampleAA.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem24;
 
     menuItem
-        -label "separator" 
+        -label "separator"
         -divider 1
-        -dividerLabel "separator" 
+        -dividerLabel "separator"
         -subMenu 0
         -tearOff 0
         -optionBox 0
@@ -295,16 +295,16 @@
         -enableCommandRepeat 1
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem25;
 
     menuItem
-        -label "Joint Size" 
+        -label "Joint Size"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "jdsWin" 
+        -command "jdsWin"
         -optionBox 0
         -enable 1
         -visible 1
@@ -312,20 +312,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "kinJoint.png" 
+        -image "kinJoint.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem12;
 
     menuItem
-        -label "Local Axis On" 
+        -label "Local Axis On"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state on -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"joint\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state on -localAxis $jnt;\n    }\n}\n}" 
+        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state on -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"joint\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state on -localAxis $jnt;\n    }\n}\n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -333,20 +333,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "channelBoxUseManips.png" 
+        -image "channelBoxUseManips.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem10;
 
     menuItem
-        -label "Local Axis Off" 
+        -label "Local Axis Off"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"transform\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\n}" 
+        -command "{\nstring $joints[] = `ls -sl`;\nif (size($joints) > 0)\n{\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\nelse \n{\n    string $joints[] = `ls -type \"transform\"`;\n    for ($jnt in $joints)\n    {\n        toggle -state off -localAxis $jnt;\n    }\n}\n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -354,16 +354,16 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "channelBoxUseManips.png" 
+        -image "channelBoxUseManips.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem11;
 
     menuItem
-        -label "Component" 
+        -label "Component"
         -divider 0
         -subMenu 1
         -tearOff 0
@@ -375,16 +375,16 @@
         -enableCommandRepeat 1
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem17;
 
         menuItem
-            -label "CVs" 
+            -label "CVs"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleCVs" 
+            -command "ToggleCVs"
             -optionBox 0
             -enable 1
             -visible 1
@@ -392,20 +392,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "selectCVs.png" 
+            -image "selectCVs.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem6;
 
         menuItem
-            -label "Vertices" 
+            -label "Vertices"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleVertices" 
+            -command "ToggleVertices"
             -optionBox 0
             -enable 1
             -visible 1
@@ -413,20 +413,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "polySelectVertex.png" 
+            -image "polySelectVertex.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem10;
 
         menuItem
-            -label "Border Edge" 
+            -label "Border Edge"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "python(\"cmds.polyOptions(r=True, db=True)\");" 
+            -command "python(\"cmds.polyOptions(r=True, db=True)\");"
             -optionBox 0
             -enable 1
             -visible 1
@@ -434,20 +434,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "polySelectEdgeBorder.png" 
+            -image "polySelectEdgeBorder.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem1;
 
         menuItem
-            -label "menuEditorMenuItem14" 
+            -label "menuEditorMenuItem14"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ChangeEdgeWidth;" 
+            -command "ChangeEdgeWidth;"
             -optionBox 1
             -enable 1
             -visible 0
@@ -458,16 +458,16 @@
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem14;
 
         menuItem
-            -label "Vertex Normals" 
+            -label "Vertex Normals"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleVertexNormalDisplay" 
+            -command "ToggleVertexNormalDisplay"
             -optionBox 0
             -enable 1
             -visible 1
@@ -475,20 +475,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "polySetVertexNormal.png" 
+            -image "polySetVertexNormal.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem9;
 
         menuItem
-            -label "menuEditorMenuItem16" 
+            -label "menuEditorMenuItem16"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ChangeNormalSize;" 
+            -command "ChangeNormalSize;"
             -optionBox 1
             -enable 1
             -visible 0
@@ -499,16 +499,16 @@
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem16;
 
         menuItem
-            -label "Face Normals" 
+            -label "Face Normals"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleFaceNormalDisplay" 
+            -command "ToggleFaceNormalDisplay"
             -optionBox 0
             -enable 1
             -visible 1
@@ -516,20 +516,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "polyNormalsPropagate.png" 
+            -image "polyNormalsPropagate.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem3;
 
         menuItem
-            -label "menuEditorMenuItem17" 
+            -label "menuEditorMenuItem17"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ChangeNormalSize;" 
+            -command "ChangeNormalSize;"
             -optionBox 1
             -enable 1
             -visible 0
@@ -540,16 +540,16 @@
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem17;
 
         menuItem
-            -label "Soft/Hard Edges" 
+            -label "Soft/Hard Edges"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "{\n    string $sels[] = `ls -sl`;\n    for ($sel in $sels) {\n        string $shape[] = `listRelatives -s $sel`;\n        int $curEdgeDisplay = `getAttr ($shape[0]+\".displayEdges\")`;\n        setAttr ($shape[0]+\".displayEdges\") (!$curEdgeDisplay);\n    }\n}" 
+            -command "{\n    string $sels[] = `ls -sl`;\n    for ($sel in $sels) {\n        string $shape[] = `listRelatives -s $sel`;\n        int $curEdgeDisplay = `getAttr ($shape[0]+\".displayEdges\")`;\n        setAttr ($shape[0]+\".displayEdges\") (!$curEdgeDisplay);\n    }\n}"
             -optionBox 0
             -enable 1
             -visible 1
@@ -557,18 +557,18 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "polyDuplicateEdgeLoop.png" 
+            -image "polyDuplicateEdgeLoop.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem2;
 
         menuItem
-            -label "separator" 
+            -label "separator"
             -divider 1
-            -dividerLabel "separator" 
+            -dividerLabel "separator"
             -subMenu 0
             -tearOff 0
             -optionBox 0
@@ -580,16 +580,16 @@
             -enableCommandRepeat 1
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem15;
 
         menuItem
-            -label "Vertex ID" 
+            -label "Vertex ID"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleVertIDs;" 
+            -command "ToggleVertIDs;"
             -optionBox 0
             -enable 1
             -visible 1
@@ -597,20 +597,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "reorderIDs.png" 
+            -image "reorderIDs.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem4;
 
         menuItem
-            -label "Edge ID" 
+            -label "Edge ID"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleEdgeIDs" 
+            -command "ToggleEdgeIDs"
             -optionBox 0
             -enable 1
             -visible 1
@@ -618,20 +618,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "polySelectEdge.png" 
+            -image "polySelectEdge.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem12;
 
         menuItem
-            -label "Face ID" 
+            -label "Face ID"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleFaceIDs" 
+            -command "ToggleFaceIDs"
             -optionBox 0
             -enable 1
             -visible 1
@@ -639,18 +639,18 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "polySelectFace.png" 
+            -image "polySelectFace.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem13;
 
     setParent -m ..;
 
     menuItem
-        -label "HUD" 
+        -label "HUD"
         -divider 0
         -subMenu 1
         -tearOff 0
@@ -662,16 +662,16 @@
         -enableCommandRepeat 1
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem9;
 
         menuItem
-            -label "Poly Count" 
+            -label "Poly Count"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "TogglePolyCount" 
+            -command "TogglePolyCount"
             -optionBox 0
             -enable 1
             -visible 1
@@ -679,20 +679,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "polyMesh.png" 
+            -image "polyMesh.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem3;
 
         menuItem
-            -label "Object Detail" 
+            -label "Object Detail"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleObjectDetails" 
+            -command "ToggleObjectDetails"
             -optionBox 0
             -enable 1
             -visible 1
@@ -700,20 +700,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "selectByObject.png" 
+            -image "selectByObject.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem4;
 
         menuItem
-            -label "FPS" 
+            -label "FPS"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleFrameRate" 
+            -command "ToggleFrameRate"
             -optionBox 0
             -enable 1
             -visible 1
@@ -721,20 +721,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "channelBoxUnknownSpeed.png" 
+            -image "channelBoxUnknownSpeed.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem5;
 
         menuItem
-            -label "Current Frame" 
+            -label "Current Frame"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleCurrentFrame" 
+            -command "ToggleCurrentFrame"
             -optionBox 0
             -enable 1
             -visible 1
@@ -742,20 +742,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "out_frameCache.png" 
+            -image "out_frameCache.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem6;
 
         menuItem
-            -label "Frame Range" 
+            -label "Frame Range"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "python(\"import takTools.utils.display as dpUtil;import imp; imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();\")" 
+            -command "python(\"import takTools.utils.display as dpUtil;import imp; imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();\")"
             -optionBox 0
             -enable 1
             -visible 1
@@ -763,20 +763,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "traxFrameRange.png" 
+            -image "traxFrameRange.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem1;
 
         menuItem
-            -label "Camera Name" 
+            -label "Camera Name"
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "ToggleCameraNames" 
+            -command "ToggleCameraNames"
             -optionBox 0
             -enable 1
             -visible 1
@@ -784,20 +784,20 @@
             -allowOptionBoxes 1
             -postMenuCommandOnce 0
             -enableCommandRepeat 1
-            -image "Camera.png" 
+            -image "Camera.png"
             -echoCommand 0
             -italicized 0
             -boldFont 1
-            -sourceType "mel" 
+            -sourceType "mel"
             -longDivider 1
             menuEditorMenuItem7;
 
     setParent -m ..;
 
     menuItem
-        -label "separator" 
+        -label "separator"
         -divider 1
-        -dividerLabel "separator" 
+        -dividerLabel "separator"
         -subMenu 0
         -tearOff 0
         -optionBox 0
@@ -809,16 +809,16 @@
         -enableCommandRepeat 1
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem20;
 
     menuItem
-        -label "Wire Color" 
+        -label "Wire Color"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.globalUtil as gUtil;import imp; imp.reload(gUtil)\");\npython(\"sels = pm.selected()\");\npython(\"for sel in sels:\\n\\tgUtil.setWireColorBySide(sel)\");" 
+        -command "python(\"import takTools.utils.globalUtil as gUtil;import imp; imp.reload(gUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels:\\n\\tgUtil.setWireColorBySide(sel)\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -826,20 +826,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "hairPaintSpecular.png" 
+        -image "hairPaintSpecular.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem16;
 
     menuItem
-        -label "menuEditorMenuItem15" 
+        -label "menuEditorMenuItem15"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.setJntColorUI()\");" 
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.setJntColorUI()\");"
         -optionBox 1
         -enable 1
         -visible 0
@@ -850,16 +850,16 @@
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem27;
 
     menuItem
-        -label "Color Feedback" 
+        -label "Color Feedback"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\nstring $curCtx = `currentCtx`;\nint $colFeedbackState = `artAttrCtx -q -colorfeedback $curCtx`;\nartAttrCtx -e -colorfeedback (!$colFeedbackState) $curCtx;\n}" 
+        -command "{\nstring $curCtx = `currentCtx`;\nint $colFeedbackState = `artAttrCtx -q -colorfeedback $curCtx`;\nartAttrCtx -e -colorfeedback (!$colFeedbackState) $curCtx;\n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -867,20 +867,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "colorPresetGrayscale.png" 
+        -image "colorPresetGrayscale.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem19;
 
     menuItem
-        -label "Display Affected" 
+        -label "Display Affected"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from imp import reload\");\npython(\"import takTools.utils.display as dp\");\npython(\"dp.displayAffectedToggle()\");" 
+        -command "python(\"from imp import reload\");\npython(\"import takTools.utils.display as dp\");\npython(\"dp.displayAffectedToggle()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -888,20 +888,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "eye.png" 
+        -image "eye.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem22;
 
     menuItem
-        -label "Wire" 
+        -label "Wire"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.Wire()\");" 
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.Wire()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -909,20 +909,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "UVTBWireFrame.png" 
+        -image "UVTBWireFrame.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem13;
 
     menuItem
-        -label "X-Ray" 
+        -label "X-Ray"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n    string $selection[] = `ls -sl`;  \n    \n    for ($cur in $selection){\n        \n        int $result[] = `displaySurface -q -x $cur `;\n        if ( $result[0] )\n            displaySurface -x 0 $cur ;\n        else\n            displaySurface -x 1 $cur ;\n            \n    }    \n}" 
+        -command "{\n    string $selection[] = `ls -sl`;  \n    \n    for ($cur in $selection){\n        \n        int $result[] = `displaySurface -q -x $cur `;\n        if ( $result[0] )\n            displaySurface -x 0 $cur ;\n        else\n            displaySurface -x 1 $cur ;\n            \n    }    \n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -930,11 +930,11 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "xRay.bmp" 
+        -image "xRay.bmp"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem14;
 

@@ -44,7 +44,6 @@ import os
 import io
 import warnings
 
-import pymel.core as pm
 from maya import cmds
 import random
 
@@ -131,8 +130,8 @@ class CcStableDiffusion():
 
         _numSamples = cmds.intFieldGrp(self.numSamplesField, query=True, value1=True)
 
-        image_dir = pm.workspace(fileRuleEntry='sourceImages')
-        image_dir = pm.workspace(expandName=image_dir)
+        image_dir = cmds.workspace(fileRuleEntry='sourceImages', query=True)
+        image_dir = cmds.workspace(expandName=image_dir)
 
         _appendPromptToName = cmds.checkBox(self.appendPromptToNameCheckBox, query=True, value=True)
         _appendSeedToName = cmds.checkBox(self.appendSeedToNameCheckBox, query=True, value=True)
@@ -182,7 +181,7 @@ class CcStableDiffusion():
                     img = Image.open(io.BytesIO(artifact.binary))
                     img.save(fp=os.path.join(image_dir, image_name))
 
-        pm.setAttr(_fileNode, image_name)
+        cmds.setAttr(_fileNode, image_name, type='string')
 
 
     def CcGetFileNode(self, *args):

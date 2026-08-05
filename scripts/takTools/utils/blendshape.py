@@ -1,4 +1,4 @@
-import pymel.core as pm
+import maya.cmds as cmds
 
 
 def reConnectBlendTargets(blendShape, searchStr='old_', replaceStr=''):
@@ -10,30 +10,29 @@ def reConnectBlendTargets(blendShape, searchStr='old_', replaceStr=''):
         searchStr (str, optional): Search string for old blendshape source transform. Defaults to 'old_'.
         replaceStr (str, optional): Replace string to new blendshape source transform. Defaults to ''.
     """
-    blendShape = pm.PyNode(blendShape)
-    targets = [target for target in pm.listAttr(blendShape.weight, ) if 'weight' not in target and pm.objExists(target)]
-    if len(blendShape.connections(d=False, type='mesh')) > 1:
-        oldBaseTransform = blendShape.getBaseObjects()[0].getParent(generations=2)
+    blendShape = str(blendShape)
+    targets = [target for target in cmds.listAttr('{0}.weight'.format(blendShape), multi=True) or [] if 'weight' not in target and cmds.objExists(target)]
+    geometry = cmds.blendShape(blendShape, q=True, geometry=True) or []
+    if len(geometry) > 1:
+        oldBaseTransform = cmds.listRelatives(geometry[0], parent=True, fullPath=False)[0]
     else:
-        oldBaseTransform = blendShape.getBaseObjects()[0].getParent()
-    newBlendshape = pm.blendShape(targets, oldBaseTransform.replace(searchStr, replaceStr), frontOfChain=True, topologyCheck=False)[0]
+        oldBaseTransform = cmds.listRelatives(geometry[0], parent=True, fullPath=False)[0]
+
+    newBlendshape = cmds.blendShape(targets, oldBaseTransform.replace(searchStr, replaceStr), frontOfChain=True, topologyCheck=False)[0]
     for target in targets:
-        newBlendshape.attr(target).set(1)
-        inputs = blendShape.attr(target).connections(plugs=True)
+        cmds.setAttr('{0}.{1}'.format(newBlendshape, target), 1)
+        inputs = cmds.listConnections('{0}.{1}'.format(blendShape, target), plugs=True, source=True, destination=False) or []
         if inputs:
-            inputs[0] >> newBlendshape.attr(target)
+            cmds.connectAttr(inputs[0], '{0}.{1}'.format(newBlendshape, target), force=True)
 
 
 def extractTargets(blendShape, geometry, searchStr='', replaceStr='', prefix='', suffix=''):
-    bs = pm.PyNode(blendShape)
-    geo = pm.PyNode(geometry)
-
-    targets = pm.listAttr(bs.weight, multi=True)
+    targets = cmds.listAttr('{0}.weight'.format(blendShape), multi=True) or []
     for target in targets:
-        bs.attr(target).set(1)
-        extractedTarget = pm.duplicate(geo, n=prefix + target.replace(searchStr, replaceStr) + suffix)[0]
-        pm.parent(extractedTarget, world=True)
-        bs.attr(target).set(0)
+        cmds.setAttr('{0}.{1}'.format(blendShape, target), 1)
+        extractedTarget = cmds.duplicate(geometry, n=prefix + target.replace(searchStr, replaceStr) + suffix)[0]
+        cmds.parent(extractedTarget, world=True)
+        cmds.setAttr('{0}.{1}'.format(blendShape, target), 0)
 
 
 def setupBlendshapeOutput(name, blendshape):
@@ -46,15 +45,14 @@ def setupBlendshapeOutput(name, blendshape):
     :param blendshape: Blendshape name
     :type blendshape: str
     """
-    bs = pm.PyNode(blendshape)
-    outBS = pm.spaceLocator(n='{0}_outBS'.format(name))
-    targets = pm.listAttr(bs.weight, multi=True)
+    outBS = cmds.spaceLocator(n='{0}_outBS'.format(name))[0]
+    targets = cmds.listAttr('{0}.weight'.format(blendshape), multi=True) or []
     for target in targets:
-        pm.addAttr(outBS, ln=target, at='double', min=0.0, max=1.0, keyable=True)
-        targetInputs = bs.attr(target).inputs(plugs=True)
-        outBS.attr(target) >> bs.attr(target)
+        cmds.addAttr(outBS, ln=target, at='double', min=0.0, max=1.0, keyable=True)
+        targetInputs = cmds.listConnections('{0}.{1}'.format(blendshape, target), plugs=True, source=True, destination=False) or []
+        cmds.connectAttr('{0}.{1}'.format(outBS, target), '{0}.{1}'.format(blendshape, target), force=True)
         if targetInputs:
-            targetInputs[0] >> outBS.attr(target)
+            cmds.connectAttr(targetInputs[0], '{0}.{1}'.format(outBS, target), force=True)
 
 
 def addInbetweensInOrder(blendShapeName, targetName, inbetweens, baseName):
@@ -68,14 +66,16 @@ def addInbetweensInOrder(blendShapeName, targetName, inbetweens, baseName):
     increment = 1.0/(len(inbetweens)+1)
     targetIndex = getTargetIndex(blendShapeName, targetName)
     for id, inbetween in enumerate(inbetweens):
-        pm.blendShape(blendShapeName, e=True, ib=True, t=(baseName, targetIndex, inbetween, increment*(id+1)))
+        cmds.blendShape(blendShapeName, e=True, ib=True, t=(baseName, targetIndex, inbetween, increment*(id+1)))
 
 
 def getTargetIndex(blendShapeName, targetName):
-    bs = pm.PyNode(blendShapeName)
-    for index in bs.weightIndexList():
-        if pm.aliasAttr('{}.w[{}]'.format(blendShapeName, index), q=True) == targetName:
+    for index in range(1000):
+        alias = cmds.aliasAttr('{}.w[{}]'.format(blendShapeName, index), q=True)
+        if alias == targetName:
             return index
+        if not alias:
+            break
     return -1
 
 
@@ -86,15 +86,15 @@ blendShapes = ['body_BS', 'eye_BS']
 bsUtil.connectExistingTargets(driverObject, blendShapes)
     """
     assert isinstance(blendShapes, list), 'Second argument should be a list of blend shapes.'
-    driverObject = pm.PyNode(driverObject)
-    blendShapes = [pm.PyNode(blendShape) for blendShape in blendShapes]
+    driverObject = str(driverObject)
     for blendShape in blendShapes:
-        bsTargets = pm.listAttr('{}.weight'.format(blendShape), multi=True)
+        blendShape = str(blendShape)
+        bsTargets = cmds.listAttr('{}.weight'.format(blendShape), multi=True) or []
         for bsTarget in bsTargets:
             driverAttr = bsTarget.replace(targetSearch, targetReplace)
-            if driverObject.hasAttr(driverAttr):
-                driverAttr = driverObject.attr(driverAttr)
-                drivenAttr = blendShape.attr(bsTarget)
-                bsTargetDriver = drivenAttr.inputs(plugs=True)
-                if not bsTargetDriver or bsTargetDriver[0] != driverAttr:
-                    driverAttr >> drivenAttr
+            if cmds.attributeQuery(driverAttr, node=driverObject, exists=True):
+                drivenAttr = '{0}.{1}'.format(blendShape, bsTarget)
+                driverPlug = '{0}.{1}'.format(driverObject, driverAttr)
+                currentInputs = cmds.listConnections(drivenAttr, plugs=True, source=True, destination=False) or []
+                if not currentInputs or currentInputs[0] != driverPlug:
+                    cmds.connectAttr(driverPlug, drivenAttr, force=True)

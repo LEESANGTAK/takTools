@@ -9,7 +9,7 @@
             "annotation": "Set normalize weights to interactive.",
             "image1": "smoothSkin.png",
             "imageOverlayLabel": "interactive",
-            "command": "for skin in pm.ls(type='skinCluster'):\n    skin.normalizeWeights.set(1)",
+            "command": "for skin in cmds.ls(type='skinCluster'):\n    skin.normalizeWeights.set(1)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -18,7 +18,7 @@
             "annotation": "Set segmentScaleCompensate to false for selected skin clusters.",
             "image1": "UVTkScale.png",
             "imageOverlayLabel": "false",
-            "command": "for jnt in pm.selected(type='joint'):\n    jnt.segmentScaleCompensate.set(False)",
+            "command": "for jnt in cmds.ls(type='joint'):\n    jnt.segmentScaleCompensate.set(False)",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -27,7 +27,7 @@
             "annotation": "Set color space to raw for normal maps.",
             "image1": "render_bump2d.png",
             "imageOverlayLabel": "raw",
-            "command": "for node in pm.ls(type='bump2d'):\n    node.inputs(type='file')[0].colorSpace.set('Raw')",
+            "command": "for node in cmds.ls(type='bump2d'):\n    node.inputs(type='file')[0].colorSpace.set('Raw')",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -36,7 +36,7 @@
             "annotation": "Set tangentSpace to Left Handed for meshes.",
             "image1": "out_mesh.png",
             "imageOverlayLabel": "tangent",
-            "command": "for mesh in pm.ls(type='mesh'):\n    mesh.tangentSpace.set(2)",
+            "command": "for mesh in cmds.ls(type='mesh'):\n    mesh.tangentSpace.set(2)",
             "sourceType": "python",
             "noDefaultPopup": true
         }

@@ -759,7 +759,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.globalUtil as gUtil;import imp; imp.reload(gUtil)\");\npython(\"sels = pm.selected()\");\npython(\"for sel in sels:\\n\\tgUtil.setWireColorBySide(sel)\");"
+        -command "python(\"import takTools.utils.globalUtil as gUtil;import imp; imp.reload(gUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels:\\n\\tgUtil.setWireColorBySide(sel)\");"
         -optionBox 0
         -enable 1
         -data 0

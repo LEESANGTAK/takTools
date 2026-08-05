@@ -1,122 +1,125 @@
-import os
 import json
-from PIL import Image
-
 from maya import cmds
-import pymel.core as pm
+
+
+def _getShapes(node):
+    shapes = cmds.listRelatives(node, shapes=True, fullPath=True) or []
+    if not shapes and cmds.nodeType(node) == 'mesh':
+        shapes = [node]
+    return shapes
 
 
 def getMaterials(geo):
-    geo = pm.PyNode(geo)
-    if isinstance(geo, pm.nodetypes.Transform):
-        geo = geo.getShape()
+    shapes = _getShapes(geo)
     materials = []
-    shadingEngines = geo.connections(s=False, type="shadingEngine")
-    for shadingEngine in shadingEngines:
-        for mat in pm.ls(shadingEngine.connections(), materials=True):
-            if not mat.nodeType() == 'displacementShader':
-                materials.append(mat)
+    for shape in shapes:
+        shadingEngines = cmds.listConnections(shape, type='shadingEngine', s=False, d=True) or []
+        for shadingEngine in shadingEngines:
+            mats = cmds.ls(cmds.listConnections(shadingEngine) or [], materials=True) or []
+            for mat in mats:
+                if cmds.nodeType(mat) != 'displacementShader':
+                    materials.append(mat)
 
     return list(set(materials))
 
 
 def getMaterialsFromShape(shape):
     materials = []
-
-    shadingEngines = shape.connections(d=True, type="shadingEngine")
+    shadingEngines = cmds.listConnections(shape, type='shadingEngine', d=True) or []
     for se in shadingEngines:
-        materials.extend([mat for mat in pm.ls(se.connections(), materials=True) if not pm.nodeType(mat) == 'displacementShader'])
+        mats = cmds.ls(cmds.listConnections(se) or [], materials=True) or []
+        materials.extend([mat for mat in mats if cmds.nodeType(mat) != 'displacementShader'])
 
     return list(set(materials))
 
 
 def getObjectsWithMaterial(material):
-    preSels = pm.ls(sl=True)
-    pm.hyperShade(objects=material)
-    objects = pm.ls(sl=True)
-    pm.select(preSels, r=True)
+    preSels = cmds.ls(sl=True)
+    objects = cmds.hyperShade(objects=material) or []
+    if preSels:
+        cmds.select(preSels, r=True)
     return objects
 
 
 def duplicateMaterial(material):
-    preSels = pm.ls(sl=True)
-    pm.select(material, r=True)
-    pm.hyperShade(duplicate=True)
-    dupMaterial = pm.ls(sl=True)[0]
-    pm.select(preSels, r=True)
-    return dupMaterial
+    preSels = cmds.ls(sl=True)
+    cmds.select(material, r=True)
+    dupMaterials = cmds.hyperShade(duplicate=True) or []
+    if preSels:
+        cmds.select(preSels, r=True)
+    return dupMaterials[0] if dupMaterials else None
 
 
 def copyMaterial(source, target):
     sourceMat = getMaterials(source)
-    assignMaterial(target, sourceMat[0])
+    if sourceMat:
+        assignMaterial(target, sourceMat[0])
 
 
 def assignMaterial(geo, material):
-    preSels = pm.ls(sl=True)
-    pm.select(geo, r=True)
-    pm.hyperShade(assign=material)
-    pm.select(preSels, r=True)
+    preSels = cmds.ls(sl=True)
+    cmds.select(geo, r=True)
+    cmds.hyperShade(assign=material)
+    if preSels:
+        cmds.select(preSels, r=True)
 
 
 def assignMaterialToFace(geo):
     material = getMaterials(geo)[0]
-    pm.delete(material.connections(s=False, type='shadingEngine'))
-    pm.select(geo.faces, r=True)
-    pm.hyperShade(assign=material)
-    pm.select(geo, r=True)
+    shadingEngines = cmds.listConnections(material, type='shadingEngine', s=False, d=True) or []
+    for se in shadingEngines:
+        cmds.delete(se)
+    target = '{}.f[*]'.format(geo.split('|')[-1]) if '.' not in geo else geo
+    cmds.select(target, r=True)
+    cmds.hyperShade(assign=material)
+    cmds.select(geo, r=True)
 
 
 def transferMaterialReferenceToDeformed(referenceNode):
-    refShadingEngines = [node for node in pm.PyNode(referenceNode).nodes() if node.type() == 'shadingEngine']
+    refNodes = cmds.listRelatives(referenceNode, allDescendents=True, fullPath=True) or []
+    refShadingEngines = [node for node in refNodes if cmds.nodeType(node) == 'shadingEngine']
     for shadingEngine in refShadingEngines:
-        assignedObjs = pm.sets(shadingEngine, q=True)
+        assignedObjs = cmds.sets(shadingEngine, q=True) or []
         for obj in assignedObjs:
-            if not obj.node().intermediateObject.get():  # In case deformed mesh, skip
+            shapes = cmds.listRelatives(obj, shapes=True, fullPath=True) or []
+            if not shapes or not cmds.getAttr('{}.intermediateObject'.format(shapes[0])):
                 continue
-            baseShapeName = obj.node().stripNamespace()
-            noNameSpaceObj = obj.stripNamespace()
-            objForAssign = noNameSpaceObj.replace(baseShapeName, baseShapeName+'Deformed')
-            pm.sets(shadingEngine, forceElement=objForAssign)
+            baseShapeName = obj.split(':')[-1]
+            objForAssign = obj.replace(baseShapeName, baseShapeName+'Deformed')
+            if cmds.objExists(objForAssign):
+                cmds.sets(shadingEngine, forceElement=objForAssign)
 
 
 def splitMaterial(faces):
-    dupMat = None
-
-    shape = faces[0].node()
+    shape = faces[0].split('.')[0] if isinstance(faces[0], str) else faces[0]
     mat = getMaterialsFromShape(shape)
-    dupMat = duplicateMaterial(mat)
-    pm.select(faces, r=True)
-    pm.hyperShade(assign=dupMat)
-
+    dupMat = duplicateMaterial(mat[0] if mat else None)
+    cmds.select(faces, r=True)
+    if dupMat:
+        cmds.hyperShade(assign=dupMat)
     return dupMat
 
 
 def setNormalMapIgnoreColorSpaceRule():
     normalMaps = []
-    bump2dNodes = pm.ls(type='bump2d')
+    bump2dNodes = cmds.ls(type='bump2d') or []
     for bump2dNode in bump2dNodes:
-        fileNodes = bump2dNode.connections(d=False, type='file')
+        fileNodes = cmds.listConnections(bump2dNode, d=False, type='file') or []
         normalMaps.extend(fileNodes)
 
     for normalMap in normalMaps:
-        normalMap.colorSpace.set('Raw')
-        normalMap.ignoreColorSpaceFileRules.set(True)
+        cmds.setAttr('{}.colorSpace'.format(normalMap), 'Raw', type='string')
+        cmds.setAttr('{}.ignoreColorSpaceFileRules'.format(normalMap), True)
 
 
 def exportMaterials(geo, outputDir):
-    geo = pm.PyNode(geo)
-    materials = []
-    materials.extend(getMaterials(geo))
-    materials = list(set(materials))  # Remove repeated items
-
+    materials = list(set(getMaterials(geo)))
     matAssignInfo = {}
     for mat in materials:
         assignedItems = getObjectsWithMaterial(mat)
-        matAssignInfo[mat.name()] = [item.name() for item in assignedItems]
+        matAssignInfo[mat] = assignedItems
 
-    # Save material assign information
-    filePath = '{}/{}.mats'.format(outputDir, geo.name())
+    filePath = '{}/{}.mats'.format(outputDir, geo.split('|')[-1])
     with open(filePath, 'w') as f:
         json.dump(matAssignInfo, f, indent=4)
 
@@ -126,10 +129,10 @@ def importMaterials(filePath):
         matAssignInfo = json.load(f)
 
     for mat, meshes in matAssignInfo.items():
-        if not pm.objExists(mat):
-            mat = pm.shadingNode('blinn', n=mat, asShader=True)
+        if not cmds.objExists(mat):
+            mat = cmds.shadingNode('blinn', n=mat, asShader=True)
         for mesh in meshes:
-            if not pm.objExists(mesh):
-                pm.warning('"{}" is not exists.'.format(mesh))
+            if not cmds.objExists(mesh):
+                cmds.warning('"{}" is not exists.'.format(mesh))
                 continue
             assignMaterial(mesh, mat)

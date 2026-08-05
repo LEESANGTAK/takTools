@@ -1,13 +1,13 @@
 """
 pluginName = 'matrixArrayToArrayOfMatrix'
-pm.loadPlugin(pluginName)
-aomNode = pm.createNode('matrixArrayToArrayOfMatrix')
-pm.PyNode('MASH1').matrixOutPP >> aomNode.inMatrixArray
+cmds.loadPlugin(pluginName)
+aomNode = cmds.createNode('matrixArrayToArrayOfMatrix')
+cmds.PyNode('MASH1').matrixOutPP >> aomNode.inMatrixArray
 
 aomNode.inMatrixArray.disconnect()
-pm.delete(pm.ls(type='matrixArrayToArrayOfMatrix'))
-pm.flushUndo()
-pm.unloadPlugin(pluginName)
+cmds.delete(cmds.ls(type='matrixArrayToArrayOfMatrix'))
+cmds.flushUndo()
+cmds.unloadPlugin(pluginName)
 """
 
 from maya import OpenMayaMPx

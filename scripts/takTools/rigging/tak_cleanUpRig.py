@@ -41,19 +41,14 @@ def ui():
 
 
 def addGeoLayer(*args):
-    sels = pm.selected()
-
-    if not pm.objExists('geo_layer'):
-        geoLayer = pm.createNode('displayLayer', n='geo_layer')
+    if not cmds.objExists('geo_layer'):
+        geoLayer = cmds.createNode('displayLayer', n='geo_layer')
     else:
-        geoLayer = pm.PyNode('geo_layer')
+        geoLayer = 'geo_layer'
 
-    meshes = []
-    for sel in sels:
-        meshes.extend([mesh.getTransform() for mesh in pm.ls(sel, dag=True, type='mesh')])
-
+    meshes = cmds.filterExpand(cmds.ls(sl=True, dag=True, type='mesh'), sm=12)
     if meshes:
-        geoLayer.addMembers(meshes)
+        cmds.editDisplayLayerMembers(geoLayer, meshes)
 
 
 def visCtrl(*args):
@@ -195,10 +190,9 @@ def chkNamespace(*args):
 
 
 def isDeformed(geometry):
-    geo = pm.PyNode(geometry)
-    shapes = geo.getShapes()
+    shapes = cmds.listRelatives(geometry, s=True)
     for shape in shapes:
-        if shape.isIntermediateObject():
+        if cmds.getAttr(f'{shape}.intermediateObject'):
             return True
     return False
 
@@ -217,10 +211,8 @@ def lockGeoTransforms():
                     pass
     geoTransforms = list(set(transforms))
     for geoTransform in geoTransforms:
-        geoTransform = pm.PyNode(geoTransform)
-        geoTransform.translate.lock()
-        geoTransform.rotate.lock()
-        geoTransform.scale.lock()
+        for trsfAttr in [ch+axis for ch in 'trs' for axis in 'xyz']:
+            cmds.setAttr(f'{geoTransform}.{trsfAttr}', lock=True)
 
 
 def delKeys(*args):
@@ -275,20 +267,20 @@ def delAllLayers(*args):
 
 
 def tagWorkingData(*args):
-    for sel in pm.selected():
-        pm.addAttr(sel, ln='K_tag', dt='string')
-        sel.K_tag.set('workingData')
+    for sel in cmds.ls(sl=True):
+        cmds.addAttr(sel, ln='K_tag', dt='string')
+        cmds.setAttr(f'{sel}.K_tag', 'workingData', type='string')
 
 
 def deleteUnusedShadingNodes(*args):
-    pm.mel.hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes")
+    mel.hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes")
 
 
 def deleteWorkingData(*args):
-    tagAttrs = pm.ls('*.K_tag')
+    tagAttrs = cmds.ls('*.K_tag')
     for tagAttr in tagAttrs:
-        if tagAttr.get() == 'workingData':
-            pm.delete(tagAttr.node())
+        if cmds.getAttr(tagAttr) == 'workingData':
+            cmds.delete(cmds.ls(tagAttr, objectsOnly=True))
 
 
 def turnOffVisMiscNodes():
@@ -327,19 +319,19 @@ def setVisCtrlAttrs():
 
 
 def createControllerNodesSet():
-    ctrlNodes = pm.ls(type='controller')
+    ctrlNodes = cmds.ls(type='controller')
     if ctrlNodes:
         ctrlNodesSetName = 'controllerNodes_set'
-        if not pm.objExists(ctrlNodesSetName):
-            ctrlNodesSet = pm.createNode('objectSet', n=ctrlNodesSetName)
+        if not cmds.objExists(ctrlNodesSetName):
+            ctrlNodesSet = cmds.createNode('objectSet', n=ctrlNodesSetName)
         else:
-            ctrlNodesSet = pm.PyNode(ctrlNodesSetName)
+            ctrlNodesSet = ctrlNodesSetName
 
-        ctrlNodesSet.addMembers(ctrlNodes)
+        cmds.sets(ctrlNodes, forceElement=ctrlNodesSet)
 
         advancedSkelSetName = 'Sets'
-        if pm.objExists(advancedSkelSetName):
-            pm.PyNode(advancedSkelSetName).addMember(ctrlNodesSet)
+        if cmds.objExists(advancedSkelSetName):
+            cmds.sets(ctrlNodesSet, forceElement=advancedSkelSetName)
 
 def allInOne(*args):
     """ Preprocess to publish rig """

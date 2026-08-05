@@ -2,7 +2,6 @@ import re
 
 import maya.api.OpenMaya as om
 
-import pymel.core as pm
 from maya import cmds, mel
 
 from . import globalUtil
@@ -61,7 +60,7 @@ def duplicateFace(faces=None):
                 shapePlug = cmds.listConnections(objSetPlug, d=False, plugs=True)[0]
                 cmds.disconnectAttr(shapePlug, objSetPlug)
 
-        pm.parent(dupMesh, world=True)
+        cmds.parent(dupMesh, world=True)
 
         dupMeshes.append(dupMesh)
 
@@ -240,66 +239,81 @@ def getOverlapVertices(source, target, searchDist=0.001):
 
 
 def resetPolygonDisplay(mesh):
-    mesh = pm.PyNode(mesh)
-    preSels = pm.ls(sl=True)
-    pm.select(mesh, r=True)
-    pm.mel.eval('PolyDisplayReset;')
-    pm.select(preSels, r=True)
+    mesh = str(mesh)
+    preSels = cmds.ls(sl=True)
+    cmds.select(mesh, r=True)
+    mel.eval('PolyDisplayReset;')
+    if preSels:
+        cmds.select(preSels, r=True)
+    else:
+        cmds.select(clear=True)
 
 
 def restoreReferenceMesh(meshTransform):
-    shapes = meshTransform.getShapes()
+    meshTransform = str(meshTransform)
+    shapes = cmds.listRelatives(meshTransform, s=True, fullPath=True) or []
     for shape in shapes:
-        if shape.isIntermediate():
-            shape.intermediateObject.set(False)
-            if not shape.isReadOnly():
-                pm.delete(shape)
+        intermediate = cmds.getAttr('{}.intermediateObject'.format(shape))
+        if intermediate:
+            cmds.setAttr('{}.intermediateObject'.format(shape), False)
+            try:
+                is_ref = cmds.referenceQuery(shape, isNodeReferenced=True)
+            except RuntimeError:
+                is_ref = False
+
+            if not is_ref:
+                cmds.delete(shape)
         else:
-            pm.delete(shape)
+            cmds.delete(shape)
 
 
 def cleanupMesh(mesh):
-    mesh = pm.PyNode(mesh)
+    mesh = str(mesh)
 
-    pm.editDisplayLayerMembers('defaultLayer', mesh)  # Add to default display layer
+    cmds.editDisplayLayerMembers('defaultLayer', mesh)  # Add to default display layer
 
-    pm.delete(mesh, ch=True)  # Delete inputs
+    cmds.delete(mesh, ch=True)  # Delete inputs
 
     # Remove attributes except for default channelbox attributes
-    for attr in mesh.listAttr(ud=True):
+    for attr in cmds.listAttr(mesh, ud=True) or []:
         try:
-            pm.deleteAttr(attr)
-        except:
+            cmds.deleteAttr(attr)
+        except RuntimeError:
             pass
 
     # Unlock channelbox
-    for attr in mesh.listAttr():
-        attr.unlock()
+    for attr in cmds.listAttr(mesh) or []:
+        try:
+            cmds.setAttr(attr, lock=False)
+        except RuntimeError:
+            pass
 
-    pm.makeIdentity(mesh, apply=True)  # Freeze transformations
+    cmds.makeIdentity(mesh, apply=True)  # Freeze transformations
 
-    shapes = mesh.getShapes()
+    shapes = cmds.listRelatives(mesh, s=True, fullPath=True) or []
     if not shapes:
         return
 
     # Delete intermediate objects
     for shape in shapes:
-        if shape.isIntermediate():
-            pm.delete(shape)
+        if cmds.getAttr('{}.intermediateObject'.format(shape)):
+            cmds.delete(shape)
 
-    for shape in mesh.getShapes():
-        # pm.polyNormalPerVertex(shape, ufn=True)  # Unlock face normal
+    shapes = cmds.listRelatives(mesh, s=True, fullPath=True) or []
+    for shape in shapes:
         resetPolygonDisplay(shape)  # Reset polygon display
-        pm.polyMoveVertex(shape, localTranslate=(0, 0, 0))  # Set Vertex local position to default
-        shape.rename('{0}Shape'.format(mesh))
+        cmds.polyMoveVertex(shape, localTranslate=(0, 0, 0))  # Set Vertex local position to default
+        shape_base = shape.split('|')[-1]
+        cmds.rename(shape, '{0}Shape'.format(mesh))
 
-    pm.delete(mesh, ch=True)  # Delete construction history
+    cmds.delete(mesh, ch=True)  # Delete construction history
 
 
 def retopology(mesh, percentage=10, symmetry=False, keepOriginal=True):
-    mesh = pm.PyNode(mesh)
+    mesh = str(mesh)
+    faceCount = cmds.polyEvaluate(mesh, face=True)
 
-    newMesh = pm.polyRetopo(
+    newMesh = cmds.polyRetopo(
         mesh,
         caching=1,
         constructionHistory=0,
@@ -313,11 +327,11 @@ def retopology(mesh, percentage=10, symmetry=False, keepOriginal=True):
         topologyRegularity=0.5,
         faceUniformity=0,
         anisotropy=0.75,
-        targetFaceCount=mesh.numFaces()*(percentage*0.01),
+        targetFaceCount=faceCount * (percentage * 0.01),
         targetFaceCountTolerance=10
     )
 
-    pm.transferAttributes(
+    cmds.transferAttributes(
         mesh, newMesh,
         transferPositions=0,
         transferNormals=0,
@@ -330,64 +344,67 @@ def retopology(mesh, percentage=10, symmetry=False, keepOriginal=True):
         flipUVs=0,
         colorBorders=1
     )
-    pm.delete(newMesh, ch=True)
+    cmds.delete(newMesh, ch=True)
 
     matUtil.copyMaterial(mesh, newMesh)
 
     if not keepOriginal:
-        pm.delete(mesh)
+        cmds.delete(mesh)
 
     return newMesh
 
 
 def curveFromEdgeRing(edge, name=''):
-    crv = None
+    edge = str(edge)
+    edgeNode = edge.split('.')[0]
+    edgeId = nameUtil.idFromComponentName(edge)
+    edgeIds = [int(id) for id in cmds.polySelect(edgeRing=edgeId)]
+    edges = [nameUtil.componentNameFromId(id, edgeNode, 'edge') for id in edgeIds]
 
-    id = nameUtil.idFromComponentName(edge.name())
-    edgeIds = [int(id) for id in pm.polySelect(edgeRing=id)]
-    edges = [nameUtil.componentNameFromId(id, edge.node(), 'edge') for id in edgeIds]
-
-    edges = [pm.PyNode(edge) for edge in edges]
     editPoints = []
+    for edgeComp in edges:
+        verts = cmds.ls(cmds.polyListComponentConversion(edgeComp, toVertex=True), fl=True) or []
+        if len(verts) < 2:
+            continue
 
-    for edge in edges:
-        midPnt = vectorUtil.getCenterVector([edge.getPoint(0, 'world'), edge.getPoint(1, 'world')])
+        pt0 = cmds.pointPosition(verts[0], w=True)
+        pt1 = cmds.pointPosition(verts[1], w=True)
+        midPnt = vectorUtil.getCenterVector([pt0, pt1])
         editPoints.append(midPnt)
 
-    crv = pm.curve(ep=editPoints, d=3, name=name)
-
+    crv = cmds.curve(ep=editPoints, d=3, name=name)
     return crv
 
 
 def duplicateOrigMesh(meshTransform):
-    meshTransform = pm.PyNode(meshTransform)
+    meshTransform = str(meshTransform)
 
-    shapes = meshTransform.getShapes()
-    intermediateShapes = [shape for shape in shapes if shape.isIntermediate()]
-    unIntermediateShapes = list(set(shapes) - set(intermediateShapes))
+    shapes = cmds.listRelatives(meshTransform, s=True, fullPath=True) or []
+    intermediateShapes = [shape for shape in shapes if cmds.getAttr('{}.intermediateObject'.format(shape))]
 
     if not intermediateShapes:
-        pm.displayWarning('Object has no orig shape to duplicate.')
+        cmds.warning('Object has no orig shape to duplicate.')
         return
 
     # Clean up intermediate shapes
     for shape in intermediateShapes:
-        if shape.outputs():  # Keep valid shape that has connection
+        if cmds.listConnections(shape, s=False, d=True):  # Keep valid shape that has connection
             continue
         else:
-            pm.delete(shape)  # Delete unnecessary intermediate shape
+            cmds.delete(shape)  # Delete unnecessary intermediate shape
 
     # Duplicate mesh and display origin shape
-    newMeshTransform = pm.duplicate(meshTransform)[0]
-    for shape in newMeshTransform.getShapes():
-        if shape.isIntermediate():  # Show orig shape
-            shape.intermediateObject.set(False)
-            shape.rename('{0}Shape'.format(newMeshTransform.name()))
+    newMeshTransform = cmds.duplicate(meshTransform)[0]
+    shapes = cmds.listRelatives(newMeshTransform, s=True, fullPath=True) or []
+    for shape in shapes:
+        if cmds.getAttr('{}.intermediateObject'.format(shape)):  # Show orig shape
+            cmds.setAttr('{}.intermediateObject'.format(shape), False)
+            cmds.rename(shape, '{0}Shape'.format(newMeshTransform.split('|')[-1]))
         else:
-            pm.delete(shape)  # Delte displayed shape
+            cmds.delete(shape)  # Delete displayed shape
 
-    if newMeshTransform.getParent():
-        pm.parent(newMeshTransform, world=True)
+    if cmds.listRelatives(newMeshTransform, p=True):
+        cmds.parent(newMeshTransform, world=True)
 
     # Assign material to new mesh
     materials = matUtil.getMaterials(meshTransform)
@@ -395,27 +412,24 @@ def duplicateOrigMesh(meshTransform):
 
 
 def getFaceNormal(face):
-    rawFaceNormalInfo = cmds.polyInfo(face, faceNormals = True)[0]
+    rawFaceNormalInfo = cmds.polyInfo(face, faceNormals=True)[0]
     normalStr = re.match(r'.+:\s(.+)\n', rawFaceNormalInfo).group(1)
     normalStrLs = normalStr.split(' ')
-    faceNormal = []
-
-    for normalStr in normalStrLs:
-        faceNormal.append(float(normalStr))
-
-    return pm.dt.Vector(faceNormal)
+    faceNormal = [float(normalStr) for normalStr in normalStrLs]
+    return om.MVector(faceNormal)
 
 
 def getVertexMap(mesh):
-    mesh = pm.PyNode(mesh)
+    mesh = str(mesh)
 
     vertexMap = {}
     leftVertices = []
     rightVertices = []
     centerVertices = []
 
-    for vtx in mesh.vtx:
-        vtxXPos = round(vtx.getPosition().x, 5)
+    vertices = cmds.ls('{}.vtx[*]'.format(mesh), fl=True) or []
+    for vtx in vertices:
+        vtxXPos = round(cmds.pointPosition(vtx, w=True)[0], 5)
         if vtxXPos > 0:
             leftVertices.append(vtx)
         elif vtxXPos < 0:
@@ -426,11 +440,11 @@ def getVertexMap(mesh):
     for lfVtx in leftVertices:
         minDist = 100000
         symVtx = None
-        lfVtxPos = lfVtx.getPosition()
-        symVtxPos = pm.dt.Vector(-lfVtxPos.x, lfVtxPos.y, lfVtxPos.z)
+        lfVtxPos = om.MPoint(cmds.pointPosition(lfVtx, w=True))
+        symVtxPos = om.MPoint(-lfVtxPos.x, lfVtxPos.y, lfVtxPos.z)
         for rtVtx in rightVertices:
-            rtVtxPos = rtVtx.getPosition()
-            deltaDistance = (rtVtxPos - symVtxPos).length()
+            rtVtxPos = om.MPoint(cmds.pointPosition(rtVtx, w=True))
+            deltaDistance = rtVtxPos.distanceTo(symVtxPos)
             if deltaDistance < minDist:
                 minDist = deltaDistance
                 symVtx = rtVtx
@@ -443,33 +457,36 @@ def getVertexMap(mesh):
 def mirror(vertexMap, targetMesh, side='x'):
     for leftVtx, rightVtx in vertexMap.items():
         if side == 'x':
-            srcVtxPos = pm.pointPosition('{0}.{1}'.format(targetMesh, leftVtx), l=True)
+            srcVtxPos = cmds.pointPosition('{0}.{1}'.format(targetMesh, leftVtx), l=True)
             targetVtx = '{0}.{1}'.format(targetMesh, rightVtx)
         elif side == '-x':
-            srcVtxPos = pm.pointPosition('{0}.{1}'.format(targetMesh, rightVtx), l=True)
+            srcVtxPos = cmds.pointPosition('{0}.{1}'.format(targetMesh, rightVtx), l=True)
             targetVtx = '{0}.{1}'.format(targetMesh, leftVtx)
 
-        pm.xform(targetVtx, os=True, t=[-srcVtxPos[0], srcVtxPos[1], srcVtxPos[2]])
+        cmds.xform(targetVtx, os=True, t=[-srcVtxPos[0], srcVtxPos[1], srcVtxPos[2]])
 
 
 def getSymVertexMap(sourceMesh, symmetryMesh):
-    srcMesh = pm.PyNode(sourceMesh)
-    symMesh = pm.PyNode(symmetryMesh)
+    sourceMesh = str(sourceMesh)
+    symmetryMesh = str(symmetryMesh)
 
-    if len(srcMesh.vtx) != len(symMesh.vtx):
-        pm.error('The number of vertices of symmetry mesh must be same as the number of vertices of the source mesh.')
+    srcVertices = cmds.ls('{}.vtx[*]'.format(sourceMesh), fl=True) or []
+    symVertices = cmds.ls('{}.vtx[*]'.format(symmetryMesh), fl=True) or []
+
+    if len(srcVertices) != len(symVertices):
+        cmds.error('The number of vertices of symmetry mesh must be same as the number of vertices of the source mesh.')
 
     symPoints = []
-    for srcVtx in srcMesh.vtx:
-        srcVtxPos = srcVtx.getPosition()
-        symPoint = pm.dt.Point(-srcVtxPos[0], srcVtxPos[1], srcVtxPos[2])
+    for srcVtx in srcVertices:
+        srcVtxPos = cmds.pointPosition(srcVtx, w=True)
+        symPoint = om.MPoint(-srcVtxPos[0], srcVtxPos[1], srcVtxPos[2])
         symPoints.append(symPoint)
 
-    symMeshVtxs = [vtx for vtx in symMesh.vtx]
     symVtxMap = []
+    symMeshVtxs = list(symVertices)
     for symPoint in symPoints:
         closestVtx = findClosestVtx(symPoint, symMeshVtxs)
-        symVtxMap.append(closestVtx.index())
+        symVtxMap.append(int(closestVtx.split('[')[-1].strip(']')))
         symMeshVtxs.remove(closestVtx)
 
     return symVtxMap
@@ -488,22 +505,27 @@ def findClosestVtx(searchPoint, vertices):
 
 
 def symmeterizeMesh(targetVerticesMap, source, target):
-    source = pm.PyNode(source)
-    target = pm.PyNode(target)
+    source = str(source)
+    target = str(target)
 
-    for index, srcVtx in enumerate(source.vtx):
-        srcVtxPos = srcVtx.getPosition(space='object')
-        trgVtx = pm.PyNode('{}.vtx[{}]'.format(target, targetVerticesMap[index]))
-        trgVtx.setPosition((-srcVtxPos[0], srcVtxPos[1], srcVtxPos[2]), space='object')
+    for index, srcVtxIndex in enumerate(targetVerticesMap):
+        srcVtx = '{0}.vtx[{1}]'.format(source, index)
+        srcVtxPos = cmds.pointPosition(srcVtx, o=True)
+        trgVtx = '{0}.vtx[{1}]'.format(target, srcVtxIndex)
+        cmds.xform(trgVtx, os=True, t=(-srcVtxPos[0], srcVtxPos[1], srcVtxPos[2]))
 
 
 def getDeformedMeshes():
     deformedMeshes = []
-    geos = [mesh.getTransform() for mesh in pm.ls(type='mesh')]
-    for geo in geos:
-        shapes = geo.getShapes()
+    meshes = cmds.ls(type='mesh', long=True) or []
+    for mesh in meshes:
+        geo = cmds.listRelatives(mesh, p=True, fullPath=True)
+        if not geo:
+            continue
+        geo = geo[0]
+        shapes = cmds.listRelatives(geo, s=True, fullPath=True) or []
         for shape in shapes:
-            if shape.isIntermediateObject():
+            if cmds.getAttr('{}.intermediateObject'.format(shape)):
                 deformedMeshes.append(geo)
     return list(set(deformedMeshes))
 

@@ -72,7 +72,7 @@
             "annotation": "Create curve from edge ring with an selected edge.",
             "image1": "curveFromEdgeRing.png",
             "imageOverlayLabel": "",
-            "command": "import takTools.utils.mesh as meshUtil\nimport importlib\nimportlib.reload(meshUtil)\nselEdge = pm.selected()[0]\nmeshUtil.curveFromEdgeRing(selEdge, \"{0}_crv\".format(selEdge.node().getTransform()))\n",
+            "command": "import takTools.utils.mesh as meshUtil\nimport importlib\nimportlib.reload(meshUtil)\nselEdge = cmds.ls(sl=True)[0]\ntransform = cmds.listRelatives(cmds.ls(selEdge, objectsOnly=True)[0], p=True)[0]\nmeshUtil.curveFromEdgeRing(selEdge, '{0}_crv'.format(transform))",
             "sourceType": "python",
             "noDefaultPopup": true
         },

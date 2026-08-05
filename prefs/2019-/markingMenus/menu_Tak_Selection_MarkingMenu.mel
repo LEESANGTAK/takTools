@@ -289,7 +289,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"noEndJnts = []\");\npython(\"sels = pm.ls(sl=True)\");\npython(\"for sel in sels: noEndJnts.extend(jntUtils.getJointsExceptEnd(sel))\");\npython(\"pm.select(noEndJnts, r=True)\");"
+        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"noEndJnts = []\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: noEndJnts.extend(jntUtils.getJointsExceptEnd(sel))\");\npython(\"cmds.select(noEndJnts, r=True)\");"
         -optionBox 0
         -enable 1
         -data 0

@@ -2,8 +2,6 @@ import maya.OpenMaya as om1
 import maya.api.OpenMaya as om
 from maya import cmds
 
-import pymel.core as pm
-
 from functools import partial
 
 from . import globalUtil
@@ -12,52 +10,57 @@ from . import transform as trsfUtil
 
 def combineCurves(curves):
     for curve in curves:
-        pm.delete(curve, ch=True)
+        cmds.delete(curve, ch=True)
     for curve in curves:
-        pm.makeIdentity(curve, apply=True)
+        cmds.makeIdentity(curve, apply=True)
 
     baseCurve = curves[0]
     extraCurves = curves[1:]
 
     extraCurveShapes = []
     for curve in extraCurves:
-        extraCurveShapes.extend(curve.getShapes())
+        extraCurveShapes.extend(cmds.listRelatives(curve, s=True, fullPath=True) or [])
 
     for extraCurveShape in extraCurveShapes:
         parentCurveShape(extraCurveShape, baseCurve)
 
-    pm.delete(extraCurves)
-    pm.select(cl=True)
+    if extraCurves:
+        cmds.delete(extraCurves)
+    cmds.select(cl=True)
 
     return baseCurve
 
 
 def parentCurveShape(sourceCrv, targetCrv):
-    cvPositionDict = {}
-    for cv in sourceCrv.cv:
-        cvPositionDict[str(cv)] = cv.getPosition(space='world')
+    sourceShape = sourceCrv
+    if cmds.nodeType(sourceCrv) == 'transform':
+        shapes = cmds.listRelatives(sourceCrv, s=True, fullPath=True) or []
+        if shapes:
+            sourceShape = shapes[0]
 
-    if isinstance(sourceCrv, pm.nodetypes.Transform):
-        sourceCrv.getShape().setParent(targetCrv, shape=True, relative=True)
-    else:
-        pm.parent(sourceCrv, targetCrv, shape=True, relative=True)
+    cvs = cmds.ls('{}.cv[*]'.format(sourceShape), fl=True) or []
+    cvPositionDict = {cv: cmds.pointPosition(cv, world=True) for cv in cvs}
+    cmds.parent(sourceShape, targetCrv, shape=True, relative=True)
 
-    for cv in sourceCrv.cv:
-        cv.setPosition(cvPositionDict.get(cv), space='world')
+    for cv, pos in cvPositionDict.items():
+        cmds.xform(cv, t=pos, ws=True)
 
-    targetCrv.updateCurve()
+    if cmds.objExists(targetCrv):
+        try:
+            cmds.refresh()
+        except RuntimeError:
+            pass
 
 
 def replaceCurve(origCurve, newCurve):
-    origShapes = origCurve.getShapes()
-    newShapes = newCurve.getShapes()
+    origShapes = cmds.listRelatives(origCurve, s=True, fullPath=True) or []
+    newShapes = cmds.listRelatives(newCurve, s=True, fullPath=True) or []
 
     for newShape in newShapes:
-        pm.parent(newShape, origCurve, shape=True, relative=True)
+        cmds.parent(newShape, origCurve, shape=True, relative=True)
 
-    pm.delete(newCurve, origShapes)
-
-    pm.select(cl=True)
+    cmds.delete(newCurve, origShapes)
+    cmds.select(cl=True)
 
 
 def mirrorControlCurveShape(srcControl, trgControl):
@@ -68,18 +71,15 @@ def mirrorControlCurveShape(srcControl, trgControl):
         srcControl (str): Source control curve transform name.
         trgControl (str): Target control curve transform name.
     """
-    srcShapes = pm.listRelatives(srcControl, s=True)
-    trgShapes = pm.listRelatives(trgControl, s=True)
+    srcShapes = cmds.listRelatives(srcControl, s=True, fullPath=True) or []
+    trgShapes = cmds.listRelatives(trgControl, s=True, fullPath=True) or []
     for i in range(len(srcShapes)):
-        # Get cvs count of each source curve.
-        degs = pm.getAttr('%s.degree' % srcShapes[i])
-        spans = pm.getAttr('%s.spans' % srcShapes[i])
+        degs = cmds.getAttr('%s.degree' % srcShapes[i])
+        spans = cmds.getAttr('%s.spans' % srcShapes[i])
         cvs = degs + spans
         for j in range(cvs):
-            # Get worldspace translate value of each cv.
-            cvTr = pm.xform('%s.cv[%d]' % (srcShapes[i], j), q=True, t=True, ws=True)
-            # Set opposite control's cvs.
-            pm.xform('%s.cv[%d]' % (trgShapes[i], j), t=(-cvTr[0], cvTr[1], cvTr[2]), ws=True)
+            cvTr = cmds.xform('%s.cv[%d]' % (srcShapes[i], j), q=True, t=True, ws=True)
+            cmds.xform('%s.cv[%d]' % (trgShapes[i], j), t=(-cvTr[0], cvTr[1], cvTr[2]), ws=True)
 
 def copyControlCurveShape(srcControl, trgControl):
     """
@@ -89,16 +89,15 @@ def copyControlCurveShape(srcControl, trgControl):
         srcControl (str): Source control curve transform name.
         trgControl (str): Target control curve transform name.
     """
-    srcShapes = pm.listRelatives(srcControl, s=True)
-    trgShapes = pm.listRelatives(trgControl, s=True)
+    srcShapes = cmds.listRelatives(srcControl, s=True, fullPath=True) or []
+    trgShapes = cmds.listRelatives(trgControl, s=True, fullPath=True) or []
     for i in range(len(srcShapes)):
-        # Get cvs count of each source curve.
-        degs = pm.getAttr('%s.degree' % srcShapes[i])
-        spans = pm.getAttr('%s.spans' % srcShapes[i])
+        degs = cmds.getAttr('%s.degree' % srcShapes[i])
+        spans = cmds.getAttr('%s.spans' % srcShapes[i])
         cvs = degs + spans
         for j in range(cvs):
-            cvTr = pm.xform('%s.cv[%d]' % (srcShapes[i], j), q=True, t=True, os=True)
-            pm.xform('%s.cv[%d]' % (trgShapes[i], j), t=(cvTr[0], cvTr[1], cvTr[2]), os=True)
+            cvTr = cmds.xform('%s.cv[%d]' % (srcShapes[i], j), q=True, t=True, os=True)
+            cmds.xform('%s.cv[%d]' % (trgShapes[i], j), t=(cvTr[0], cvTr[1], cvTr[2]), os=True)
 
 
 def duplicateObjectAlongCurve(crv, obj, count):
@@ -110,17 +109,14 @@ def duplicateObjectAlongCurve(crv, obj, count):
         obj (str): Object name to duplicate.
         count (int): Duplicated object count.
     """
-    crv = pm.PyNode(crv)
-    obj = pm.PyNode(obj)
-
     numOfSpans = count - 1
     increNum = 1.0 / numOfSpans
     unNum = 0
 
     for i in range(count):
-        objPos = pm.pointPosition('%s.un[%f]' %(crv, unNum), w=True)
-        dupObj = obj.duplicate(n='{}_{}'.format(obj, i))[0]
-        dupObj.translate.set(objPos)
+        objPos = cmds.pointPosition('%s.un[%f]' % (crv, unNum), w=True)
+        dupObj = cmds.duplicate(obj, n='{}_{}'.format(obj, i))[0]
+        cmds.xform(dupObj, t=objPos, ws=True)
         unNum += increNum
 
 
@@ -128,11 +124,11 @@ def createShortestPathCurve(startTransform, endTransform, pathTransforms):
     editPoints = []
 
     while len(pathTransforms) >= 0:
-        startTrsfPivotPos = startTransform.scalePivot.get()
-        if startTrsfPivotPos.get() != (0.0, 0.0, 0.0):  # In case freezed transform
-            editPoints.append(startTrsfPivotPos.get())
+        startTrsfPivotPos = cmds.xform(startTransform, q=True, sp=True, ws=True)
+        if startTrsfPivotPos != [0.0, 0.0, 0.0]:  # In case freezed transform
+            editPoints.append(startTrsfPivotPos)
         else:
-            editPoints.append(pm.xform(startTransform, q=True, t=True, ws=True))
+            editPoints.append(cmds.xform(startTransform, q=True, t=True, ws=True))
 
         if len(pathTransforms) == 0:
             break
@@ -140,13 +136,13 @@ def createShortestPathCurve(startTransform, endTransform, pathTransforms):
         startTransform = closestTrsf
         pathTransforms.remove(closestTrsf)
 
-    endTrsfPivotPos = endTransform.scalePivot.get()
-    if endTrsfPivotPos.get() != (0.0, 0.0, 0.0):  # In case freezed transform
-        editPoints.append(endTrsfPivotPos.get())
+    endTrsfPivotPos = cmds.xform(endTransform, q=True, sp=True, ws=True)
+    if endTrsfPivotPos != [0.0, 0.0, 0.0]:  # In case freezed transform
+        editPoints.append(endTrsfPivotPos)
     else:
-        editPoints.append(pm.xform(endTransform, q=True, t=True, ws=True))
+        editPoints.append(cmds.xform(endTransform, q=True, t=True, ws=True))
 
-    pm.curve(ep=editPoints)
+    cmds.curve(p=editPoints)
 
 
 def getLength(curve):
@@ -163,26 +159,25 @@ def getLength(curve):
 
 def getCurveInfo(curve):
     crvInfo = {}
-    crv = pm.PyNode(curve)
-    shapes = crv.getShapes()
+    shapes = cmds.listRelatives(curve, s=True, fullPath=True) or []
     for shp in shapes:
-        form = shp.f.get()
-        degree = shp.d.get()
-        cvPos = []
-        for cv in shp.cv:
-            cvPos.append(list(cv.getPosition(space='world')))
-        crvInfo[shp.nodeName()] = {'form': form, 'degree': degree, 'cvPos': cvPos}
+        form = cmds.getAttr('{}.form'.format(shp))
+        degree = cmds.getAttr('{}.degree'.format(shp))
+        cvs = cmds.ls('{}.cv[*]'.format(shp), fl=True) or []
+        cvPos = [list(cmds.pointPosition(cv, world=True)) for cv in cvs]
+        crvInfo[shp] = {'form': form, 'degree': degree, 'cvPos': cvPos}
     return crvInfo
 
 
 def createCurve(curveInfo, curveName):
-    transform = pm.createNode('transform', n=curveName)
+    transform = cmds.createNode('transform', n=curveName)
     for shapeInfo in curveInfo.values():
-        crv = pm.curve(n=curveName, p=shapeInfo['cvPos'], degree=shapeInfo['degree'])
+        tempCurve = cmds.curve(p=shapeInfo['cvPos'], degree=shapeInfo['degree'], n='{}_temp'.format(curveName))
         if shapeInfo['form'] > 0:
-            pm.closeCurve(ch=False, preserveShape=False, replaceOriginal=True)
-        pm.parent(crv.getShape(), transform, s=True, r=True)
-        pm.delete(crv)
+            cmds.closeCurve(ch=False, preserveShape=False, replaceOriginal=True)
+        tempShape = cmds.listRelatives(tempCurve, s=True, fullPath=True)[0]
+        cmds.parent(tempShape, transform, s=True, r=True)
+        cmds.delete(tempCurve)
 
 
 def setupDriveLocators(curve):

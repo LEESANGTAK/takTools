@@ -9,16 +9,13 @@ Separated from tak_misc.py for better organization.
 
 from importlib import reload
 
-import os
 import re
 from functools import partial
 
 import maya.OpenMaya as OpenMaya
-import maya.api.OpenMaya as om
 
 import maya.cmds as cmds
 import maya.mel as mel
-import pymel.core as pm
 
 from . import tak_lib
 from ..utils import skin as skinUtil; reload(skinUtil)
@@ -352,7 +349,7 @@ def copyUvRiggedMesh(source, target):
     targetOrigShapes = [shape for shape in targetShapes if shape.isIntermediate()]
     for targetOrigShape in targetOrigShapes:
         targetOrigShape.intermediateObject.set(False)
-        pm.transferAttributes(
+        cmds.transferAttributes(
             source,
             targetOrigShape,
             transferPositions=0,
@@ -362,7 +359,7 @@ def copyUvRiggedMesh(source, target):
             sampleSpace=0,
             searchMethod=3
         )
-        pm.delete(targetOrigShape, ch=True)
+        cmds.delete(targetOrigShape, ch=True)
         targetOrigShape.intermediateObject.set(True)
 
 

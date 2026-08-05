@@ -1,4 +1,3 @@
-import pymel.core as pm
 import maya.cmds as cmds
 
 from . import globalUtil
@@ -48,14 +47,18 @@ def connectReferenceUVsetToDeformed(referenceMesh):
 
 def createLightMapUVSet(lightMapUVSetName='LightMapUV'):
     cleanupNeedObjs = []
-    for sel in pm.selected():
-        allUVSets = pm.polyUVSet(sel.getShape(), q=True, allUVSets=True)
+    for sel in cmds.ls(selection=True, long=True) or []:
+        shape = cmds.listRelatives(sel, shapes=True, fullPath=True)
+        if not shape:
+            continue
+        shape = shape[0]
+        allUVSets = cmds.polyUVSet(shape, q=True, allUVSets=True) or []
         if len(allUVSets) > 1:
             cleanupNeedObjs.append(sel)
-        pm.polyCopyUV(sel, uvSetNameInput=allUVSets[0], uvSetName=lightMapUVSetName, createNewMap=True, ch=True)
-        pm.polyUVSet(sel.getShape(), currentUVSet=True, uvSet=allUVSets[0])
+        cmds.polyCopyUV(sel, uvSetNameInput=allUVSets[0], uvSetName=lightMapUVSetName, createNewMap=True, ch=True)
+        cmds.polyUVSet(shape, currentUVSet=True, uvSet=allUVSets[0])
     if cleanupNeedObjs:
-        pm.warning('{} are need to clean up UV Sets.'.format(cleanupNeedObjs))
+        cmds.warning('{} are need to clean up UV Sets.'.format(cleanupNeedObjs))
 
 
 def normalizeCardUVs(selections):

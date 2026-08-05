@@ -15,10 +15,7 @@ reload(tak_attachIt)
 tak_attachIt.UI()
 """
 
-import re
-
 from maya import cmds
-import pymel.core as pm
 import maya.api.OpenMaya as om
 
 
@@ -144,8 +141,8 @@ class Functions(object):
 
         if not mPosOffOpt:
             if freezedTransformOpt:
-                pm.matchTransform(srcObj, anchorGrp)
-                pm.makeIdentity(srcObj, apply=True)
+                cmds.matchTransform(srcObj, anchorGrp)
+                cmds.makeIdentity(srcObj, apply=True)
             else:
                 cls.setZeroAttr(srcObj, 'pos')
 
@@ -209,8 +206,8 @@ class Functions(object):
 
         if not mPosOffOpt:
             if freezedTransformOpt:
-                pm.matchTransform(srcObj, anchorGrp)
-                pm.makeIdentity(srcObj, apply=True)
+                cmds.matchTransform(srcObj, anchorGrp)
+                cmds.makeIdentity(srcObj, apply=True)
             else:
                 cls.setZeroAttr(srcObj, 'pos')
 
@@ -274,8 +271,8 @@ class Functions(object):
         # Maintain offset option
         if not mPosOffOpt:
             if freezedTransformOpt:
-                pm.matchTransform(srcObj, anchorGrp)
-                pm.makeIdentity(srcObj, apply=True)
+                cmds.matchTransform(srcObj, anchorGrp)
+                cmds.makeIdentity(srcObj, apply=True)
             else:
                 cls.setZeroAttr(srcObj, 'pos')
 
@@ -340,8 +337,8 @@ class Functions(object):
         # Maintain offset option
         if not mPosOffOpt:
             if freezedTransformOpt:
-                pm.matchTransform(srcObj, anchorGrp)
-                pm.makeIdentity(srcObj, apply=True)
+                cmds.matchTransform(srcObj, anchorGrp)
+                cmds.makeIdentity(srcObj, apply=True)
             else:
                 cls.setZeroAttr(srcObj, 'pos')
 
@@ -439,8 +436,8 @@ class Functions(object):
 
         if not mPosOffOpt:
             if freezedTransformOpt:
-                pm.matchTransform(srcObj, anchorGrp)
-                pm.makeIdentity(srcObj, apply=True)
+                cmds.matchTransform(srcObj, anchorGrp)
+                cmds.makeIdentity(srcObj, apply=True)
             else:
                 cls.setZeroAttr(srcObj, 'pos')
 

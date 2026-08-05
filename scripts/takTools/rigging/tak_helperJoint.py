@@ -18,7 +18,6 @@ reload(tak_helperJoint)
 tak_helperJoint.ui()
 '''
 
-import pymel.core as pm
 import maya.cmds as cmds
 import maya.mel as mel
 
@@ -402,42 +401,43 @@ def mirrorCorJnt(*args):
 
 			# Check if driver is more than two.
 			if not drvrVals:
-				animatableAttrs = pm.PyNode(sdkLoc).listAnimatable()
+				animatableAttrs = cmds.listAttr(sdkLoc, keyable=True)
 				for attr in animatableAttrs:
-					animAttrInputNode = attr.connections(d=False, scn=True)
+					animAttrInputNode = cmds.listConnections(attr, d=False, scn=True)
 					if animAttrInputNode:
-						if isinstance(animAttrInputNode[0], pm.nodetypes.AnimCurve): # In case animCurve
+						if 'animCurve' in cmds.nodeType(animAttrInputNode[0]): # In case animCurve
 							animCurve = animAttrInputNode[0]
-							animCurveInput = animCurve.input.connections(p=True, scn=True)[0]
-							animCurveOutput = animCurve.output.connections(p=True, scn=True)[0]
+							animCurveInput = cmds.listConnections(f'{animCurve}.input', p=True, scn=True)[0]
+							animCurveOutput = cmds.listConnections(f'{animCurve}.output', p=True, scn=True)[0]
 
-							dupAnimCurve = animCurve.duplicate()[0]
-							pm.PyNode(animCurveInput.replace(helperJntSrch, helperJntRplc)) >> dupAnimCurve.input
-							dupAnimCurve.output >> pm.PyNode(animCurveOutput.replace(helperJntSrch, helperJntRplc))
+							dupAnimCurve = cmds.duplicate(animCurve)[0]
+							cmds.connectAttr(animCurveInput.replace(helperJntSrch, helperJntRplc), f'{dupAnimCurve}.input')
+							cmds.connectAttr(f'{dupAnimCurve}.output', animCurveOutput.replace(helperJntSrch, helperJntRplc))
 
 						else: # In case blendWeight
 							blendWeight = animAttrInputNode[0]
-							animCurves = blendWeight.input.connections(scn=True)
-							blendWeightOutput = blendWeight.output.connections(p=True, scn=True)[0]
+							animCurves = cmds.listConnections(f'{blendWeight}.input', scn=True)
+							blendWeightOutput = cmds.listConnections(f'{blendWeight}.output', p=True, scn=True)[0]
 
-							dupBlendWeight = blendWeight.duplicate()[0]
-							dupBlendWeight.output >> pm.PyNode(blendWeightOutput.replace(helperJntSrch, helperJntRplc))
+							dupBlendWeight = cmds.duplicate(blendWeight)[0]
+							cmds.connectAttr(f'{dupBlendWeight}.output', blendWeightOutput.replace(helperJntSrch, helperJntRplc))
 							for animCurve in animCurves:
-								if not animCurve.numKeyframes():
-									pm.delete(animCurve)
+								if not cmds.keyframe(animCurve, q=True):
+									cmds.delete(animCurve)
 									continue
 
 								animCurveInput = animCurve.input.connections(p=True, scn=True)[0]
 								animCurveOutput = animCurve.output.connections(p=True, scn=True)[0]
 
-								dupAnimCurve = animCurve.duplicate()[0]
-								pm.PyNode(animCurveInput.replace(helperJntSrch, helperJntRplc)) >> dupAnimCurve.input
+								dupAnimCurve = cmds.duplicate(animCurve)[0]
+								cmds.connectAttr(animCurveInput.replace(helperJntSrch, helperJntRplc), f'{dupAnimCurve}.input')
 								dstIndex = re.search(r'.*\[(\d+)\]', str(animCurveOutput)).group(1)
-								dupAnimCurve.output >> dupBlendWeight.input[dstIndex]
+								cmds.connectAttr(f'{dupAnimCurve}.output', f'{dupBlendWeight}.input[{dstIndex}]')
 
 								if 'translate' in str(blendWeightOutput):
-									for i in range(dupAnimCurve.numKeyframes()):
-										dupAnimCurve.setValue(i, -dupAnimCurve.getValue(i))
+									for i in range(len(cmds.keyframe(dupAnimCurve, q=True))):
+										origValue = cmds.keyframe(dupAnimCurve, q=True, index=(i,), valueChange=True)
+										cmds.keyframe(dupAnimCurve, e=True, index=(i,), valueChange=-origValue)
 				continue
 
 			for i in range(len(drvrVals)):

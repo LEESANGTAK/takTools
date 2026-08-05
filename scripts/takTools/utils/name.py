@@ -1,15 +1,18 @@
-import pymel.core as pm
-
+import maya.cmds as cmds
 import time
 import re
 
 
-
 def renameChildren(rootNode, prefix='', suffix='', search='', replace=''):
-    rootNode = pm.PyNode(rootNode)
-    for node in rootNode.getChildren(ad=True, type='transform'):
-        node.rename(prefix + node.nodeName() + suffix)
-        node.rename(node.replace(search, replace))
+    children = cmds.listRelatives(rootNode, allDescendents=True, type='transform', fullPath=True) or []
+    for node in children:
+        nodeName = node.split('|')[-1]
+        newName = prefix + nodeName + suffix
+        newName = newName.replace(search, replace)
+        try:
+            cmds.rename(node, newName)
+        except RuntimeError:
+            pass
 
 
 def componentNameFromId(index, object, componentType):
@@ -29,13 +32,13 @@ def componentNameFromId(index, object, componentType):
         'edge': 'e',
         'face': 'f',
     }
-    object = pm.PyNode(object)
-    if object.nodeType() == 'transform':
-        object = object.getShape()
+    obj = object
+    if cmds.nodeType(obj) == 'transform':
+        shapes = cmds.listRelatives(obj, shapes=True, fullPath=True) or []
+        if shapes:
+            obj = shapes[0]
 
-    compoenentName = ''
-    compoenentName = '{0}.{1}[{2}]'.format(object, typeTable[componentType], index)
-    return compoenentName
+    return '{0}.{1}[{2}]'.format(obj, typeTable[componentType], index)
 
 
 def idFromComponentName(componentName):
@@ -78,24 +81,33 @@ def removeNamespaces(replaceChar='_'):
     """
 
     startTime = time.time()
-
     namespaceChar = ':'
 
-    allNodes = pm.ls()
+    allNodes = cmds.ls(long=True) or []
     for node in allNodes:
-        if namespaceChar in node.name():
-            node.rename(node.replace(namespaceChar, replaceChar))
+        if namespaceChar in node:
+            newName = node.replace(namespaceChar, replaceChar)
+            try:
+                cmds.rename(node, newName)
+            except RuntimeError:
+                pass
 
-    allNamespaces = pm.listNamespaces()
+    allNamespaces = cmds.namespaceInfo(listOnlyNamespaces=True) or []
     for namespace in allNamespaces:
-        namespace.remove()
+        if namespace in ('UI', 'shared'):
+            continue
+        try:
+            cmds.namespace(rm=namespace, mergeNamespaceWithRoot=True)
+        except RuntimeError:
+            pass
 
     duration = time.time() - startTime
-    pm.displayInfo('Remove namespace job done in %ss.' % duration)
+    print('Remove namespace job done in %ss.' % duration)
 
 
 def copyName(source, target, stripNamespace=True):
-    src = pm.PyNode(source)
-    trg = pm.PyNode(target)
-
-    trg.rename(src.name(stripNamespace=stripNamespace))
+    srcName = source.split(':')[-1] if stripNamespace else source
+    try:
+        cmds.rename(target, srcName)
+    except RuntimeError:
+        pass

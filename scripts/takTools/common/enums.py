@@ -1,4 +1,4 @@
-import pymel.core as pm
+from maya.api import OpenMaya as om
 
 
 class Color(object):
@@ -29,6 +29,6 @@ class ControlShape(object):
 
 
 class Vector(object):
-    X = pm.datatypes.Vector(1, 0, 0)
-    Y = pm.datatypes.Vector(0, 1, 0)
-    Z = pm.datatypes.Vector(0, 0, 1)
+    X = om.MVector(1, 0, 0)
+    Y = om.MVector(0, 1, 0)
+    Z = om.MVector(0, 0, 1)

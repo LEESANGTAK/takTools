@@ -90,7 +90,7 @@
             "annotation": "Polygon Edges to Curve",
             "image1": "polyEdgeToCurves.png",
             "imageOverlayLabel": "",
-            "command": "meshName = pm.selected()[0].node().getTransform();pm.polyToCurve(form=2, degree=3, n=meshName+\"_crv\")",
+            "command": "meshName = cmds.ls(sl=True)[0].node().getTransform();cmds.polyToCurve(form=2, degree=3, n=meshName+\"_crv\")",
             "sourceType": "python",
             "noDefaultPopup": true
         },

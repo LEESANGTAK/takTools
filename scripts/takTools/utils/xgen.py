@@ -9,7 +9,7 @@ import json
 
 from maya import mel
 from maya import cmds
-import pymel.core as pm
+import maya.api.OpenMaya as om
 
 import xgenm as xg
 import xgenm.xgGlobal as xgg
@@ -30,9 +30,9 @@ def connectScalpToPatch(scalp, patch):
         connectScalpToPatch(scalp="hairScalp_geo", patch="hairScalp_geo_teajung_frontHair")
     """
 
-    patchShp = pm.listRelatives(patch)[0]
-    pm.connectAttr(scalp + ".worldMesh", patchShp + ".geometry")
-    pm.connectAttr(scalp + ".matrix", patchShp + ".transform")
+    patchShp = cmds.listRelatives(patch, s=True, fullPath=True)[0]
+    cmds.connectAttr('{}.worldMesh'.format(scalp), '{}.geometry'.format(patchShp), force=True)
+    cmds.connectAttr('{}.matrix'.format(scalp), '{}.transform'.format(patchShp), force=True)
 
 
 def connectFollicleToScalp(follicle, scalp):
@@ -48,32 +48,37 @@ def connectFollicleToScalp(follicle, scalp):
         connectFollicleToScalp(follicle='follicleShape1', scalp='hairScalp_geo')
     """
 
-    pm.connectAttr(scalp + ".outMesh", follicle + ".inputMesh", f=True)
-    pm.connectAttr(scalp + ".worldMatrix", follicle + ".inputWorldMatrix", f=True)
+    cmds.connectAttr('{}.outMesh'.format(scalp), '{}.inputMesh'.format(follicle), force=True)
+    cmds.connectAttr('{}.worldMatrix'.format(scalp), '{}.inputWorldMatrix'.format(follicle), force=True)
 
 
 def attachGuideToScalp():
-    xgGuides = pm.ls(type='xgmSplineGuide')
+    xgGuides = cmds.ls(type='xgmSplineGuide', long=True) or []
     for xgGuide in xgGuides:
-        xgmMakeGuide = xgGuide.toMakeGuide.connections()[0]
-        xgmMakeGuide.outputMesh.connect(xgGuide.inputMesh, f=True)
+        xgmMakeGuides = cmds.listConnections('{}.toMakeGuide'.format(xgGuide), s=True, d=False) or []
+        if not xgmMakeGuides:
+            continue
+        xgmMakeGuide = xgmMakeGuides[0]
+        cmds.connectAttr('{}.outputMesh'.format(xgmMakeGuide), '{}.inputMesh'.format(xgGuide), force=True)
 
 
 def exportXgenTextureInfo(mesh, filePath):
-    files = mesh.connections(type='file', plugs=True)
+    mesh = str(mesh)
+    files = cmds.listConnections(mesh, type='file', plugs=True) or []
     connectionInfos = []
-    for file in files:
-        meshAttr = file.connections(s=False, plugs=True)[0]
+    for fileOutput in files:
+        meshAttr = cmds.listConnections(fileOutput, s=False, plugs=True)[0]
         connectionInfos.append({
-            'fileOutput': str(file),
+            'fileOutput': str(fileOutput),
             'attr': '_' + meshAttr.split('.')[-1].split('_', 1)[-1],
-            'attrType': meshAttr.type()
+            'attrType': cmds.getAttr(fileOutput, type=True)
         })
     with open(filePath, 'w') as f:
         json.dump(connectionInfos, f)
 
 
 def importXgenTextureInfo(mesh, collection, filePath):
+    mesh = str(mesh)
     with open(filePath, 'r') as f:
         connectionInfos = json.load(f)
 
@@ -82,25 +87,24 @@ def importXgenTextureInfo(mesh, collection, filePath):
         attr = collection + info['attr']
         attrType = info['attrType']
 
-        if not mesh.hasAttr(attr):
+        if not cmds.attributeQuery(attr, node=mesh, exists=True):
             if attrType == 'float3':
-                mesh.addAttr(attr, at=attrType)
-                mesh.addAttr(attr+'X', at='float', p=attr)
-                mesh.addAttr(attr+'Y', at='float', p=attr)
-                mesh.addAttr(attr+'Z', at='float', p=attr)
+                cmds.addAttr(mesh, ln=attr, at=attrType)
+                cmds.addAttr(mesh, ln=attr+'X', at='float', p=attr)
+                cmds.addAttr(mesh, ln=attr+'Y', at='float', p=attr)
+                cmds.addAttr(mesh, ln=attr+'Z', at='float', p=attr)
             else:
-                mesh.addAttr(attr, at=attrType)
+                cmds.addAttr(mesh, ln=attr, at=attrType)
 
-        pm.Attribute(fileOutput) >> mesh.attr(attr)
+        cmds.connectAttr(fileOutput, '{}.{}'.format(mesh, attr), force=True)
 
 
 def createGuideCurves(description, connect=True):
     guideCurvesGrp = description + '_guideCurves'
 
-    desc = pm.PyNode(description)
-    guides = desc.getChildren(ad=True, type='xgmSplineGuide')
-    pm.select(guides, r=True)
-    pm.mel.eval('xgmCreateCurvesFromGuidesOption(0, 0, "%s")' % (guideCurvesGrp))
+    guides = cmds.listRelatives(description, ad=True, type='xgmSplineGuide', fullPath=True) or []
+    cmds.select(guides, r=True)
+    mel.eval('xgmCreateCurvesFromGuidesOption(0, 0, "%s")' % (guideCurvesGrp))
 
     if connect:
         connectCurvesToGuides(guideCurvesGrp, description)
@@ -110,20 +114,23 @@ def connectCurvesToGuides(curveGroup, description, method='override'):
     curveGroup = str(curveGroup)
     description = str(description)
 
-    crvs = pm.listRelatives(curveGroup)
-    guides = pm.listRelatives(description, ad=True, type='xgmSplineGuide')
+    crvs = cmds.listRelatives(curveGroup, c=True, fullPath=True) or []
+    guides = cmds.listRelatives(description, ad=True, type='xgmSplineGuide', fullPath=True) or []
 
     if method == 'override':
         for crv, guide in zip(crvs, guides):
-            makeGuide = guide.inputMesh.connections(d=False, type='xgmMakeGuide')[0]
-            crv.worldSpace >> makeGuide.override
+            makeGuide = cmds.listConnections('{}.inputMesh'.format(guide), d=False, s=True, type='xgmMakeGuide')
+            if not makeGuide:
+                continue
+            makeGuide = makeGuide[0]
+            cmds.connectAttr('{}.worldSpace[0]'.format(crv), '{}.override'.format(makeGuide), force=True)
     elif method == 'attach':
         de = xgg.DescriptionEditor
-        collection = str(pm.listRelatives(description, parent=True)[0])
+        collection = cmds.listRelatives(description, parent=True, fullPath=True)[0]
         objects = xg.objects(collection, description, True)
 
         xg.setAttr("useCache", 'True', collection, description, objects[0])
-        pm.select(crvs, r=True)
+        cmds.select(crvs, r=True)
         mel.eval('xgmFindAttachment -description "{0}" -module "{1}"'.format(description, objects[0]))
 
         de.refresh('Description')
@@ -132,8 +139,8 @@ def connectCurvesToGuides(curveGroup, description, method='override'):
 def findStackedGuides(guides):
     guidePoses = []
     for guide in guides:
-        guidePos = pm.xform(guide, q=True, rp=True, ws=True)
-        guidePoses.append(pm.dt.Vector(guidePos))
+        guidePos = cmds.xform(guide, q=True, rp=True, ws=True)
+        guidePoses.append(om.MVector(guidePos))
 
     thresholds = 0.1
     stackedGuides = []

@@ -1,4 +1,4 @@
-import pymel.core as pm
+from maya import cmds
 from functools import partial
 
 
@@ -20,58 +20,58 @@ class UI(object):
 
     def show(self):
         self._build()
-        self.window.show()
+        cmds.showWindow(self.window)
 
     def _build(self):
-        self.window = pm.window(
+        self.window = cmds.window(
             UI.name,
             title='Ouliner Color',
             minimizeButton=False,
             maximizeButton=False
         )
 
-        pm.columnLayout(
+        cmds.columnLayout(
             columnAttach=('both', 5),
             backgroundColor=[.2, .2, .2],
             adj=True
         )
 
-        self.colorTable = pm.gridLayout(
+        self.colorTable = cmds.gridLayout(
             allowEmptyCells=False,
             numberOfRowsColumns=(10, 5),
             cellWidthHeight=(40, 24),
             backgroundColor=(.2, .2, .2)
         )
 
-        pm.window(self.window, e=True, w=10, h=10)
+        cmds.window(self.window, e=True, w=10, h=10)
 
         self._populateColorTable()
 
     def _populateColorTable(self):
         for index in UI.colorSwatchIds:
-            pm.canvas(
+            cmds.canvas(
                 ('%s%i' % ('colorCanvas_', index)),
-                rgb=pm.colorIndex(index, q=True),
+                rgb=cmds.colorIndex(index, q=True),
                 pc=partial(setOutlinerColor, index),
                 p=self.colorTable
             )
 
 
 def showUI():
-    if pm.window(UI.name, q=True, exists=True):
-            pm.deleteUI(UI.name)
+    if cmds.window(UI.name, q=True, exists=True):
+            cmds.deleteUI(UI.name)
     ui = UI()
     ui.show()
 
 
 def setOutlinerColor(index):
-    selNods = pm.selected()
+    selNods = cmds.ls(sl=True)
     if index == 3:
         for node in selNods:
-            node.useOutlinerColor.set(False)
+            cmds.setAttr(f'{node}.useOutlinerColor', False)
         return
 
-    rgb = pm.colorIndex(index, q=True)
+    rgb = cmds.colorIndex(index, q=True)
     for node in selNods:
-        node.useOutlinerColor.set(True)
-        node.outlinerColor.set(rgb)
+        cmds.setAttr(f'{node}.useOutlinerColor', True)
+        cmds.setAttr(f'{node}.outlinerColor', *rgb)

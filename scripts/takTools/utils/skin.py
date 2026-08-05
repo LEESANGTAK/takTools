@@ -2,7 +2,6 @@ import os
 import maya.OpenMaya as om
 import maya.OpenMayaAnim as oma
 
-import pymel.core as pm
 from maya import cmds, mel
 
 from importlib import reload
@@ -37,18 +36,18 @@ def bind(jnts, geos, maxInfluence=4):
     """
     removeLockWeightsInputConnection(jnts)
 
-    geoShpLs = pm.ls(geos, dag=True, ni=True, type=['mesh', 'nurbsCurve', 'nurbsSurface'])
+    geoShpLs = cmds.ls(geos, dag=True, ni=True, type=['mesh', 'nurbsCurve', 'nurbsSurface'])
 
     for geoShp in geoShpLs:
-        skinClst = pm.mel.eval('findRelatedSkinCluster("%s");' % geoShp)
+        skinClst = mel.eval('findRelatedSkinCluster("%s");' % geoShp)
         if skinClst:
-            pm.select(geoShp, r=True)
-            pm.mel.eval('DetachSkin();')
-        pm.skinCluster(jnts, geoShp, tsb=True, bm=0, wd=0, omi=False, mi=maxInfluence, dr=4.0)
+            cmds.select(geoShp, r=True)
+            mel.eval('DetachSkin();')
+        cmds.skinCluster(jnts, geoShp, tsb=True, bm=0, wd=0, omi=False, mi=maxInfluence, dr=4.0)
 
 
 def reBind(skinMesh):
-    tmpDir = pm.internalVar(userTmpDir=True)
+    tmpDir = cmds.internalVar(userTmpDir=True)
     skinFile = exportSkin(skinMesh, tmpDir)
     meshUtil.cleanupMesh(skinMesh)
     importSkin(skinFile)
@@ -57,9 +56,7 @@ def reBind(skinMesh):
 
 def getSkinCluster(geo):
     skinClst = None
-    skinClst = pm.mel.eval('findRelatedSkinCluster("%s");' % geo)
-    if skinClst:
-        return pm.PyNode(skinClst)
+    skinClst = mel.eval('findRelatedSkinCluster("%s");' % geo)
     return skinClst
 
 
@@ -224,52 +221,49 @@ def copySkin(source, target, components=None):
     """
     removeLockWeightsInputConnection()
 
-    source = pm.PyNode(source)
-    target = pm.PyNode(target)
-
     srcInfs = getInfluences(source)
-    srcJointInfs = [inf for inf in srcInfs if isinstance(inf, pm.nodetypes.Joint)]
+    srcJointInfs = [inf for inf in srcInfs if cmds.nodeType(inf) == 'joint']
     srcGeoInfs = list(set(srcInfs) - set(srcJointInfs))
-    srcSkinClst = getSkinCluster(source.name())
-    targetMesh = target.node() if isinstance(target, pm.MeshVertex) else target
-    trgSkinClst = getSkinCluster(targetMesh.name())
+    srcSkinClst = getSkinCluster(source)
+    targetMesh = cmds.ls(target, objectsOnly=True)[0] if 'vtx' in target else target
+    trgSkinClst = getSkinCluster(targetMesh)
 
-    targetMeshShapeVis = targetMesh.getShape().visibility.get()
+    targetMeshShapeVis = cmds.getAttr(f'{targetMesh}.visibility')
     if not targetMeshShapeVis:
-        targetMesh.getShape().visibility.set(True)
+        cmds.setAttr(f'{targetMesh}.visibility', True)
 
     if not trgSkinClst:
-        trgSkinClst = pm.skinCluster(srcJointInfs, targetMesh, dr=4, tsb=True, nw=1)
-        pm.skinCluster(trgSkinClst, e=True, ug=True, ai=srcGeoInfs)
+        trgSkinClst = cmds.skinCluster(srcJointInfs, targetMesh, dr=4, tsb=True, nw=1)
+        cmds.skinCluster(trgSkinClst, e=True, ug=True, ai=srcGeoInfs)
 
     else:
         trgInfs = getInfluences(targetMesh)
-        trgJointInfs = [inf for inf in trgInfs if isinstance(inf, pm.nodetypes.Joint)]
+        trgJointInfs = [inf for inf in trgInfs if cmds.nodeType(inf) == 'joint']
         trgGeoInfs = list(set(trgInfs) - set(trgJointInfs))
         addedSrcJointInfs = list(set(srcJointInfs) - set(trgJointInfs))
         addedSrcGeoInfs = list(set(srcGeoInfs) - set(trgGeoInfs))
 
         for srcJntInf in addedSrcJointInfs:
-            pm.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ai=srcJntInf)
-            pm.setAttr('%s.liw' % srcJntInf, False)
+            cmds.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ai=srcJntInf)
+            cmds.setAttr('%s.liw' % srcJntInf, False)
         for srcGeoInf in addedSrcGeoInfs:
-            pm.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ug=True, ai=srcGeoInf)
-            pm.setAttr('%s.liw' % srcGeoInf, False)
+            cmds.skinCluster(trgSkinClst, e=True, dr=4, lw=True, wt=0, ug=True, ai=srcGeoInf)
+            cmds.setAttr('%s.liw' % srcGeoInf, False)
 
     if components:
-        pm.select(source, components, r=True)
+        cmds.select(source, components, r=True)
     else:
-        pm.select(source, target, r=True)
+        cmds.select(source, target, r=True)
 
-    pm.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
+    cmds.copySkinWeights(noMirror=True, surfaceAssociation='closestPoint', influenceAssociation='closestJoint')
 
-    srcSkinMethod = max(pm.PyNode(srcSkinClst).skinningMethod.get(), 0)  # Prevent the value of skinning method not to be negative
-    trgSkinMethod = max(pm.PyNode(trgSkinClst).skinningMethod.get(), 0)
+    srcSkinMethod = max(cmds.getAttr(f'{srcSkinClst}.skinningMethod'), 0)  # Prevent the value of skinning method not to be negative
+    trgSkinMethod = max(cmds.getAttr(f'{trgSkinClst}.skinningMethod'), 0)
     if trgSkinMethod != 2:  # Set skinning method as same as source skin cluster if not Weighted Blended
-        pm.PyNode(trgSkinClst).skinningMethod.set(srcSkinMethod)
-    pm.PyNode(trgSkinClst).useComponents.set(pm.PyNode(srcSkinClst).useComponents.get())
+        cmds.setAttr(f'{trgSkinClst}.skinningMethod', srcSkinMethod)
+    cmds.setAttr(f'{trgSkinClst}.useComponents', cmds.getAttr(f'{srcSkinClst}.useComponents'))
 
-    targetMesh.getShape().visibility.set(targetMeshShapeVis)
+    cmds.setAttr(f'{targetMesh}.visibility', targetMeshShapeVis)
 
     return trgSkinClst
 
@@ -327,7 +321,7 @@ def duplicateSkinMesh():
         dupMesh.displayBorders.set(True)
     except:
         pass
-    pm.select(dupMesh, r=True)
+    cmds.select(dupMesh, r=True)
 
     return str(dupMesh)
 
@@ -377,26 +371,26 @@ def mergeSkinMeshes():
 
 
 def addInfluences():
-    sels = pm.selected()
-    jnts = pm.ls(sels, type='joint')
+    sels = cmds.ls(sl=True)
+    jnts = cmds.ls(sels, type='joint')
 
     removeLockWeightsInputConnection(jnts)
 
-    meshes = [item for item in sels if item.getShape()]
+    meshes = [item for item in sels if cmds.listRelatives(item, s=True)]
     for mesh in meshes:
-        skinClst = getSkinCluster(mesh.name())
+        skinClst = getSkinCluster(mesh)
         influences = getInfluences(mesh)
         for jnt in jnts:
             if not jnt in influences:
-                pm.skinCluster(skinClst, e=True, dr=4, lw=True, wt=0, ai=jnt)
-                pm.setAttr('%s.liw' % jnt, False)
+                cmds.skinCluster(skinClst, e=True, dr=4, lw=True, wt=0, ai=jnt)
+                cmds.setAttr('%s.liw' % jnt, False)
 
 
 def getAffectedVertex(inf, minWeight):
     selVtxs = []
 
-    inf = pm.PyNode(inf)
-    skinClusters = inf.worldMatrix.listConnections()
+    skinClusters = cmds.listConnections(f'{inf}.worldMatrix')
+
     if not skinClusters:
         print('"{}" is not influence.'.format(inf))
         return selVtxs
@@ -454,25 +448,25 @@ def createSkinMeshWithJoints(joints, type='ribbon'):
 
     width = jntsLength*0.05
     if type == 'ribbon':
-        profileCurve = pm.curve(degree=1, editPoint=[(0.0, 0.0, -width), (0.0, 0.0, width)], n='profile_crv')
+        profileCurve = cmds.curve(degree=1, editPoint=[(0.0, 0.0, -width), (0.0, 0.0, width)], n='profile_crv')
     elif type == 'tube':
-        profileCurve = pm.circle(normal=[1, 0, 0], radius=width, n='profile_crv')[0]
+        profileCurve = cmds.circle(normal=[1, 0, 0], radius=width, n='profile_crv')[0]
 
     profileCurves = []
     for jnt in joints:
-        dupProfileCrv = profileCurve.duplicate()
-        pm.xform(dupProfileCrv, matrix=jnt.worldMatrix.get(), ws=True)
+        dupProfileCrv = cmds.duplicate(profileCurve)
+        cmds.xform(dupProfileCrv, matrix=cmds.getAttr(f'{jnt}.worldMatrix'), ws=True)
         profileCurves.append(dupProfileCrv)
 
-    skinSurface = pm.loft(profileCurves, degree=1, sectionSpans=int(jntsLength/len(joints)), ch=False)
-    skinMesh = pm.nurbsToPoly(skinSurface, format=3, polygonType=1, ch=False, n='{0}_skin'.format(joints[0]))
+    skinSurface = cmds.loft(profileCurves, degree=1, sectionSpans=int(jntsLength/len(joints)), ch=False)
+    skinMesh = cmds.nurbsToPoly(skinSurface, format=3, polygonType=1, ch=False, n='{0}_skin'.format(joints[0]))
 
-    pm.delete(skinSurface)
-    pm.delete([profileCurve] + profileCurves)
+    cmds.delete(skinSurface)
+    cmds.delete([profileCurve] + profileCurves)
 
     bind(joints[:-1], skinMesh)  # Exclude end joint for binding
 
-    pm.select(skinMesh, r=True)
+    cmds.select(skinMesh, r=True)
 
 
 def updateBindPose(rootJoint):
@@ -496,53 +490,53 @@ def updateBindPose(rootJoint):
 
 
 def goToBindPose(rootJoint):
-    bindPoses = pm.dagPose(rootJoint, q=True, bindPose=True)
+    bindPoses = cmds.dagPose(rootJoint, q=True, bindPose=True)
 
     if len(bindPoses) > 1:
-        pm.error('There is more than one bind pose. Please clean up bind poses first.')
+        cmds.error('There is more than one bind pose. Please clean up bind poses first.')
         return False
     else:
         bindPose = bindPoses[0]
 
     try:
-        pm.dagPose(bindPose, restore=True, g=True)
+        cmds.dagPose(bindPose, restore=True, g=True)
         return True
     except:
         return False
 
 
 def setSolidSkinWeights(sourceVertex):
-    pm.select(sourceVertex, r=True)
-    pm.mel.eval('artAttrSkinWeightCopy;')
-    pm.mel.eval('ConvertSelectionToShell')
-    pm.mel.eval('artAttrSkinWeightPaste;')
+    cmds.select(sourceVertex, r=True)
+    mel.eval('artAttrSkinWeightCopy;')
+    mel.eval('ConvertSelectionToShell')
+    mel.eval('artAttrSkinWeightPaste;')
 
 
 def editSkinMesh(skinMesh):
-    tempSkin = pm.duplicate(skinMesh, n='temp_skin')[0]
-    tempSkin.hide()
+    tempSkin = cmds.duplicate(skinMesh, n='temp_skin')[0]
+    cmds.hide(tempSkin)
     skinClst = copySkin(skinMesh, tempSkin)
     cmds.setAttr('{}.envelope'.format(skinClst), 0)
     meshUtil.cleanupMesh(skinMesh)
-    pm.select(skinMesh, r=True)
-    pm.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(tempSkin, skinMesh))
+    cmds.select(skinMesh, r=True)
+    cmds.hudButton('editSkinMeshHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinMesh(tempSkin, skinMesh))
 
 def doneEditSkinMesh(tempSkin, skinMesh):
     meshUtil.cleanupMesh(skinMesh)
     copySkin(tempSkin, skinMesh)
-    pm.delete(tempSkin)
-    pm.headsUpDisplay('editSkinMeshHUD', remove=True)
+    cmds.delete(tempSkin)
+    cmds.headsUpDisplay('editSkinMeshHUD', remove=True)
 
 
 def editSkinnedJoints(skinMesh):
-    tempSkinFile = exportSkin(skinMesh, pm.internalVar(userTmpDir=True))
-    pm.select(skinMesh, r=True)
-    pm.mel.eval('DetachSkin;')
-    pm.hudButton('editSkinnedJointsHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinnedJoints(tempSkinFile))
+    tempSkinFile = exportSkin(skinMesh, cmds.internalVar(userTmpDir=True))
+    cmds.select(skinMesh, r=True)
+    mel.eval('DetachSkin;')
+    cmds.hudButton('editSkinnedJointsHUD', s=3, b=4, vis=1, l='Done Edit', bw=80, bsh='roundRectangle', rc=lambda : doneEditSkinnedJoints(tempSkinFile))
 
 def doneEditSkinnedJoints(tempSkinFile):
     importSkin(tempSkinFile)
-    pm.headsUpDisplay('editSkinnedJointsHUD', remove=True)
+    cmds.headsUpDisplay('editSkinnedJointsHUD', remove=True)
 
 
 def sculptSkinMesh(skinMesh):
@@ -565,11 +559,11 @@ def SSD(geo):
     skinCluster = mel.eval('findRelatedSkinCluster("{}");'.format(geo))
     cmds.skinPercent(skinCluster, str(geo), pruneWeights=0.01)
     cmds.skinCluster(skinCluster, e=True, removeUnusedInfluence=True)
-    pm.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=8)
+    cmds.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=8)
 
 
 def exportSkin(mesh, outputDir):
-    pm.select(mesh, r=True)
+    cmds.select(mesh, r=True)
     skinFile = '{}/{}.sw'.format(outputDir, mesh)
     bsk.bSaveSkinValues(skinFile)
     return skinFile
@@ -584,7 +578,7 @@ def importSkin(skinFile):
     if not cmds.objExists(mesh):
         print('"{}" is not exists. Skip importing skin weights.'.format(mesh))
         return False
-    pm.select(mesh, r=True)
+    cmds.select(mesh, r=True)
     bsk.bLoadSkinValues(True, skinFile)
 
 
@@ -626,12 +620,12 @@ def simplifySkin(*args):
     topInfluence = globalUtil.getTopDagNode(influences)
 
     # Store current pose
-    pm.select(topInfluence, hi=True)
+    cmds.select(topInfluence, hi=True)
     curPose = cmds.dagPose(save=True, selection=True)
 
     succeed = goToBindPose(topInfluence)
     if not succeed:
-        pm.warning('Go to bind pose process is failed! Rigidfy skin weights will be performed in current pose.')
+        cmds.warning('Go to bind pose process is failed! Rigidfy skin weights will be performed in current pose.')
 
     cmds.select(faces, r=True)
     dupSkinMesh = duplicateSkinMesh()

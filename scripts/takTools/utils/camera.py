@@ -1,23 +1,23 @@
-import pymel.core as pm
+from maya import cmds
 
 
 def shakeCamera(camera, amplitude=1.0, speed=0.1):
-    spaceLoc = pm.spaceLocator(n='camSpace_loc')
-    shakeLoc = pm.spaceLocator(n='camShake_loc')
-    spaceLoc | shakeLoc
+    spaceLoc = cmds.spaceLocator(n='camSpace_loc')[0]
+    shakeLoc = cmds.spaceLocator(n='camShake_loc')[0]
+    cmds.parent(shakeLoc, spaceLoc)
 
-    decMatrix = pm.createNode('decomposeMatrix')
-    shakeLoc.worldMatrix >> decMatrix.inputMatrix
-    decMatrix.outputTranslate >> camera.translate
-    decMatrix.outputRotate >> camera.rotate
+    decMatrix = cmds.createNode('decomposeMatrix')
+    cmds.connectAttr('{}.worldMatrix'.format(shakeLoc), '{}.inputMatrix'.format(decMatrix), force=True)
+    cmds.connectAttr('{}.outputTranslate'.format(decMatrix), '{}.translate'.format(camera), force=True)
+    cmds.connectAttr('{}.outputRotate'.format(decMatrix), '{}.rotate'.format(camera), force=True)
 
-    pm.addAttr(spaceLoc, ln='amplitude', keyable=True, dv=amplitude, min=0.0)
-    pm.addAttr(spaceLoc, ln='speed', keyable=True, dv=speed, min=0.0)
-    pm.addAttr(spaceLoc, ln='offset', keyable=True, dv=0)
-    pm.addAttr(spaceLoc, ln='translateXOnOff', keyable=True, dv=1.0, min=0.0, max=1.0)
-    pm.addAttr(spaceLoc, ln='translateYOnOff', keyable=True, dv=1.0, min=0.0, max=1.0)
-    pm.addAttr(spaceLoc, ln='rotateXOnOff', keyable=True, dv=1.0, min=0.0, max=1.0)
-    pm.addAttr(spaceLoc, ln='rotateYOnOff', keyable=True, dv=1.0, min=0.0, max=1.0)
+    cmds.addAttr(spaceLoc, ln='amplitude', keyable=True, dv=amplitude, min=0.0)
+    cmds.addAttr(spaceLoc, ln='speed', keyable=True, dv=speed, min=0.0)
+    cmds.addAttr(spaceLoc, ln='offset', keyable=True, dv=0)
+    cmds.addAttr(spaceLoc, ln='translateXOnOff', keyable=True, dv=1.0, min=0.0, max=1.0)
+    cmds.addAttr(spaceLoc, ln='translateYOnOff', keyable=True, dv=1.0, min=0.0, max=1.0)
+    cmds.addAttr(spaceLoc, ln='rotateXOnOff', keyable=True, dv=1.0, min=0.0, max=1.0)
+    cmds.addAttr(spaceLoc, ln='rotateYOnOff', keyable=True, dv=1.0, min=0.0, max=1.0)
 
     exprStr = '''
 float $amp = {0}.amplitude;
@@ -36,6 +36,6 @@ float $verticalMove = noise((frame + $offset) * $speed)*0.01 * $amp;
 {1}.rotateX = rad_to_deg($verticalMove) * $rotateXOnOff;
     '''.format(spaceLoc, shakeLoc)
 
-    pm.expression(s=exprStr, ae=True, uc='all', n='shakeCam_expr')
+    cmds.expression(s=exprStr, ae=True, uc='all', n='shakeCam_expr')
 
-    pm.select(spaceLoc, r=True)
+    cmds.select(spaceLoc, r=True)

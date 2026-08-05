@@ -107,7 +107,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"for sel in pm.selected(): tak_misc.unlockChannels(sel)\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"for sel in cmds.ls(sl=True): tak_misc.unlockChannels(sel)\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -406,7 +406,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"bfUtil.convertToCageMesh(pm.selected())\");"
+        -command "python(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"bfUtil.convertToCageMesh(cmds.ls(sl=True))\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -521,7 +521,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"import imp; imp.reload(meshUtil)\");\npython(\"sels = pm.selected()\");\npython(\"for sel in sels:\\n\\tmeshUtil.duplicateOrigMesh(sel)\");"
+        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"import imp; imp.reload(meshUtil)\");\npython(\"sels = cmds.ls(sl=True))\");\npython(\"for sel in sels:\\n\\tmeshUtil.duplicateOrigMesh(sel)\");"
         -optionBox 0
         -enable 1
         -data 0

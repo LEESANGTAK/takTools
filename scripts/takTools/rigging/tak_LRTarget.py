@@ -21,7 +21,6 @@ tak_misc.py
 """
 
 import maya.cmds as cmds
-import pymel.core as pm
 
 from ..common import tak_misc
 
@@ -76,7 +75,7 @@ def UI():
     cmds.setParent('mainForm')
     cmds.button('appButton', label='Create L/R', w=90, c=main)
     cmds.button('flipBtn', label='Create Flip', c=flip)
-    cmds.button('recoverButton', label='Recover Freezed', w=90, c=recoverFrzedTrg)
+    cmds.button('recoverButton', label='Recover Freezed', w=90, c=recoverFrzedTrg, ann="Recover tranform values of freezed transform targets.\nTo extract locally deformed targets.")
     cmds.formLayout('mainForm', e=True,
                     attachForm=[('mainTab', 'top', 5), ('mainTab', 'left', 5), ('mainTab', 'right', 5),
                                 ('appButton', 'bottom', 5), ('appButton', 'left', 5), ('flipBtn', 'bottom', 5),
@@ -152,13 +151,18 @@ def createLfRtTarget(baseName, targetName, side):
                  'right': {'prefix': rPrefix, 'suffix': rSuffix, 'position': (targetPos[0]-posOffset, targetPos[1], targetPos[2])}
                 }
 
-    blendTarget = pm.duplicate(baseName, renameChildren=True)[0]
+    blendTarget = cmds.duplicate(baseName, renameChildren=True)[0]
     tak_misc.unlockChannels(blendTarget)
-    pm.parent(blendTarget, world=True)
-    blendTarget.rename(lfRtTable[side]['prefix'] + targetName + lfRtTable[side]['suffix'])
-    blendTarget.setTranslation(lfRtTable[side]['position'], space='world')
 
-    return str(blendTarget)
+    try:
+        cmds.parent(blendTarget, world=True)
+    except:
+        pass
+
+    cmds.xform(blendTarget, t=lfRtTable[side]['position'], ws=True)
+    blendTarget = cmds.rename(blendTarget, lfRtTable[side]['prefix'] + targetName + lfRtTable[side]['suffix'])
+
+    return blendTarget
 
 
 def removeNoMesh(transformList):
@@ -173,15 +177,16 @@ def vectorReproduce(baseMeshes, noSymMeshes, targetMeshes, outMeshes, centerFall
     noSymOffset = 1000
 
     for i in range(len(baseMeshes)):
-        baseMesh = pm.PyNode(baseMeshes[i])
-        targetMesh = pm.PyNode(targetMeshes[i])
-        outMesh = pm.PyNode(outMeshes[i])
+        baseMesh = baseMeshes[i]
+        targetMesh = targetMeshes[i]
+        outMesh = outMeshes[i]
 
-        rampBS = pm.createNode('rampBlendShape')
+        rampBS = cmds.createNode('rampBlendShape')
 
-        targetMesh.visibility.set(True) # Can't get boundingbox when mesh visibility set to false
-        targetGeoBoundingBox = targetMesh.getBoundingBox(space='world')
-        rampBS.range.set(targetGeoBoundingBox.width())
+        cmds.setAttr(f'{targetMesh}.visibility', True) # Can't get boundingbox when mesh visibility set to false
+        targetGeoBoundingBox = cmds.xform(targetMesh, q=True, bb=True, ws=True)
+        bbWidth = abs(targetGeoBoundingBox[3] - targetGeoBoundingBox[1])
+        cmds.setAttr(f'{rampBS}.range', bbWidth)
 
         if noSymMeshes:
             isNoSymMesh = baseMesh in noSymMeshes
@@ -189,31 +194,33 @@ def vectorReproduce(baseMeshes, noSymMeshes, targetMeshes, outMeshes, centerFall
             isNoSymMesh = False
 
         if side == 'left':
-            rampBS.weightCurveRamp[0].weightCurveRamp_Position.set(0.5-offset)
-            rampBS.weightCurveRamp[1].weightCurveRamp_Position.set(0.5+offset)
-            rampBS.weightCurveRamp[2].weightCurveRamp_FloatValue.set(1.0)
+            cmds.setAttr(f'{rampBS}.weightCurveRamp[0].weightCurveRamp_Position', 0.5-offset)
+            cmds.setAttr(f'{rampBS}.weightCurveRamp[1].weightCurveRamp_Position', 0.5+offset)
+            cmds.setAttr(f'{rampBS}.weightCurveRamp[2].weightCurveRamp_FloatValue', 1.0)
             if isNoSymMesh:
                 if not isLeftSide(baseMesh):
-                    rampBS.envelope.set(0)
+                    cmds.setAttr(f'{rampBS}.envelope', 0)
                 else:
-                    rampBS.attr('center').set(-noSymOffset)
-                    rampBS.range.set(rampBS.range.get()+(2*noSymOffset))
+                    cmds.setAttr(f'{rampBS}.center', -noSymOffset)
+                    cmds.setAttr(f'{rampBS}.range', cmds.getAttr(f'{rampBS}.range')+(2*noSymOffset))
         elif side == 'right':
-            rampBS.weightCurveRamp[0].weightCurveRamp_Position.set(0.5+offset)
-            rampBS.weightCurveRamp[1].weightCurveRamp_Position.set(0.5-offset)
-            rampBS.weightCurveRamp[2].weightCurveRamp_FloatValue.set(0.0)
+            cmds.setAttr(f'{rampBS}.weightCurveRamp[0].weightCurveRamp_Position', 0.5+offset)
+            cmds.setAttr(f'{rampBS}.weightCurveRamp[1].weightCurveRamp_Position', 0.5-offset)
+            cmds.setAttr(f'{rampBS}.weightCurveRamp[2].weightCurveRamp_FloatValue', 0.0)
             if isNoSymMesh:
                 if isLeftSide(baseMesh):
-                    rampBS.envelope.set(0)
+                    cmds.setAttr(f'{rampBS}.envelope', 0)
                 else:
-                    rampBS.attr('center').set(noSymOffset)
-                    rampBS.range.set(rampBS.range.get()+(2*noSymOffset))
+                    cmds.setAttr(f'{rampBS}.center', noSymOffset)
+                    cmds.setAttr(f'{rampBS}.range', cmds.getAttr(f'{rampBS}.range')+(2*noSymOffset))
 
-        baseMesh.getShape(ni=True).worldMesh >> rampBS.baseGeo
-        targetMesh.getShape(ni=True).worldMesh >> rampBS.targetGeo
-        rampBS.outGeo >> outMesh.inMesh
+        baseMeshShape = cmds.listRelatives(baseMesh, s=True, ni=True)[0]
+        cmds.connectAttr(f'{baseMeshShape}.worldMesh', f'{rampBS}.baseGeo')
+        targetMeshShape = cmds.listRelatives(targetMesh, s=True, ni=True)[0]
+        cmds.connectAttr(f'{targetMeshShape}.worldMesh', f'{rampBS}.targetGeo')
+        cmds.connectAttr(f'{rampBS}.outGeo', f'{outMesh}.inMesh')
 
-        pm.select(targetMesh, outMesh, r=True)
+        cmds.select(targetMesh, outMesh, r=True)
         tak_misc.copyMat()
 
 
@@ -222,6 +229,7 @@ def isLeftSide(mesh):
 
 
 def flip(*args):
+    print("Not implemented yet.")
     pass
 
 
@@ -233,10 +241,6 @@ def recoverFrzedTrg(*args):
         # Cleanup frzedFacialGrp
         cmds.delete(frzedFacialGrp, ch=True)
         cmds.makeIdentity(frzedFacialGrp, apply=True)
-        allChlds = cmds.listRelatives(frzedFacialGrp, ad=True, type='transform')
-        for chld in allChlds:
-            if 'Base' in chld:
-                cmds.delete(chld)
 
         # Match original facial group to freezed facial group
         origFacialDupGrp = cmds.duplicate(origFacialGrp, rc=True, rr=True)

@@ -1,5 +1,5 @@
 import json
-import pymel.core as pm
+from maya import cmds
 
 
 def createSingleSkeleton(joints):
@@ -13,11 +13,12 @@ def getJntInfo(joints):
     parentInfo = []
 
     for jnt in joints:
-        parentInfo.append({'bndJnt':          jnt,
-                           'engJnt':          'eng_'+jnt.name(),
-                           'engJntParent':    'eng_'+jnt.getParent(),
-                           }
-                          )
+        jntName = jnt if isinstance(jnt, str) else str(jnt)
+        parent = cmds.listRelatives(jntName, parent=True) or []
+        parentName = parent[0] if parent else ''
+        parentInfo.append({'bndJnt': jntName,
+                           'engJnt': 'eng_' + jntName,
+                           'engJntParent': 'eng_' + parentName if parentName else ''})
 
     return parentInfo
 
@@ -26,7 +27,8 @@ def createEngineJnts(joints):
     newJnts = []
 
     for oldJnt in joints:
-        newJnt = oldJnt.duplicate(n='eng_'+oldJnt.name(), parentOnly=True)[0]
+        oldName = oldJnt if isinstance(oldJnt, str) else str(oldJnt)
+        newJnt = cmds.duplicate(oldName, name='eng_'+oldName, parentOnly=True)[0]
         newJnts.append(newJnt)
 
     return newJnts
@@ -34,13 +36,24 @@ def createEngineJnts(joints):
 
 def connectMatrix(jntInfo):
     for info in jntInfo:
-        bndJnt = pm.PyNode(info['bndJnt'])
-        engJnt = pm.PyNode(info['engJnt'])
-        decMatrix = pm.createNode('decomposeMatrix')
-
-        bndJnt.matrix >> decMatrix.inputMatrix
-        decMatrix.outputTranslate >> engJnt.translate
-        decMatrix.outputRotate >> engJnt.rotate
+        bndJnt = info['bndJnt']
+        engJnt = info['engJnt']
+        decMatrix = cmds.createNode('decomposeMatrix')
+        try:
+            cmds.connectAttr('{}.worldMatrix[0]'.format(bndJnt), '{}.inputMatrix'.format(decMatrix), force=True)
+        except Exception:
+            try:
+                cmds.connectAttr('{}.matrix'.format(bndJnt), '{}.inputMatrix'.format(decMatrix), force=True)
+            except Exception:
+                pass
+        try:
+            cmds.connectAttr('{}.outputTranslate'.format(decMatrix), '{}.translate'.format(engJnt), force=True)
+        except Exception:
+            pass
+        try:
+            cmds.connectAttr('{}.outputRotate'.format(decMatrix), '{}.rotate'.format(engJnt), force=True)
+        except Exception:
+            pass
 
 
 def buildHierarchy(jntInfo):
@@ -63,82 +76,119 @@ def createAttachJoint(joint, name, convertToScene=True):
         convertToScene {bool} -- Import option state in unreal engine. (default: {True})
 
     Returns:
-        pm.nodetypes.Joint -- Attach joint pymel object
+        Joint -- Attach joint object
     """
     attachJnt = None
 
-    joint = pm.PyNode(joint)
-
-    jointParent = joint.getParent()
-    attachJnt = pm.duplicate(joint, po=True, n=name)[0]
-    pm.parent(attachJnt, world=True)
-
-    attachJnt.rotate.set(0, 0, 0)
-    attachJnt.jointOrient.set(0, 0, 0)
+    jointName = joint if isinstance(joint, str) else str(joint)
+    parents = cmds.listRelatives(jointName, parent=True) or []
+    jointParent = parents[0] if parents else None
+    attachJnt = cmds.duplicate(jointName, parentOnly=True, name=name)[0]
+    try:
+        cmds.parent(attachJnt, world=True)
+    except Exception:
+        pass
+    try:
+        cmds.setAttr('{}.rotate'.format(attachJnt), 0, 0, 0)
+    except Exception:
+        pass
+    try:
+        cmds.setAttr('{}.jointOrient'.format(attachJnt), 0, 0, 0)
+    except Exception:
+        pass
     if convertToScene:
-        attachJnt.rotateX.set(-90)
-
+        try:
+            cmds.setAttr('{}.rotateX'.format(attachJnt), -90)
+        except Exception:
+            pass
     if jointParent:
-        pm.parent(attachJnt, jointParent)
+        try:
+            cmds.parent(attachJnt, jointParent)
+        except Exception:
+            pass
 
     return attachJnt
 
 
 def createRootJoint(name='Root', convertToScene=True):
-    rootJoint = pm.createNode('joint', n=name)
+    rootJoint = cmds.createNode('joint', name=name)
     if convertToScene:
-        rootJoint.rotateX.set(-90)
+        try:
+            cmds.setAttr('{}.rotateX'.format(rootJoint), -90)
+        except Exception:
+            pass
 
 
 def setupJointScaledVis(meshes, drivingJoints, controller, attribute):
     """
     attr = 'default'
 
-    sels = pm.selected()
-    joints = pm.selected(type='joint')
+    sels = cmds.ls(sl=True)
+    joints = cmds.ls(sl=True, type='joint')
     meshes = list(set(sels) - set(joints))
     ctrl = 'EyeLeft_Blend'
     utils.setupJointScaledVis(meshes, joints, ctrl, attr)
 
 
-    sels = pm.selected()
-    joints = pm.selected(type='joint')
+    sels = cmds.ls(sl=True)
+    joints = cmds.ls(sl=True, type='joint')
     meshes = list(set(sels) - set(joints))
     ctrl = 'EyeRight_Blend'
     utils.setupJointScaledVis(meshes, joints, ctrl, attr)
     """
-    drvJnts = [pm.PyNode(drvJnt) for drvJnt in drivingJoints]
-    ctrl = pm.PyNode(controller)
+    drvJnts = [drvJnt if isinstance(drvJnt, str) else str(drvJnt) for drvJnt in drivingJoints]
+    ctrl = controller if isinstance(controller, str) else str(controller)
 
     # Create subJoints
     subJoints = []
     for drvJnt in drvJnts:
-        subJnt = pm.duplicate(drvJnt, n='{}_{}'.format(drvJnt, attribute), po=True)[0]
-        subJnt.segmentScaleCompensate.set(False)
-        drvJnt | subJnt
+        subJnt = cmds.duplicate(drvJnt, name='{}_{}'.format(drvJnt, attribute), parentOnly=True)[0]
+        try:
+            cmds.setAttr('{}.segmentScaleCompensate'.format(subJnt), False)
+        except Exception:
+            pass
+        try:
+            cmds.parent(subJnt, drvJnt)
+        except Exception:
+            pass
         subJoints.append(subJnt)
 
     # Bind meshes with subJoints
     for mesh in meshes:
-        pm.skinCluster(subJoints, mesh, tsb=True, bm=0, wd=0, omi=False, mi=1, dr=4.0)
+        try:
+            cmds.skinCluster(subJoints, mesh, tsb=True, bindMethod=0, maximumInfluences=1, dropoffRate=4.0, omi=False)
+        except Exception:
+            try:
+                cmds.skinCluster(subJoints, mesh, tsb=True, bm=0, wd=0, omi=False, mi=1, dr=4.0)
+            except Exception:
+                pass
 
     # Clamp attribute value to prevent zero value
-    clamp = pm.createNode('clamp', n='{}_{}_clamp'.format(drvJnt, attribute))
-    clamp.minR.set(0.001)
-    clamp.minG.set(0.001)
-    clamp.minB.set(0.001)
-    clamp.maxR.set(1.0)
-    clamp.maxG.set(1.0)
-    clamp.maxB.set(1.0)
-    ctrl.attr(attribute) >> clamp.inputR
-    ctrl.attr(attribute) >> clamp.inputG
-    ctrl.attr(attribute) >> clamp.inputB
+    clamp = cmds.createNode('clamp', name='{}_{}_clamp'.format(drvJnt, attribute))
+    try:
+        cmds.setAttr('{}.minR'.format(clamp), 0.001)
+        cmds.setAttr('{}.minG'.format(clamp), 0.001)
+        cmds.setAttr('{}.minB'.format(clamp), 0.001)
+        cmds.setAttr('{}.maxR'.format(clamp), 1.0)
+        cmds.setAttr('{}.maxG'.format(clamp), 1.0)
+        cmds.setAttr('{}.maxB'.format(clamp), 1.0)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.{}'.format(ctrl, attribute), '{}.inputR'.format(clamp), force=True)
+        cmds.connectAttr('{}.{}'.format(ctrl, attribute), '{}.inputG'.format(clamp), force=True)
+        cmds.connectAttr('{}.{}'.format(ctrl, attribute), '{}.inputB'.format(clamp), force=True)
+    except Exception:
+        pass
 
     # Connect clamped value to sub joints scale
     for subJnt in subJoints:
-        clamp.outputR >> subJnt.scaleX
-        clamp.outputG >> subJnt.scaleY
-        clamp.outputB >> subJnt.scaleZ
+        try:
+            cmds.connectAttr('{}.outputR'.format(clamp), '{}.scaleX'.format(subJnt), force=True)
+            cmds.connectAttr('{}.outputG'.format(clamp), '{}.scaleY'.format(subJnt), force=True)
+            cmds.connectAttr('{}.outputB'.format(clamp), '{}.scaleZ'.format(subJnt), force=True)
+        except Exception:
+            pass
 
 
 def publishCustomAttrs(sourceNode, attrPrefix, skeletonRoot, sourceAttrs=[]):
@@ -148,48 +198,75 @@ def publishCustomAttrs(sourceNode, attrPrefix, skeletonRoot, sourceAttrs=[]):
     skeletonRoot = 'root'
     uUtil.publishCustomAttrs(sourceNode, attrPrefix, skeletonRoot)
     """
-    sourceNode = pm.PyNode(sourceNode)
-    skeletonRoot = pm.PyNode(skeletonRoot)
+    src = sourceNode if isinstance(sourceNode, str) else str(sourceNode)
+    skRoot = skeletonRoot if isinstance(skeletonRoot, str) else str(skeletonRoot)
 
-    if not sourceAttrs:  # If no sourceAttrs given sourceAttrs is user defined
-        sourceAttrs = [attr.attrName() for attr in sourceNode.listAttr(ud=True)]
-
-    pm.undoInfo(openChunk=True)
+    if not sourceAttrs:
+        sourceAttrs = cmds.listAttr(src, userDefined=True) or []
+    try:
+        cmds.undoInfo(openChunk=True)
+    except Exception:
+        pass
     for srcAttr in sourceAttrs:
         pubAttr = attrPrefix + srcAttr
-        pm.addAttr(skeletonRoot, ln=pubAttr, at='double', keyable=True)
-        sourceNode.attr(srcAttr) >> skeletonRoot.attr(pubAttr)
-    pm.undoInfo(closeChunk=True)
+        try:
+            cmds.addAttr(skRoot, longName=pubAttr, attributeType='double', keyable=True)
+        except Exception:
+            try:
+                cmds.addAttr(skRoot, ln=pubAttr, at='double', keyable=True)
+            except Exception:
+                pass
+        try:
+            cmds.connectAttr('{}.{}'.format(src, srcAttr), '{}.{}'.format(skRoot, pubAttr), force=True)
+        except Exception:
+            pass
+    try:
+        cmds.undoInfo(closeChunk=True)
+    except Exception:
+        pass
 
 
 def connectToUESkeleton(maSkeletonRoot, ueSkeletonRoot, forceFrontXAxis=False):
     """
     from takTools.utils import unreal as ueUtil; reload(ueUtil)
 
-    sels = pm.selected()
+    sels = cmds.ls(sl=True)
     maSkelRoot = sels[0]
     ueSkelRoot = sels[1]
     ueUtil.connectToUESkeleton(maSkelRoot, ueSkelRoot)
     """
-    maJnts = pm.ls(maSkeletonRoot, dag=True, type="joint")
-    ueJnts = pm.ls(ueSkeletonRoot, dag=True, type="joint")
+    maJnts = cmds.ls(maSkeletonRoot, dag=True, type="joint") or []
+    ueJnts = cmds.ls(ueSkeletonRoot, dag=True, type="joint") or []
 
     for ueJnt, maJnt in zip(ueJnts, maJnts):
-        ueJntWM = ueJnt.worldMatrix.get()
+        try:
+            ueJntWM = cmds.xform(ueJnt, q=True, matrix=True, worldSpace=True)
+        except Exception:
+            ueJntWM = None
 
         maJntWM = ueJntWM
-        if forceFrontXAxis:
-            maJntWM = pm.dt.Matrix([
-                ueJntWM[1],
-                ueJntWM[2],
-                ueJntWM[0],
-                ueJntWM[3]
-            ])
+        if forceFrontXAxis and ueJntWM:
+            try:
+                rows = [ueJntWM[0:4], ueJntWM[4:8], ueJntWM[8:12], ueJntWM[12:16]]
+                newRows = [rows[1], rows[2], rows[0], rows[3]]
+                maJntWM = [val for row in newRows for val in row]
+            except Exception:
+                maJntWM = ueJntWM
 
-        pm.xform(maJnt, m=maJntWM, ws=True)
+        if maJntWM:
+            try:
+                cmds.xform(maJnt, matrix=maJntWM, worldSpace=True)
+            except Exception:
+                pass
 
-        pm.parentConstraint(ueJnt, maJnt, mo=True)
-        pm.scaleConstraint(ueJnt, maJnt, mo=True)
+        try:
+            cmds.parentConstraint(ueJnt, maJnt, maintainOffset=True)
+        except Exception:
+            pass
+        try:
+            cmds.scaleConstraint(ueJnt, maJnt, maintainOffset=True)
+        except Exception:
+            pass
 
 
 def importMatrix(filePath):
@@ -203,19 +280,34 @@ def importMatrix(filePath):
         timeUnit = "pal"
     elif fps == 30:
         timeUnit = "ntsc"
-    pm.currentUnit(time=timeUnit)
+    cmds.currentUnit(time=timeUnit)
 
     startFrame = data["startFrame"]
     endFrame = data["endFrame"]
-    pm.env.setMinTime(startFrame)
-    pm.env.setMaxTime(endFrame)
+    try:
+        cmds.playbackOptions(min=startFrame)
+        cmds.playbackOptions(max=endFrame)
+    except Exception:
+        pass
 
-    pm.refresh(su=True)
-    curFrame = pm.env.getTime()
-    transf = pm.createNode("transform", n=data["name"])
+    try:
+        cmds.refresh(suspend=True)
+    except Exception:
+        pass
+    curFrame = cmds.currentTime(q=True)
+    transf = cmds.createNode("transform", name=data["name"])
     for i in range(startFrame, endFrame+1):
-        pm.currentTime(i)
-        pm.xform(transf, matrix=data[str(i)], ws=True)
-        pm.setKeyframe(transf)
-    pm.env.setTime(curFrame)
-    pm.refresh(su=False)
+        try:
+            cmds.currentTime(i)
+            cmds.xform(transf, matrix=data[str(i)], worldSpace=True)
+            cmds.setKeyframe(transf)
+        except Exception:
+            pass
+    try:
+        cmds.currentTime(curFrame)
+    except Exception:
+        pass
+    try:
+        cmds.refresh(suspend=False)
+    except Exception:
+        pass

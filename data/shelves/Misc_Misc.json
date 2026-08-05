@@ -90,7 +90,7 @@
             "annotation": "Shake selected camera.",
             "image1": "Camera.png",
             "imageOverlayLabel": "Shake",
-            "command": "import takTools.utils.camera as camUtils\nimport importlib\nimportlib.reload(camUtils)\n\ncam = pm.selected()[0]\ncamUtils.shakeCamera(cam)\n",
+            "command": "import takTools.utils.camera as camUtils\nimport importlib\nimportlib.reload(camUtils)\n\ncam = cmds.ls(sl=True)[0]\ncamUtils.shakeCamera(cam)\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },

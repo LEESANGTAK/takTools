@@ -109,7 +109,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skUtil; reload(skUtil)\");\npython(\"sels = pm.selected()\");\npython(\"skUtil.copySkinSets(sels[0], sels[1:])\");"
+        -command "python(\"from takTools.utils import skin as skUtil; reload(skUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"skUtil.copySkinSets(sels[0], sels[1:])\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -212,7 +212,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import imp; imp.reload(skinUtil)\");\npython(\"sels = pm.selected()\");\npython(\"for sel in sels: skinUtil.reBind(sel)\");"
+        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import imp; imp.reload(skinUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: skinUtil.reBind(sel)\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -250,7 +250,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skUtil; import imp; imp.reload(skUtil)\");\npython(\"skUtil.createSkinMeshWithJoints(pm.selected(), 'ribbon')\");"
+        -command "python(\"from takTools.utils import skin as skUtil; import imp; imp.reload(skUtil)\");\npython(\"skUtil.createSkinMeshWithJoints(cmds.ls(sl=True), 'ribbon')\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -270,7 +270,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skUtil; import imp; imp.reload(skUtil)\");\npython(\"skUtil.createSkinMeshWithJoints(pm.selected(), 'tube')\");"
+        -command "python(\"from takTools.utils import skin as skUtil; import imp; imp.reload(skUtil)\");\npython(\"skUtil.createSkinMeshWithJoints(cmds.ls(sl=True), 'tube')\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -290,7 +290,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skinUtil; import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.SSD(pm.selected()[0])\");"
+        -command "python(\"from takTools.utils import skin as skinUtil; import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.SSD(cmds.ls(sl=True)[0])\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -388,7 +388,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skinUtil; import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.editSkinMesh(pm.selected()[0])\");"
+        -command "python(\"from takTools.utils import skin as skinUtil; import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.editSkinMesh(cmds.ls(sl=True)[0])\");"
         -optionBox 0
         -enable 1
         -data 0

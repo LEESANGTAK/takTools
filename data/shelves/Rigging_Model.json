@@ -36,7 +36,7 @@
             "annotation": "Duplicate selected shader network.",
             "image1": "out_lambert.png",
             "imageOverlayLabel": "duplicate",
-            "command": "pm.mel.hyperShadePanelMenuCommand(\"hyperShadePanel1\", \"duplicateShadingNetwork\");",
+            "command": "mel.hyperShadePanelMenuCommand(\"hyperShadePanel1\", \"duplicateShadingNetwork\");",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -81,7 +81,7 @@
             "annotation": "Copy source mesh's uv to target mesh that rigged",
             "image1": "copyUV.png",
             "imageOverlayLabel": "rigged",
-            "command": "import pymel.core as pm\nimport takTools.common.tak_misc as tak_misc\n\nsels = pm.ls(sl=True)\nsrc = sels[0]\ntrg = sels[1]\n\ntak_misc.copyUvRiggedMesh(src, trg)",
+            "command": "import pymel.core as pm\nimport takTools.common.tak_misc as tak_misc\n\nsels = cmds.ls(sl=True)\nsrc = sels[0]\ntrg = sels[1]\n\ntak_misc.copyUvRiggedMesh(src, trg)",
             "sourceType": "python",
             "noDefaultPopup": true
         },

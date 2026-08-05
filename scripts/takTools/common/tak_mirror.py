@@ -11,7 +11,7 @@ import re
 
 import maya.cmds as cmds
 import maya.mel as mel
-import pymel.core as pm
+from maya.api import OpenMaya as om
 
 from ..modeling import tak_cleanUpModel
 
@@ -68,9 +68,7 @@ def mirrorJnt(*args):
 
 
 def mirrorYZPlane(src, trg):
-    src = pm.PyNode(src)
-
-    srcMat = src.worldMatrix.get()
+    srcMat = om.MMatrix(cmds.getAttr(f'{src}.worldMatrix'))
     worldXInvMat = [
         -1, 0, 0, 0,
         0, 1, 0, 0,
@@ -78,8 +76,8 @@ def mirrorYZPlane(src, trg):
         0, 0, 0, 1
     ]
 
-    trgMat = srcMat * pm.dt.Matrix(worldXInvMat)
-    pm.xform(trg, matrix=trgMat, ws=True)
+    trgMat = srcMat * om.MMatrix(worldXInvMat)
+    cmds.xform(trg, matrix=trgMat, ws=True)
 
 
 def mirObjUi():
@@ -301,19 +299,19 @@ def mirrorCtrls(*args):
 
 
 def mirrorObject(obj, axis='x'):
-    xMirrorMatrix = pm.datatypes.Matrix(
+    xMirrorMatrix = om.MMatrix(
         -1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1
     )
-    yMirrorMatrix = pm.datatypes.Matrix(
+    yMirrorMatrix = om.MMatrix(
         1, 0, 0, 0,
         0, -1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1
     )
-    zMirrorMatrix = pm.datatypes.Matrix(
+    zMirrorMatrix = om.MMatrix(
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, -1, 0,
@@ -326,8 +324,7 @@ def mirrorObject(obj, axis='x'):
         'z': zMirrorMatrix
     }
 
-    obj = pm.PyNode(obj)
-    objWsMtx = obj.worldMatrix.get()
+    objWsMtx = om.MMatrix(cmds.getAttr(f'{obj}.worldMatrix'))
     mirMtx = objWsMtx * matrixDict.get(axis)
 
-    pm.xform(obj, matrix=mirMtx, worldSpace=True)
+    cmds.xform(obj, matrix=mirMtx, worldSpace=True)

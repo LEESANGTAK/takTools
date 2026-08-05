@@ -39,9 +39,9 @@ FK/IK switch and source objects attributes must be in single "Hub Node".
       ikCtrls = ['arm_L_ik_ctrl', 'arm_L_poleVector_ctrl']
       hubNode = 'arm_L_fkIk_switcher'
       switchAttrName = 'fkIk'
-      pm.addAttr(hubNode, longName=switchAttrName, at='enum', en=['fk', 'ik'], keyable=False)
+      cmds.addAttr(hubNode, longName=switchAttrName, at='enum', en=['fk', 'ik'], keyable=False)
       for ctrl in fkCtrls + ikCtrls:
-          pm.addAttr(ctrl, ln=switchAttrName, proxy='{0}.{1}'.format(hubNode, switchAttrName), keyable=True)
+          cmds.addAttr(ctrl, ln=switchAttrName, proxy='{0}.{1}'.format(hubNode, switchAttrName), keyable=True)
 
 # Source objects attributes
     type: message
@@ -50,14 +50,14 @@ FK/IK switch and source objects attributes must be in single "Hub Node".
 
 
 * Test Code *
-pm.delete(pm.ls(type='fkIkSnapper'))
-pm.flushUndo()
-pm.unloadPlugin('fkIkSnapper')
-pm.loadPlugin('fkIkSnapper')
-pm.createNode('fkIkSnapper')
+cmds.delete(cmds.ls(type='fkIkSnapper'))
+cmds.flushUndo()
+cmds.unloadPlugin('fkIkSnapper')
+cmds.loadPlugin('fkIkSnapper')
+cmds.createNode('fkIkSnapper')
 """
 
-import pymel.core as pm
+from maya import cmds
 from maya.api import OpenMaya as om
 
 
@@ -220,27 +220,27 @@ class FkIkSnapper(om.MPxNode):
     def _snapFkToIk(fkCtrls, ikJnts):
         om.MGlobal.displayInfo("Snap fk controllers to ik joints.")
         for fkCtrl, ikJnt in zip(fkCtrls, ikJnts):
-            ikJntTrans = pm.xform(ikJnt, q=True, t=True, ws=True)
-            ikJntRot = pm.xform(ikJnt, q=True, ro=True, ws=True)
+            ikJntTrans = cmds.xform(ikJnt, q=True, t=True, ws=True)
+            ikJntRot = cmds.xform(ikJnt, q=True, ro=True, ws=True)
 
-            pm.xform(fkCtrl, t=ikJntTrans, ws=True)
-            pm.xform(fkCtrl, ro=ikJntRot, ws=True)
+            cmds.xform(fkCtrl, t=ikJntTrans, ws=True)
+            cmds.xform(fkCtrl, ro=ikJntRot, ws=True)
 
     @staticmethod
     def _snapIkToFk(ikCtrl, pvCtrl, fkJnts):
         om.MGlobal.displayInfo("Snap ik controllers to fk joints.")
-        fkEndJntTrans = pm.xform(fkJnts[-1], q=True, t=True, ws=True)
-        fkEndJntRot = pm.xform(fkJnts[-1], q=True, ro=True, ws=True)
+        fkEndJntTrans = cmds.xform(fkJnts[-1], q=True, t=True, ws=True)
+        fkEndJntRot = cmds.xform(fkJnts[-1], q=True, ro=True, ws=True)
 
-        pm.xform(ikCtrl, t=fkEndJntTrans, ws=True)
-        pm.xform(ikCtrl, ro=fkEndJntRot, ws=True)
-        pm.xform(pvCtrl, t=FkIkSnapper._getPoleVectorPosition(fkJnts), ws=True)
+        cmds.xform(ikCtrl, t=fkEndJntTrans, ws=True)
+        cmds.xform(ikCtrl, ro=fkEndJntRot, ws=True)
+        cmds.xform(pvCtrl, t=FkIkSnapper._getPoleVectorPosition(fkJnts), ws=True)
 
     @staticmethod
     def _getPoleVectorPosition(fkJnts):
-        startVector = pm.dt.Vector(pm.xform(fkJnts[0], q=True, rp=True, ws=True))
-        midVector = pm.dt.Vector(pm.xform(fkJnts[1], q=True, rp=True, ws=True))
-        endVector = pm.dt.Vector(pm.xform(fkJnts[2], q=True, rp=True, ws=True))
+        startVector = om.MVector(cmds.xform(fkJnts[0], q=True, rp=True, ws=True))
+        midVector = om.MVector(cmds.xform(fkJnts[1], q=True, rp=True, ws=True))
+        endVector = om.MVector(cmds.xform(fkJnts[2], q=True, rp=True, ws=True))
 
         startToEndCenter = startVector + ((endVector - startVector) / 2)
         poleVector = midVector - startToEndCenter

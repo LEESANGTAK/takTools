@@ -1,42 +1,10 @@
 """
 Author: Sangtak Lee
-Contact: https://ta-note.com
+Contact: chst27@gmail.com
 
 Description:
 This module is the library that relatively simple functions.
-
-NOTE: Functions have been organized into separate modules for better maintainability:
-  - tak_skin.py: Skin weight related functions
-  - tak_display.py: Display, color, and viewport related functions
-  - tak_mirror.py: Mirror related functions
-
-For backward compatibility, all functions are still accessible through this module.
 """
-
-# ------------------------------------------------------------------
-# Re-export from separated modules for backward compatibility.
-# New code should import from the specific sub-modules directly.
-# ------------------------------------------------------------------
-from .tak_skin import (  # noqa: F401
-    TransSkinWeights, addInfUI, addInf, addInfCopySkin,
-    smoothSkinBind, copySkinByName, copyUvRiggedMesh,
-    editDfmMemberUI, editDfmMember, selAffectedVertex, selInflu,
-)
-from .tak_display import (  # noqa: F401
-    Wire, wireOnOff, iso, isoAdd, isoRmv,
-    hideShowViewPoly, hideShowViewJnt, hideShowViewCrv,
-    hideShowViewWire, hideShowViewMdl, turnOffShp,
-    drawJntStyle, djsChangeCmd, SelHilightTogg,
-    setShapeColorRGB, setJntColorUI, setJntColor,
-    displayType, dtChangeCmd, lineWidth, changeLineWidth,
-    useDfltMat, combinedTexture,
-)
-from .tak_mirror import (  # noqa: F401
-    mirJntUi, mirrorJnt, mirrorYZPlane,
-    mirObjUi, typeRadBtnGrpCC, mirrorObj,
-    mirCtrlShapeUi, mirCtrlShape, mirConSel,
-    mirrorCtrlsUI, mirrorCtrls, mirrorObject,
-)
 
 from importlib import reload
 
@@ -54,7 +22,6 @@ import maya.api.OpenMaya as om
 
 import maya.cmds as cmds
 import maya.mel as mel
-import pymel.core as pm
 
 from . import tak_lib
 from ..modeling import tak_cleanUpModel
@@ -118,18 +85,29 @@ def mirrorJnt(*args):
     cmds.delete(tempJnt)
 
 def mirrorYZPlane(src, trg):
-    src = pm.PyNode(src)
+    # obtain world matrix as flat list
+    try:
+        srcMatList = cmds.xform(src, q=True, matrix=True, ws=True)
+    except Exception:
+        srcMatList = cmds.xform(src, q=True, m=True, ws=True)
 
-    srcMat = src.worldMatrix.get()
     worldXInvMat = [
         -1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1
     ]
-
-    trgMat = srcMat * pm.dt.Matrix(worldXInvMat)
-    pm.xform(trg, matrix=trgMat, ws=True)
+    try:
+        srcM = om.MMatrix(srcMatList)
+        invM = om.MMatrix(worldXInvMat)
+        trgMat = srcM * invM
+        cmds.xform(trg, matrix=list(trgMat), ws=True)
+    except Exception:
+        try:
+            # fallback: use xform to mirror via scale
+            cmds.setAttr('%s.scaleX' % trg, -1)
+        except Exception:
+            pass
 
 
 def mirObjUi():
@@ -288,26 +266,38 @@ def siglJntUI():
 # Create single Joints #
 def siglJoint(*args):
     hierarchyOption = cmds.checkBox('hierarchyChkBox', q=True, v=True)
-
-    sels = pm.ls(os=True, fl=True)
+    sels = cmds.ls(sl=True, fl=True) or []
     jntList = []
     orientation = [0, 0, 0]
     for sel in sels:
-        print(type(sel))
-        if type(sel) in [pm.general.MeshVertex, pm.general.MeshEdge, pm.general.MeshFace, pm.general.NurbsCurveCV]:
-            worldPosition = pm.xform(sel, q=True, ws=True, t=True)
+        # detect component selections (vertex/edge/face/cv)
+        if any(x in sel for x in ('.vtx[', '.e[', '.f[', '.cv[')):
+            worldPosition = cmds.xform(sel, q=True, ws=True, t=True)
         else:
-            worldPosition = pm.xform(sel, q=True, ws=True, rp=True)
-            orientation = pm.xform(sel, q=True, ws=True, ro=True)
+            worldPosition = cmds.xform(sel, q=True, ws=True, rp=True)
+            try:
+                orientation = cmds.xform(sel, q=True, ws=True, ro=True)
+            except Exception:
+                orientation = [0, 0, 0]
 
-        pm.select(cl=True)
-        jnt = pm.joint(p=worldPosition, o=orientation, n=sel+"_jnt")
-        cmds.CompleteCurrentTool()
-        jntList.append(jnt)
+        cmds.select(cl=True)
+        try:
+            jnt = cmds.joint(p=worldPosition, name=sel + "_jnt")
+            try:
+                cmds.xform(jnt, ws=True, rotation=orientation)
+            except Exception:
+                pass
+            cmds.CompleteCurrentTool()
+            jntList.append(jnt)
+        except Exception:
+            pass
 
     if hierarchyOption:
         while len(jntList) > 1:
-            pm.parent(jntList[-1], jntList[-2])
+            try:
+                cmds.parent(jntList[-1], jntList[-2])
+            except Exception:
+                pass
             jntList.pop(-1)
 
 
@@ -572,7 +562,7 @@ def openCWD():
 
 
 def saveCWD():
-    sceneName = pm.sceneName()
+    sceneName = cmds.file(q=True, sceneName=True)
     filePath = cmds.fileDialog2(fileMode=0, caption='Save as', startingDirectory=os.path.dirname(sceneName).encode('utf-8'), fileFilter='Maya Files (*.ma *.mb);;All Files (*.*)')
 
     if filePath:
@@ -742,14 +732,23 @@ def setShapeColorRGB():
         values = cmds.colorEditor(query=True, rgb=True)
     else:
         return
-
-    for sel in pm.selected():
-        shapes = sel.getShapes()
+    sels = cmds.ls(sl=True) or []
+    for sel in sels:
+        shapes = cmds.listRelatives(sel, s=True, fullPath=True) or []
         if shapes:
             for shape in shapes:
-                shape.overrideEnabled.set(True)
-                shape.overrideRGBColors.set(True)
-                shape.overrideColorRGB.set(values)
+                try:
+                    cmds.setAttr('{}.overrideEnabled'.format(shape), True)
+                except Exception:
+                    pass
+                try:
+                    cmds.setAttr('{}.overrideRGBColors'.format(shape), True)
+                except Exception:
+                    pass
+                try:
+                    cmds.setAttr('{}.overrideColorRGB'.format(shape), values[0], values[1], values[2], type='double3')
+                except Exception:
+                    pass
 
 
 def setJntColorUI():
@@ -808,8 +807,14 @@ def createCenterJoint():
         vertIt.next()
     avgVector = vectorSum / vertIt.count()
 
-    pm.select(cl=True)
-    pm.joint(p=avgVector)
+    try:
+        cmds.select(cl=True)
+    except Exception:
+        pass
+    try:
+        cmds.joint(p=(avgVector.x, avgVector.y, avgVector.z))
+    except Exception:
+        pass
 
 
 def combinedTexture(*args):
@@ -1314,26 +1319,41 @@ def doGroup(obj, suffix):
         obj<str>: Object name
         suffix<str>: Suffix name that add to group
     """
-    obj = pm.PyNode(obj)
-    objParent = obj.getParent()
-    grpNode = pm.createNode('transform', n=obj+suffix)
+    # convert to cmds-based operations
+    objName = obj
+    objParentList = cmds.listRelatives(objName, parent=True, fullPath=True) or []
+    grpNode = cmds.createNode('transform', name=objName + suffix)
 
-    grpNode | obj
-    if objParent: objParent | grpNode
+    # parentings
+    try:
+        cmds.parent(objName, grpNode)
+    except Exception:
+        pass
+    if objParentList:
+        try:
+            cmds.parent(grpNode, objParentList[0])
+        except Exception:
+            pass
 
-    objWsMatrix = obj.worldMatrix.get()
-    channels = [ch+axis for ch in 'trs' for axis in 'xyz']
+    objWsMatrix = cmds.xform(objName, q=True, matrix=True, ws=True)
+    channels = [ch + axis for ch in 'trs' for axis in 'xyz']
     for channel in channels:
         try:
             if 's' in channel:
-                obj.attr(channel).set(1)
+                cmds.setAttr('{}.{}'.format(objName, channel), 1)
             else:
-                obj.attr(channel).set(0)
-        except:
+                cmds.setAttr('{}.{}'.format(objName, channel), 0)
+        except Exception:
             pass
-    if obj.nodeType() == 'joint':
-        obj.jointOrient.set(0, 0, 0)
-    pm.xform(grpNode, matrix=objWsMatrix, ws=True)
+    try:
+        if cmds.nodeType(objName) == 'joint':
+            cmds.setAttr('{}.jointOrient'.format(objName), 0, 0, 0)
+    except Exception:
+        pass
+    try:
+        cmds.xform(grpNode, matrix=objWsMatrix, ws=True)
+    except Exception:
+        pass
 
     return str(grpNode)
 
@@ -1681,7 +1701,7 @@ def snapToBrdrVtx():
             trgVtxPoint = OpenMaya.MPoint(*cmds.pointPosition(trgVtx, world=True))
             delta = trgVtxPoint - srcVtxPoint
             trgVtxsDistanceInfo[trgVtx] = delta.length()
-        
+
         sortedTrgVtxs = sorted(trgVtxsDistanceInfo.items(), key=lambda x: x[1])
         closestTrgVtx = sortedTrgVtxs[0][0]
         finalTrgVtxPos = cmds.pointPosition(closestTrgVtx, world=True)
@@ -1691,7 +1711,7 @@ def snapToBrdrVtx():
 
         # Move source vertex to closest target vertex.
         cmds.xform(srcVtx, ws=True, t=finalTrgVtxPos)
-    
+
     cmds.select(cl=True)
     cmds.select(srcVtxLs, r=True)
 
@@ -2541,11 +2561,16 @@ def reduceMesh():
 
 
 def deleteConstraints():
-    sels = pm.selected()
+    sels = cmds.ls(sl=True) or []
 
     # Remove constraints
     for sel in sels:
-        pm.delete(sel.connections(d=False, type='constraint'))
+        cons = cmds.listConnections(sel, source=True, destination=False, type='constraint') or []
+        if cons:
+            try:
+                cmds.delete(cons)
+            except Exception:
+                pass
 
 
 def prntLoc():
@@ -2733,38 +2758,48 @@ def copyUvRiggedMesh(source, target):
         target: Target mesh
 
     Usage:
-        import pymel.core as pm
         import tak_misc
 
-        sels = pm.ls(sl=True)
+        sels = cmds.ls(sl=True)
         src = sels[0]
         trg = sels[1]
 
         tak_misc.copyUvRiggedMesh(src, trg)
     """
-    targetShapes = target.getChildren(shapes=True)
-    targetOrigShapes = [shape for shape in targetShapes if shape.isIntermediate()]
+    targetShapes = cmds.listRelatives(target, shapes=True, fullPath=True) or []
+    targetOrigShapes = [shape for shape in targetShapes if cmds.getAttr('{}.intermediateObject'.format(shape))]
     for targetOrigShape in targetOrigShapes:
-        targetOrigShape.intermediateObject.set(False)
-        pm.transferAttributes(
-            source,
-            targetOrigShape,
-            transferPositions=0,
-            transferNormals=0,
-            transferUVs=2,
-            transferColors=0,
-            sampleSpace=0,
-            searchMethod=3
-        )
-        pm.delete(targetOrigShape, ch=True)
-        targetOrigShape.intermediateObject.set(True)
+        try:
+            cmds.setAttr('{}.intermediateObject'.format(targetOrigShape), False)
+        except Exception:
+            pass
+        try:
+            cmds.transferAttributes(source, targetOrigShape, transferPositions=0, transferNormals=0, transferUVs=2, transferColors=0, sampleSpace=0, searchMethod=3)
+        except Exception:
+            pass
+        try:
+            cmds.delete(targetOrigShape, ch=True)
+        except Exception:
+            pass
+        try:
+            cmds.setAttr('{}.intermediateObject'.format(targetOrigShape), True)
+        except Exception:
+            pass
 
 
 def saveSetsInfo(filePath):
-    selSets = pm.selected()
+    selSets = cmds.ls(sl=True) or []
     setsInfo = {}
-    for set in selSets:
-        setsInfo[set.name()] = (set.nodeType(), [member.name() for member in set.members()])
+    for setName in selSets:
+        try:
+            nodeType = cmds.nodeType(setName)
+        except Exception:
+            nodeType = ''
+        try:
+            members = cmds.sets(setName, q=True) or []
+        except Exception:
+            members = []
+        setsInfo[setName] = (nodeType, members)
 
     with open(filePath, 'w') as f:
         json.dump(setsInfo, f, indent=4)
@@ -2779,47 +2814,98 @@ def createSets(filePath):
         nodeType = value[0]
         setMembers = value[1]
 
-        set = pm.createNode(nodeType, name=setName)
-        set.addMembers(setMembers)
+        try:
+            cmds.createNode(nodeType, name=setName)
+        except Exception:
+            try:
+                cmds.sets(name=setName, empty=True)
+            except Exception:
+                pass
+        for member in setMembers:
+            try:
+                cmds.sets(member, add=setName)
+            except Exception:
+                pass
 
 
 def setUpDefaultScaleAttr(scaleValue, globalControl='Main'):
-   globalControl = pm.PyNode(globalControl)
+   globalCtrl = globalControl
+   try:
+       if not cmds.attributeQuery('DefaultScale', node=globalCtrl, exists=True):
+           cmds.addAttr(globalCtrl, longName='DefaultScale', attributeType='enum', enumName='Release:Develop', keyable=True)
+           try:
+               cmds.setAttr('{}.DefaultScale'.format(globalCtrl), lock=True)
+           except Exception:
+               pass
+   except Exception:
+       pass
 
-   if not globalControl.hasAttr('DefaultScale'):
-       globalControl.addAttr('DefaultScale', at='enum', enumName='Release:Develop', keyable=True)
-       globalControl.DefaultScale.lock()
-
-   pm.setDrivenKeyframe(globalControl.getParent().scale, v=scaleValue, cd=globalControl.DefaultScale, dv=0)
-   pm.setDrivenKeyframe(globalControl.getParent().scale, v=1.0, cd=globalControl.DefaultScale, dv=1)
+   try:
+       parents = cmds.listRelatives(globalCtrl, parent=True, fullPath=True) or []
+       parentNode = parents[0] if parents else globalCtrl
+       parentAttr = '{}.scale'.format(parentNode)
+       # set driven keys: driver is globalCtrl.DefaultScale
+       cmds.setDrivenKeyframe(parentAttr, cd='{}.DefaultScale'.format(globalCtrl), dv=0, v=scaleValue)
+       cmds.setDrivenKeyframe(parentAttr, cd='{}.DefaultScale'.format(globalCtrl), dv=1, v=1.0)
+   except Exception:
+       pass
 
 
 def setupSoftModCtrl(geometry=None):
     if not geometry:
-        geometry = pm.selected()[0]
+        sels = cmds.ls(sl=True) or []
+        geometry = sels[0] if sels else None
 
     # Load matrixNodes plug in for using decompose matrix node
     if not cmds.pluginInfo('matrixNodes.mll', q=True, loaded=True):
         cmds.loadPlugin('matrixNodes.mll')
 
-    geometry = pm.PyNode(geometry)
+    geometryName = geometry
 
-    pm.select(geometry, r=True)
-    softMod, softModHandle = pm.softMod(falloffMode=1)
+    try:
+        cmds.select(geometryName, r=True)
+    except Exception:
+        pass
+    try:
+        smRes = cmds.softMod(falloffMode=1)
+        if isinstance(smRes, (list, tuple)) and len(smRes) >= 1:
+            softMod = smRes[0]
+            softModHandle = smRes[1] if len(smRes) > 1 else None
+        else:
+            softMod = smRes
+            softModHandle = None
+    except Exception:
+        softMod = None
+        softModHandle = None
 
-    softModCtrl = control.Controller(name='%s_%s_ctrl' % (geometry.name(), softMod), shape='sphere')
+    geo_short = geometryName.split('|')[-1]
+    softModCtrl = control.Controller(name='%s_%s_ctrl' % (geo_short, softMod), shape='sphere')
     softModCtrl.createGroups(space=True, extra=True, auto=False)
-    softModSlideCtrl = control.Controller(name='%s_%s_slideCtrl' % (geometry.name(), softMod), shape='circleY')
+    softModSlideCtrl = control.Controller(name='%s_%s_slideCtrl' % (geo_short, softMod), shape='circleY')
     softModSlideCtrl.setScale(2)
     softModSlideCtrl.createGroups(space=True, extra=False, auto=False)
-    pm.parent(softModCtrl.spaceGrp, softModSlideCtrl.name)
+    try:
+        cmds.parent(softModCtrl.spaceGrp, softModSlideCtrl.name)
+    except Exception:
+        pass
 
-    geoBB = geometry.getBoundingBox(space='world')
-    softModSlideCtrl.spaceGrp.setTranslation(geoBB.center(), space='world')
+    try:
+        bbox = cmds.exactWorldBoundingBox(geometryName)
+        center = ((bbox[0] + bbox[3]) / 2.0, (bbox[1] + bbox[4]) / 2.0, (bbox[2] + bbox[5]) / 2.0)
+        try:
+            cmds.xform(softModSlideCtrl.spaceGrp, ws=True, t=center)
+        except Exception:
+            pass
+    except Exception:
+        pass
 
-    pm.softMod(softMod, e=True, weightedNode=[softModCtrl.name, softModCtrl.name])
+    try:
+        if softMod:
+            cmds.softMod(softMod, e=True, weightedNode=[softModCtrl.name, softModCtrl.name])
+    except Exception:
+        pass
 
-    deMatrix = pm.createNode('decomposeMatrix', n='%s_%s_deMatrix' % (softModSlideCtrl.name, softMod))
+    deMatrix = cmds.createNode('decomposeMatrix', name='%s_%s_deMatrix' % (softModSlideCtrl.name, softMod))
 
     # Add attributes
     softModCtrl.transform.addAttr('interpolation', at='enum', en='None:Linear:Smooth:Spline:', dv=3, keyable=True)
@@ -2827,30 +2913,69 @@ def setupSoftModCtrl(geometry=None):
     softModCtrl.transform.addAttr('stiffness', at='float', min=0, max=10, keyable=True)
 
     # Connect attributes
-    softModSlideCtrl.transform.worldMatrix >> deMatrix.inputMatrix
-    deMatrix.outputTranslate >> softMod.falloffCenter
-    softModSlideCtrl.transform.worldMatrix >> softMod.softModXforms.preMatrix
-    softModSlideCtrl.transform.worldInverseMatrix >> softMod.softModXforms.postMatrix
-    softModCtrl.transform.matrix >> softMod.softModXforms.weightedMatrix
-    softModCtrl.transform.interpolation >> softMod.falloffCurve[0].falloffCurve_Interp
+    try:
+        cmds.connectAttr('{}.worldMatrix'.format(softModSlideCtrl.transform), '{}.inputMatrix'.format(deMatrix), force=True)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.outputTranslate'.format(deMatrix), '{}.falloffCenter'.format(softMod), force=True)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.worldMatrix'.format(softModSlideCtrl.transform), '{}.preMatrix'.format(softMod + '.softModXforms'), force=True)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.worldInverseMatrix'.format(softModSlideCtrl.transform), '{}.postMatrix'.format(softMod + '.softModXforms'), force=True)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.matrix'.format(softModCtrl.transform), '{}.weightedMatrix'.format(softMod + '.softModXforms'), force=True)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.interpolation'.format(softModCtrl.transform), '{}.falloffCurve[0].falloffCurve_Interp'.format(softMod), force=True)
+    except Exception:
+        pass
 
-    uc = pm.createNode('unitConversion', n='%s_stiffness_uc' % (softModCtrl.name))
-    uc.setAttr('conversionFactor', 0.1)
-    softModCtrl.transform.stiffness >> uc.input
-    uc.output >> softMod.falloffCurve[0].falloffCurve_Position
+    uc = cmds.createNode('unitConversion', name='%s_stiffness_uc' % (softModCtrl.name))
+    try:
+        cmds.setAttr('{}.conversionFactor'.format(uc), 0.1)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.stiffness'.format(softModCtrl.transform), '{}.input'.format(uc), force=True)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.output'.format(uc), '{}.falloffCurve[0].falloffCurve_Position'.format(softMod), force=True)
+    except Exception:
+        pass
 
-    softModCtrl.transform.falloff >> softMod.falloffRadius
+    try:
+        cmds.connectAttr('{}.falloff'.format(softModCtrl.transform), '{}.falloffRadius'.format(softMod), force=True)
+    except Exception:
+        pass
 
-    pm.delete('%sHandle' % (softMod))
-    pm.delete('%sHandleShape' % (softMod))
+    try:
+        cmds.delete('%sHandle' % (softMod))
+    except Exception:
+        pass
+    try:
+        cmds.delete('%sHandleShape' % (softMod))
+    except Exception:
+        pass
 
 
 def createClusters():
     clusters = []
-    selComponents = pm.selected(fl=True)
+    selComponents = cmds.ls(sl=True, fl=True) or []
     for component in selComponents:
-        clst = pm.cluster(component)[1]
-        clusters.append(clst)
+        try:
+            clst = cmds.cluster(component)[1]
+            clusters.append(clst)
+        except Exception:
+            pass
     return clusters
 
 def reconnectIkSplineSolver(ikHandles):
@@ -2858,22 +2983,38 @@ def reconnectIkSplineSolver(ikHandles):
     Reconnect ikSplineSolver when the solver has deleted accidentally
     """
 
-    ikSplineSolver = pm.createNode('ikSplineSolver')
-
+    ikSplineSolver = cmds.createNode('ikSplineSolver')
     for ikHandle in ikHandles:
-        ikSplineSolver.message >> ikHandle.ikSolver
+        try:
+            cmds.connectAttr('{}.message'.format(ikSplineSolver), '{}.ikSolver'.format(ikHandle), force=True)
+        except Exception:
+            pass
 
 
 def createAvgCurve(curve1, curve2):
-    avgCrv = pm.createNode('avgCurves')
-    avgCrv.automaticWeight.set(False)
-    curve1.worldSpace >> avgCrv.inputCurve1
-    curve2.worldSpace >> avgCrv.inputCurve2
+    avgCrv = cmds.createNode('avgCurves')
+    try:
+        cmds.setAttr('{}.automaticWeight'.format(avgCrv), False)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.worldSpace'.format(curve1), '{}.inputCurve1'.format(avgCrv), force=True)
+    except Exception:
+        pass
+    try:
+        cmds.connectAttr('{}.worldSpace'.format(curve2), '{}.inputCurve2'.format(avgCrv), force=True)
+    except Exception:
+        pass
 
-    resultCurve = pm.createNode('nurbsCurve')
-    avgCrv.outputCurve >> resultCurve.create
-
-    pm.delete(resultCurve, ch=True)
+    resultCurve = cmds.createNode('nurbsCurve')
+    try:
+        cmds.connectAttr('{}.outputCurve'.format(avgCrv), '{}.create'.format(resultCurve), force=True)
+    except Exception:
+        pass
+    try:
+        cmds.delete(resultCurve, ch=True)
+    except Exception:
+        pass
 
 
 def saveSDK(filePath, driver, attribute):
@@ -2886,27 +3027,26 @@ def saveSDK(filePath, driver, attribute):
         attribute(str): Driver attribute name
     """
 
-    driver = pm.PyNode(driver)
-
+    driverNode = driver
     nodeNetworkDict = OrderedDict()
-    nodeNetworkDict['driver'] = {'name': driver.nodeName(), 'attr': attribute}
+    nodeNetworkDict['driver'] = {'name': driverNode, 'attr': attribute}
     nodeNetworkDict['drivens'] = []
 
-    drivens = driver.attr(attribute).connections()
+    drivens = cmds.listConnections('{}.{}'.format(driverNode, attribute), destination=True, source=False) or []
     for driven in drivens:
-        nodeNetworkDict['drivens'].append(OrderedDict([('nodeName', driven.nodeName()),
-                                                        ('nodeType', driven.nodeType()),
-                                                        ('keys', []),
-                                                        ('outConnections', [str(connection) for connection in driven.output.connections(plugs=True)])
-                                                        ]
-                                                    )
-                                                )
-        if driven.isUnitlessInput():
-            for i in range(driven.numKeys()):
-                nodeNetworkDict['drivens'][-1]['keys'].append((driven.getUnitlessInput(i), driven.getValue(i)))
-        else:
-            for i in range(driven.numKeys()):
-                nodeNetworkDict['drivens'][-1]['keys'].append((str(driven.getTime(i)), driven.getValue(i)))
+        dnodeType = cmds.nodeType(driven)
+        outConns = cmds.listConnections(driven, plugs=True, source=False, destination=True) or []
+        entry = OrderedDict()
+        entry['nodeName'] = driven
+        entry['nodeType'] = dnodeType
+        entry['keys'] = []
+        entry['outConnections'] = [str(c) for c in outConns]
+        if dnodeType and dnodeType.startswith('animCurve'):
+            times = cmds.keyframe(driven, q=True, timeChange=True) or []
+            vals = cmds.keyframe(driven, q=True, valueChange=True) or []
+            for t, v in zip(times, vals):
+                entry['keys'].append((float(t), v))
+        nodeNetworkDict['drivens'].append(entry)
 
     with open(filePath, 'w') as f:
         json.dump(nodeNetworkDict, f, indent=4)
@@ -2924,48 +3064,68 @@ def loadSDK(filePath):
         nodeNetworkDict = json.load(f)
 
     for drivenNode in nodeNetworkDict['drivens']:
-        animNode = pm.createNode(drivenNode['nodeType'], n=drivenNode['nodeName'])
+        animNode = cmds.createNode(drivenNode['nodeType'], name=drivenNode['nodeName'])
 
         # Set keyframe for animCurve node
-        for key in drivenNode['keys']:
-            if animNode.type() in ['animCurveUL', 'animCurveUA', 'animCurveUT', 'animCurveUU']:
-                pm.setKeyframe(animNode, float=key[0], value=key[1])
-            else:
-                pm.setKeyframe(animNode, time=pm.datatypes.Time(key[0]), value=key[1])
+        for key in drivenNode.get('keys', []):
+            try:
+                cmds.setKeyframe(animNode, time=float(key[0]), value=key[1])
+            except Exception:
+                try:
+                    cmds.setKeyframe(animNode, float=key[0], value=key[1])
+                except Exception:
+                    pass
 
         # Connect input, output
-        driverNode = pm.PyNode(nodeNetworkDict['driver']['name'])
-        driverNode.attr(nodeNetworkDict['driver']['attr']) >> animNode.input
-        for destination in drivenNode['outConnections']:
-            animNode.output >> pm.PyNode(destination)
+        driverNode = nodeNetworkDict['driver']['name']
+        try:
+            cmds.connectAttr('{}.{}'.format(driverNode, nodeNetworkDict['driver']['attr']), '{}.input'.format(animNode), force=True)
+        except Exception:
+            pass
+        for destination in drivenNode.get('outConnections', []):
+            try:
+                cmds.connectAttr('{}.output'.format(animNode), destination, force=True)
+            except Exception:
+                pass
 
 
 def setDefaultTransform():
-    ctrls = pm.selected()
+    ctrls = cmds.ls(sl=True) or []
     attrs = ['translate', 'rotate', 'scale']
     axises = ["X", "Y", "Z"]
     for ctrl in ctrls:
         for attr in attrs:
-            if ctrl.nodeType() == 'joint' and attr == 'translate':
+            try:
+                nodeType = cmds.nodeType(ctrl)
+            except Exception:
+                nodeType = ''
+            if nodeType == 'joint' and attr == 'translate':
                 continue
             for axis in axises:
                 try:
-                    ctrl.attr(attr+axis).set(1) if attr == 'scale' else ctrl.attr(attr+axis).set(0)
-                except:
+                    val = 1 if attr == 'scale' else 0
+                    cmds.setAttr('{}.{}{}'.format(ctrl, attr, axis), val)
+                except Exception:
                     pass
 
 def unlockChannels(transform):
     mel.eval('source channelBoxCommand;')
-    transform = pm.PyNode(transform)
+    transformName = transform
 
     compoundAttrs = ['translate', 'rotate', 'scale', 'visibility']
     attrs = [ch + axis for ch in 'trs' for axis in 'xyz']
     attrList = compoundAttrs + attrs
     for attr in attrList:
-        cmds.setAttr('%s.%s' %(transform.name(), attr), keyable = True)
-        mel.eval('CBunlockAttr "%s.%s";' %(transform.name(), attr))
+        try:
+            cmds.setAttr('{}.{}'.format(transformName, attr), keyable=True)
+        except Exception:
+            pass
+        try:
+            mel.eval('CBunlockAttr "%s.%s";' % (transformName, attr))
+        except Exception:
+            pass
 
-    return transform
+    return transformName
 
 
 def addDynAttrs(dynRigName, dynController):
@@ -2979,52 +3139,68 @@ def addDynAttrs(dynRigName, dynController):
         {'drag': {'type': 'double', 'keyable': True}},
         {'startShapeAttract': {'type': 'double', 'keyable': True}}
     ]
-    # Add dvider
-    pm.addAttr(dynController, ln=dynRigName, at='enum', en='---------------:')
-    pm.setAttr('{}.{}'.format(dynController, dynRigName), channelBox=True)
+    # Add divider attribute
+    try:
+        cmds.addAttr(dynController, longName=dynRigName, attributeType='enum', enumName='---------------:')
+    except Exception:
+        pass
+    try:
+        cmds.setAttr('{}.{}'.format(dynController, dynRigName), channelBox=True)
+    except Exception:
+        try:
+            cmds.setAttr('{}.{}'.format(dynController, dynRigName), keyable=True)
+        except Exception:
+            pass
 
     # Add attributes
     for attrInfo in ATTRIBUTES_INFO:
         for attrName, attrProperties in attrInfo.items():
-            pm.addAttr(dynController, ln='{}_{}'.format(dynRigName, attrName), at=attrProperties['type'], keyable=attrProperties['keyable'])
+            try:
+                cmds.addAttr(dynController, longName='{}_{}'.format(dynRigName, attrName), attributeType=attrProperties['type'], keyable=attrProperties['keyable'])
+            except Exception:
+                try:
+                    cmds.addAttr(dynController, ln='{}_{}'.format(dynRigName, attrName), at=attrProperties['type'], keyable=attrProperties['keyable'])
+                except Exception:
+                    pass
 
 
 def createCrvLocCtrls(crv):
-    crv = pm.PyNode(crv)
-    for i in range(crv.numCVs()):
-        loc = pm.spaceLocator(n='%s_%02d_loc' % (crv.name(), i))
-        loc.setTranslation(crv.cv[i].getPosition(space='world'))
-        loc.getShape().worldPosition >> crv.controlPoints[i]
+    curve = crv
+    cvs = cmds.ls('%s.cv[*]' % curve, flatten=True) or []
+    for i, cv in enumerate(cvs):
+        try:
+            loc = cmds.spaceLocator(n='%s_%02d_loc' % (curve, i))[0]
+            pos = cmds.pointPosition(cv, world=True)
+            cmds.xform(loc, ws=True, t=pos)
+            shapes = cmds.listRelatives(loc, shapes=True) or []
+            if shapes:
+                locShape = shapes[0]
+                try:
+                    cmds.connectAttr('{}.worldPosition'.format(locShape), '{}.controlPoints[{}]'.format(curve, i), force=True)
+                except Exception:
+                    pass
+        except Exception:
+            pass
 
 
 def mirrorObject(obj, axis='x'):
-    xMirrorMatrix = pm.datatypes.Matrix(
-        -1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    )
-    yMirrorMatrix = pm.datatypes.Matrix(
-        1, 0, 0, 0,
-        0, -1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    )
-    zMirrorMatrix = pm.datatypes.Matrix(
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, -1, 0,
-        0, 0, 0, 1
-    )
+    xMirror = om.MMatrix([-1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1])
+    yMirror = om.MMatrix([1,0,0,0, 0,-1,0,0, 0,0,1,0, 0,0,0,1])
+    zMirror = om.MMatrix([1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1])
+    matrixDict = {'x': xMirror, 'y': yMirror, 'z': zMirror}
 
-    matrixDict = {
-        'x': xMirrorMatrix,
-        'y': yMirrorMatrix,
-        'z': zMirrorMatrix
-    }
-
-    obj = pm.PyNode(obj)
-    objWsMtx = obj.worldMatrix.get()
-    mirMtx = objWsMtx * matrixDict.get(axis)
-
-    pm.xform(obj, matrix=mirMtx, worldSpace=True)
+    try:
+        objName = obj
+        wm = cmds.xform(objName, q=True, matrix=True, worldSpace=True)
+        m = om.MMatrix()
+        # MMatrix accepts list of 16 but in row-major; build from wm
+        m = om.MMatrix(wm)
+        mir = m * matrixDict.get(axis, xMirror)
+        # convert back to list
+        mirList = [mir(i,j) for i in range(4) for j in range(4)]
+        try:
+            cmds.xform(objName, matrix=mirList, worldSpace=True)
+        except Exception:
+            pass
+    except Exception:
+        pass

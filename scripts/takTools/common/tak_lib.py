@@ -11,10 +11,9 @@ import pprint
 import re
 
 import maya.OpenMaya as OpenMaya
-import maya.api.OpenMaya as om2
+import maya.api.OpenMaya as om
 import maya.cmds as cmds
 import maya.mel as mel
-import pymel.core as pm
 
 
 def showHUD(widgetName, title, sectionNum = 2, blockNum = 0):
@@ -286,31 +285,31 @@ def getOverlappedVertices(source, target, searchRadius=5.0):
         closestVtxs: string list - Target mesh's closest vertices.
     '''
 
-    selLs = om2.MSelectionList()
+    selLs = om.MSelectionList()
     selLs.add(source)
     selLs.add(target)
 
     srcDagPath = selLs.getDagPath(0)
     trgDagPath = selLs.getDagPath(1)
 
-    trgVtxIt = om2.MItMeshVertex(trgDagPath)
+    trgVtxIt = om.MItMeshVertex(trgDagPath)
 
-    srcMeshFn = om2.MFnMesh(srcDagPath)
+    srcMeshFn = om.MFnMesh(srcDagPath)
 
     overlappedVerticesId = []
     while not trgVtxIt.isDone():
-        trgVtxWsPnt = trgVtxIt.position(om2.MSpace.kWorld)
+        trgVtxWsPnt = trgVtxIt.position(om.MSpace.kWorld)
         trgVtxNormal = trgVtxIt.getNormal()
 
         intersectPoint = srcMeshFn.closestIntersection(
-            om2.MFloatPoint(trgVtxWsPnt),
-            om2.MFloatVector(trgVtxNormal),
-            om2.MSpace.kWorld,
+            om.MFloatPoint(trgVtxWsPnt),
+            om.MFloatVector(trgVtxNormal),
+            om.MSpace.kWorld,
             searchRadius,
             True
         )[0]
 
-        if not intersectPoint.isEquivalent(om2.MFloatPoint(0, 0, 0, 1)):
+        if not intersectPoint.isEquivalent(om.MFloatPoint(0, 0, 0, 1)):
             overlappedVerticesId.append(trgVtxIt.index())
 
         trgVtxIt.next()
@@ -340,11 +339,9 @@ def findMultiAttributeEmptyIndex(node, attribute):
     Returns:
         Available index
     """
-    node = pm.PyNode(node)
-
     id = 0
 
-    while node.attr(attribute)[id].isConnected():
+    while cmds.listConnections(f'{node}.{attribute}[{id}]'):
         id += 1
 
     return id
@@ -404,14 +401,9 @@ def getMDagPath(node):
     Returns:
         MDagPath
     """
-    mSelLs = OpenMaya.MSelectionList()
+    mSelLs = om.MSelectionList()
     mSelLs.add(node)
-
-    mDagPath = OpenMaya.MDagPath()
-
-    mSelLs.getDagPath(0, mDagPath)
-
-    return mDagPath
+    return mSelLs.getDagPath(0)
 
 
 def swapOrderString(type="number"):
@@ -424,50 +416,65 @@ def swapOrderString(type="number"):
     firstOrderStr = None
     secOrderStr = None
 
-    sels = pm.selected()
+    sels = cmds.ls(sl=True)
     if type == "number":
-        firstOrderStr = re.search(r"_(\d+)_", sels[0].name()).group(1)
-        secOrderStr = re.search(r"_(\d+)_", sels[1].name()).group(1)
+        firstOrderStr = re.search(r"_(\d+)_", sels[0]).group(1)
+        secOrderStr = re.search(r"_(\d+)_", sels[1]).group(1)
     elif type == "alphabet":
-        firstOrderStr = re.search(r"_(\D)_", sels[0].name()).group(1)
-        secOrderStr = re.search(r"_(\D)_", sels[1].name()).group(1)
+        firstOrderStr = re.search(r"_(\D)_", sels[0]).group(1)
+        secOrderStr = re.search(r"_(\D)_", sels[1]).group(1)
 
-    sels[0].rename(sels[0].replace(firstOrderStr, "tempStr"))
-    sels[1].rename(sels[1].replace(secOrderStr, firstOrderStr))
-    sels[0].rename(sels[0].replace("tempStr", secOrderStr))
+    cmds.rename(sels[0], sels[0].replace(firstOrderStr, "tempStr"))
+    cmds.rename(sels[1], sels[1].replace(secOrderStr, firstOrderStr))
+    cmds.rename(sels[0], sels[0].replace("tempStr", secOrderStr))
 
 
 def matchTransformToFace(transform, face):
-    """
-    transform(pymel.core.nodetypes.Transform): Transform pymel node
-    face(pymel.core.general.MeshFace): A face
+    mesh_name = cmds.listRelatives(cmds.ls(face, objectsOnly=True)[0], p=True)[0]
 
-    Example:
-        import pymel.core as pm
+    face_index = None
+    match = re.search(r'f\[(\d+)\]', face)
+    if match:
+        face_index = int(match.group(1))
 
-        sels = pm.ls(os=True) # Select transform and a face
-        matchTransformToFace(sels[0], sels[1])
-    """
-    points = face.getPoints()
+    face_info = cmds.polyInfo(face, faceToVertex=True)
+    verts = [int(v) for v in face_info[0].split()[2:]]
+    points = []
+    for vert in verts:
+        pos = cmds.pointPosition('%s.vtx[%d]' % (mesh_name, vert), w=True)
+        points.append(om.MVector(pos[0], pos[1], pos[2]))
 
-    # Vectors for build matrix
-    vectorX = points[1] - points[0]
-    vectorX.normalize()
-    vectorY = face.getNormal()
-    vectorZ = vectorX ^ vectorY
-    position = pm.datatypes.Vector()
+    position = om.MVector()
     for point in points:
         position += point
-    position = position/len(points)
+    position /= len(points)
 
-    # Build matrix
-    matrixData = [[vectorX.x, vectorX.y, vectorX.z, 0],
-                    [vectorY.x, vectorY.y, vectorY.z, 0],
-                    [vectorZ.x, vectorZ.y, vectorZ.z, 0],
-                    [position.x, position.y, position.z, 1]]
-    matrix = pm.datatypes.Matrix(matrixData)
+    selection = om.MSelectionList()
+    selection.add(mesh_name)
+    dag_path = selection.getDagPath(0)
+    fn_mesh = om.MFnMesh(dag_path)
 
-    transform.setMatrix(matrix)
+    normal = fn_mesh.getPolygonNormal(face_index, om.MSpace.kWorld)
+    normal.normalize()
+
+    vectorX = points[1] - points[0]
+    if vectorX.length() == 0.0:
+        vectorX = points[-1] - points[0]
+    vectorX.normalize()
+
+    vectorZ = vectorX ^ normal
+    vectorZ.normalize()
+
+    vectorY = normal
+
+    matrix = [
+        vectorX.x, vectorX.y, vectorX.z, 0,
+        vectorY.x, vectorY.y, vectorY.z, 0,
+        vectorZ.x, vectorZ.y, vectorZ.z, 0,
+        position.x, position.y, position.z, 1,
+    ]
+
+    cmds.xform(transform, ws=True, matrix=matrix)
 
 
 def getInputNodes(start, inputNodes, nodeType=None):
@@ -477,12 +484,11 @@ def getInputNodes(start, inputNodes, nodeType=None):
         inputNodes<list>: Empty list
         nodeType<str>: Specific node type
     """
-    startNode = pm.PyNode(start)
-    nodes = startNode.connections(d=False, scn=True)
+    nodes = cmds.listConnections(start, d=False, scn=True)
     if nodes:
         for node in nodes:
             if nodeType:
-                if node.type() == nodeType:
+                if cmds.nodeType(node) == nodeType:
                     inputNodes.append(node)
             else:
                 inputNodes.append(node)
@@ -492,24 +498,24 @@ def getInputNodes(start, inputNodes, nodeType=None):
 
 
 def duplicateRename(node, prefix='', suffix='', srchStr='', rplcStr=''):
-    addStrDupNode = pm.duplicate(node, n=prefix + node + suffix, returnRootsOnly=True)[0]
-    subStrDupNodeName = re.sub(srchStr, rplcStr, addStrDupNode.name())
-    dupNode = cmds.rename(addStrDupNode.name(), subStrDupNodeName)
+    addStrDupNode = cmds.duplicate(node, n=prefix + node + suffix, returnRootsOnly=True)[0]
+    subStrDupNodeName = re.sub(srchStr, rplcStr, addStrDupNode)
+    dupNode = cmds.rename(addStrDupNode, subStrDupNodeName)
 
     try:
-        pm.parent(dupNode, world=True)
+        cmds.parent(dupNode, world=True)
     except:
         pass
 
-    dupObjChldLs = pm.listRelatives(dupNode, type='transform', ad=True, path=True)
+    dupObjChldLs = cmds.listRelatives(dupNode, type='transform', ad=True, path=True)
     if dupObjChldLs:
         for chldObj in dupObjChldLs:
             chldObjBaseName = chldObj.split('|')[-1]
-            addName = cmds.rename(chldObj.name(), prefix + chldObjBaseName + suffix)
+            addName = cmds.rename(chldObj, prefix + chldObjBaseName + suffix)
             subName = re.sub(srchStr, rplcStr, addName)
             cmds.rename(addName, subName)
 
-    return pm.PyNode(dupNode)
+    return dupNode
 
 
 def setDefaultTransform(transformNode):
@@ -521,10 +527,10 @@ def setDefaultTransform(transformNode):
 
 
 def deleteIntermediateObject(transformNode):
-    itmdShapes = pm.ls(transformNode, dag=True, s=True, io=True)
+    itmdShapes = cmds.ls(transformNode, dag=True, s=True, io=True)
     for shape in itmdShapes:
-        if shape.intermediateObject.get():
-            pm.delete(shape)
+        if cmds.objExists(f'{shape}.intermediateObject'):
+            cmds.delete(shape)
 
 
 def copySkinByName(target, prefix="", srchStr="", rplcStr="", copyMatOpt=False):
@@ -573,107 +579,98 @@ def copySkinByName(target, prefix="", srchStr="", rplcStr="", copyMatOpt=False):
 
 
 def copySkin(source, target):
-    source = pm.PyNode(source)
-    target = pm.PyNode(target)
-
     srcInfs = getInfluences(source)
-    srcJointInfs = [inf for inf in srcInfs if isinstance(inf, pm.nodetypes.Joint)]
+    srcJointInfs = [inf for inf in srcInfs if cmds.nodeType(inf, 'joint')]
     srcGeoInfs = list(set(srcInfs) - set(srcJointInfs))
-    srcSkinClst = pm.mel.eval('findRelatedSkinCluster("%s");' % source.name())
-    targetMesh = target.node() if isinstance(target, pm.MeshVertex) else target
-    trgSkinClst = pm.mel.eval('findRelatedSkinCluster("%s");' % targetMesh.name())
+    srcSkinClst = mel.eval('findRelatedSkinCluster("%s");' % source)
+    targetMesh = cmds.ls(target, objectsOnly=True)[0] if 'vtx' in target else target
+    trgSkinClst = mel.eval('findRelatedSkinCluster("%s");' % targetMesh)
 
     if not trgSkinClst:
-        trgSkinClst = pm.skinCluster(srcJointInfs, targetMesh, dr=4, tsb=True, nw=1)
-        pm.skinCluster(trgSkinClst, e=True, ug=True, ai=srcGeoInfs)
+        trgSkinClst = cmds.skinCluster(srcJointInfs, targetMesh, dr=4, tsb=True, nw=1)
+        cmds.skinCluster(trgSkinClst, e=True, ug=True, ai=srcGeoInfs)
 
     else:
         trgInfs = getInfluences(targetMesh)
-        trgJointInfs = [inf for inf in trgInfs if isinstance(inf, pm.nodetypes.Joint)]
+        trgJointInfs = [inf for inf in trgInfs if cmds.nodeType(inf) == 'joint']
         trgGeoInfs = list(set(trgInfs) - set(trgJointInfs))
         addedSrcJointInfs = list(set(srcJointInfs) - set(trgJointInfs))
         addedSrcGeoInfs = list(set(srcGeoInfs) - set(trgGeoInfs))
 
-        pm.skinCluster(trgSkinClst, e=True, ai=addedSrcJointInfs)
-        pm.skinCluster(trgSkinClst, e=True, ug=True, ai=addedSrcGeoInfs)
+        cmds.skinCluster(trgSkinClst, e=True, ai=addedSrcJointInfs)
+        cmds.skinCluster(trgSkinClst, e=True, ug=True, ai=addedSrcGeoInfs)
 
-    pm.select(source, target, r=True)
+    cmds.select(source, target, r=True)
     cmds.CopySkinWeights()
 
-    pm.PyNode(trgSkinClst).skinningMethod.set(pm.PyNode(srcSkinClst).skinningMethod.get())
-    pm.PyNode(trgSkinClst).useComponents.set(pm.PyNode(srcSkinClst).useComponents.get())
+    cmds.setAttr(f'{trgSkinClst}.skinningMethod', cmds.getAttr(f'{srcSkinClst}.skinningMethod'))
+    cmds.setAttr(f'{trgSkinClst}.useComponents', cmds.getAttr(f'{srcSkinClst}.useComponents'))
 
 
 def copyMat(source, target):
     srcShape = source.getShape()
     trgShape = target.getShape()
     srcShadingGrp = srcShape.listConnections(s=False, type='shadingEngine')[0]
-    pm.sets(srcShadingGrp, forceElement=trgShape)
+    cmds.sets(srcShadingGrp, forceElement=trgShape)
 
 
 def getInfluences(skinGeo):
-    skClu = pm.mel.eval('findRelatedSkinCluster("%s");' % skinGeo)
-    infls = pm.skinCluster(skClu, q=True, inf=True)
+    skClu = mel.eval('findRelatedSkinCluster("%s");' % skinGeo)
+    infls = cmds.skinCluster(skClu, q=True, inf=True)
     return infls
 
 
 def constraintWithMatrix(driver, driven, maintainOffset=True, translateAxes=['x','y','z'], rotateAxes=['x','y','z'], scaleAxes=[]):
-    driver = pm.PyNode(driver)
-    driven = pm.PyNode(driven)
-
-    multMtx = pm.createNode('multMatrix', n=driver.name()+'_multMtx')
-    decMtx = pm.createNode('decomposeMatrix', n=driver.name()+'_decMtx')
+    multMtx = cmds.createNode('multMatrix', n=driver.name()+'_multMtx')
+    decMtx = cmds.createNode('decomposeMatrix', n=driver.name()+'_decMtx')
 
     if maintainOffset:
-        offsetMtx = driven.worldMatrix.get() * driver.worldInverseMatrix.get()  # Parent to driver
-        multMtx.matrixIn[0].set(offsetMtx)
-        driver.worldMatrix >> multMtx.matrixIn[1]
-        if driven.getParent(): driven.getParent().worldInverseMatrix >> multMtx.matrixIn[2]
+        offsetMtx = cmds.getAttr(f'{driven}.worldMatrix') * cmds.getAttr(f'{driver}.worldInverseMatrix')  # Parent to driver
+        cmds.setAttr(f'{multMtx}.matrixIn[0]', type='matrix', *offsetMtx)
+        cmds.connectAttr(f'{driver}.worldMatrix', f'{multMtx}.matrixIn[1]', f=True)
+        if cmds.listRelatives(driven, p=True): cmds.connectAttr(f'{cmds.listRelatives(driven, p=True)[0]}.worldInverseMatrix', f'{multMtx}.matrixIn[2]', f=True)
     else:
-        driver.worldMatrix >> multMtx.matrixIn[0]
-        if driven.getParent(): driven.getParent().worldInverseMatrix >> multMtx.matrixIn[1]
+        cmds.connectAttr(f'{driver}.worldMatrix', f'{multMtx}.matrixIn[0]', f=True)
+        if cmds.listRelatives(driven, p=True): cmds.connectAttr(f'{cmds.listRelatives(driven, p=True)[0]}.worldInverseMatrix', f'{multMtx}.matrixIn[1]', f=True)
 
-    multMtx.matrixSum >> decMtx.inputMatrix
+    cmds.connectAttr(f'{multMtx}.matrixSum', f'{decMtx}.inputMatrix', f=True)
 
     for axis in translateAxes:
-        decMtx.attr('outputTranslate'+axis.capitalize()) >> driven.attr('translate'+axis.capitalize())
+        cmds.connectAttr(f'{decMtx}.outputTranslate{axis.capitalize()}', f'{driven}.translate{axis.capitalize()}', f=True)
     for axis in rotateAxes:
-        decMtx.attr('outputRotate'+axis.capitalize()) >> driven.attr('rotate'+axis.capitalize())
+        cmds.connectAttr(f'{decMtx}.outputRotate{axis.capitalize()}', f'{driven}.rotate{axis.capitalize()}', f=True)
     for axis in scaleAxes:
-        decMtx.attr('outputScale'+axis.capitalize()) >> driven.attr('scale'+axis.capitalize())
+        cmds.connectAttr(f'{decMtx}.outputScale{axis.capitalize()}', f'{driven}.scale{axis.capitalize()}', f=True)
 
 
 def interpolateRotation(driverA, driverB, driven, driverAw, driverBw):
-    driverA = pm.PyNode(driverA)
-    driverB = pm.PyNode(driverB)
-    driven = pm.PyNode(driven)
-    blendNode = pm.createNode('animBlendNodeAdditiveRotation')
+    blendNode = cmds.createNode('animBlendNodeAdditiveRotation')
 
-    driverA.rotate >> blendNode.inputA
-    driverB.rotate >> blendNode.inputB
-    blendNode.output >> driven.rotate
+    cmds.connectAttr(f'{driverA}.rotate', f'{blendNode}.inputA')
+    cmds.connectAttr(f'{driverB}.rotate', f'{blendNode}.inputB')
+    cmds.connectAttr(f'{blendNode}.output', f'{driven}.rotate')
 
-    blendNode.weightA.set(driverAw)
-    blendNode.weightB.set(driverBw)
+    cmds.setAttr(f'{blendNode}.weightA', driverAw)
+    cmds.setAttr(f'{blendNode}.weightB', driverBw)
 
 
 def copySDK(drivenObj, searchStr, replaceStr, inverseAttrs=[]):
-    drivenObj = pm.PyNode(drivenObj)
+    animNodes = list(set(cmds.listHistory(drivenObj, type='animCurve')))
 
-    animNodes = list(set(drivenObj.listHistory(type='animCurve')))
-    print(animNodes)
     for animNode in animNodes:
-        inputPlug = animNode.connections(d=False, plugs=True)[0]
-        # outputPlug = animNode.connections(s=False, plugs=True)[0]
-        splitStrs = animNode.name().rsplit('_', 1)
-        outputPlug = pm.PyNode('{0}.{1}'.format(splitStrs[0], splitStrs[1]))
+        inputPlug = cmds.listConnections(animNode, d=False, plugs=True)[0]
+        splitStrs = animNode.rsplit('_', 1)
+        outputPlug = '{0}.{1}'.format(splitStrs[0], splitStrs[1])
 
-        dupAnimNode = animNode.duplicate(n=animNode.replace(searchStr, replaceStr))[0]
+        dupAnimNode = cmds.duplicate(animNode, n=animNode.replace(searchStr, replaceStr))[0]
 
         if inverseAttrs:
             for invAttr in inverseAttrs:
-                if invAttr in outputPlug.name():
-                    [dupAnimNode.setValue(id, -dupAnimNode.getValue(id)) for id in range(dupAnimNode.numKeys())]
+                if invAttr in outputPlug:
+                    numKeyframes = len(cmds.keyframe(dupAnimNode, q=True))
+                    for id in range(numKeyframes):
+                        srcValue = cmds.keyframe(dupAnimNode, q=True, index=(id,), valueChange=True)[0]
+                        cmds.keyframe(dupAnimNode, e=True, index=(id,), valueChange=-srcValue)
 
-        pm.PyNode(inputPlug.replace(searchStr, replaceStr)) >> dupAnimNode.input
-        dupAnimNode.output >> pm.PyNode(outputPlug.replace(searchStr, replaceStr))
+        cmds.connectAttr(inputPlug.replace(searchStr, replaceStr), f'{dupAnimNode}.input')
+        cmds.connectAttr(f'{dupAnimNode}.output', outputPlug.replace(searchStr, replaceStr))

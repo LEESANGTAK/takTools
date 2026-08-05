@@ -11,7 +11,6 @@ from functools import partial
 
 import maya.cmds as cmds
 import maya.mel as mel
-import pymel.core as pm
 
 from . import tak_lib
 
@@ -179,13 +178,13 @@ def setShapeColorRGB():
     else:
         return
 
-    for sel in pm.selected():
-        shapes = sel.getShapes()
+    for sel in cmds.ls(sl=True):
+        shapes = cmds.listRelatives(sel, s=True)
         if shapes:
             for shape in shapes:
-                shape.overrideEnabled.set(True)
-                shape.overrideRGBColors.set(True)
-                shape.overrideColorRGB.set(values)
+                cmds.setAttr('%s.overrideEnabled' % shape, True)
+                cmds.setAttr('%s.overrideRGBColors' % shape, True)
+                cmds.setAttr('%s.overrideColorRGB' % shape, *values)
 
 
 def setJntColorUI():

@@ -1,5 +1,4 @@
 import maya.api.OpenMaya as om
-import pymel.core as pm
 import maya.cmds as cmds
 
 from . import globalUtil
@@ -17,21 +16,22 @@ def createClusters(components, orientation='normal'):
     """
 
     shape = globalUtil.getShapeFromComponent(components[0])
-    pnts = [om.MPoint(pm.pointPosition(item, world=True)) for item in components]
+    pnts = [om.MPoint(cmds.pointPosition(item, world=True)) for item in components]
     midPoint = om.MPoint(vectorUtil.getCenterVector(pnts))
     basisXVector = (pnts[0] - midPoint) ^ (pnts[1] - pnts[0])
 
     i = 0
     for cpnt in components:
-        clst, clstHandle = pm.cluster(cpnt, n='%s_clst' % nameUtil.convertNiceComponentName(cpnt.name()))
-        clstLoc = pm.createNode('locator', name='%s_loc' % clst.name())
-        clstLocTrsf = clstLoc.getParent()
+        clst, clstHandle = cmds.cluster(cpnt, n='%s_clst' % nameUtil.convertNiceComponentName(str(cpnt).split('.')[-1]))
+        clstLoc = cmds.createNode('locator', name='%s_loc' % clst)
+        clstLocTrsf = cmds.listRelatives(clstLoc, parent=True, fullPath=True)[0]
 
         if orientation == 'world':
             pass  # Cluster default orientation is aligned to the world.
-            clstLocTrsf.translate.set(clstHandle.scalePivot.get())
+            pivot = cmds.xform(clstHandle, q=True, ws=True, rp=True)
+            cmds.xform(clstLocTrsf, t=pivot, ws=True)
             trsfUtil.addGroup(clstLocTrsf, '_zero')
-            clstLocTrsf | clstHandle
+            cmds.parent(clstHandle, clstLocTrsf)
 
         elif orientation == 'object':
             pass
@@ -68,9 +68,9 @@ def createClusters(components, orientation='normal'):
                 ]
             )
 
-            pm.xform(clstLocTrsf, matrix=orientedMatrix, objectSpace=True)
+            cmds.xform(clstLocTrsf, matrix=list(orientedMatrix), objectSpace=True)
             trsfUtil.addGroup(clstLocTrsf, '_zero')
-            clstLocTrsf | clstHandle
+            cmds.parent(clstHandle, clstLocTrsf)
 
         i += 1
 

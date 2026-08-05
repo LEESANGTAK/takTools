@@ -3,6 +3,8 @@ Author: LEE SANGTAK
 Contact: chst27@gmail.com
 """
 
+import os
+
 from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from PySide2.QtCore import *
@@ -10,7 +12,7 @@ from PySide2.QtCore import *
 import xgenm as xg
 import xgenm.xgGlobal as xgg
 import xgenm.XgExternalAPI as xge
-import pymel.core as pm
+from maya import cmds, mel
 import maya.OpenMayaUI as omui
 
 from shiboken2 import wrapInstance
@@ -36,14 +38,14 @@ class XGenBaker(QDialog):
 
     def prepare(self):
         # Set evaluation mode to DG
-        pm.evaluationManager(mode='off')
+        cmds.evaluationManager(mode='off')
 
-        pm.setAttr('defaultRenderGlobals.animation', True)
-        pm.setAttr('defaultRenderGlobals.useFrameExt', True)
-        pm.setAttr('defaultRenderGlobals.putFrameBeforeExt', True)
-        pm.setAttr('defaultRenderGlobals.extensionPadding', 4)
+        cmds.setAttr('defaultRenderGlobals.animation', True)
+        cmds.setAttr('defaultRenderGlobals.useFrameExt', True)
+        cmds.setAttr('defaultRenderGlobals.putFrameBeforeExt', True)
+        cmds.setAttr('defaultRenderGlobals.extensionPadding', 4)
 
-        pm.mel.eval('xgmPreview -clean;')
+        mel.eval('xgmPreview -clean;')
 
         # Description render setting
         for collection in self.collections:
@@ -53,9 +55,9 @@ class XGenBaker(QDialog):
                 xg.setAttr("custom__arnold_rendermode", xge.prepForAttribute(str(1)), collection, description, "RendermanRenderer")
                 xg.setAttr("custom__arnold_minPixelWidth", xge.prepForAttribute(str(0.5)), collection, description, "RendermanRenderer")
 
-        pm.refresh(su=True)
+        cmds.refresh(su=True)
         xgg.DescriptionEditor.exportPatches()
-        pm.refresh(su=False)
+        cmds.refresh(su=False)
 
 
     def buildUI(self):
@@ -73,8 +75,8 @@ class XGenBaker(QDialog):
         browsButton = QPushButton('Brows...')
         mainLayout.addWidget(browsButton, 1, 4)
 
-        startFrame = pm.playbackOptions(q=True, min=True)
-        endFrame = pm.playbackOptions(q=True, max=True)
+        startFrame = cmds.playbackOptions(q=True, min=True)
+        endFrame = cmds.playbackOptions(q=True, max=True)
         mainLayout.addWidget(QLabel('Start Frame: '), 2, 1)
         self.startFrameLineEdit = QLineEdit()
         self.startFrameLineEdit.setText(str(startFrame))
@@ -102,15 +104,15 @@ class XGenBaker(QDialog):
 
 
     def getSaveFilePath(self):
-        startSearchDir = self.savePathLineEdit.text() if self.savePathLineEdit.text() else pm.sceneName().dirname()
+        startSearchDir = self.savePathLineEdit.text() if self.savePathLineEdit.text() else os.path.dirname(cmds.file(q=True, sceneName=True))
         savePathLineEdit = QFileDialog.getSaveFileName(self, 'Export Selection', startSearchDir, 'Ass Export (*.ass;*.ass.gz)')
         self.savePathLineEdit.setText(savePathLineEdit[0])
 
 
     def exportCollection(self):
-        pm.select(self.collectionComboBox.currentText(), r=True)
+        cmds.select(self.collectionComboBox.currentText(), r=True)
         expandProceduralsStr = '-expandProcedurals' if self.expandProceduralsCheckBox.checkState() else ''
-        pm.mel.eval('''arnoldExportAss
+        mel.eval('''arnoldExportAss
             -f "{0}"
             -boundingBox
             -compressed {expandProcedurals}

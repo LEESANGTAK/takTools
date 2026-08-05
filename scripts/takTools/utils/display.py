@@ -1,12 +1,11 @@
-import pymel.core as pm
 import maya.cmds as cmds
 
 from . import environment as envUtil
 
 
 def displayAffectedToggle():
-    displayAffected = pm.displayPref(q=True, displayAffected=True)
-    pm.displayPref(displayAffected=not displayAffected)
+    displayAffected = cmds.displayPref(q=True, displayAffected=True)
+    cmds.displayPref(displayAffected=not displayAffected)
 
 
 def displayModelOnlyToggle():

@@ -1,4 +1,4 @@
-import pymel.core as pm
+from maya import cmds
 import maya.api.OpenMaya as om
 
 
@@ -12,15 +12,15 @@ def getCenterVector(points):
 
 
 def poleVectorLocator():
-    selList = pm.selected()
+    selList = cmds.ls(selection=True)
     strtJnt = selList[0]
     midJnt = selList[1]
     endJnt = selList[2]
-    loc = pm.spaceLocator(n='poleVector_loc')
+    loc = cmds.spaceLocator(name='poleVector_loc')
 
-    startJntRawPos = pm.xform(strtJnt, q=True, rp=True, ws=True)
-    endJntRawPos = pm.xform(endJnt, q=True, rp=True, ws=True)
-    midJntRawPos = pm.xform(midJnt, q=True, rp=True, ws=True)
+    startJntRawPos = cmds.xform(strtJnt, q=True, rp=True, ws=True)
+    endJntRawPos = cmds.xform(endJnt, q=True, rp=True, ws=True)
+    midJntRawPos = cmds.xform(midJnt, q=True, rp=True, ws=True)
 
     strtJntVector = om.MVector(*startJntRawPos)
     endJntVector = om.MVector(*endJntRawPos)
@@ -32,4 +32,4 @@ def poleVectorLocator():
     poleVecLocPos = midJntVector + poleVector
 
     # place locator to the pole vector position
-    pm.xform(loc, t=(poleVecLocPos.x, poleVecLocPos.y, poleVecLocPos.z), ws=True)
+    cmds.xform(loc, t=(poleVecLocPos.x, poleVecLocPos.y, poleVecLocPos.z), ws=True)

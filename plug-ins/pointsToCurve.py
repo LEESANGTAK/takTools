@@ -4,22 +4,19 @@ Contact: chst27@gmail.com
 Created: 2019.06.07
 
 Test Codes:
-import pymel.core as pm
-
 # Test Build
-pm.loadPlugin('pointsToCurve')
-node = pm.createNode('pointsToCurve')
-motionTrail = pm.PyNode('motionTrail1HandleShape')
-nurbsCurve = pm.createNode('nurbsCurve')
+cmds.loadPlugin('pointsToCurve')
+node = cmds.createNode('pointsToCurve')
+motionTrail = 'motionTrail1HandleShape'
+nurbsCurve = cmds.createNode('nurbsCurve')
 
-motionTrail.points >> node.points
-node.outCurve >> nurbsCurve.create
-
+cmds.connectAttr(f'{motionTrail}.points', f'{node}.points')
+cmds.connectAttr(f'{node}.outCurve', f'{nurbsCurve}.create')
 
 # Test Remove
-pm.delete(node, nurbsCurve)
-pm.flushUndo()
-pm.unloadPlugin('pointsToCurve')
+cmds.delete(node, nurbsCurve)
+cmds.flushUndo()
+cmds.unloadPlugin('pointsToCurve')
 """
 
 

@@ -239,14 +239,15 @@ def setupScriptNode(objs, trgSpcs, cnsts, spcsGrp, spcLocs, prntCnst, prntCnstOp
     if cmds.objExists(scriptNodeName):
         cmds.scriptNode(scriptNodeName, executeBefore = True)
     else:
-        exprStr = '''import maya.cmds as cmds
-import pymel.core as pm
+        exprStr = '''import math
+import maya.cmds as cmds
+from maya.api import OpenMaya as om
 
 def spaceSwitchMatchTrsf():
     sels = cmds.ls( sl = True )
     for sel in sels:
-        spacesGrp = pm.listConnections('%s.spacesGrp' % sel)[0]
-        spacesGrpPreMat = spacesGrp.worldMatrix.get()
+        spacesGrp = cmds.listConnections('%s.spacesGrp' % sel)[0]
+        spacesGrpPreMat = om.MMatrix(cmds.getAttr(f'%s.worldMatrix' % spacesGrp))
 
         # Get selected attribute.
         rawSelAttr = cmds.channelBox('mainChannelBox', q = True, selectedMainAttributes = True)
@@ -278,13 +279,12 @@ def spaceSwitchMatchTrsf():
         driverLoc = None
         for udAttr in cmds.listAttr(sel, ud=True):
             if selspace+'_space_loc' in udAttr:
-                driverLoc = pm.listConnections('%s.%s' % (sel, udAttr))[0]
+                driverLoc = cmds.listConnections('%s.%s' % (sel, udAttr))[0]
                 break
         offsetMat = spacesGrpPreMat * driverLoc.worldMatrix.get().inverse()
-        # if spacesGrp.getParent():
-        #     offsetMat = offsetMat * spacesGrp.getParent().worldMatrix.get().inverse()
+        offsetMat = spacesGrpPreMat * om.MMatrix(cmds.getAttr(f'%s.worldMatrix' % driverLoc))
         offsetTranslate = offsetMat.translate
-        offsetRotate = pm.util.degrees(offsetMat.rotate.asEulerRotation())
+        offsetRotate = math.degrees(offsetMat.rotate.asEulerRotation())
 
         # Set offset and set key
         for udAttr in udAttrs:

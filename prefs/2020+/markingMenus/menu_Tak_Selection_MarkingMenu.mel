@@ -1,76 +1,76 @@
 
     menuItem
-        -label "Symmetry On" 
+        -label "Symmetry On"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "reflectionSetMode objectx;" 
+        -command "reflectionSetMode objectx;"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "W" 
+        -radialPosition "W"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "symmetrize.png" 
+        -image "symmetrize.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem1;
 
     menuItem
-        -label "Symmetry Off" 
+        -label "Symmetry Off"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "reflectionSetMode none;" 
+        -command "reflectionSetMode none;"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "E" 
+        -radialPosition "E"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "symmetrize.png" 
+        -image "symmetrize.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem2;
 
     menuItem
-        -label "Lasso" 
+        -label "Lasso"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nchangeSelectMode -component;\nselectType -msh false;\nsetToolTo lassoSelectContext;\n" 
+        -command "polySelectConstraint -dis;\nchangeSelectMode -component;\nselectType -msh false;\nsetToolTo lassoSelectContext;\n"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "NW" 
+        -radialPosition "NW"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "lassoSelect.png" 
+        -image "lassoSelect.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem3;
 
     menuItem
-        -label "menuEditorMenuItem4" 
+        -label "menuEditorMenuItem4"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "setToolTo lassoSelectContext;toolPropertyWindow" 
+        -command "setToolTo lassoSelectContext;toolPropertyWindow"
         -optionBox 1
         -enable 1
         -visible 0
@@ -81,126 +81,126 @@
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem4;
 
     menuItem
-        -label "Paint" 
+        -label "Paint"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nchangeSelectMode -component;\nselectType -msh false;\nsetToolTo artSelectContext;\nselect -cl;" 
+        -command "polySelectConstraint -dis;\nchangeSelectMode -component;\nselectType -msh false;\nsetToolTo artSelectContext;\nselect -cl;"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "NE" 
+        -radialPosition "NE"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "artSelect.png" 
+        -image "artSelect.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem5;
 
     menuItem
-        -label "Polygon Planner" 
+        -label "Polygon Planner"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -facet 1;\nselectType -msh false;\npolySelectConstraint -m 0 -type 0x0008 -ap 1 -at 20;\nsetToolTo selectSuperContext;" 
+        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -facet 1;\nselectType -msh false;\npolySelectConstraint -m 0 -type 0x0008 -ap 1 -at 20;\nsetToolTo selectSuperContext;"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "S" 
+        -radialPosition "S"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "polyPlane.png" 
+        -image "polyPlane.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem6;
 
     menuItem
-        -label "Polygon Shell" 
+        -label "Polygon Shell"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -facet 1;\nselectType -msh false;\npolySelectConstraint -m 0 -type 0x0008 -sh 1;\nsetToolTo selectSuperContext;\n\n" 
+        -command "polySelectConstraint -dis;\nselectMode -component;\nselectType -facet 1;\nselectType -msh false;\npolySelectConstraint -m 0 -type 0x0008 -sh 1;\nsetToolTo selectSuperContext;\n\n"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "SE" 
+        -radialPosition "SE"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "polyConvertToShell.png" 
+        -image "polyConvertToShell.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem9;
 
     menuItem
-        -label "Disable Constraint" 
+        -label "Disable Constraint"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nselectType -msh false;\n" 
+        -command "polySelectConstraint -dis;\nselectType -msh false;\n"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "N" 
+        -radialPosition "N"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "polySelectUsingConstraints.png" 
+        -image "polySelectUsingConstraints.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem7;
 
     menuItem
-        -label "UV Shell" 
+        -label "UV Shell"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectConstraint -dis;\nchangeSelectMode -component;\nsetComponentPickMask \"Facet\" true;\nselectType -ocm -alc false;\nselectType -msh true;\nsetToolTo selectSuperContext;" 
+        -command "polySelectConstraint -dis;\nchangeSelectMode -component;\nsetComponentPickMask \"Facet\" true;\nselectType -ocm -alc false;\nselectType -msh true;\nsetToolTo selectSuperContext;"
         -optionBox 0
         -enable 1
         -visible 1
         -data 0
-        -radialPosition "SW" 
+        -radialPosition "SW"
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "polySelectUVShell.png" 
+        -image "polySelectUVShell.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem8;
 
     menuItem
-        -label "Hierarchy" 
+        -label "Hierarchy"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "changeSelectMode -object;\nsetToolTo selectSuperContext;\nSelectHierarchy;\n" 
+        -command "changeSelectMode -object;\nsetToolTo selectSuperContext;\nSelectHierarchy;\n"
         -optionBox 0
         -enable 1
         -visible 1
@@ -208,20 +208,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "menuIconSelect.png" 
+        -image "menuIconSelect.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem11;
 
     menuItem
-        -label "Set Manager" 
+        -label "Set Manager"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from imp import reload\");\npython(\"import setManager as sm; reload(sm)\");\npython(\"smGUI = sm.gui.ManagerGUI()\");\npython(\"smGUI.show()\");" 
+        -command "python(\"from imp import reload\");\npython(\"import setManager as sm; reload(sm)\");\npython(\"smGUI = sm.gui.ManagerGUI()\");\npython(\"smGUI.show()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -229,18 +229,18 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "out_objectSet.png" 
+        -image "out_objectSet.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem17;
 
     menuItem
-        -label "separator" 
+        -label "separator"
         -divider 1
-        -dividerLabel "separator" 
+        -dividerLabel "separator"
         -subMenu 0
         -tearOff 0
         -optionBox 0
@@ -252,16 +252,16 @@
         -enableCommandRepeat 1
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem18;
 
     menuItem
-        -label "Child Joints" 
+        -label "Child Joints"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "{\n\tstring $jnts[] = `ls -sl -dag -type \"joint\"`;\n\tselect $jnts;\n}" 
+        -command "{\n\tstring $jnts[] = `ls -sl -dag -type \"joint\"`;\n\tselect $jnts;\n}"
         -optionBox 0
         -enable 1
         -visible 1
@@ -269,20 +269,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "kinJoint.png" 
+        -image "kinJoint.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem14;
 
     menuItem
-        -label "End Joints" 
+        -label "End Joints"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"endJnts = []\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: endJnts.extend(jntUtils.getEndJoints(sel))\");\npython(\"cmds.select(endJnts, r=True)\");" 
+        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"endJnts = []\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: endJnts.extend(jntUtils.getEndJoints(sel))\");\npython(\"cmds.select(endJnts, r=True)\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -290,20 +290,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "kinJoint.png" 
+        -image "kinJoint.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem15;
 
     menuItem
-        -label "No End Joints" 
+        -label "No End Joints"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"noEndJnts = []\");\npython(\"sels = pm.ls(sl=True)\");\npython(\"for sel in sels: noEndJnts.extend(jntUtils.getJointsExceptEnd(sel))\");\npython(\"pm.select(noEndJnts, r=True)\");" 
+        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"noEndJnts = []\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: noEndJnts.extend(jntUtils.getJointsExceptEnd(sel))\");\npython(\"cmds.select(noEndJnts, r=True)\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -311,18 +311,18 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "kinJoint.png" 
+        -image "kinJoint.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem10;
 
     menuItem
-        -label "separator" 
+        -label "separator"
         -divider 1
-        -dividerLabel "separator" 
+        -dividerLabel "separator"
         -subMenu 0
         -tearOff 0
         -optionBox 0
@@ -334,16 +334,16 @@
         -enableCommandRepeat 1
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem16;
 
     menuItem
-        -label "Ring Vertices" 
+        -label "Ring Vertices"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectSp -ring;\nConvertSelectionToVertices;" 
+        -command "polySelectSp -ring;\nConvertSelectionToVertices;"
         -optionBox 0
         -enable 1
         -visible 1
@@ -351,20 +351,20 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "polySelectEdgeRing.png" 
+        -image "polySelectEdgeRing.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem12;
 
     menuItem
-        -label "Loop Vertices" 
+        -label "Loop Vertices"
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "polySelectSp -loop;\nConvertSelectionToVertices;" 
+        -command "polySelectSp -loop;\nConvertSelectionToVertices;"
         -optionBox 0
         -enable 1
         -visible 1
@@ -372,11 +372,11 @@
         -allowOptionBoxes 1
         -postMenuCommandOnce 0
         -enableCommandRepeat 1
-        -image "polySelectEdgeLoop.png" 
+        -image "polySelectEdgeLoop.png"
         -echoCommand 0
         -italicized 0
         -boldFont 1
-        -sourceType "mel" 
+        -sourceType "mel"
         -longDivider 1
         menuEditorMenuItem13;
 

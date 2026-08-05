@@ -1,6 +1,5 @@
 import os
 import re
-import pymel.core as pm
 from maya import cmds, mel
 from . import mesh as meshUtil; reload(meshUtil)
 from . import skin as skinUtil; reload(skinUtil)
@@ -258,14 +257,21 @@ def cleanup(fbxFile, textureDirectory, name, height, flipZ=True):
     cleanupOutliner()
     cleanupMaterial(textureDirectory, name)
 
-    pm.delete(UNUSING_NODES)
+    cmds.delete(UNUSING_NODES)
 
     # Delete locators
-    locators = [loc.getTransform() for loc in pm.ls(type='locator')]
-    pm.delete(locators)
+    locators = []
+    for locator in cmds.ls(type='locator', long=True) or []:
+        parent = cmds.listRelatives(locator, parent=True, fullPath=True)
+        if parent:
+            locators.append(parent[0])
+    if locators:
+        cmds.delete(locators)
 
     # Delete unnecessary blendshape targets
-    pm.delete(pm.ls('_*', type='transform'))
+    blend_targets = cmds.ls('_*', type='transform', long=True) or []
+    if blend_targets:
+        cmds.delete(blend_targets)
 
 
 def cleanupModel(height, flipZ):
@@ -276,14 +282,14 @@ def cleanupModel(height, flipZ):
     correctJointName()
 
     # Make character facing positive z-axis
-    skelTopNode = pm.PyNode(UNUSING_NODES[2])
-    skelTopNode.rotateY.set(yRotate)
+    skelTopNode = UNUSING_NODES[2]
+    cmds.setAttr('{}.rotateY'.format(skelTopNode), yRotate)
 
     # Modify height
     meshes = meshUtil.getDeformedMeshes()
     curHeight = getHeight(meshes)
-    ratio = height/curHeight * skelTopNode.scaleY.get()
-    skelTopNode.scale.set(ratio, ratio, ratio)
+    ratio = height / curHeight * cmds.getAttr('{}.scaleY'.format(skelTopNode))
+    cmds.setAttr('{}.scale'.format(skelTopNode), ratio, ratio, ratio)
 
     # Rotate arm joints slightly for the IK
     try:
@@ -299,36 +305,39 @@ def cleanupModel(height, flipZ):
     for mesh in meshes:
         skinFile = skinUtil.exportSkin(mesh, docDir)
         skinFiles.append(skinFile)
-        pm.polySoftEdge(mesh, a=180)
+        cmds.polySoftEdge(mesh, a=180)
         meshUtil.cleanupMesh(mesh)
 
     # Cleanup skeleton
-    pm.makeIdentity(skelTopNode, apply=True, scale=True)
-    root = pm.PyNode('Root')
-    pm.parent('Root', world=True)
-    rootChild = root.getChildren()
+    cmds.makeIdentity(skelTopNode, apply=True, scale=True)
+    root = 'Root'
+    cmds.parent(root, world=True)
+    rootChild = cmds.listRelatives(root, children=True, fullPath=True) or []
     # Rotate the root joint for the unreal engine
-    pm.parent(rootChild, world=True)
-    root.rotate.set(0, 0, 0)
-    root.jointOrient.set(-90, 0, 0)
-    pm.parent(rootChild, root)
+    if rootChild:
+        cmds.parent(rootChild, world=True)
+    cmds.setAttr('{}.rotate'.format(root), 0, 0, 0)
+    cmds.setAttr('{}.jointOrient'.format(root), -90, 0, 0)
+    if rootChild:
+        cmds.parent(rootChild, root)
 
     # Freeze joints
-    pm.makeIdentity(root, apply=True)
-    for jnt in pm.ls(type='joint'):
-        jnt.radius.set(1.0)
+    cmds.makeIdentity(root, apply=True)
+    for jnt in cmds.ls(type='joint', long=True) or []:
+        cmds.setAttr('{}.radius'.format(jnt), 1.0)
 
 
     # Restore blendshape
-    facialTargets = pm.ls('Fcl_*', type='transform')
-    if pm.objExists(ARKIT_TARGETS[0]):
+    facialTargets = cmds.ls('Fcl_*', type='transform', long=True) or []
+    if cmds.objExists(ARKIT_TARGETS[0]):
         facialTargets += ARKIT_TARGETS
-    nullGrp = pm.createNode('transform', n='null1')
-    pm.parent(facialTargets, nullGrp)
-    nullGrp.scale.set(ratio, ratio, ratio)
-    nullGrp.rotate.set(-90, yRotate, 0)
-    pm.makeIdentity(nullGrp, apply=True)
-    pm.blendShape(facialTargets, MESHES[0], n=FACIAL_BLENDSHAPE)
+    nullGrp = cmds.createNode('transform', name='null1')
+    if facialTargets:
+        cmds.parent(facialTargets, nullGrp)
+    cmds.setAttr('{}.scale'.format(nullGrp), ratio, ratio, ratio)
+    cmds.setAttr('{}.rotate'.format(nullGrp), -90, yRotate, 0)
+    cmds.makeIdentity(nullGrp, apply=True)
+    cmds.blendShape(facialTargets, MESHES[0], name=FACIAL_BLENDSHAPE)
 
     # Restore skin weights
     for skinFile in skinFiles:
@@ -338,53 +347,62 @@ def cleanupModel(height, flipZ):
 
 def correctJointName():
     # Replace fbx ascii name in the joints
-    for jnt in pm.ls(typ='joint'):
+    for jnt in cmds.ls(type='joint', long=True) or []:
         newName = jnt.replace('FBXASC046', '_')
         newName = newName.replace('FBXASC044', '_')
         suffix = newName.rsplit('_', 1)[-1]
         if suffix in ['L', 'R']:
             splitNames = newName.split('_')
             newName = '{}_{}_{}'.format('_'.join(splitNames[:2]), suffix, '_'.join(splitNames[2:-1]))
-        jnt.rename(newName)
+        cmds.rename(jnt, newName)
 
 
 def getHeight(meshes):
     height = 0.0
     for mesh in meshes:
-        curHeight = pm.PyNode(mesh).boundingBox().max().y
+        bbox = cmds.exactWorldBoundingBox(mesh)
+        if bbox:
+            curHeight = bbox[4]
+        else:
+            curHeight = 0.0
         if curHeight > height:
             height = curHeight
     return height
 
 
 def cleanupOutliner():
-    allGrp = pm.createNode('transform', n='all')
-    tmpGrp = pm.createNode('transform', n='temp_grp')
-    mdlGrp = pm.createNode('transform', n='model')
-    geoGrp = pm.createNode('transform', n='geo_grp')
-    skelGrp = pm.createNode('transform', n='skeleton')
-    rigGrp = pm.createNode('transform', n='rig')
-    vroidTargetsGrp = pm.createNode('transform', n='vroid_targets_grp')
-    pm.parent(pm.ls('Fcl_*', type='transform'), vroidTargetsGrp)
+    allGrp = cmds.createNode('transform', name='all')
+    tmpGrp = cmds.createNode('transform', name='temp_grp')
+    mdlGrp = cmds.createNode('transform', name='model')
+    geoGrp = cmds.createNode('transform', name='geo_grp')
+    skelGrp = cmds.createNode('transform', name='skeleton')
+    rigGrp = cmds.createNode('transform', name='rig')
+    vroidTargetsGrp = cmds.createNode('transform', name='vroid_targets_grp')
+    vroid_targets = cmds.ls('Fcl_*', type='transform', long=True) or []
+    if vroid_targets:
+        cmds.parent(vroid_targets, vroidTargetsGrp)
 
     meshes = meshUtil.getDeformedMeshes()
-    pm.parent(meshes, geoGrp)
-    pm.parent('Root', skelGrp)
-    pm.parent(geoGrp, mdlGrp)
-    pm.parent([mdlGrp, skelGrp, rigGrp], allGrp)
-    pm.parent(vroidTargetsGrp, tmpGrp)
+    if meshes:
+        cmds.parent(meshes, geoGrp)
+    if cmds.objExists('Root'):
+        cmds.parent('Root', skelGrp)
+    cmds.parent(geoGrp, mdlGrp)
+    cmds.parent([mdlGrp, skelGrp, rigGrp], allGrp)
+    cmds.parent(vroidTargetsGrp, tmpGrp)
 
-    if pm.objExists(ARKIT_TARGETS[0]):
-        arkitTargetsGrp = pm.createNode('transform', n='arkit_targets_grp')
-        pm.parent(ARKIT_TARGETS, arkitTargetsGrp)
-        pm.parent(arkitTargetsGrp, tmpGrp)
+    if cmds.objExists(ARKIT_TARGETS[0]):
+        arkitTargetsGrp = cmds.createNode('transform', name='arkit_targets_grp')
+        cmds.parent(ARKIT_TARGETS, arkitTargetsGrp)
+        cmds.parent(arkitTargetsGrp, tmpGrp)
 
 def cleanupMaterial(textureDirectory, name):
     # Add prefix for textures
     # Some textures starts with invalid character are can not imported in unreal
     textures = [f for f in os.listdir(textureDirectory) if f.endswith('png')]
     for tex in textures:
-        if name in tex: continue
+        if name in tex:
+            continue
         oldTexPath = os.path.join(textureDirectory, tex)
         newTexPath = os.path.join(textureDirectory, '{}{}'.format(name, tex))
         os.rename(oldTexPath, newTexPath)
@@ -395,13 +413,30 @@ def cleanupMaterial(textureDirectory, name):
         materials.extend(matUtil.getMaterials(mesh))
 
     for mat in materials:
-        result = re.search(r'N.+?_(\D+.+?)FBX.+', mat.name())
+        mat_name = mat
+        if isinstance(mat, str):
+            mat_name = mat
+        else:
+            try:
+                mat_name = mat.name()
+            except AttributeError:
+                mat_name = mat
+
+        result = re.search(r'N.+?_(\D+.+?)FBX.+', mat_name)
 
         if result:
-            mat.specularColor.set(0, 0, 0)
-            mat.reflectedColor.set(0, 0, 0)
+            mat_node = mat_name
+            if hasattr(mat, 'specularColor'):
+                try:
+                    mat.specularColor.set(0, 0, 0)
+                    mat.reflectedColor.set(0, 0, 0)
+                except Exception:
+                    pass
 
-            mat.rename('{}_{}_MI'.format(name, result.group(1)))
+            new_mat_name = '{}_{}_MI'.format(name, result.group(1))
+            if mat_node != new_mat_name:
+                cmds.rename(mat_node, new_mat_name)
+            mat_node = new_mat_name
 
             try:
                 rawTexName = MAT_INFO[result.group(1)]
@@ -410,34 +445,38 @@ def cleanupMaterial(textureDirectory, name):
 
             tex = '{}{}'.format(name, rawTexName)
 
-        fileNode = pm.shadingNode('file', asTexture=True)
-        place2dNode = pm.shadingNode('place2dTexture', asUtility=True)
+            fileNode = cmds.shadingNode('file', asTexture=True, name='{}_file'.format(tex))
+            place2dNode = cmds.shadingNode('place2dTexture', asUtility=True, name='{}_place2dTexture'.format(tex))
 
-        place2dNode.coverage >> fileNode.coverage
-        place2dNode.mirrorU >> fileNode.mirrorU
-        place2dNode.mirrorV >> fileNode.mirrorV
-        place2dNode.noiseUV >> fileNode.noiseUV
-        place2dNode.offset >> fileNode.offset
-        place2dNode.outUV >> fileNode.uvCoord
-        place2dNode.outUvFilterSize >> fileNode.uvFilterSize
-        place2dNode.repeatUV >> fileNode.repeatUV
-        place2dNode.rotateFrame >> fileNode.rotateFrame
-        place2dNode.rotateUV >> fileNode.rotateUV
-        place2dNode.stagger >> fileNode.stagger
-        place2dNode.translateFrame >> fileNode.translateFrame
-        place2dNode.vertexCameraOne >> fileNode.vertexCameraOne
-        place2dNode.vertexUvOne >> fileNode.vertexUvOne
-        place2dNode.vertexUvThree >> fileNode.vertexUvThree
-        place2dNode.vertexUvTwo >> fileNode.vertexUvTwo
-        place2dNode.wrapU >> fileNode.wrapU
-        place2dNode.wrapV >> fileNode.wrapV
+            attrs = [
+                ('coverage', 'coverage'),
+                ('mirrorU', 'mirrorU'),
+                ('mirrorV', 'mirrorV'),
+                ('noiseUV', 'noiseUV'),
+                ('offset', 'offset'),
+                ('outUV', 'uvCoord'),
+                ('outUvFilterSize', 'uvFilterSize'),
+                ('repeatUV', 'repeatUV'),
+                ('rotateFrame', 'rotateFrame'),
+                ('rotateUV', 'rotateUV'),
+                ('stagger', 'stagger'),
+                ('translateFrame', 'translateFrame'),
+                ('vertexCameraOne', 'vertexCameraOne'),
+                ('vertexUvOne', 'vertexUvOne'),
+                ('vertexUvThree', 'vertexUvThree'),
+                ('vertexUvTwo', 'vertexUvTwo'),
+                ('wrapU', 'wrapU'),
+                ('wrapV', 'wrapV'),
+            ]
+            for src, dst in attrs:
+                cmds.connectAttr('{}.{}'.format(place2dNode, src), '{}.{}'.format(fileNode, dst), force=True)
 
-        fileNode.fileTextureName.set(os.path.join(textureDirectory, tex))
-        fileNode.outColor >> mat.color
-        fileNode.outTransparency >> mat.transparency
+            cmds.setAttr('{}.fileTextureName'.format(fileNode), os.path.join(textureDirectory, tex), type='string')
+            cmds.connectAttr('{}.outColor'.format(fileNode), '{}.color'.format(mat_node), force=True)
+            cmds.connectAttr('{}.outTransparency'.format(fileNode), '{}.transparency'.format(mat_node), force=True)
 
     # Set transparency algorithm to the "Alpha Cut" of the viewport 2.0
-    pm.setAttr("hardwareRenderingGlobals.transparencyAlgorithm", 5)
+    cmds.setAttr("hardwareRenderingGlobals.transparencyAlgorithm", 5)
 # --------------------------------------------------------------------------------------
 
 
@@ -461,12 +500,12 @@ def setupHumanIK():
 
 def matchFitSkeleton():
     for asJnt, vrJnt in AS_TABLE.items():
-        pm.matchTransform(asJnt, vrJnt, pos=True)
+        cmds.matchTransform(asJnt, vrJnt, pos=True)
 
 
 # Facial #
 def setupFacial():
-    pm.importFile(FACIAL_CONTROLLER_FILE)
+    cmds.file(FACIAL_CONTROLLER_FILE, i=True)
     setupVRFacialAttrs()
     bsUtil.connectExistingTargets('facial_attrs_out', [FACIAL_BLENDSHAPE])
     setupEyelidSDK()
@@ -474,32 +513,32 @@ def setupFacial():
 
 def setupVRFacialAttrs():
     for part, targets in VR_TARGETS_INFO.items():
-        pm.addAttr('facial_global_ctrl', ln=part, at='enum', en='---------------:')
-        pm.setAttr('facial_global_ctrl.{}'.format(part), channelBox=True)
+        cmds.addAttr('facial_global_ctrl', longName=part, attributeType='enum', enumName='---------------:')
+        cmds.setAttr('facial_global_ctrl.{}'.format(part), channelBox=True)
         for target in targets:
-            pm.addAttr('facial_global_ctrl', ln=target, at='float', min=0, max=1, keyable=True)
-            pm.addAttr('facial_attrs_out', ln=target, at='float', min=0, max=1, keyable=True)
-            pm.connectAttr('facial_global_ctrl.{}'.format(target), 'facial_attrs_out.{}'.format(target))
+            cmds.addAttr('facial_global_ctrl', longName=target, attributeType='float', min=0, max=1, keyable=True)
+            cmds.addAttr('facial_attrs_out', longName=target, attributeType='float', min=0, max=1, keyable=True)
+            cmds.connectAttr('facial_global_ctrl.{}'.format(target), 'facial_attrs_out.{}'.format(target), force=True)
 
 
 def setupEyelidSDK():
     # Left eyelid SDK
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookUpLeft', v=0, cd='Eye_L.rotateZ', dv=0)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookUpLeft', v=1, cd='Eye_L.rotateZ', dv=-11)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookDownLeft', v=0, cd='Eye_L.rotateZ', dv=0)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookDownLeft', v=1, cd='Eye_L.rotateZ', dv=11)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookInLeft', v=0, cd='Eye_L.rotateY', dv=0)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookInLeft', v=1, cd='Eye_L.rotateY', dv=12)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookOutLeft', v=0, cd='Eye_L.rotateY', dv=0)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookOutLeft', v=1, cd='Eye_L.rotateY', dv=-12)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookUpLeft', value=0, driver='Eye_L.rotateZ', driverValue=0)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookUpLeft', value=1, driver='Eye_L.rotateZ', driverValue=-11)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookDownLeft', value=0, driver='Eye_L.rotateZ', driverValue=0)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookDownLeft', value=1, driver='Eye_L.rotateZ', driverValue=11)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookInLeft', value=0, driver='Eye_L.rotateY', driverValue=0)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookInLeft', value=1, driver='Eye_L.rotateY', driverValue=12)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookOutLeft', value=0, driver='Eye_L.rotateY', driverValue=0)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookOutLeft', value=1, driver='Eye_L.rotateY', driverValue=-12)
 
     # Right eyelid SDK
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookUpRight', v=0, cd='Eye_R.rotateZ', dv=0)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookUpRight', v=1, cd='Eye_R.rotateZ', dv=-11)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookDownRight', v=0, cd='Eye_R.rotateZ', dv=0)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookDownRight', v=1, cd='Eye_R.rotateZ', dv=11)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookInRight', v=0, cd='Eye_R.rotateY', dv=0)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookInRight', v=1, cd='Eye_R.rotateY', dv=-12)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookOutRight', v=0, cd='Eye_R.rotateY', dv=0)
-    pm.setDrivenKeyframe('facial_attrs_out.eyeLookOutRight', v=1, cd='Eye_R.rotateY', dv=12)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookUpRight', value=0, driver='Eye_R.rotateZ', driverValue=0)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookUpRight', value=1, driver='Eye_R.rotateZ', driverValue=-11)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookDownRight', value=0, driver='Eye_R.rotateZ', driverValue=0)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookDownRight', value=1, driver='Eye_R.rotateZ', driverValue=11)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookInRight', value=0, driver='Eye_R.rotateY', driverValue=0)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookInRight', value=1, driver='Eye_R.rotateY', driverValue=-12)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookOutRight', value=0, driver='Eye_R.rotateY', driverValue=0)
+    cmds.setDrivenKeyframe('facial_attrs_out.eyeLookOutRight', value=1, driver='Eye_R.rotateY', driverValue=12)
 # --------------------------------------------------------------------------------------

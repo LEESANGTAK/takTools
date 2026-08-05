@@ -18,7 +18,6 @@ from functools import partial
 
 import maya.cmds as cmds
 import maya.mel as mel
-import pymel.core as pm
 import maya.OpenMaya as OpenMaya
 
 from ..common import tak_lib
@@ -37,9 +36,8 @@ def findMultiAttributeEmptyIndex(node, attribute):
     Returns:
         Available index
     """
-    node = pm.PyNode(node)
     id = 0
-    while node.attr(attribute)[id].isConnected():
+    while cmds.listConnections('{}.{}[{}]'.format(node, attribute, id)):
         id += 1
     return id
 
