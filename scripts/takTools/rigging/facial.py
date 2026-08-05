@@ -6,7 +6,7 @@ This module contain functions for facial setup.
 """
 
 import maya.cmds as cmds
-import pymel.core as pm
+import maya.mel as mel
 import maya.api.OpenMaya as om
 import re
 from ..common import tak_misc
@@ -17,12 +17,12 @@ from ..common import tak_misc
 from takTools.rigging import facial
 reload(facial)
 
-pm.undoInfo(openChunk=True)
+cmds.undoInfo(openChunk=True)
 for grp, targets in facial.ARKIT_TARGETS.items():
-    grp = pm.createNode('transform', n=grp+'_grp')
+    grp = cmds.createNode('transform', n=grp+'_grp')
     facial.createFacialList('src_facial', targets)
-    pm.parent(targets, grp)
-pm.undoInfo(closeChunk=True)
+    cmds.parent(targets, grp)
+cmds.undoInfo(closeChunk=True)
 """
 ARKIT_TARGETS = {
     'brow': [
@@ -87,7 +87,7 @@ def createFacialList(facialGrp, facialList):
 
 # Extract facial targets from rigged geo
 '''
-facialRigGrp = pm.PyNode('rig_face_grp')
+facialRigGrp = 'rig_face_grp'
 targetNameList = ['eyebrow_down', 'eyebrow_up', 'eyebrow_angry', 'eyebrow_sad',
     'eyelid_blink', 'eyelid_smile', 'eyelid_angry', 'eyelid_sad', 'eyelid_big',
     'lip_wide', 'lip_narrow', 'lip_smile', 'lip_frown', 'lip_openSmileBig', 'lip_angryBig']
@@ -97,63 +97,66 @@ increment = 20
 extractFacialTargets(facialRigGrp, targetNameList, startFrame, increment)
 '''
 def extractFacialTargets(facialRigGrp, targetNameList, startFrame, increment):
-    pm.currentTime(startFrame)
+    cmds.currentTime(startFrame)
     for trgName in targetNameList:
-        facialRigGrp.duplicate(n=trgName, renameChildren=True)
-        startFrame+=increment
-        pm.currentTime(startFrame)
+        cmds.duplicate(facialRigGrp, n=trgName, renameChildren=True)
+        startFrame += increment
+        cmds.currentTime(startFrame)
 
 
 def extractFacialTargetsWithCtrl(facialGrp, control, lfRtPrefix=['L', 'R']):
     """
     Args:
-        facialGrp (pymel.nodetypes.transform): Facial group that contain facial expressions
-        control (pymel.nodetypes.transform): Facial control curve
+        facialGrp (str): Facial group that contain facial expressions
+        control (str): Facial control curve name
     """
     lfRtAttrs = []
-    for attr in control.listAttr(keyable=True):
-        if attr.isLocked():
+    keyableAttrs = cmds.listAttr(control, keyable=True) or []
+    for attrName in keyableAttrs:
+        attrFull = '{}.{}'.format(control, attrName)
+        if cmds.getAttr(attrFull, lock=True):
             continue
-        attrPrefix = attr.attrName().split('_')[0]
+        attrPrefix = attrName.split('_')[0]
         if attrPrefix in lfRtPrefix:
-            lfRtAttrs.append(attr.attrName().replace(attrPrefix, ''))
+            lfRtAttrs.append(attrName.replace(attrPrefix, ''))
         else:
-            attr.set(1)
-            facialGrp.duplicate(renameChildren=True, name='{ctrlName}_{attrName}'.format(ctrlName=control.name(), attrName=attr.attrName()))
-            attr.set(0)
+            cmds.setAttr(attrFull, 1)
+            cmds.duplicate(facialGrp, renameChildren=True,
+                           name='{ctrlName}_{attrName}'.format(ctrlName=control, attrName=attrName))
+            cmds.setAttr(attrFull, 0)
 
     for lfRtAttr in list(set(lfRtAttrs)):
         for prefix in lfRtPrefix:
-            control.attr(prefix+lfRtAttr).set(1)
-        facialGrp.duplicate(renameChildren=True, name=control.name()+lfRtAttr)
+            cmds.setAttr('{}.{}'.format(control, prefix + lfRtAttr), 1)
+        cmds.duplicate(facialGrp, renameChildren=True, name=control + lfRtAttr)
         for prefix in lfRtPrefix:
-            control.attr(prefix+lfRtAttr).set(0)
+            cmds.setAttr('{}.{}'.format(control, prefix + lfRtAttr), 0)
 
 
 def extractFacialTargets(blendShape, facialGrp):
-    trgLs = cmds.listAttr(blendShape + '.w', multi = True)
+    trgLs = cmds.listAttr(blendShape + '.w', multi=True)
 
     for trg in trgLs:
         cmds.setAttr(blendShape + '.' + trg, 1)
-        cmds.duplicate(facialGrp, renameChildren = True, n = trg)
+        cmds.duplicate(facialGrp, renameChildren=True, n=trg)
         cmds.setAttr(blendShape + '.' + trg, 0)
 
 
 def connectFacial(facialCtrl, blendshapeNode):
-    facialAttrLs = cmds.listAttr(facialCtrl, keyable = True)
+    facialAttrLs = cmds.listAttr(facialCtrl, keyable=True)
     for facialAttr in facialAttrLs:
         facialBsTrgName = re.sub(r'ctrl', facialAttr, facialCtrl)
 
         if cmds.objExists(blendshapeNode + '.' + facialBsTrgName):
             try:
-                cmds.connectAttr(facialCtrl + '.' + facialAttr, blendshapeNode + '.' + facialBsTrgName, f = True)
+                cmds.connectAttr(facialCtrl + '.' + facialAttr, blendshapeNode + '.' + facialBsTrgName, f=True)
             except:
                 pass
 
         if 'lip' in facialCtrl:
-            if facialAttr in ['a','e', 'i', 'o', 'u']:
+            if facialAttr in ['a', 'e', 'i', 'o', 'u']:
                 try:
-                    cmds.connectAttr(facialCtrl+'.'+facialAttr, blendshapeNode+'.'+facialAttr, f=True)
+                    cmds.connectAttr(facialCtrl + '.' + facialAttr, blendshapeNode + '.' + facialAttr, f=True)
                 except:
                     pass
 
@@ -163,9 +166,9 @@ def connectFacial(facialCtrl, blendshapeNode):
             elif 'lip_R' in facialBsTrgName:
                 facialBsTrgName = re.sub(r'lip_R', 'R_lip', facialBsTrgName)
 
-            if cmds.objExists(blendshapeNode+'.'+facialBsTrgName):
+            if cmds.objExists(blendshapeNode + '.' + facialBsTrgName):
                 try:
-                    cmds.connectAttr(facialCtrl+'.'+facialAttr, blendshapeNode+'.'+facialBsTrgName, f=True)
+                    cmds.connectAttr(facialCtrl + '.' + facialAttr, blendshapeNode + '.' + facialBsTrgName, f=True)
                 except:
                     pass
 
@@ -181,80 +184,89 @@ def createCurveSystem(name, numOfControls):
     """
 
     # Convert edges to curve
-    rawCurve = pm.PyNode(pm.polyToCurve(n=name+'_crv', form=2, degree=1)[0])
+    rawCurve = cmds.polyToCurve(n=name + '_crv', form=2, degree=1)[0]
 
     # Create joints with rawCurve
     jnts = []
-    for cv in rawCurve.cv:
-        pm.select(cl=True)
-        jnts.append(pm.joint(p=cv.getPosition(space='world'), radius=0.25))
+    numCVs = cmds.getAttr('{}.spans'.format(rawCurve)) + cmds.getAttr('{}.degree'.format(rawCurve))
+    for i in range(numCVs):
+        cvPos = cmds.pointPosition('{}.cv[{}]'.format(rawCurve, i), w=True)
+        cmds.select(cl=True)
+        jnt = cmds.joint(p=cvPos, radius=0.25)
+        jnts.append(jnt)
     jnts = renameByPosition(name, jnts)
 
     # Rebuild curve and delete history
-    newCrv = pm.rebuildCurve(rawCurve, spans=numOfControls-3, degree=3)[0]
-    pm.delete(newCrv, ch=True)
+    newCrv = cmds.rebuildCurve(rawCurve, spans=numOfControls - 3, degree=3)[0]
+    cmds.delete(newCrv, ch=True)
 
     # Attach cluster to the curve cvs
-    clusters = [pm.cluster(cv)[1] for cv in newCrv.cv]
+    newCrvNumCVs = cmds.getAttr('{}.spans'.format(newCrv)) + cmds.getAttr('{}.degree'.format(newCrv))
+    clusters = []
+    for i in range(newCrvNumCVs):
+        clst = cmds.cluster('{}.cv[{}]'.format(newCrv, i))[1]
+        clusters.append(clst)
     clusters = renameByPosition(name, clusters, suffix='clst')
     locatorZeroGrps = []
     for clst in clusters:
-        pm.select(clst, r=True)
+        cmds.select(clst, r=True)
         locatorZeroGrps.extend(tak_misc.locGrp())
-        clst.hide()
+        cmds.setAttr('%s.visibility' % clst, False)
 
     # Set mirrored behavior for right side
     for locatorZeroGrp in locatorZeroGrps:
-        locatorZeroGrp = pm.PyNode(locatorZeroGrp)
-        if locatorZeroGrp.tx.get() < 0:
-            clst, locator, autoGrp = pm.listRelatives(locatorZeroGrp, ad=True, type="transform")
-            clst.setParent(w=True)
-            locatorZeroGrp.sx.set(-1)
-            clst.setParent(locator)
+        if cmds.getAttr('%s.tx' % locatorZeroGrp) < 0:
+            children = cmds.listRelatives(locatorZeroGrp, ad=True, type='transform') or []
+            if len(children) >= 3:
+                clst, locator, autoGrp = children[0], children[1], children[2]
+                cmds.parent(clst, world=True)
+                cmds.setAttr('%s.sx' % locatorZeroGrp, -1)
+                cmds.parent(clst, locator)
 
     # Cleanup outliner
-    jntGrp = pm.group(jnts, n=name+'_jnt_grp')
-    locGrp = pm.group(locatorZeroGrps, n=name+'_loc_grp')
-    pm.group(jntGrp, locGrp, newCrv, n=name+'_system_grp')
+    jntGrp = cmds.group(jnts, n=name + '_jnt_grp')
+    locGrp = cmds.group(locatorZeroGrps, n=name + '_loc_grp')
+    cmds.group(jntGrp, locGrp, newCrv, n=name + '_system_grp')
 
 
 def renameByPosition(name, transformList, suffix='bnd_jnt'):
     renamedList = []
 
-    if isinstance(transformList[0], pm.nodetypes.Joint):
+    nodeType = cmds.nodeType(transformList[0])
+    if nodeType == 'joint':
         if '_R' in name:
-            transformList.sort(key=lambda x:x.tx.get(), reverse=True)
+            transformList.sort(key=lambda x: cmds.getAttr('%s.tx' % x), reverse=True)
         else:
-            transformList.sort(key=lambda x:x.tx.get())
+            transformList.sort(key=lambda x: cmds.getAttr('%s.tx' % x))
     else:
         if '_R' in name:
-            transformList.sort(key=lambda x:x.rotatePivotX.get(), reverse=True)
+            transformList.sort(key=lambda x: cmds.getAttr('%s.rotatePivotX' % x), reverse=True)
         else:
-            transformList.sort(key=lambda x:x.rotatePivotX.get())
+            transformList.sort(key=lambda x: cmds.getAttr('%s.rotatePivotX' % x))
 
     for item in transformList:
-        renamedList.append(item.rename('%s_%02d_%s' % (name, transformList.index(item)+1, suffix)))
+        renamedList.append(cmds.rename(item, '%s_%02d_%s' % (name, transformList.index(item) + 1, suffix)))
 
     return renamedList
 
 
 def mirrorXTransform(src, trg):
-    srcMat = src.worldMatrix.get()
-    srcMatX = srcMat[0]
-    srcMatY = srcMat[1]
-    srcMatZ = srcMat[2]
-    srcMatT = srcMat[3]
+    from maya.api import OpenMaya as om
+    mSels = om.MSelectionList()
+    mSels.add(src)
+    dagPath = mSels.getDagPath(0)
+    fnTrsf = om.MFnTransform(dagPath)
+    srcMat = fnTrsf.transformation().asMatrix()
 
-    mirXMat = [
+    mirXMat = om.MMatrix([
         -1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1
-    ]
+    ])
 
-    mirroredMat = srcMat * pm.dt.Matrix(mirXMat)
-    pm.xform(trg, matrix=mirroredMat, ws=True)
-
+    mirroredMat = srcMat * mirXMat
+    cmds.xform(trg, matrix=list(mirroredMat), ws=True)
 
 
 def createProjectedCurve(locators, nurbsSurface, name='projected_crv'):
@@ -263,8 +275,8 @@ def createProjectedCurve(locators, nurbsSurface, name='projected_crv'):
     Locators order will be cv order.
 
     Args:
-        locators (list<transform>): Locator transforms.
-        nurbsSurface (pymel.nodetypes.NurbsSurface): Nurbs surface to project.
+        locators (list<str>): Locator transform names.
+        nurbsSurface (str): Nurbs surface transform name.
         name (str, optional): Curve name. Defaults to 'projected_crv'.
     """
     follicles = []
@@ -272,46 +284,54 @@ def createProjectedCurve(locators, nurbsSurface, name='projected_crv'):
     for locator in locators:
         follicleTransform = createProjectedFollicle(locator, nurbsSurface)
         follicles.append(follicleTransform)
-        positions.append(follicleTransform.getTranslation(space='world'))
+        pos = cmds.xform(follicleTransform, q=True, t=True, ws=True)
+        positions.append(pos)
 
-    curve = pm.curve(d=3, p=positions, n=name)
+    curve = cmds.curve(d=3, p=positions, n=name)
+    curveShape = cmds.listRelatives(curve, shapes=True)[0]
 
-    for follicle in follicles:
-        decMatrix = pm.createNode('decomposeMatrix', n='%s_decMatrix' % follicle.name())
-        follicle.worldMatrix >> decMatrix.inputMatrix
-        decMatrix.outputTranslate >> curve.getShape().controlPoints[follicles.index(follicle)]
+    for i, follicle in enumerate(follicles):
+        decMatrix = cmds.createNode('decomposeMatrix', n='%s_decMatrix' % follicle)
+        cmds.connectAttr('%s.worldMatrix' % follicle, '%s.inputMatrix' % decMatrix, f=True)
+        cmds.connectAttr('%s.outputTranslate' % decMatrix,
+                         '%s.controlPoints[%d]' % (curveShape, i), f=True)
 
     return curve
 
 
 def createProjectedFollicle(locator, nurbsSurface):
-    nurbsSurfaceShape = nurbsSurface.getShape()
+    nurbsSurfaceShape = cmds.listRelatives(nurbsSurface, shapes=True, noIntermediate=True)
+    if nurbsSurfaceShape:
+        nurbsSurfaceShape = nurbsSurfaceShape[0]
+    else:
+        nurbsSurfaceShape = nurbsSurface
+
+    locatorShape = cmds.listRelatives(locator, shapes=True)[0]
 
     # Create nodes
-    closestPointOnSurface = pm.createNode('closestPointOnSurface', n='%s_ClstPntOnSrfc' % locator.name())
-    multiplyDivide = pm.createNode('multiplyDivide', n='%s_munDiv' % locator.name())
-    follicleShape = pm.createNode('follicle', n='%s_follicleShape' % locator.name())
-    follicleTransform = follicleShape.getParent()
+    closestPointOnSurface = cmds.createNode('closestPointOnSurface', n='%s_ClstPntOnSrfc' % locator)
+    multiplyDivide = cmds.createNode('multiplyDivide', n='%s_munDiv' % locator)
+    follicleShape = cmds.createNode('follicle', n='%s_follicleShape' % locator)
+    follicleTransform = cmds.listRelatives(follicleShape, parent=True)[0]
 
     # Connect nodes
-    locator.getShape().worldPosition >> closestPointOnSurface.inPosition
-    nurbsSurfaceShape.worldSpace >> closestPointOnSurface.inputSurface
+    cmds.connectAttr('%s.worldPosition' % locatorShape, '%s.inPosition' % closestPointOnSurface, f=True)
+    cmds.connectAttr('%s.worldSpace' % nurbsSurfaceShape, '%s.inputSurface' % closestPointOnSurface, f=True)
 
-    closestPointOnSurface.parameterU >> multiplyDivide.input1X
-    closestPointOnSurface.parameterV >> multiplyDivide.input1Y
-    nurbsSurfaceShape.minMaxRangeU.maxValueU >> multiplyDivide.input2X
-    nurbsSurfaceShape.minMaxRangeV.maxValueV >> multiplyDivide.input2Y
-    multiplyDivide.operation.set(2)
+    cmds.connectAttr('%s.parameterU' % closestPointOnSurface, '%s.input1X' % multiplyDivide, f=True)
+    cmds.connectAttr('%s.parameterV' % closestPointOnSurface, '%s.input1Y' % multiplyDivide, f=True)
+    cmds.connectAttr('%s.minMaxRangeU' % nurbsSurfaceShape, '%s.input2X' % multiplyDivide, f=True)
+    cmds.connectAttr('%s.minMaxRangeV' % nurbsSurfaceShape, '%s.input2Y' % multiplyDivide, f=True)
+    cmds.setAttr('%s.operation' % multiplyDivide, 2)
 
-    multiplyDivide.outputX >> follicleShape.parameterU
-    multiplyDivide.outputY >> follicleShape.parameterV
-    nurbsSurfaceShape.worldSpace >> follicleShape.inputSurface
+    cmds.connectAttr('%s.outputX' % multiplyDivide, '%s.parameterU' % follicleShape, f=True)
+    cmds.connectAttr('%s.outputY' % multiplyDivide, '%s.parameterV' % follicleShape, f=True)
+    cmds.connectAttr('%s.worldSpace' % nurbsSurfaceShape, '%s.inputSurface' % follicleShape, f=True)
 
-    follicleShape.outTranslate >> follicleTransform.translate
-    follicleShape.outRotate >> follicleTransform.rotate
+    cmds.connectAttr('%s.outTranslate' % follicleShape, '%s.translate' % follicleTransform, f=True)
+    cmds.connectAttr('%s.outRotate' % follicleShape, '%s.rotate' % follicleTransform, f=True)
 
     return follicleTransform
-
 
 
 CURVE = 0
@@ -321,77 +341,83 @@ def createFacialJoint(vertex, curve, surface, positionTo=CURVE):
     Create a joint oriented to surface. Position can be changed with option.
 
     Args:
-        vertex (pymel.nodetypes.Vertex): Source vertex to find closest point on curve.
-        curve (pymel.nodetypes.NurbsCurve): Facial curve.
-        surface (pymel.nodetypes.NurbsSurface): Skull surface.
-        positionTo (str) : Nurbs geometry to attach joint. [CURVE, SURFACE]
+        vertex (str): Source vertex component (e.g. 'mesh.vtx[0]') to find closest point on curve.
+        curve (str): Facial curve transform name.
+        surface (str): Skull surface transform name.
+        positionTo (int): Nurbs geometry to attach joint. [CURVE, SURFACE]
 
     Returns:
-        pymel.nodetypes.Joint: Created joint
+        str: Created joint name
     """
     joint = None
 
+    curveShape = cmds.listRelatives(curve, shapes=True, noIntermediate=True)
+    curveShape = curveShape[0] if curveShape else curve
+
+    surfaceShape = cmds.listRelatives(surface, shapes=True, noIntermediate=True)
+    surfaceShape = surfaceShape[0] if surfaceShape else surface
+
     # Get curve function
     mSels = om.MSelectionList()
-    mSels.add(curve.name())
+    mSels.add(curveShape)
     crvDagPath = mSels.getDagPath(0)
     crvFn = om.MFnNurbsCurve(crvDagPath)
 
     # Get parameter of closest point on curve from vertex
-    vtxPnt = om.MPoint(vertex.getPosition())
+    vtxPos = cmds.pointPosition(vertex, w=True)
+    vtxPnt = om.MPoint(*vtxPos)
     closestPntOnCrvParm = crvFn.closestPoint(vtxPnt, space=om.MSpace.kWorld)[1]
 
     # Create necessary nodes
-    pntOnCrvInfo = pm.createNode('pointOnCurveInfo')
-    closestPntOnSurface = pm.createNode('closestPointOnSurface')
-    normalizeParmDiv = pm.createNode('multiplyDivide')
-    folShape = pm.createNode('follicle')
-    folTrsf = folShape.getParent()
-    joint = pm.createNode('joint', n='%s_jnt' % vertex.name())
+    pntOnCrvInfo = cmds.createNode('pointOnCurveInfo')
+    closestPntOnSurface = cmds.createNode('closestPointOnSurface')
+    normalizeParmDiv = cmds.createNode('multiplyDivide')
+    folShape = cmds.createNode('follicle')
+    folTrsf = cmds.listRelatives(folShape, parent=True)[0]
+    joint = cmds.createNode('joint', n='%s_jnt' % vertex.replace('.', '_').replace('[', '').replace(']', ''))
 
     # Point on curve info connections
-    curve.worldSpace >> pntOnCrvInfo.inputCurve
-    pntOnCrvInfo.parameter.set(closestPntOnCrvParm)
-    # pntOnCrvInfo.turnOnPercentage.set(True)
+    cmds.connectAttr('%s.worldSpace' % curveShape, '%s.inputCurve' % pntOnCrvInfo, f=True)
+    cmds.setAttr('%s.parameter' % pntOnCrvInfo, closestPntOnCrvParm)
 
     # Closest point on surface connections
-    surface.worldSpace >> closestPntOnSurface.inputSurface
-    pntOnCrvInfo.position >> closestPntOnSurface.inPosition
+    cmds.connectAttr('%s.worldSpace' % surfaceShape, '%s.inputSurface' % closestPntOnSurface, f=True)
+    cmds.connectAttr('%s.position' % pntOnCrvInfo, '%s.inPosition' % closestPntOnSurface, f=True)
 
     # Normalize parameterUV of point on surface with nurbs surface parameterUV max value
-    normalizeParmDiv.operation.set(2)
-    closestPntOnSurface.parameterU >> normalizeParmDiv.input1X
-    closestPntOnSurface.parameterV >> normalizeParmDiv.input1Y
-    surface.minMaxRangeU.maxValueU >> normalizeParmDiv.input2X
-    surface.minMaxRangeV.maxValueV >> normalizeParmDiv.input2Y
+    cmds.setAttr('%s.operation' % normalizeParmDiv, 2)
+    cmds.connectAttr('%s.parameterU' % closestPntOnSurface, '%s.input1X' % normalizeParmDiv, f=True)
+    cmds.connectAttr('%s.parameterV' % closestPntOnSurface, '%s.input1Y' % normalizeParmDiv, f=True)
+    cmds.connectAttr('%s.minMaxRangeU' % surfaceShape, '%s.input2X' % normalizeParmDiv, f=True)
+    cmds.connectAttr('%s.minMaxRangeV' % surfaceShape, '%s.input2Y' % normalizeParmDiv, f=True)
 
     # Follicle connections
-    surface.worldSpace >> folShape.inputSurface
-    normalizeParmDiv.outputX >> folShape.parameterU
-    normalizeParmDiv.outputY >> folShape.parameterV
+    cmds.connectAttr('%s.worldSpace' % surfaceShape, '%s.inputSurface' % folShape, f=True)
+    cmds.connectAttr('%s.outputX' % normalizeParmDiv, '%s.parameterU' % folShape, f=True)
+    cmds.connectAttr('%s.outputY' % normalizeParmDiv, '%s.parameterV' % folShape, f=True)
 
     # Follicle transform connections depend on option
     if positionTo == CURVE:
-        pntOnCrvInfo.position >> folTrsf.translate
+        cmds.connectAttr('%s.position' % pntOnCrvInfo, '%s.translate' % folTrsf, f=True)
     elif positionTo == SURFACE:
-        folShape.outTranslate >> folTrsf.translate
-    folShape.outRotate >> folTrsf.rotate
+        cmds.connectAttr('%s.outTranslate' % folShape, '%s.translate' % folTrsf, f=True)
+    cmds.connectAttr('%s.outRotate' % folShape, '%s.rotate' % folTrsf, f=True)
 
     # Parent joint to follicle transform
-    folTrsf | joint
-    joint.translate.set(0, 0, 0)
-    joint.rotate.set(0, 0, 0)
-    joint.scale.set(1, 1, 1)
+    cmds.parent(joint, folTrsf)
+    cmds.setAttr('%s.translate' % joint, 0, 0, 0)
+    cmds.setAttr('%s.rotate' % joint, 0, 0, 0)
+    cmds.setAttr('%s.scale' % joint, 1, 1, 1)
 
     return joint
 
 
 def buildFacialController(controller, railSurface, minVal, maxVal):
     """ Attach controller to nurbs surface to sliding controller. """
-    controller = pm.PyNode(controller)
-    railSurface = pm.PyNode(railSurface)
+    railSurfaceShape = cmds.listRelatives(railSurface, shapes=True, noIntermediate=True)
+    railSurfaceShape = railSurfaceShape[0] if railSurfaceShape else railSurface
 
-    pm.rebuildSurface(
+    cmds.rebuildSurface(
         railSurface,
         rebuildType=0,
         keepRange=0,
@@ -400,386 +426,134 @@ def buildFacialController(controller, railSurface, minVal, maxVal):
         degreeU=3,
         degreeV=1
     )
-    pm.delete(railSurface, ch=True)
+    cmds.delete(railSurface, ch=True)
 
-    pntOnSrfcInfo = pm.createNode('pointOnSurfaceInfo', n='{}_pntOnSrfcInfo'.format(controller))
-    zVecProduct = pm.createNode('vectorProduct', n='{}_zVec'.format(controller))
-    matrixNode = pm.createNode('fourByFourMatrix', n='{}_matrix'.format(controller))
-    decMatrix = pm.createNode('decomposeMatrix', n='{}_decMatrix'.format(controller))
-    anchorGrp = pm.createNode('transform', n='{}_anchor'.format(controller))
-    revGrp = pm.createNode('transform', n='{}_rev'.format(controller))
-    revMul = pm.createNode('multiplyDivide', n='{}_rev_mul'.format(controller))
+    pntOnSrfcInfo = cmds.createNode('pointOnSurfaceInfo', n='{}_pntOnSrfcInfo'.format(controller))
+    zVecProduct = cmds.createNode('vectorProduct', n='{}_zVec'.format(controller))
+    matrixNode = cmds.createNode('fourByFourMatrix', n='{}_matrix'.format(controller))
+    decMatrix = cmds.createNode('decomposeMatrix', n='{}_decMatrix'.format(controller))
+    anchorGrp = cmds.createNode('transform', n='{}_anchor'.format(controller))
+    revGrp = cmds.createNode('transform', n='{}_rev'.format(controller))
+    revMul = cmds.createNode('multiplyDivide', n='{}_rev_mul'.format(controller))
 
-    controller.setLimit('translateMinX', minVal)
-    controller.setLimit('translateMaxX', maxVal)
+    cmds.transformLimits(controller, tx=(minVal, maxVal), etx=(True, True))
 
-    pntOnSrfcInfo.parameterV.set(0.5)
-    zVecProduct.operation.set(2)
-    zVecProduct.normalizeOutput.set(True)
-    revMul.input2X.set(-1.0)
-    revMul.input2Y.set(-1.0)
-    revMul.input2Z.set(-1.0)
+    cmds.setAttr('%s.parameterV' % pntOnSrfcInfo, 0.5)
+    cmds.setAttr('%s.operation' % zVecProduct, 2)
+    cmds.setAttr('%s.normalizeOutput' % zVecProduct, True)
+    cmds.setAttr('%s.input2X' % revMul, -1.0)
+    cmds.setAttr('%s.input2Y' % revMul, -1.0)
+    cmds.setAttr('%s.input2Z' % revMul, -1.0)
 
-    pm.parent(controller, revGrp)
-    pm.parent(revGrp, anchorGrp)
+    cmds.parent(controller, revGrp)
+    cmds.parent(revGrp, anchorGrp)
 
     if minVal < 0:
-        txRemap = pm.createNode('remapValue', n='{}_tx_remap'.format(controller))
-        txRemap.inputMin.set(minVal)
-        txRemap.inputMax.set(maxVal)
+        txRemap = cmds.createNode('remapValue', n='{}_tx_remap'.format(controller))
+        cmds.setAttr('%s.inputMin' % txRemap, minVal)
+        cmds.setAttr('%s.inputMax' % txRemap, maxVal)
 
-        zeroToNegOneRemap = pm.createNode('remapValue', n='{}_zeroToNegOne_remap'.format(controller))
-        zeroToNegOneRemap.inputMin.set(0)
-        zeroToNegOneRemap.inputMax.set(minVal)
+        zeroToNegOneRemap = cmds.createNode('remapValue', n='{}_zeroToNegOne_remap'.format(controller))
+        cmds.setAttr('%s.inputMin' % zeroToNegOneRemap, 0)
+        cmds.setAttr('%s.inputMax' % zeroToNegOneRemap, minVal)
 
-        controller.tx >> txRemap.inputValue
-        controller.tx >> zeroToNegOneRemap.inputValue
-        txRemap.outValue >> pntOnSrfcInfo.parameterU
+        cmds.connectAttr('%s.tx' % controller, '%s.inputValue' % txRemap, f=True)
+        cmds.connectAttr('%s.tx' % controller, '%s.inputValue' % zeroToNegOneRemap, f=True)
+        cmds.connectAttr('%s.outValue' % txRemap, '%s.parameterU' % pntOnSrfcInfo, f=True)
     else:
-        controller.tx >> pntOnSrfcInfo.parameterU
+        cmds.connectAttr('%s.tx' % controller, '%s.parameterU' % pntOnSrfcInfo, f=True)
 
-    railSurface.worldSpace >> pntOnSrfcInfo.inputSurface
+    cmds.connectAttr('%s.worldSpace' % railSurfaceShape, '%s.inputSurface' % pntOnSrfcInfo, f=True)
 
-    pntOnSrfcInfo.normalizedNormal >> zVecProduct.input1
-    pntOnSrfcInfo.normalizedTangentU >> zVecProduct.input2
+    cmds.connectAttr('%s.normalizedNormal' % pntOnSrfcInfo, '%s.input1' % zVecProduct, f=True)
+    cmds.connectAttr('%s.normalizedTangentU' % pntOnSrfcInfo, '%s.input2' % zVecProduct, f=True)
 
-    pntOnSrfcInfo.normalizedTangentUX >> matrixNode.in00
-    pntOnSrfcInfo.normalizedTangentUY >> matrixNode.in01
-    pntOnSrfcInfo.normalizedTangentUZ >> matrixNode.in02
-    zVecProduct.outputX >> matrixNode.in10
-    zVecProduct.outputY >> matrixNode.in11
-    zVecProduct.outputZ >> matrixNode.in12
-    pntOnSrfcInfo.normalizedNormalX >> matrixNode.in20
-    pntOnSrfcInfo.normalizedNormalY >> matrixNode.in21
-    pntOnSrfcInfo.normalizedNormalZ >> matrixNode.in22
-    pntOnSrfcInfo.positionX >> matrixNode.in30
-    pntOnSrfcInfo.positionY >> matrixNode.in31
-    pntOnSrfcInfo.positionZ >> matrixNode.in32
+    cmds.connectAttr('%s.normalizedTangentUX' % pntOnSrfcInfo, '%s.in00' % matrixNode, f=True)
+    cmds.connectAttr('%s.normalizedTangentUY' % pntOnSrfcInfo, '%s.in01' % matrixNode, f=True)
+    cmds.connectAttr('%s.normalizedTangentUZ' % pntOnSrfcInfo, '%s.in02' % matrixNode, f=True)
+    cmds.connectAttr('%s.outputX' % zVecProduct, '%s.in10' % matrixNode, f=True)
+    cmds.connectAttr('%s.outputY' % zVecProduct, '%s.in11' % matrixNode, f=True)
+    cmds.connectAttr('%s.outputZ' % zVecProduct, '%s.in12' % matrixNode, f=True)
+    cmds.connectAttr('%s.normalizedNormalX' % pntOnSrfcInfo, '%s.in20' % matrixNode, f=True)
+    cmds.connectAttr('%s.normalizedNormalY' % pntOnSrfcInfo, '%s.in21' % matrixNode, f=True)
+    cmds.connectAttr('%s.normalizedNormalZ' % pntOnSrfcInfo, '%s.in22' % matrixNode, f=True)
+    cmds.connectAttr('%s.positionX' % pntOnSrfcInfo, '%s.in30' % matrixNode, f=True)
+    cmds.connectAttr('%s.positionY' % pntOnSrfcInfo, '%s.in31' % matrixNode, f=True)
+    cmds.connectAttr('%s.positionZ' % pntOnSrfcInfo, '%s.in32' % matrixNode, f=True)
 
-    matrixNode.output >> decMatrix.inputMatrix
+    cmds.connectAttr('%s.output' % matrixNode, '%s.inputMatrix' % decMatrix, f=True)
 
-    decMatrix.outputTranslate >> anchorGrp.translate
-    decMatrix.outputRotate >> anchorGrp.rotate
+    cmds.connectAttr('%s.outputTranslate' % decMatrix, '%s.translate' % anchorGrp, f=True)
+    cmds.connectAttr('%s.outputRotate' % decMatrix, '%s.rotate' % anchorGrp, f=True)
 
-    controller.translate >> revMul.input1
-    revMul.output >> revGrp.translate
+    cmds.connectAttr('%s.translate' % controller, '%s.input1' % revMul, f=True)
+    cmds.connectAttr('%s.output' % revMul, '%s.translate' % revGrp, f=True)
 
 
 def buildZipperLip(vertices):
     __createJoints(vertices)
 
 def __createJoints(vertices):
-    skinClst = pm.mel.eval('findRelatedSkinCluster "%s";' % vertices[0].node())
-    infs = pm.skinCluster(skinClst, q=True, inf=True)
+    skinClst = mel.eval('findRelatedSkinCluster "%s";' % vertices[0].split('.')[0])
+    infs = cmds.skinCluster(skinClst, q=True, inf=True)
 
     for vtx in vertices:
-        jnt = pm.createNode('joint', n=vtx.name()+'zip_jnt')
-        jnt.setTranslation(vtx.getPosition())
+        vtxPos = cmds.pointPosition(vtx, w=True)
+        jnt = cmds.createNode('joint', n=vtx.replace('.', '_').replace('[', '').replace(']', '') + 'zip_jnt')
+        cmds.setAttr('%s.translate' % jnt, *vtxPos)
         for inf in infs:
-            weight = round(pm.skinPercent(skinClst, vtx, q=True, transform=inf), 10)
+            weight = round(cmds.skinPercent(skinClst, vtx, q=True, transform=inf), 10)
             if weight > 0.0:
-                pm.pointConstraint(inf, jnt, mo=True, w=weight)
+                cmds.pointConstraint(inf, jnt, mo=True, w=weight)
 
 
 def connectFACS(facsOut, blendShape, shader):
-    fOut = pm.PyNode(facsOut)
-    bs = pm.PyNode(blendShape)
-    shader = pm.PyNode(shader)
-
-    actionCodings = fOut.listAttr(ud=True)
+    actionCodings = cmds.listAttr(facsOut, ud=True) or []
     for ac in actionCodings:
         try:
-            ac >> bs.attr(ac.longName())
+            cmds.connectAttr('%s.%s' % (facsOut, ac), '%s.%s' % (blendShape, ac), f=True)
         except:
             pass
 
     # Wrinkle map 0
-    fOut.browOuterUpLeft >> shader.wrinkleMap0_WrinkleGroup0X
-    fOut.browOuterUpRight >> shader.wrinkleMap0_WrinkleGroup0Y
-    fOut.browInnerUpLeft >> shader.wrinkleMap0_WrinkleGroup0Z
-    fOut.browInnerUpRight >> shader.wrinkleMap0_WrinkleGroup0W
+    cmds.connectAttr('%s.browOuterUpLeft' % facsOut, '%s.wrinkleMap0_WrinkleGroup0X' % shader, f=True)
+    cmds.connectAttr('%s.browOuterUpRight' % facsOut, '%s.wrinkleMap0_WrinkleGroup0Y' % shader, f=True)
+    cmds.connectAttr('%s.browInnerUpLeft' % facsOut, '%s.wrinkleMap0_WrinkleGroup0Z' % shader, f=True)
+    cmds.connectAttr('%s.browInnerUpRight' % facsOut, '%s.wrinkleMap0_WrinkleGroup0W' % shader, f=True)
 
-    fOut.cheekSquintLeft >> shader.wrinkleMap0_WrinkleGroup1X
-    fOut.cheekSquintRight >> shader.wrinkleMap0_WrinkleGroup1Y
-    # fOut. >> shader.wrinkleMap0_WrinkleGroup1Z
-    # fOut. >> shader.wrinkleMap0_WrinkleGroup1W
+    cmds.connectAttr('%s.cheekSquintLeft' % facsOut, '%s.wrinkleMap0_WrinkleGroup1X' % shader, f=True)
+    cmds.connectAttr('%s.cheekSquintRight' % facsOut, '%s.wrinkleMap0_WrinkleGroup1Y' % shader, f=True)
 
-    fOut.mouthSmileLeft >> shader.wrinkleMap0_WrinkleGroup2X
-    fOut.mouthSmileRight >> shader.wrinkleMap0_WrinkleGroup2Y
-    fOut.neckTensionLeft >> shader.wrinkleMap0_WrinkleGroup2Z
-    fOut.neckTensionRight >> shader.wrinkleMap0_WrinkleGroup2W
+    cmds.connectAttr('%s.mouthSmileLeft' % facsOut, '%s.wrinkleMap0_WrinkleGroup2X' % shader, f=True)
+    cmds.connectAttr('%s.mouthSmileRight' % facsOut, '%s.wrinkleMap0_WrinkleGroup2Y' % shader, f=True)
+    cmds.connectAttr('%s.neckTensionLeft' % facsOut, '%s.wrinkleMap0_WrinkleGroup2Z' % shader, f=True)
+    cmds.connectAttr('%s.neckTensionRight' % facsOut, '%s.wrinkleMap0_WrinkleGroup2W' % shader, f=True)
 
     # Wrinkle map 1
-    # fOut. >> shader.wrinkleMap1_WrinkleGroup0X
-    # fOut. >> shader.wrinkleMap1_WrinkleGroup0Y
-    # fOut. >> shader.wrinkleMap1_WrinkleGroup0Z
-    # fOut. >> shader.wrinkleMap1_WrinkleGroup0W
+    cmds.connectAttr('%s.noseSneerLeft' % facsOut, '%s.wrinkleMap1_WrinkleGroup1X' % shader, f=True)
+    cmds.connectAttr('%s.noseSneerRight' % facsOut, '%s.wrinkleMap1_WrinkleGroup1Y' % shader, f=True)
 
-    fOut.noseSneerLeft >> shader.wrinkleMap1_WrinkleGroup1X
-    fOut.noseSneerRight >> shader.wrinkleMap1_WrinkleGroup1Y
-    # fOut. >> shader.wrinkleMap1_WrinkleGroup1Z
-    # fOut. >> shader.wrinkleMap1_WrinkleGroup1W
-
-    fOut.mouthStretchLeft >> shader.wrinkleMap1_WrinkleGroup2X
-    fOut.mouthStretchRight >> shader.wrinkleMap1_WrinkleGroup2Y
-    fOut.mouthPuckerLeft >> shader.wrinkleMap1_WrinkleGroup2Z
-    fOut.mouthPuckerRight >> shader.wrinkleMap1_WrinkleGroup2W
+    cmds.connectAttr('%s.mouthStretchLeft' % facsOut, '%s.wrinkleMap1_WrinkleGroup2X' % shader, f=True)
+    cmds.connectAttr('%s.mouthStretchRight' % facsOut, '%s.wrinkleMap1_WrinkleGroup2Y' % shader, f=True)
+    cmds.connectAttr('%s.mouthPuckerLeft' % facsOut, '%s.wrinkleMap1_WrinkleGroup2Z' % shader, f=True)
+    cmds.connectAttr('%s.mouthPuckerRight' % facsOut, '%s.wrinkleMap1_WrinkleGroup2W' % shader, f=True)
 
     # Wrinkle map 2
-    fOut.browDownLeft >> shader.wrinkleMap2_WrinkleGroup0X
-    fOut.browDownRight >> shader.wrinkleMap2_WrinkleGroup0Y
-    # fOut. >> shader.wrinkleMap2_WrinkleGroup0Z
-    # fOut. >> shader.wrinkleMap2_WrinkleGroup0W
+    cmds.connectAttr('%s.browDownLeft' % facsOut, '%s.wrinkleMap2_WrinkleGroup0X' % shader, f=True)
+    cmds.connectAttr('%s.browDownRight' % facsOut, '%s.wrinkleMap2_WrinkleGroup0Y' % shader, f=True)
 
-    fOut.eyeSquintLeft >> shader.wrinkleMap2_WrinkleGroup1X
-    fOut.eyeSquintRight >> shader.wrinkleMap2_WrinkleGroup1Y
-    fOut.mouthUpperShrugLeft >> shader.wrinkleMap2_WrinkleGroup1Z
-    fOut.mouthUpperShrugRight >> shader.wrinkleMap2_WrinkleGroup1W
+    cmds.connectAttr('%s.eyeSquintLeft' % facsOut, '%s.wrinkleMap2_WrinkleGroup1X' % shader, f=True)
+    cmds.connectAttr('%s.eyeSquintRight' % facsOut, '%s.wrinkleMap2_WrinkleGroup1Y' % shader, f=True)
+    cmds.connectAttr('%s.mouthUpperShrugLeft' % facsOut, '%s.wrinkleMap2_WrinkleGroup1Z' % shader, f=True)
+    cmds.connectAttr('%s.mouthUpperShrugRight' % facsOut, '%s.wrinkleMap2_WrinkleGroup1W' % shader, f=True)
 
-    fOut.mouthFrownLeft >> shader.wrinkleMap2_WrinkleGroup2X
-    fOut.mouthFrownRight >> shader.wrinkleMap2_WrinkleGroup2Y
-    fOut.mouthLowerShrugLeft >> shader.wrinkleMap2_WrinkleGroup2Z
-    fOut.mouthLowerShrugRight >> shader.wrinkleMap2_WrinkleGroup2W
+    cmds.connectAttr('%s.mouthFrownLeft' % facsOut, '%s.wrinkleMap2_WrinkleGroup2X' % shader, f=True)
+    cmds.connectAttr('%s.mouthFrownRight' % facsOut, '%s.wrinkleMap2_WrinkleGroup2Y' % shader, f=True)
+    cmds.connectAttr('%s.mouthLowerShrugLeft' % facsOut, '%s.wrinkleMap2_WrinkleGroup2Z' % shader, f=True)
+    cmds.connectAttr('%s.mouthLowerShrugRight' % facsOut, '%s.wrinkleMap2_WrinkleGroup2W' % shader, f=True)
 
 
 def setROMPose(numPose=50):
     for i in range(numPose):
-        pm.env.time = i * 10
-        pm.setKeyframe()
-
-
-# -----------------------------------------
-# Metahuman Facial retargeting
-# -----------------------------------------
-
-if __name__ == '__main__':
-    # Create skin joint
-    pm.undoInfo(openChunk=True)
-    skJnts = []
-    for outJnt in pm.selected():
-        skJnt = pm.duplicate(outJnt, n=outJnt.replace('_out', ''))[0]
-        skJntParent = pm.PyNode(outJnt.getParent().replace('_out', ''))
-        skJntParent | skJnt
-        outJnt.translate >> skJnt.translate
-        outJnt.rotate >> skJnt.rotate
-        outJnt.scale >> skJnt.scale
-        skJnts.append(skJnt)
-    pm.select(skJnts, r=True)
-    pm.undoInfo(closeChunk=True)
-
-
-    # Connect to existing target shape
-    bsOut = pm.PyNode('bs_out')
-    deltaBS = pm.PyNode('deltaBlendshape5')
-    for attr in bsOut.listAttr(ud=True, keyable=True):
-        exprName = attr.attrName()
-        if deltaBS.hasAttr(exprName):
-            attr >> deltaBS.attr(exprName)
-
-
-    ### Joint Based Facial Rigging ###
-
-    # Eyelid ikh locator align #
-    import pymel.core as pm
-
-    eyelidLocs = pm.ls(sl=True)
-    for loc in eyelidLocs:
-
-        ikh = loc.getChildren(type='ikHandle')[0]
-        ikh.setParent(w=True)
-
-        locZeroGrp = loc.getParent(generations=2)
-        locZeroGrp.rotate.set(0,0,0)
-
-        if 'lower' in loc.name():
-           locZeroGrp.scaleY.set(-1)
-
-        if 'R_' in loc.name():
-            locZeroGrp.scaleX.set(-1)
-
-        ikh.setParent(loc)
-
-    # Locator zero group scaleX set to -1 #
-    locators = pm.ls(sl=True)
-    for locator in locators:
-        locChild = locator.getChildren(type='transform')[0]
-        locChild.setParent(world=True)
-
-        zeroGrpName = '%s_zero' % locator.name()
-        pm.setAttr('%s.scaleX' % zeroGrpName, -1)
-
-        locChild.setParent(locator)
-
-
-    # Mirror zero group #
-    zeroGrps = pm.ls(sl=True)
-    searchStr = 'lf_'
-    replaceStr = 'R_'
-
-    for zeroGrp in zeroGrps:
-        zeroGrpTrans = zeroGrp.getTranslation()
-        zeroGrpRotation = zeroGrp.getRotation()
-        zeroGrpScale = zeroGrp.getScale()
-
-        otherSideZeroGrpName = zeroGrp.replace(searchStr, replaceStr)
-        otherSideZeroGrp = pm.PyNode(otherSideZeroGrpName)
-
-        otherSideZeroGrp.setTranslation([-zeroGrpTrans.x, zeroGrpTrans.y, zeroGrpTrans.z])
-        otherSideZeroGrp.setRotation([zeroGrpRotation.x, -zeroGrpRotation.y, -zeroGrpRotation.z])
-        otherSideZeroGrp.setScale([zeroGrpScale[0], zeroGrpScale[1], zeroGrpScale[2]])
-
-    ### Facial Secondary ###
-
-    # Eyelid #
-    import pymel.core as pm
-    from takTools.common import tak_misc
-
-    # Normal eyelid
-    selJnts = pm.selected()
-    for jnt in selJnts:
-        name = jnt.getChildren()[0].rsplit('_jnt')[0]
-
-        ikh = pm.ikHandle(sj=jnt, ee=jnt.getChildren()[0], solver='ikSCsolver', n=name+'_ikh')[0]
-        ikhWsPos = pm.xform(ikh, q=True, ws=True, t=True)
-
-        loc = pm.spaceLocator(n=name+'_loc')
-        loc.translate.set(ikhWsPos)
-        ikh.setParent(loc)
-        tak_misc.doGroup(loc.name(), '_zero')
-        tak_misc.doGroup(loc.name(), '_auto')
-
-    # Zipper Lip #
-    import pymel.core as pm
-
-    # Distribute constraint weight #
-    selJnts = sorted(pm.ls(sl=True), reverse=True)
-    segment = len(selJnts)-1
-    fullWeight = 1.0
-    increment = fullWeight/len(selJnts)
-
-    weight = 1
-    for jnt in selJnts:
-        weight -= increment
-        parentConstraintNode = jnt.getChildren()[0]
-        parentConstraintNode.jaw_lockW0.set(weight*weight)
-
-
-    # Zipper Lip Joints rampValuesNode Set Up #
-    import pymel.core as pm
-    jnts = pm.selected()
-
-    driverJnts = ['jaw_ctrl', 'jaw_lock_jnt']
-    drivenAttr = 'jaw_ctrlW1'
-
-    rampValsNode = pm.createNode('rampValuesNode')
-    rampValsNode.inValue.set(1.0)
-    rampValsNode.numSamples.set(len(jnts))
-    rampValsNode.ramp01[0].ramp01_Interp.set(3)
-    rampValsNode.ramp01[0].ramp01_Position.set(0)
-    rampValsNode.ramp01[0].ramp01_FloatValue.set(0)
-    rampValsNode.ramp01[1].ramp01_Interp.set(3)
-    rampValsNode.ramp01[1].ramp01_Position.set(0.6)
-    rampValsNode.ramp01[1].ramp01_FloatValue.set(0.4)
-    rampValsNode.ramp01[2].ramp01_Interp.set(3)
-    rampValsNode.ramp01[2].ramp01_Position.set(1.0)
-    rampValsNode.ramp01[2].ramp01_FloatValue.set(1.0)
-
-    for jnt in jnts:
-        parentConst = pm.parentConstraint(driverJnts, jnt, mo=True)
-        rampValsNode.outValues[jnts.index(jnt)] >> parentConst.attr(drivenAttr)
-
-    # Copy left constraint weight to right #
-    selJnts = pm.ls(sl=True)
-    for jnt in selJnts:
-        parentConstraintNode = jnt.getChildren()[0]
-        weightList = parentConstraintNode.getWeightAliasList()
-        for weight in weightList:
-            val = weight.get()
-            oppositeWeight = pm.PyNode(weight.name().replace('lf_', 'R_'))
-            oppositeWeight.set(val)
-
-    # Distribute SDK End Value #
-    zipperLipJnts = pm.selected()
-    zipperLipJnts.sort(key=lambda x:x.tx.get(), reverse=True)
-    maxValue = 10.0
-    increment = maxValue / len(zipperLipJnts)
-    endValue = 0
-    for jnt in zipperLipJnts:
-        parentConst = jnt.getChildren(type='parentConstraint')[0]
-        weightList = parentConst.getWeightAliasList()
-        for weight in weightList:
-            animCurve = weight.connections(type='animCurve')[0]
-            animCurve.setUnitlessInput(1, endValue)
-        endValue += increment
-
-    # Create corner locator
-    locName = 'lf_outerEyelid_clst_loc'
-
-    sels = pm.selected()
-
-    loc = pm.spaceLocator(n=locName)
-
-    translate = pm.xform(sels[0], q=True, t=True, ws=True)
-    scale = sels[0].scale.get()
-    pm.xform(loc, t=translate, ws=True)
-    loc.scale.set(scale)
-
-    tak_misc.doGroup(str(loc), '_zero')
-    tak_misc.doGroup(str(loc), '_auto')
-
-    pm.parent(sels, loc)
-    pm.hide(sels)
-
-    # Replace tertiary facial control attaching mesh #
-    newAttachMesh = pm.PyNode('lod02_face')
-    tertiaryCtrls = pm.selected()
-    attachedMesh = tertiaryCtrls[0].getParent(3).translate.connections(destination=False, type='transform')[0].translate.listConnections(destination=False, type='follicle')[0].inputMesh.listConnections(type='mesh', shapes=True)[0]
-    for fol in attachedMesh.worldMesh[0].connections(source=False, type='follicle', shapes=True):
-        newAttachMesh.getShape().worldMesh[0] >> fol.inputMesh
-
-    # point on poly constraint method
-    newAttachMesh = pm.PyNode('lod02_face')
-    tertiaryCtrls = pm.selected()
-    attachedMesh = tertiaryCtrls[0].getParent(2).translateX.connections(destination=False, type='pointOnPolyConstraint')[0].target.listConnections(type='mesh', shapes=True)[0]
-    for pntOnPolyCnst in attachedMesh.worldMesh[0].connections(source=False, type='pointOnPolyConstraint', shapes=True):
-        newAttachMesh.getShape().worldMesh[0] >> pntOnPolyCnst.target[0].targetMesh
-
-    # Set left target's rampBlendShape.weight[2]
-    lfRampBSList = [meshTrsf.getShape().inMesh.connections()[0] for meshTrsf in pm.selected() if meshTrsf.getShape().inMesh.connections()]
-    for rampBS in lfRampBSList:
-        rampBS.weightCurveRamp[2].weightCurveRamp_FloatValue.set(1.0)
-
-
-    for sel in pm.selected():
-        pntOnCrvInfo = sel.connections(type='pointOnCurveInfo', d=False)[0]
-        decMtrx = sel.connections(type='decomposeMatrix', s=False)[0]
-        closestPntOnSrfc = decMtrx.connections(type='closestPointOnSurface', s=False)[0]
-
-        pntOnCrvInfo.position >> closestPntOnSrfc.inPosition
-
-        pm.delete(sel)
-
-
-    # Create curve on surface
-    locators = pm.selected()
-    surface = pm.PyNode('eyeball_R_surface')
-    createProjectedCurve(locators, surface, name='lowEyelid_R_crv')
-
-    # Create facial joints
-    vertices = pm.selected(fl=True)
-    name = 'lowEyelid_R'
-    curve = pm.PyNode('%s_crv' % name)
-    surface = pm.PyNode('eyeball_R_surface')
-    i=1
-    for vtx in vertices:
-        createFacialJoint(vtx, curve, surface, name='%s_%02d_jnt' % (name, i), positionTo='surface')
-        i += 1
-
-
-    # Match surface cvs
-    import takRiggingToolkit as trt
-
-    source = pm.PyNode('eyeball_L_surface')
-    target = pm.PyNode('eyeball_R_surface')
-    trt.utils.general.matchSurfaceCVs(source, target, mirror=True)
-
+        cmds.currentTime(i * 10)
+        cmds.setKeyframe()

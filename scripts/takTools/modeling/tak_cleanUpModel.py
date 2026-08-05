@@ -22,7 +22,6 @@ import shutil
 from functools import partial
 from ..utils import mesh as meshUtil; reload(meshUtil)
 
-import pymel.core as pm
 import maya.mel as mel
 import maya.cmds as cmds
 from maya.api import OpenMaya as om
@@ -211,18 +210,18 @@ def utnDoubClicCmd(*args):
 
 
 def autoUniqName(*args):
-    sels = pm.selected()
+    sels = cmds.ls(sl=True)
     if sels:
-        notUniqueNodes = [node for node in sels if '|' in node.name()]
+        notUniqueNodes = [node for node in sels if '|' in node]
     else:
-        notUniqueNodes = [node for node in pm.ls() if '|' in node.name()]
+        notUniqueNodes = [node for node in cmds.ls() if '|' in node]
 
     newNameInfo = {}
     for node in notUniqueNodes:
         newNameInfo[node] = node.replace('|', '_')
 
     for node, newName in newNameInfo.items():
-        node.rename(newName)
+        cmds.rename(node, newName)
 
 def matchShape(*args):
     selList = cmds.ls(sl = True, type = 'transform')
@@ -248,9 +247,9 @@ def matchShape(*args):
 # Geometry error check related functions
 # --------------------------------------------------------
 def findOverlappedRootCurve(*args):
-    sels = pm.selected()
-    crvs = pm.filterExpand(sels, sm=9) or []
-    guides = pm.filterExpand(sels, sm=12) or []
+    sels = cmds.ls(sl=True)
+    crvs = cmds.filterExpand(sels, sm=9) or []
+    guides = cmds.filterExpand(sels, sm=12) or []
     objects = crvs + guides
 
     rootCvs = ["{}.cv[0]".format(crv) for crv in crvs]
@@ -265,45 +264,42 @@ def findOverlappedRootCurve(*args):
             continue
         checkedObjs.append(objects[i])
 
-        iCpntPos = pm.pointPosition(rootCpnts[i], w=True)
+        iCpntPos = om.MPoint(*cmds.pointPosition(rootCpnts[i], w=True))
         for otherCpnt in rootCpnts[i+1:]:
-            otherCpntPos = pm.pointPosition(otherCpnt, w=True)
-            if (otherCpntPos - iCpntPos).length() <= thresholds:
+            otherCpntPos = om.MPoint(*cmds.pointPosition(otherCpnt, w=True))
+            diff = otherCpntPos - iCpntPos
+            if om.MVector(diff.x, diff.y, diff.z).length() <= thresholds:
                 otherObj = objects[rootCpnts.index(otherCpnt)]
                 stackedObjects.extend([objects[i], otherObj])
                 checkedObjs.append(otherObj)
 
-    pm.select(stackedObjects, r=True)
+    cmds.select(stackedObjects, r=True)
 
 
 def checkUVSets(*args):
     DEFAULT_UV_SET_NAME = 'map1'
     errorMeshes = []
 
-    for sel in pm.selected():
-        uvSets = sel.getUVSetNames()
+    for sel in cmds.ls(sl=True):
+        uvSets = cmds.polyUVSet(sel, q=True, allUVSets=True) or []
         if len(uvSets) > 1:
             errorMeshes.append(sel)
         elif len(uvSets) == 1 and DEFAULT_UV_SET_NAME != uvSets[0]:
-            pm.polyUVSet(rename=True, newUVSet=DEFAULT_UV_SET_NAME, uvSet=uvSets[0])
+            cmds.polyUVSet(sel, rename=True, newUVSet=DEFAULT_UV_SET_NAME, uvSet=uvSets[0])
             print('UV Set "{}" in {} has been renamed to "{}".'.format(uvSets[0], sel, DEFAULT_UV_SET_NAME))
     if errorMeshes:
-        pm.warning('{errorMeshes} are have more than one UV Set.'.format(errorMeshes=str(errorMeshes)))
-        pm.mel.uvSetEditor()
+        cmds.warning('{errorMeshes} are have more than one UV Set.'.format(errorMeshes=str(errorMeshes)))
+        mel.eval('uvSetEditor')
 
 
-def moveToOrigin(*args):
-    meshes = pm.selected()
-    for mesh in meshes:
-        meshUtil.moveToOrigin(mesh.name())
+
 
 
 def setTangentSapceLeftHanded(*args):
-    for obj in pm.selected():
-        meshes = obj.getChildren(type='mesh', ni=True)
-        if meshes:
-            for mesh in meshes:
-                mesh.tangentSpace.set(2)
+    for obj in cmds.ls(sl=True):
+        meshes = cmds.listRelatives(obj, children=True, type='mesh', noIntermediate=True) or []
+        for mesh in meshes:
+            cmds.setAttr('%s.tangentSpace' % mesh, 2)
 
 
 
@@ -410,10 +406,10 @@ def findMirrorVtx(mirrorPoint, vtxList, searchTolerance):
 
 
 def zeroVtx(*args):
-    vtxs = pm.selected(fl=True)
+    vtxs = cmds.ls(sl=True, fl=True)
     for vtx in vtxs:
-        vtxPos = vtx.getPosition(space='world')
-        vtx.setPosition((0, vtxPos[1], vtxPos[2]), space='world')
+        vtxPos = cmds.pointPosition(vtx, w=True)
+        cmds.xform(vtx, ws=True, t=(0, vtxPos[1], vtxPos[2]))
 
 
 def makeSym(*args):
@@ -559,7 +555,7 @@ def combineObjByMat(*args):
 
 
 def deleteUnusedMaterials(*args):
-    pm.mel.hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes")
+    mel.eval('hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes")')
 
 
 def getMatLs(objLs):
@@ -599,49 +595,69 @@ def getTrsfLs(selLs):
 
 
 def reAssignMatToObj(*args):
-    sels = pm.selected()
+    sels = cmds.ls(sl=True)
     for sel in sels:
-        shadingEngine = sel.getShape().connections(type='shadingEngine', s=False)[0]
-        mat = shadingEngine.surfaceShader.connections(d=False)[0]
-        pm.delete(shadingEngine)
-        pm.select(sel, r=True)
-        pm.hyperShade(assign=mat)
+        shape = cmds.listRelatives(sel, shapes=True, fullPath=True)
+        if not shape:
+            continue
+        shadingEngines = cmds.listConnections(shape[0], type='shadingEngine', s=False) or []
+        if not shadingEngines:
+            continue
+        shadingEngine = shadingEngines[0]
+        mats = cmds.ls(cmds.listConnections('%s.surfaceShader' % shadingEngine, d=False) or [], materials=True)
+        if not mats:
+            continue
+        mat = mats[0]
+        cmds.delete(shadingEngine)
+        cmds.select(sel, r=True)
+        cmds.hyperShade(assign=mat)
 
 
 def showPackageTexturesUI(*args):
-    pm.window('packageTexturesUI', title='Package Textures', mnb=False, mxb=False)
-    pm.columnLayout(adj=True)
-    pm.textFieldButtonGrp('textureDir', label='Texture Directory:', bl='<<', bc=getTextureDir)
-    pm.button(label='Apply', c=packageTextures)
-    pm.showWindow()
+    if cmds.window('packageTexturesUI', exists=True):
+        cmds.deleteUI('packageTexturesUI')
+    cmds.window('packageTexturesUI', title='Package Textures', mnb=False, mxb=False)
+    cmds.columnLayout(adj=True)
+    cmds.textFieldButtonGrp('textureDir', label='Texture Directory:', bl='<<', bc=getTextureDir)
+    cmds.button(label='Apply', c=packageTextures)
+    cmds.showWindow('packageTexturesUI')
 
 def getTextureDir(*args):
-    textureDir = pm.fileDialog2(fileMode=3)
+    textureDir = cmds.fileDialog2(fileMode=3)
     if textureDir:
-        pm.textFieldButtonGrp('textureDir', e=True, text=textureDir[0])
+        cmds.textFieldButtonGrp('textureDir', e=True, text=textureDir[0])
 
 def packageTextures(*args):
-    textureDir = pm.textFieldButtonGrp('textureDir', q=True, text=True)
-    for fileTexture in pm.ls(type='file'):
-        oldTexturePath = fileTexture.fileTextureName.get()
+    textureDir = cmds.textFieldButtonGrp('textureDir', q=True, text=True)
+    for fileTexture in cmds.ls(type='file'):
+        oldTexturePath = cmds.getAttr('%s.fileTextureName' % fileTexture)
         fileName = os.path.basename(oldTexturePath)
         try:
             newTexturePath = os.path.join(textureDir, fileName)
             shutil.copyfile(oldTexturePath, newTexturePath)
-            fileTexture.fileTextureName.set(newTexturePath)
+            cmds.setAttr('%s.fileTextureName' % fileTexture, newTexturePath, type='string')
         except:
             print('"{}" is not exists.'.format(oldTexturePath))
-    pm.deleteUI('packageTexturesUI')
+    cmds.deleteUI('packageTexturesUI')
 
 def reAssignMatToface(*args):
-    sels = pm.selected()
+    sels = cmds.ls(sl=True)
     for sel in sels:
-        shadingEngine = sel.getShape().connections(type='shadingEngine', s=False)[0]
-        mat = shadingEngine.surfaceShader.connections(d=False)[0]
-        pm.delete(shadingEngine)
-        pm.select(sel.f, r=True)
-        pm.hyperShade(assign=mat)
-    pm.select(cl=True)
+        shape = cmds.listRelatives(sel, shapes=True, fullPath=True)
+        if not shape:
+            continue
+        shadingEngines = cmds.listConnections(shape[0], type='shadingEngine', s=False) or []
+        if not shadingEngines:
+            continue
+        shadingEngine = shadingEngines[0]
+        mats = cmds.ls(cmds.listConnections('%s.surfaceShader' % shadingEngine, d=False) or [], materials=True)
+        if not mats:
+            continue
+        mat = mats[0]
+        cmds.delete(shadingEngine)
+        cmds.select('%s.f[*]' % sel, r=True)
+        cmds.hyperShade(assign=mat)
+    cmds.select(cl=True)
 
 
 def sepCombineByMat(mode, *args):
@@ -947,20 +963,23 @@ def freezeTrnf(*args):
 
 def delChildOfShape(*args):
     """ Delete children of shape that isn't necessary """
-    shapes = pm.ls(sl=True, type='shape')
+    shapes = cmds.ls(sl=True, type='shape')
     for shape in shapes:
-        junkShapes = shape.listRelatives()
+        junkShapes = cmds.listRelatives(shape) or []
         if junkShapes:
-            pm.delete(junkShapes)
+            cmds.delete(junkShapes)
 
 
 def correctMaterials(*args):
-    for mat in pm.ls(materials=True):
+    for mat in cmds.ls(materials=True):
         # Set ambient color to 0
         try:
-            mat.ambientColor.set(0, 0, 0)
-            mat.specularColor.set(0.1, 0.1, 0.1)
-            mat.cosinePower.set(10)
+            if cmds.attributeQuery('ambientColor', node=mat, exists=True):
+                cmds.setAttr('%s.ambientColor' % mat, 0, 0, 0, type='double3')
+            if cmds.attributeQuery('specularColor', node=mat, exists=True):
+                cmds.setAttr('%s.specularColor' % mat, 0.1, 0.1, 0.1, type='double3')
+            if cmds.attributeQuery('cosinePower', node=mat, exists=True):
+                cmds.setAttr('%s.cosinePower' % mat, 10)
         except:
             pass
         # Remove FBX ascii space string
@@ -968,16 +987,19 @@ def correctMaterials(*args):
         relpaceStr = ''
         for searchStr in searchStrs:
             try:
-                mat.rename(mat.replace(searchStr, relpaceStr))
+                newName = mat.replace(searchStr, relpaceStr)
+                if newName != mat:
+                    cmds.rename(mat, newName)
             except:
                 pass
 
     # Set color space of the normal map to raw
-    for node in pm.ls(type='bump2d'):
-        fileNode = node.inputs(type='file')
-        if fileNode:
-            fileNode[0].colorSpace.set('Raw')
-            fileNode[0].ignoreColorSpaceFileRules.set(True)
+    for node in cmds.ls(type='bump2d'):
+        fileNodes = cmds.listConnections(node, type='file', d=False) or []
+        if fileNodes:
+            fileNode = fileNodes[0]
+            cmds.setAttr('%s.colorSpace' % fileNode, 'Raw', type='string')
+            cmds.setAttr('%s.ignoreColorSpaceFileRules' % fileNode, True)
 
 
 def moveToOrigin(*args):

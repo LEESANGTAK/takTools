@@ -8,7 +8,6 @@ tak_matchTransform.UI()
 '''
 
 import maya.cmds as cmds
-import pymel.core as pm
 from maya.api import OpenMaya as om
 
 
@@ -46,7 +45,7 @@ def UI():
 
 
 def match(*args):
-    sels = pm.selected()
+    sels = cmds.ls(sl=True)
     srcTrsfs = sels[0:-1]
     target = sels[-1]
 
@@ -57,49 +56,58 @@ def match(*args):
     mirrorWorldX = cmds.checkBox('mirrorWorldXChkbox', q=True, v=True)
     mirrorLocalX = cmds.checkBox('mirrorLocalXChkbox', q=True, v=True)
 
-    if pm.filterExpand(target, sm=[12]):  # check if target is a Mesh
-        mathToClosestPointOnSurface([src.name() for src in srcTrsfs], target.name())
-    elif pm.filterExpand(target, sm=[9]):  # check if target is a Curve
-        matchToClosestPointOnCurve([src.name() for src in srcTrsfs], target.name())
-    else:  # check if target is a transform node
+    # check if target is a Mesh (sm=12) or Curve (sm=9)
+    if cmds.filterExpand(target, sm=[12]):
+        mathToClosestPointOnSurface(srcTrsfs, target)
+    elif cmds.filterExpand(target, sm=[9]):
+        matchToClosestPointOnCurve(srcTrsfs, target)
+    else:
         for srcTrsf in srcTrsfs:
             if mirrorWorldX:
-                tempLoc = pm.spaceLocator()
-                pm.matchTransform(tempLoc, target)
+                tempLoc = cmds.spaceLocator()[0]
+                cmds.matchTransform(tempLoc, target)
 
-                tmpTrgLocWsMtx = pm.xform(tempLoc, q=True, matrix=True, ws=True)
+                tmpTrgLocWsMtx = cmds.xform(tempLoc, q=True, matrix=True, ws=True)
                 mirrorXMatrix = [
                     -1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
                     0, 0, 0, 1
                 ]
-                tmpSrcWsMtx = pm.datatypes.Matrix(tmpTrgLocWsMtx) * pm.datatypes.Matrix(mirrorXMatrix)
-                pm.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
+                # Matrix multiply using om
+                mTrg = om.MMatrix(tmpTrgLocWsMtx)
+                mMirror = om.MMatrix(mirrorXMatrix)
+                tmpSrcWsMtx = list(mTrg * mMirror)
+                cmds.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
 
-                pm.matchTransform(srcTrsf, tempLoc)
-                pm.delete(tempLoc)
+                cmds.matchTransform(srcTrsf, tempLoc)
+                cmds.delete(tempLoc)
             elif mirrorLocalX:
-                tempLoc = pm.spaceLocator()
-                pm.matchTransform(tempLoc, target)
+                tempLoc = cmds.spaceLocator()[0]
+                cmds.matchTransform(tempLoc, target)
 
-                tmpTrgLocWsMtx = pm.xform(tempLoc, q=True, matrix=True, ws=True)
+                tmpTrgLocWsMtx = cmds.xform(tempLoc, q=True, matrix=True, ws=True)
                 mirrorXMatrix = [
                     -1, 0, 0, 0,
                     0, 1, 0, 0,
                     0, 0, 1, 0,
                     0, 0, 0, 1
                 ]
-                tmpSrcWsMtx = pm.datatypes.Matrix(tmpTrgLocWsMtx) * pm.datatypes.Matrix(mirrorXMatrix)
-                pm.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
+                mTrg = om.MMatrix(tmpTrgLocWsMtx)
+                mMirror = om.MMatrix(mirrorXMatrix)
+                tmpSrcWsMtx = list(mTrg * mMirror)
+                cmds.xform(tempLoc, matrix=tmpSrcWsMtx, ws=True)
 
-                pm.matchTransform(srcTrsf, tempLoc)
-                pm.delete(tempLoc)
+                cmds.matchTransform(srcTrsf, tempLoc)
+                cmds.delete(tempLoc)
 
-                pm.setAttr('{}.scale'.format(srcTrsf), 1, 1, 1)
-                pm.setAttr('{}.rotate'.format(srcTrsf), target.rotateX.get(), -target.rotateY.get(), -target.rotateZ.get())
+                cmds.setAttr('{}.scale'.format(srcTrsf), 1, 1, 1)
+                rx = cmds.getAttr('{}.rotateX'.format(target))
+                ry = cmds.getAttr('{}.rotateY'.format(target))
+                rz = cmds.getAttr('{}.rotateZ'.format(target))
+                cmds.setAttr('{}.rotate'.format(srcTrsf), rx, -ry, -rz)
             else:
-                pm.matchTransform(srcTrsf, target, pos=translateOpt, rot=rotateOpt, scl=scaleOpt, piv=pivotOpt)
+                cmds.matchTransform(srcTrsf, target, pos=translateOpt, rot=rotateOpt, scl=scaleOpt, piv=pivotOpt)
 
 
 def mathToClosestPointOnSurface(srcs, trg):

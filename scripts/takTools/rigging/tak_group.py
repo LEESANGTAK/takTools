@@ -9,11 +9,9 @@ tak_group.UI()
 """
 
 import maya.cmds as cmds
-import pymel.core as pm
 from functools import partial
 
 from ..common import tak_misc
-
 
 
 def UI():
@@ -146,49 +144,48 @@ def revGrp(sel):
     """
     Create reverse group that subtract control transform.
     """
-    revGrp = cmds.createNode('transform', n='%s_rev' % sel)
-    cmds.parent(revGrp, sel)
+    revGrpNode = cmds.createNode('transform', n='%s_rev' % sel)
+    cmds.parent(revGrpNode, sel)
     for attr in ['X', 'Y', 'Z']:
-        cmds.setAttr('%s.translate%s' % (revGrp, attr), 0)
-        cmds.setAttr('%s.rotate%s' % (revGrp, attr), 0)
-        cmds.setAttr('%s.scale%s' % (revGrp, attr), 1)
+        cmds.setAttr('%s.translate%s' % (revGrpNode, attr), 0)
+        cmds.setAttr('%s.rotate%s' % (revGrpNode, attr), 0)
+        cmds.setAttr('%s.scale%s' % (revGrpNode, attr), 1)
     selParent = cmds.listRelatives(sel, p=True)[0]
-    cmds.parent(revGrp, selParent)
-    cmds.parent(sel, revGrp)
+    cmds.parent(revGrpNode, selParent)
+    cmds.parent(sel, revGrpNode)
 
     mulNode = cmds.createNode('multiplyDivide', n=sel + '_rev_mul')
     inputList = ['input2X', 'input2Y', 'input2Z']
     for input in inputList:
         cmds.setAttr('{0}.{1}'.format(mulNode, input), -1)
     cmds.connectAttr('{0}.translate'.format(sel), '{0}.input1'.format(mulNode), f=True)
-    cmds.connectAttr('{0}.output'.format(mulNode), '{0}.translate'.format(revGrp), f=True)
+    cmds.connectAttr('{0}.output'.format(mulNode), '{0}.translate'.format(revGrpNode), f=True)
 
 
 def createModuleGroups(moduleName, parentSpace):
-    moduleGrp = pm.group(n=moduleName + '_module', empty=True)
+    moduleGrp = cmds.group(n=moduleName + '_module', empty=True)
 
     if parentSpace:
-        parentSpace = pm.PyNode(parentSpace)
-        pm.matchTransform(moduleGrp, parentSpace, pos=True, rot=True)
-        pm.parentConstraint(parentSpace, moduleGrp, mo=True)
-        parentSpace.scale >> moduleGrp.scale
+        cmds.matchTransform(moduleGrp, parentSpace, pos=True, rot=True)
+        cmds.parentConstraint(parentSpace, moduleGrp, mo=True)
+        cmds.connectAttr('%s.scale' % parentSpace, '%s.scale' % moduleGrp, f=True)
 
-    geoGrp = pm.group(n=moduleName + '_geo_grp', empty=True)
-    outGrp = pm.group(n=moduleName + '_out_grp', empty=True)
-    sysGrp = pm.group(n=moduleName + '_sys_grp', empty=True)
-    blbxGrp = pm.group(n=moduleName + '_blbx_grp', empty=True)
-    noTransGrp = pm.group(n=moduleName + '_noTrans_grp', empty=True)
-    ctrlGrp = pm.group(n=moduleName + '_ctrl_grp', empty=True)
+    geoGrp = cmds.group(n=moduleName + '_geo_grp', empty=True)
+    outGrp = cmds.group(n=moduleName + '_out_grp', empty=True)
+    sysGrp = cmds.group(n=moduleName + '_sys_grp', empty=True)
+    blbxGrp = cmds.group(n=moduleName + '_blbx_grp', empty=True)
+    noTransGrp = cmds.group(n=moduleName + '_noTrans_grp', empty=True)
+    ctrlGrpNode = cmds.group(n=moduleName + '_ctrl_grp', empty=True)
 
-    pm.parent(geoGrp, outGrp, sysGrp, moduleGrp)
-    pm.parent(blbxGrp, ctrlGrp, sysGrp)
-    pm.parent(noTransGrp, blbxGrp)
+    cmds.parent(geoGrp, outGrp, sysGrp, moduleGrp)
+    cmds.parent(blbxGrp, ctrlGrpNode, sysGrp)
+    cmds.parent(noTransGrp, blbxGrp)
 
     for grp in [geoGrp, noTransGrp]:
-        grp.inheritsTransform.set(False)
-        grp.translate.set([0, 0, 0])
-        grp.rotate.set([0, 0, 0])
-        grp.scale.set([1, 1, 1])
+        cmds.setAttr('%s.inheritsTransform' % grp, False)
+        cmds.setAttr('%s.translate' % grp, 0, 0, 0)
+        cmds.setAttr('%s.rotate' % grp, 0, 0, 0)
+        cmds.setAttr('%s.scale' % grp, 1, 1, 1)
 
 def locGrp(obj, negateScaleX=False):
     parent = cmds.listRelatives(obj, parent=True)
@@ -227,17 +224,14 @@ def ctrlGrp(obj, negateScaleX=False):
 
 
 def spaceGroup(obj, targetSpace):
-    obj = pm.PyNode(obj)
-    targetSpace = pm.PyNode(targetSpace)
+    spaceGrp = cmds.createNode('transform', n='%s_%s_space' % (obj, targetSpace))
+    spaceGrpZero = cmds.createNode('transform', n='%s_zero' % spaceGrp)
 
-    spaceGrp = pm.createNode('transform', n='%s_%s_space' % (obj, targetSpace))
-    spaceGrpZero = pm.createNode('transform', n='%s_zero' % (spaceGrp))
+    cmds.matchTransform(spaceGrp, targetSpace)
+    cmds.matchTransform(spaceGrpZero, targetSpace)
 
-    pm.matchTransform(spaceGrp, targetSpace)
-    pm.matchTransform(spaceGrpZero, targetSpace)
-
-    pm.parent(obj, spaceGrp)
-    pm.parent(spaceGrp, spaceGrpZero)
+    cmds.parent(obj, spaceGrp)
+    cmds.parent(spaceGrp, spaceGrpZero)
 
 
 def chainParent(*args):

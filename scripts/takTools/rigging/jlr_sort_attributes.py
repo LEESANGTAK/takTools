@@ -1,4 +1,4 @@
-import pymel.core as pm
+import maya.cmds as cmds
 import maya.mel as mel
 
 ##################################################################################
@@ -97,9 +97,9 @@ def remove_ui_item_menu(name_list):
     :param name_list: list with the name of UI items to remove.
     """
     for name in name_list:
-        for item in pm.lsUI():
+        for item in cmds.lsUI():
             if item.endswith(name):
-                pm.deleteUI(item)
+                cmds.deleteUI(item)
 
 
 def add_commands_to_menu(commands, menu):
@@ -116,11 +116,11 @@ def add_commands_to_menu(commands, menu):
 
         if '_menuDivider' in name:
             name = '{}_{}'.format(menu.split('|')[-1], name)
-            pm.menuItem(name, parent=menu, divider=True, dividerLabel=label)
+            cmds.menuItem(name, parent=menu, divider=True, dividerLabel=label)
 
         else:
             name = '{}_{}'.format(menu.split('|')[-1], name)
-            pm.menuItem(name, parent=menu, label=label, command=command)
+            cmds.menuItem(name, parent=menu, label=label, command=command)
 
 
 #########################################
@@ -134,156 +134,244 @@ def copy_attr(node_source, node_target, attr_name, move=False):
     If the attribute is copied and has connections, these will be connected through a pairBlend node in order
     to maintain the old and new connections.
     If the attribute can not be moved returns None.
-    :param node_source: String or dagNode. Object with the user defined attribute.
-    :param node_target: String or dagNode. Object will receive the user defined attribute.
+    :param node_source: String. Object with the user defined attribute.
+    :param node_target: String. Object will receive the user defined attribute.
     :param attr_name: String. Name of the attribute to be copied.
     :param move: Boolean. Indicate if the attribute must be copied or moved.
-    :return: Attribute. The new attribute.
+    :return: String. The new attribute full name (node.attr).
     """
-    node_source = pm.PyNode(node_source)
-    node_target = pm.PyNode(node_target)
+    node_source = str(node_source)
+    node_target = str(node_target)
 
-    if not node_source.hasAttr(attr_name):
-        pm.warning('The attribute{} does not exist in {}'.format(attr_name, node_source))
+    if not cmds.attributeQuery(attr_name, node=node_source, exists=True):
+        cmds.warning('The attribute {} does not exist in {}'.format(attr_name, node_source))
         return None
 
+    source_attr_full = '{}.{}'.format(node_source, attr_name)
+
     # Get source attribute info.
-    source_attr = node_source.attr(attr_name)
-    attr_data = get_attr_info(source_attr)
+    attr_data = get_attr_info(node_source, attr_name)
     if not attr_data:
         return None
 
-    source_value = source_attr.get()
-    source_is_locked = source_attr.isLocked()
-    source_is_compound = source_attr.isCompound()
-    source_connections = get_attr_connections(source_attr)
+    source_value = _safe_get_attr(source_attr_full)
+    source_is_locked = cmds.getAttr(source_attr_full, lock=True)
+    source_is_compound = _is_compound(node_source, attr_name)
+    source_connections = get_attr_connections(node_source, attr_name)
 
     # If attribute is a Compound, read the children attributes info.
     source_child_info = dict()
     source_child_connections = dict()
     if source_is_compound:
-        for child in source_attr.getChildren():
-            source_child_info[child.attrName()] = get_attr_info(child)
-            source_child_connections[child.attrName()] = get_attr_connections(child)
+        for child in _get_children(node_source, attr_name):
+            source_child_info[child] = get_attr_info(node_source, child)
+            source_child_connections[child] = get_attr_connections(node_source, child)
 
     # Creates a list with all attributes connected to source attribute and its lock status.
     l_check = list()
     l_check.extend(source_connections['inputs'])
     l_check.extend(source_connections['outputs'])
     if source_is_compound:
-        for child in source_attr.getChildren():
-            l_check.extend(source_child_connections[child.attrName()]['inputs'])
-            l_check.extend(source_child_connections[child.attrName()]['outputs'])
+        for child in _get_children(node_source, attr_name):
+            l_check.extend(source_child_connections[child]['inputs'])
+            l_check.extend(source_child_connections[child]['outputs'])
 
-    l_locked = [[attr, attr.isLocked()] for attr in l_check]
+    l_locked = [[attr_full, cmds.getAttr(attr_full, lock=True)] for attr_full in l_check]
 
     # Unlock all attributes connected
-    for attr in l_check:
-        attr.unlock()
+    for attr_full in l_check:
+        _unlock_attr(attr_full)
 
     # If move is True, delete the source attribute.
     if move:
-        if source_attr.isLocked:
-            source_attr.unlock()
-        pm.deleteAttr(source_attr)
+        if cmds.getAttr(source_attr_full, lock=True):
+            _unlock_attr(source_attr_full)
+        cmds.deleteAttr(source_attr_full)
 
     # Create the attribute
     create_attr(node_target, attr_data)
 
     # If attribute is a Compound, the children attributes are created
     if source_is_compound:
-
         for child_key in sorted(source_child_info.keys()):
             create_attr(node_target, source_child_info[child_key])
 
-    new_attr = node_target.attr(attr_name)
+    new_attr_full = '{}.{}'.format(node_target, attr_name)
 
     # Copy the value
-    new_attr.set(source_value)
+    _safe_set_attr(new_attr_full, source_value)
 
     # Copy the lock status
-    if source_is_locked:
-        new_attr.lock()
-    else:
-        new_attr.unlock()
+    cmds.setAttr(new_attr_full, lock=source_is_locked)
 
     # Connect the attributes
-    connect_attr(new_attr, **source_connections)
+    connect_attr(new_attr_full, **source_connections)
 
     # If attribute is a Compound, the children attributes are connected.
     if source_is_compound:
-        for attr_child, child_key in zip(new_attr.getChildren(), sorted(source_child_connections.keys())):
-            connect_attr(attr_child, **source_child_connections[child_key])
+        child_names = sorted(source_child_connections.keys())
+        for child_name in child_names:
+            child_attr_full = '{}.{}'.format(node_target, child_name)
+            connect_attr(child_attr_full, **source_child_connections[child_name])
 
     # Lock all attributes connected locked previously.
-    for attr, is_locked in l_locked:
+    for attr_full, is_locked in l_locked:
         if is_locked:
-            attr.lock()
+            _lock_attr(attr_full)
 
-    return new_attr
+    return new_attr_full
+
+
+def _safe_get_attr(attr_full):
+    """Safely get attribute value, returns None on failure."""
+    try:
+        return cmds.getAttr(attr_full)
+    except Exception:
+        return None
+
+
+def _safe_set_attr(attr_full, value):
+    """Safely set attribute value."""
+    if value is None:
+        return
+    try:
+        attr_type = cmds.getAttr(attr_full, type=True)
+        if attr_type in ['string']:
+            cmds.setAttr(attr_full, value, type='string')
+        elif attr_type in ['double3', 'float3']:
+            if isinstance(value, (list, tuple)) and len(value) >= 3:
+                cmds.setAttr(attr_full, *value[0] if isinstance(value[0], (list, tuple)) else value)
+        else:
+            cmds.setAttr(attr_full, value)
+    except Exception:
+        pass
+
+
+def _unlock_attr(attr_full):
+    """Unlock an attribute."""
+    try:
+        cmds.setAttr(attr_full, lock=False)
+    except Exception:
+        pass
+
+
+def _lock_attr(attr_full):
+    """Lock an attribute."""
+    try:
+        cmds.setAttr(attr_full, lock=True)
+    except Exception:
+        pass
+
+
+def _is_compound(node, attr_name):
+    """Check if attribute is compound."""
+    try:
+        children = cmds.attributeQuery(attr_name, node=node, listChildren=True)
+        return children is not None and len(children) > 0
+    except Exception:
+        return False
+
+
+def _get_children(node, attr_name):
+    """Get children attribute names of a compound attribute."""
+    try:
+        children = cmds.attributeQuery(attr_name, node=node, listChildren=True)
+        return children or []
+    except Exception:
+        return []
+
+
+def _get_parent_attr(node, attr_name):
+    """Get parent attribute name if any."""
+    try:
+        parent = cmds.attributeQuery(attr_name, node=node, listParent=True)
+        return parent[0] if parent else None
+    except Exception:
+        return None
 
 
 def create_attr(node, attr_data):
     """
     This method creates a new attribute in a node.
     If the node already has an attribute with the same name, the new attribute will not be created.
-    :param node: dagNode.
+    :param node: String node name.
     :param attr_data: dictionary with the necessary data to create the attribute.
     """
-
-    # It checks if the attribute already exists within the node.
     attr_name = attr_data['longName']
-    if node.hasAttr(attr_name):
-        pm.warning('The attribute {} already exist in {}.'
-                   'Can not create a new attribute with the same name'.format(attr_name, node))
-
+    if cmds.attributeQuery(attr_name, node=node, exists=True):
+        cmds.warning('The attribute {} already exist in {}.'
+                     'Can not create a new attribute with the same name'.format(attr_name, node))
     else:
-        # Creating the attribute
-        pm.addAttr(node, **attr_data)
+        # Build kwargs without 'type' key (use dataType or attributeType)
+        kwargs = {k: v for k, v in attr_data.items()}
+        # enumName must be a string for cmds.addAttr
+        if 'enumName' in kwargs and isinstance(kwargs['enumName'], dict):
+            # Convert ordered dict to colon-separated string
+            kwargs['enumName'] = ':'.join(str(k) for k in kwargs['enumName'].keys())
+        cmds.addAttr(node, **kwargs)
 
 
 def connect_attr(attribute, inputs=None, outputs=None):
     """
     It connects an attribute to passed inputs and outputs.
-    :param attribute: Attribute Object.
-    :param inputs: list of inputs attributes.
-    :param outputs: list of outputs attributes.
+    :param attribute: Attribute full name (node.attr).
+    :param inputs: list of input attribute full names.
+    :param outputs: list of output attribute full names.
     """
     if inputs:
         for attr_input in inputs:
-            if attribute.inputs():
+            existing_inputs = cmds.listConnections(attribute, s=True, d=False, plugs=True)
+            if existing_inputs:
                 make_shared_connection(attr_input, attribute)
             else:
-                attr_input.connect(attribute)
+                try:
+                    cmds.connectAttr(attr_input, attribute, f=True)
+                except Exception:
+                    pass
 
     if outputs:
-        if attribute.type() in ['long', 'bool', 'double', 'enum', 'double3']:
+        attr_type = cmds.getAttr(attribute, type=True)
+        if attr_type in ['long', 'bool', 'double', 'enum', 'double3']:
             for attr_output in outputs:
-                if attr_output.inputs(p=1):
+                existing_inputs = cmds.listConnections(attr_output, s=True, d=False, plugs=True)
+                if existing_inputs:
                     make_shared_connection(attribute, attr_output)
                 else:
-                    attribute.connect(attr_output)
+                    try:
+                        cmds.connectAttr(attribute, attr_output, f=True)
+                    except Exception:
+                        pass
 
 
 def make_shared_connection(attr_source, target_attr):
     """
     It connects an attribute to other connected attribute by pairblend node.
     This way the target attribute does'nt lose their existing connections.
-    :param attr_source: Source attribute.
-    :param target_attr: Target attribute.
+    :param attr_source: Source attribute full name.
+    :param target_attr: Target attribute full name.
     """
-    attr_previous_connected = target_attr.inputs(p=1)[0]
+    existing_inputs = cmds.listConnections(target_attr, s=True, d=False, plugs=True)
+    if not existing_inputs:
+        return
+    attr_previous_connected = existing_inputs[0]
 
-    pb = pm.createNode('pairBlend')
-    pb.w.set(0.5)
-    d_previous = {True: pb.inTranslate1, False: pb.inTranslateX1}
-    d_source = {True: pb.inTranslate2, False: pb.inTranslateX2}
-    d_out = {True: pb.outTranslate, False: pb.outTranslateX}
+    pb = cmds.createNode('pairBlend')
+    cmds.setAttr('%s.w' % pb, 0.5)
 
-    is_compound = attr_previous_connected.isCompound()
-    attr_previous_connected.connect(d_previous[is_compound])
-    attr_source.connect(d_source[is_compound])
-    d_out[is_compound].connect(target_attr, force=True)
+    # Determine if compound
+    attr_type = cmds.getAttr(attr_previous_connected, type=True)
+    is_compound = attr_type in ['double3', 'float3']
+
+    d_previous = {True: '%s.inTranslate1' % pb, False: '%s.inTranslateX1' % pb}
+    d_source = {True: '%s.inTranslate2' % pb, False: '%s.inTranslateX2' % pb}
+    d_out = {True: '%s.outTranslate' % pb, False: '%s.outTranslateX' % pb}
+
+    try:
+        cmds.connectAttr(attr_previous_connected, d_previous[is_compound], f=True)
+        cmds.connectAttr(attr_source, d_source[is_compound], f=True)
+        cmds.connectAttr(d_out[is_compound], target_attr, f=True)
+    except Exception:
+        pass
 
 
 def get_selected_attributes():
@@ -292,41 +380,44 @@ def get_selected_attributes():
     If there are not attributes selected, this method returns a empty list.
     :return: list with the selected attributes.
     """
-    attrs = pm.channelBox('mainChannelBox', q=True, sma=True)
+    attrs = cmds.channelBox('mainChannelBox', q=True, sma=True)
     if not attrs:
         return []
-
     return attrs
 
 
 def get_all_user_attributes(node):
     """
     It gets all user defined attributes of a node.
-    :param node: dagNode.
+    :param node: String node name.
     :return: list with all user defined attributes.
     """
     all_attributes = list()
-    for attr in pm.listAttr(node, ud=True):
-        if not node.attr(attr).parent():
+    ud_attrs = cmds.listAttr(node, ud=True) or []
+    for attr in ud_attrs:
+        # Only include top-level attributes (no parent)
+        if not _get_parent_attr(node, attr):
             all_attributes.append(attr)
     return all_attributes
 
 
-def get_attr_info(attribute):
+def get_attr_info(node, attr_name):
     """
     Get all data of a passed attribute.
     The data that it returns depends on the type of attribute.
-    :param attribute: Attribute Object.
+    :param node: String node name.
+    :param attr_name: String attribute name.
     :return: dictionary with the necessary data to recreate the attribute.
     """
-    attribute_type = str(attribute.type())
+    attr_full = '{}.{}'.format(node, attr_name)
+    attribute_type = cmds.getAttr(attr_full, type=True)
 
     d_data = dict()
-    d_data['longName'] = str(pm.attributeName(attribute, long=True))
-    d_data['niceName'] = str(pm.attributeName(attribute, nice=True))
-    d_data['shortName'] = str(pm.attributeName(attribute, short=True))
-    d_data['hidden'] = attribute.isHidden()
-    d_data['keyable'] = attribute.isKeyable()
+    d_data['longName'] = cmds.attributeQuery(attr_name, node=node, longName=True)
+    d_data['niceName'] = cmds.attributeQuery(attr_name, node=node, niceName=True)
+    d_data['shortName'] = cmds.attributeQuery(attr_name, node=node, shortName=True)
+    d_data['hidden'] = not cmds.attributeQuery(attr_name, node=node, hidden=True) == False
+    d_data['keyable'] = cmds.getAttr(attr_full, keyable=True)
 
     if attribute_type in ['string']:
         d_data['dataType'] = attribute_type
@@ -334,28 +425,46 @@ def get_attr_info(attribute):
         d_data['attributeType'] = attribute_type
 
     if attribute_type in ['long', 'double', 'bool']:
-        d_data['defaultValue'] = attribute.get(default=True)
-        if attribute.getMax():
-            d_data['maxValue'] = attribute.getMax()
-        if attribute.getMin():
-            d_data['minValue'] = attribute.getMin()
+        try:
+            d_data['defaultValue'] = cmds.attributeQuery(attr_name, node=node, listDefault=True)[0]
+        except Exception:
+            pass
+        try:
+            max_val = cmds.attributeQuery(attr_name, node=node, maximum=True)
+            if max_val:
+                d_data['maxValue'] = max_val[0]
+        except Exception:
+            pass
+        try:
+            min_val = cmds.attributeQuery(attr_name, node=node, minimum=True)
+            if min_val:
+                d_data['minValue'] = min_val[0]
+        except Exception:
+            pass
 
     if attribute_type in ['enum']:
-        d_data['enumName'] = attribute.getEnums()
+        enums = cmds.attributeQuery(attr_name, node=node, listEnum=True)
+        if enums:
+            d_data['enumName'] = enums[0]
 
-    if attribute.parent():
-        d_data['parent'] = attribute.parent().attrName()
+    parent = _get_parent_attr(node, attr_name)
+    if parent:
+        d_data['parent'] = parent
 
     return d_data
 
 
-def get_attr_connections(source_attr):
+def get_attr_connections(node, attr_name):
     """
     It returns the inputs and outputs connections of an attribute.
-    :param source_attr: Attribute Object.
-    :return: dictionary with the inputs and outputs connections.
+    :param node: String node name.
+    :param attr_name: String attribute name.
+    :return: dictionary with the inputs and outputs connections (as full plug strings).
     """
-    return {'inputs': source_attr.inputs(p=True), 'outputs': source_attr.outputs(p=True)}
+    attr_full = '{}.{}'.format(node, attr_name)
+    inputs = cmds.listConnections(attr_full, s=True, d=False, plugs=True) or []
+    outputs = cmds.listConnections(attr_full, s=False, d=True, plugs=True) or []
+    return {'inputs': inputs, 'outputs': outputs}
 
 
 def select_attributes(attributes, nodes):
@@ -365,9 +474,9 @@ def select_attributes(attributes, nodes):
     :param nodes: List of the objects with the attributes to select
     """
     to_select = ['{}.{}'.format(n, a) for a in attributes for n in nodes]
-    pm.select(nodes, r=True)
-    str_command = "import pymel.core as pm\npm.channelBox('mainChannelBox', e=True, select={}, update=True)"
-    pm.evalDeferred(str_command.format(to_select))
+    cmds.select(nodes, r=True)
+    str_command = "import maya.cmds as cmds\ncmds.channelBox('mainChannelBox', e=True, select={}, update=True)"
+    cmds.evalDeferred(str_command.format(to_select))
 
 
 def move_up_attribute(*args):
@@ -377,18 +486,19 @@ def move_up_attribute(*args):
     """
     selected_attributes = get_selected_attributes()
 
-    if not len(pm.ls(sl=1)) or not selected_attributes:
+    if not cmds.ls(sl=True) or not selected_attributes:
         print('Nothing Selected')
         return
 
-    selected_items = pm.selected()
+    selected_items = cmds.ls(sl=True)
     last_parent = None
 
     for item in selected_items:
         for attribute in selected_attributes:
 
-            if item.attr(attribute).parent():
-                attribute = item.attr(attribute).parent().attrName()
+            parent_attr = _get_parent_attr(item, attribute)
+            if parent_attr:
+                attribute = parent_attr
                 if attribute == last_parent:
                     continue
                 last_parent = attribute
@@ -424,18 +534,19 @@ def move_down_attribute(*args):
     """
     selected_attributes = get_selected_attributes()
 
-    if not len(pm.ls(sl=1)) or not selected_attributes:
+    if not cmds.ls(sl=True) or not selected_attributes:
         print('Nothing Selected')
         return
 
-    selected_items = pm.selected()
+    selected_items = cmds.ls(sl=True)
     last_parent = None
 
     for item in selected_items:
         for attribute in reversed(selected_attributes):
 
-            if item.attr(attribute).parent():
-                attribute = item.attr(attribute).parent().attrName()
+            parent_attr = _get_parent_attr(item, attribute)
+            if parent_attr:
+                attribute = parent_attr
                 if attribute == last_parent:
                     continue
                 last_parent = attribute
@@ -486,22 +597,22 @@ def save_selected_attributes(mode):
     global __jlr_copy_data
     global __jlr_copy_mode
 
-    if not pm.selected():
-        pm.warning("Nothing selected.")
+    if not cmds.ls(sl=True):
+        cmds.warning("Nothing selected.")
         return
 
-    source_item = pm.selected()[-1]
+    source_item = cmds.ls(sl=True)[-1]
     all_selected_attr = get_selected_attributes()
 
     if not all_selected_attr:
-        pm.warning("No attribute is selected.")
+        cmds.warning("No attribute is selected.")
         return
 
     all_ud_attributes = get_all_user_attributes(source_item)
     ud_selected_attr = [attr for attr in all_selected_attr if attr in all_ud_attributes]
 
     if not ud_selected_attr:
-        pm.warning("No user defined attribute is selected.")
+        cmds.warning("No user defined attribute is selected.")
         return
 
     __jlr_copy_data = {'source_item': source_item, 'attributes': ud_selected_attr}
@@ -516,17 +627,17 @@ def paste_attribute(*args):
     global __jlr_copy_data
     global __jlr_copy_mode
 
-    if not pm.selected():
-        pm.warning("Nothing selected.")
+    if not cmds.ls(sl=True):
+        cmds.warning("Nothing selected.")
         return
 
-    target_item = pm.selected()[-1]
+    target_item = cmds.ls(sl=True)[-1]
     source_item = __jlr_copy_data['source_item']
     move_attr = __jlr_copy_mode == 'cut'
     for attr in __jlr_copy_data['attributes']:
         copy_attr(source_item, target_item, attr, move=move_attr)
 
-    pm.select(target_item)
+    cmds.select(target_item)
 
 
 def add_divider_attribute(*args):
@@ -534,22 +645,23 @@ def add_divider_attribute(*args):
     Adds a divider attribute in the ChannelBox of last selected item.
     :param args: list of arguments
     """
-    item = pm.selected()[-1]
+    item = cmds.ls(sl=True)[-1]
     name = 'divider'
     cont = 0
     fullname = name + str(cont).zfill(2)
 
-    while fullname in [attr.attrName() for attr in item.listAttr(ud=True)]:
+    ud_attrs = cmds.listAttr(item, ud=True) or []
+    while fullname in ud_attrs:
         cont += 1
         fullname = name + str(cont).zfill(2)
 
     d_data = dict()
     d_data['longName'] = str(fullname)
-    d_data['type'] = 'enum'
+    d_data['attributeType'] = 'enum'
     d_data['niceName'] = str(' ')
     d_data['hidden'] = False
     d_data['keyable'] = True
-    d_data['enumName'] = (str('-' * 15))
+    d_data['enumName'] = str('-' * 15)
     create_attr(item, d_data)
 
 
@@ -559,6 +671,10 @@ def unlock_trs_attributes(*args):
     :param args: list of arguments.
     """
     import itertools
-    for item in pm.selected():
+    for item in cmds.ls(sl=True):
         for attr in itertools.product(['t', 'r', 's'], ['x', 'y', 'z']):
-            item.attr(''.join(attr)).unlock()
+            attr_full = '{}.{}'.format(item, ''.join(attr))
+            try:
+                cmds.setAttr(attr_full, lock=False)
+            except Exception:
+                pass
