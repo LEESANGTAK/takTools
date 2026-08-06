@@ -230,7 +230,7 @@
             "annotation": "Set Manager",
             "image1": "objectSet.svg",
             "imageOverlayLabel": "",
-            "command": "from imp import reload; import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()",
+            "command": "from importlib import reload; import setManager as sm; reload(sm)\nsmGUI = sm.gui.ManagerGUI()\nsmGUI.show()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -239,7 +239,7 @@
             "annotation": "Layout script editor horizontally",
             "image1": "defaultTwoSideBySideLayout.png",
             "imageOverlayLabel": "script",
-            "command": "from imp import reload\nfrom takTools.utils import qtUtil; reload(qtUtil)\nqtUtil.editScriptEditorHorizontal()",
+            "command": "from importlib import reload\nfrom takTools.utils import qtUtil; reload(qtUtil)\nqtUtil.editScriptEditorHorizontal()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

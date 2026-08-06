@@ -99,7 +99,7 @@
             "annotation": "Convert nurbs curves to polygon tubes.",
             "image1": "curveToCylinder.png",
             "imageOverlayLabel": "",
-            "command": "from imp import reload\nfrom takTools.utils import curve as crvUtil; reload(crvUtil) \n\nribbonMeshs = []\nfor crv in cmds.filterExpand(cmds.ls(sl=True), sm=9):\n    ribbonMeshs.append(crvUtil.curveToMesh(crv, 'tube'))\n\ncmds.select(ribbonMeshs, r=True)",
+            "command": "from importlib import reload\nfrom takTools.utils import curve as crvUtil; reload(crvUtil) \n\nribbonMeshs = []\nfor crv in cmds.filterExpand(cmds.ls(sl=True), sm=9):\n    ribbonMeshs.append(crvUtil.curveToMesh(crv, 'tube'))\n\ncmds.select(ribbonMeshs, r=True)",
             "sourceType": "python",
             "noDefaultPopup": true
         },

@@ -715,7 +715,7 @@ def copySkinOverlapVertices(*args):
 # ------------  Copy and Paste
 def copySkin(*args):
     import takTools.common.tak_misc as tak_misc
-    import imp; imp.reload(tak_misc)
+    import importlib as imp; imp.reload(tak_misc)
     tak_misc.addInfCopySkin()
 
 def copyPasteWeight(*args):
@@ -756,7 +756,7 @@ def runHammerWeightsBrush(*args):
 
 def runAverageWeightsBrush(*args):
     import takTools.rigging.averageVertexSkinWeightBrush as averageVertexSkinWeightBrush
-    import imp; imp.reload(averageVertexSkinWeightBrush)
+    import importlib as imp; imp.reload(averageVertexSkinWeightBrush)
     averageVertexSkinWeightBrush.paint()
 # ------------
 
@@ -871,5 +871,5 @@ def setDirectory(*args):
 
 def bSkinSaverGUI(*args):
     import takTools.rigging.bSkinSaver as bSkinSaver
-    import imp; imp.reload(bSkinSaver)
+    import importlib as imp; imp.reload(bSkinSaver)
     bSkinSaver.showUI()

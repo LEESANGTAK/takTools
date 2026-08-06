@@ -189,7 +189,7 @@
             "annotation": "Clean up a fbx file.",
             "image1": "fbxReview.png",
             "imageOverlayLabel": "",
-            "command": "from imp import reload\nimport takFBXExporter as tfbxe; reload(tfbxe)\n\ntfbxe.gui.fbxCleanerUI.show()",
+            "command": "from importlib import reload\nimport takFBXExporter as tfbxe; reload(tfbxe)\n\ntfbxe.gui.fbxCleanerUI.show()",
             "sourceType": "python",
             "noDefaultPopup": true
         },

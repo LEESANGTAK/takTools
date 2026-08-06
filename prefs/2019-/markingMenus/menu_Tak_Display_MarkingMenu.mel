@@ -4,7 +4,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.isoAdd()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.isoAdd()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -25,7 +25,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.isoRmv()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.isoRmv()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -67,7 +67,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.wireOnOff()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.wireOnOff()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -88,7 +88,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.hideShowViewCrv()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.hideShowViewCrv()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -109,7 +109,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.hideShowViewPoly()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.hideShowViewPoly()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -151,7 +151,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.display as disUtils\");\npython(\"import imp; imp.reload(disUtils)\");\n\n\npython(\"disUtils.displayModelOnlyToggle()\");"
+        -command "python(\"import takTools.utils.display as disUtils\");\npython(\"import importlib as imp; imp.reload(disUtils)\");\n\n\npython(\"disUtils.displayModelOnlyToggle()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -699,7 +699,7 @@
             -divider 0
             -subMenu 0
             -tearOff 0
-            -command "python(\"import takTools.utils.display as dpUtil;import imp; imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();\")"
+            -command "python(\"import takTools.utils.display as dpUtil;import importlib as imp; imp.reload(dpUtil);dpUtil.frameRangeHUDToggle();\")"
             -optionBox 0
             -enable 1
             -data 0
@@ -759,7 +759,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.globalUtil as gUtil;import imp; imp.reload(gUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels:\\n\\tgUtil.setWireColorBySide(sel)\");"
+        -command "python(\"import takTools.utils.globalUtil as gUtil;import importlib as imp; imp.reload(gUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels:\\n\\tgUtil.setWireColorBySide(sel)\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -779,7 +779,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.setJntColorUI()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.setJntColorUI()\");"
         -optionBox 1
         -enable 1
         -data 0
@@ -818,7 +818,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.Wire()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.Wire()\");"
         -optionBox 0
         -enable 1
         -data 0

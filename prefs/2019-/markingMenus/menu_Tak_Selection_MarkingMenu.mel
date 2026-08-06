@@ -211,7 +211,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from imp import reload\");\npython(\"import setManager as sm; reload(sm)\");\npython(\"smGUI = sm.gui.ManagerGUI()\");\npython(\"smGUI.show()\");"
+        -command "python(\"from importlib import reload\");\npython(\"import setManager as sm; reload(sm)\");\npython(\"smGUI = sm.gui.ManagerGUI()\");\npython(\"smGUI.show()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -269,7 +269,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"endJnts = []\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: endJnts.extend(jntUtils.getEndJoints(sel))\");\npython(\"cmds.select(endJnts, r=True)\");"
+        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import importlib as imp; imp.reload(jntUtils)\");\npython(\"endJnts = []\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: endJnts.extend(jntUtils.getEndJoints(sel))\");\npython(\"cmds.select(endJnts, r=True)\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -289,7 +289,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import imp; imp.reload(jntUtils)\");\npython(\"noEndJnts = []\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: noEndJnts.extend(jntUtils.getJointsExceptEnd(sel))\");\npython(\"cmds.select(noEndJnts, r=True)\");"
+        -command "python(\"import takTools.utils.joint as jntUtils\");\npython(\"import importlib as imp; imp.reload(jntUtils)\");\npython(\"noEndJnts = []\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: noEndJnts.extend(jntUtils.getJointsExceptEnd(sel))\");\npython(\"cmds.select(noEndJnts, r=True)\");"
         -optionBox 0
         -enable 1
         -data 0

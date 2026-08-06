@@ -827,7 +827,7 @@ def checkUpdate():
 
                 # Reload tool
                 import takTools.tak_tools as tt
-                import imp; imp.reload(tt); tt.UI()
+                import importlib as imp; imp.reload(tt); tt.UI()
 
                 # Reload hotkey set
                 if 'takTools' in cmds.hotkeySet(q=True, hotkeySetArray=True):

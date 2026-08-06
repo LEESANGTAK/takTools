@@ -26,7 +26,6 @@ import maya.mel as mel
 from . import tak_lib
 from ..modeling import tak_cleanUpModel
 from ..utils import skin as skinUtil; reload(skinUtil)
-from ..rigging.autoRigging.base import controller as control
 
 
 MODULE_NAME = 'takTools'
@@ -2879,13 +2878,13 @@ def setupSoftModCtrl(geometry=None):
         softModHandle = None
 
     geo_short = geometryName.split('|')[-1]
-    softModCtrl = control.Controller(name='%s_%s_ctrl' % (geo_short, softMod), shape='sphere')
-    softModCtrl.createGroups(space=True, extra=True, auto=False)
-    softModSlideCtrl = control.Controller(name='%s_%s_slideCtrl' % (geo_short, softMod), shape='circleY')
-    softModSlideCtrl.setScale(2)
-    softModSlideCtrl.createGroups(space=True, extra=False, auto=False)
+    softModCtrl = cmds.spaceLocator(name='%s_%s_ctrl' % (geo_short, softMod))[0]
+    softModCtrlExtraGrp = cmds.group(softModCtrl, n=f'{softModCtrl}_extra')
+    sortModCtrlZeroGrp = cmds.group(softModCtrlExtraGrp, n=f'{softModCtrl}_zero')
+    softModSlideCtrl = cmds.circle(name='%s_%s_slideCtrl' % (geo_short, softMod), nr=(0, 1, 0), r=2, ch=False)[0]
+    cmds.group(softModSlideCtrl, n=f'{softModSlideCtrl}_zero')
     try:
-        cmds.parent(softModCtrl.spaceGrp, softModSlideCtrl.name)
+        cmds.parent(sortModCtrlZeroGrp, softModSlideCtrl)
     except Exception:
         pass
 
@@ -2901,70 +2900,32 @@ def setupSoftModCtrl(geometry=None):
 
     try:
         if softMod:
-            cmds.softMod(softMod, e=True, weightedNode=[softModCtrl.name, softModCtrl.name])
+            cmds.softMod(softMod, e=True, weightedNode=[softModCtrl, softModCtrl])
     except Exception:
         pass
 
-    deMatrix = cmds.createNode('decomposeMatrix', name='%s_%s_deMatrix' % (softModSlideCtrl.name, softMod))
+    deMatrix = cmds.createNode('decomposeMatrix', name='%s_%s_deMatrix' % (softModSlideCtrl, softMod))
 
     # Add attributes
-    softModCtrl.transform.addAttr('interpolation', at='enum', en='None:Linear:Smooth:Spline:', dv=3, keyable=True)
-    softModCtrl.transform.addAttr('falloff', at='float', min=0, dv=10, keyable=True)
-    softModCtrl.transform.addAttr('stiffness', at='float', min=0, max=10, keyable=True)
+    cmds.addAttr(softModCtrl, ln='interpolation', at='enum', en='None:Linear:Smooth:Spline:', dv=3, keyable=True)
+    cmds.addAttr(softModCtrl, ln='falloff', at='float', min=0, dv=10, keyable=True)
+    cmds.addAttr(softModCtrl, ln='stiffness', at='float', min=0, max=10, keyable=True)
 
     # Connect attributes
-    try:
-        cmds.connectAttr('{}.worldMatrix'.format(softModSlideCtrl.transform), '{}.inputMatrix'.format(deMatrix), force=True)
-    except Exception:
-        pass
-    try:
-        cmds.connectAttr('{}.outputTranslate'.format(deMatrix), '{}.falloffCenter'.format(softMod), force=True)
-    except Exception:
-        pass
-    try:
-        cmds.connectAttr('{}.worldMatrix'.format(softModSlideCtrl.transform), '{}.preMatrix'.format(softMod + '.softModXforms'), force=True)
-    except Exception:
-        pass
-    try:
-        cmds.connectAttr('{}.worldInverseMatrix'.format(softModSlideCtrl.transform), '{}.postMatrix'.format(softMod + '.softModXforms'), force=True)
-    except Exception:
-        pass
-    try:
-        cmds.connectAttr('{}.matrix'.format(softModCtrl.transform), '{}.weightedMatrix'.format(softMod + '.softModXforms'), force=True)
-    except Exception:
-        pass
-    try:
-        cmds.connectAttr('{}.interpolation'.format(softModCtrl.transform), '{}.falloffCurve[0].falloffCurve_Interp'.format(softMod), force=True)
-    except Exception:
-        pass
+    cmds.connectAttr('{}.worldMatrix'.format(softModSlideCtrl), '{}.inputMatrix'.format(deMatrix), force=True)
+    cmds.connectAttr('{}.outputTranslate'.format(deMatrix), '{}.falloffCenter'.format(softMod), force=True)
+    cmds.connectAttr('{}.worldMatrix'.format(softModSlideCtrl), '{}.preMatrix'.format(softMod + '.softModXforms'), force=True)
+    cmds.connectAttr('{}.worldInverseMatrix'.format(softModSlideCtrl), '{}.postMatrix'.format(softMod + '.softModXforms'), force=True)
+    cmds.connectAttr('{}.matrix'.format(softModCtrl), '{}.weightedMatrix'.format(softMod + '.softModXforms'), force=True)
+    cmds.connectAttr('{}.interpolation'.format(softModCtrl), '{}.falloffCurve[0].falloffCurve_Interp'.format(softMod), force=True)
 
-    uc = cmds.createNode('unitConversion', name='%s_stiffness_uc' % (softModCtrl.name))
-    try:
-        cmds.setAttr('{}.conversionFactor'.format(uc), 0.1)
-    except Exception:
-        pass
-    try:
-        cmds.connectAttr('{}.stiffness'.format(softModCtrl.transform), '{}.input'.format(uc), force=True)
-    except Exception:
-        pass
-    try:
-        cmds.connectAttr('{}.output'.format(uc), '{}.falloffCurve[0].falloffCurve_Position'.format(softMod), force=True)
-    except Exception:
-        pass
-
-    try:
-        cmds.connectAttr('{}.falloff'.format(softModCtrl.transform), '{}.falloffRadius'.format(softMod), force=True)
-    except Exception:
-        pass
-
-    try:
-        cmds.delete('%sHandle' % (softMod))
-    except Exception:
-        pass
-    try:
-        cmds.delete('%sHandleShape' % (softMod))
-    except Exception:
-        pass
+    uc = cmds.createNode('unitConversion', name='%s_stiffness_uc' % (softModCtrl))
+    cmds.setAttr('{}.conversionFactor'.format(uc), 0.1)
+    cmds.connectAttr('{}.stiffness'.format(softModCtrl), '{}.input'.format(uc), force=True)
+    cmds.connectAttr('{}.output'.format(uc), '{}.falloffCurve[0].falloffCurve_Position'.format(softMod), force=True)
+    cmds.connectAttr('{}.falloff'.format(softModCtrl), '{}.falloffRadius'.format(softMod), force=True)
+    cmds.delete('%sHandle' % (softMod))
+    cmds.delete('%sHandleShape' % (softMod))
 
 
 def createClusters():

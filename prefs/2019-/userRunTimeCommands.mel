@@ -71,7 +71,7 @@ runTimeCommand
 	-category "Custom Scripts.Rigging"
 	-hotkeyCtx ""
 	-commandLanguage "python"
-	-command ("from imp import reload\nfrom takTools.utils import mesh as meshUtil\nreload(meshUtil)\n\nmeshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\nfor mesh in meshes:\n\tmeshUtil.toggleDeformers(mesh)\n")
+	-command ("from importlib import reload\nfrom takTools.utils import mesh as meshUtil\nreload(meshUtil)\n\nmeshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\nfor mesh in meshes:\n\tmeshUtil.toggleDeformers(mesh)\n")
 	toggleDeformers;
 
 runTimeCommand
@@ -87,7 +87,7 @@ runTimeCommand
 	-category "Custom Scripts.Rigging"
 	-hotkeyCtx ""
 	-commandLanguage "python"
-	-command ("from imp import reload\nfrom takTools.utils import joint as jntUtil; reload(jntUtil)\n\n\nsels = cmds.ls(sl=True, fl=True)\n\n# Handle if components exists in selection\nedgesFaces = cmds.filterExpand(sels, sm=[32, 34])\nif edgesFaces:\n    vertices = cmds.ls(cmds.polyListComponentConversion(sels, toVertex=True), fl=True)\n    sels = list(set(sels) - set(edgesFaces))\n    sels.extend(vertices)\n\njntUtil.createOnCenter(sels)")
+	-command ("from importlib import reload\nfrom takTools.utils import joint as jntUtil; reload(jntUtil)\n\n\nsels = cmds.ls(sl=True, fl=True)\n\n# Handle if components exists in selection\nedgesFaces = cmds.filterExpand(sels, sm=[32, 34])\nif edgesFaces:\n    vertices = cmds.ls(cmds.polyListComponentConversion(sels, toVertex=True), fl=True)\n    sels = list(set(sels) - set(edgesFaces))\n    sels.extend(vertices)\n\njntUtil.createOnCenter(sels)")
 	createJointOnCenter;
 
 

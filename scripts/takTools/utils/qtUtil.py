@@ -1,10 +1,20 @@
 import os
-from PySide2 import QtCore, QtGui, QtWidgets
+
+
 
 from maya import cmds
 from maya import OpenMayaUI as omui
-from shiboken2 import wrapInstance
-from PySide2 import QtWidgets
+
+MAYA_VERSION = int(cmds.about(version=True))
+if MAYA_VERSION <= 2016:
+    from PySide import QtWidgets, QtGui, QtCore
+    from shiboken import wrapInstance
+elif 2017 <= MAYA_VERSION <= 2024:
+    from PySide2 import QtWidgets, QtGui, QtCore
+    from shiboken2 import wrapInstance
+elif 2025 <= MAYA_VERSION:
+    from PySide6 import QtWidgets, QtGui, QtCore
+    from shiboken6 import wrapInstance
 
 
 class ScreenCapture(QtWidgets.QDialog):

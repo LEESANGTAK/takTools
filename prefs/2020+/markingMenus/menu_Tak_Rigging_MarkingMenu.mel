@@ -4,7 +4,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.setDefaultTransform()\")"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.setDefaultTransform()\")"
         -optionBox 0
         -enable 1
         -visible 1
@@ -26,7 +26,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.delKey()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.delKey()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -92,7 +92,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.rigging.tak_matchTransform as tak_matchTransform;import imp; imp.reload(tak_matchTransform);tak_matchTransform.UI()\");"
+        -command "python(\"import takTools.rigging.tak_matchTransform as tak_matchTransform;import importlib as imp; imp.reload(tak_matchTransform);tak_matchTransform.UI()\");"
         -optionBox 1
         -enable 1
         -visible 0
@@ -112,7 +112,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"for sel in cmds.ls(sl=True): tak_misc.unlockChannels(sel)\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"for sel in cmds.ls(sl=True): tak_misc.unlockChannels(sel)\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -134,7 +134,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.deleteConstraints()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.deleteConstraints()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -178,7 +178,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from imp import reload\");\npython(\"from takTools.modeling import tak_cleanUpModel as tcum;reload(tcum)\");\npython(\"tcum.allInOne()\");"
+        -command "python(\"from importlib import reload\");\npython(\"from takTools.modeling import tak_cleanUpModel as tcum;reload(tcum)\");\npython(\"tcum.allInOne()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -220,7 +220,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takRenamer import main\");\npython(\"import imp; imp.reload(main)\");\npython(\"main.showUI()\");"
+        -command "python(\"from takRenamer import main\");\npython(\"import importlib as imp; imp.reload(main)\");\npython(\"main.showUI()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -241,7 +241,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takSkeleton as ts\");\npython(\"import imp; imp.reload(ts)\");\npython(\"ts.gui.showUI()\");\n"
+        -command "python(\"import takSkeleton as ts\");\npython(\"import importlib as imp; imp.reload(ts)\");\npython(\"ts.gui.showUI()\");\n"
         -optionBox 0
         -enable 1
         -visible 1
@@ -262,7 +262,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from imp import reload\\nfrom takTools.utils import mesh as meshUtil\\nreload(meshUtil)\");\npython(\"meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\\nfor mesh in meshes:\\n\\tmeshUtil.toggleDeformers(mesh)\");\n"
+        -command "python(\"from importlib import reload\\nfrom takTools.utils import mesh as meshUtil\\nreload(meshUtil)\");\npython(\"meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\\nfor mesh in meshes:\\n\\tmeshUtil.toggleDeformers(mesh)\");\n"
         -optionBox 0
         -enable 1
         -visible 1
@@ -283,7 +283,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc;import imp; imp.reload(tak_misc)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels:\\n    tak_misc.doGroup(sel, '_zero')\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc;import importlib as imp; imp.reload(tak_misc)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels:\\n    tak_misc.doGroup(sel, '_zero')\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -406,7 +406,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.cnntAttrs()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.cnntAttrs()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -466,7 +466,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\");\npython(\"faceMeshes = None\");\npython(\"if not meshes: faceMeshes = meshUtil.duplicateFace()\");\npython(\"srcMeshes = meshes or faceMeshes\");\npython(\"bfUtil.convertToCageMesh(srcMeshes)\");\npython(\"if faceMeshes: cmds.delete(faceMeshes)\");"
+        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"from takTools.utils import bifrost as bfUtil; import importlib as imp; imp.reload(bfUtil)\");\npython(\"meshes = cmds.filterExpand(cmds.ls(sl=True), sm=12)\");\npython(\"faceMeshes = None\");\npython(\"if not meshes: faceMeshes = meshUtil.duplicateFace()\");\npython(\"srcMeshes = meshes or faceMeshes\");\npython(\"bfUtil.convertToCageMesh(srcMeshes)\");\npython(\"if faceMeshes: cmds.delete(faceMeshes)\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -487,7 +487,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import bifrost as bfUtil; import imp; imp.reload(bfUtil)\");\npython(\"bfUtil.showConvertToCageMeshUI()\");"
+        -command "python(\"from takTools.utils import bifrost as bfUtil; import importlib as imp; imp.reload(bfUtil)\");\npython(\"bfUtil.showConvertToCageMeshUI()\");"
         -optionBox 1
         -enable 1
         -visible 0
@@ -507,7 +507,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import mesh as mUtil; import imp; imp.reload(mUtil)\");\npython(\"mUtil.duplicateFace()\");"
+        -command "python(\"from takTools.utils import mesh as mUtil; import importlib as imp; imp.reload(mUtil)\");\npython(\"mUtil.duplicateFace()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -528,7 +528,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import mesh as mUtil; import imp; imp.reload(mUtil)\");\npython(\"mUtil.separateFace()\");"
+        -command "python(\"from takTools.utils import mesh as mUtil; import importlib as imp; imp.reload(mUtil)\");\npython(\"mUtil.separateFace()\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -568,7 +568,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"import imp; imp.reload(meshUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels:\\n\\tmeshUtil.duplicateOrigMesh(sel)\");"
+        -command "python(\"from takTools.utils import mesh as meshUtil\");\npython(\"import importlib as imp; imp.reload(meshUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels:\\n\\tmeshUtil.duplicateOrigMesh(sel)\");"
         -optionBox 0
         -enable 1
         -visible 1
@@ -610,7 +610,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from imp import reload\");\npython(\"from takTools.utils import globalUtil as gu;reload(gu)\");\npython(\"gu.duplicateRenameSelectionGUI()\");\n"
+        -command "python(\"from importlib import reload\");\npython(\"from takTools.utils import globalUtil as gu;reload(gu)\");\npython(\"gu.duplicateRenameSelectionGUI()\");\n"
         -optionBox 1
         -enable 1
         -visible 0

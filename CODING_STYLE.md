@@ -36,7 +36,7 @@ scripts/takTools/
 ```
 
 ## import 규칙
-- `from imp import reload` → `from importlib import reload` (Python 3.4+)
+- `from importlib import reload` → `from importlib import reload` (Python 3.4+)
 - 새 코드에서 분리된 모듈 직접 import 권장:
   ```python
   # 권장

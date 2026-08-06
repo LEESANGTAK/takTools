@@ -4,7 +4,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.smoothSkinBind()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.smoothSkinBind()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -25,7 +25,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from imp import reload\");\npython(\"from takTools.utils import skin as skinUtil;reload(skinUtil)\");\npython(\"skinUtil.mirrorSkin()\");"
+        -command "python(\"from importlib import reload\");\npython(\"from takTools.utils import skin as skinUtil;reload(skinUtil)\");\npython(\"skinUtil.mirrorSkin()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -88,7 +88,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import imp; imp.reload(tak_misc)\");\npython(\"tak_misc.addInfCopySkin()\");"
+        -command "python(\"import takTools.common.tak_misc as tak_misc\");\npython(\"import importlib as imp; imp.reload(tak_misc)\");\npython(\"tak_misc.addInfCopySkin()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -130,7 +130,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.skin as skinUtils\");\npython(\"import imp; imp.reload(skinUtils)\");\npython(\"skinUtils.addInfluences()\");"
+        -command "python(\"import takTools.utils.skin as skinUtils\");\npython(\"import importlib as imp; imp.reload(skinUtils)\");\npython(\"skinUtils.addInfluences()\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -212,7 +212,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import imp; imp.reload(skinUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: skinUtil.reBind(sel)\");"
+        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import importlib as imp; imp.reload(skinUtil)\");\npython(\"sels = cmds.ls(sl=True)\");\npython(\"for sel in sels: skinUtil.reBind(sel)\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -250,7 +250,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skUtil; import imp; imp.reload(skUtil)\");\npython(\"skUtil.createSkinMeshWithJoints(cmds.ls(sl=True), 'ribbon')\");"
+        -command "python(\"from takTools.utils import skin as skUtil; import importlib as imp; imp.reload(skUtil)\");\npython(\"skUtil.createSkinMeshWithJoints(cmds.ls(sl=True), 'ribbon')\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -270,7 +270,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skUtil; import imp; imp.reload(skUtil)\");\npython(\"skUtil.createSkinMeshWithJoints(cmds.ls(sl=True), 'tube')\");"
+        -command "python(\"from takTools.utils import skin as skUtil; import importlib as imp; imp.reload(skUtil)\");\npython(\"skUtil.createSkinMeshWithJoints(cmds.ls(sl=True), 'tube')\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -290,7 +290,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skinUtil; import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.SSD(cmds.ls(sl=True)[0])\");"
+        -command "python(\"from takTools.utils import skin as skinUtil; import importlib as imp; imp.reload(skinUtil)\");\npython(\"skinUtil.SSD(cmds.ls(sl=True)[0])\");"
         -optionBox 0
         -enable 1
         -data 0
@@ -328,7 +328,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.rigidifySkin()\");\n"
+        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import importlib as imp; imp.reload(skinUtil)\");\npython(\"skinUtil.rigidifySkin()\");\n"
         -optionBox 0
         -enable 1
         -data 0
@@ -348,7 +348,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.duplicateSkinMesh()\");\n"
+        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import importlib as imp; imp.reload(skinUtil)\");\npython(\"skinUtil.duplicateSkinMesh()\");\n"
         -optionBox 0
         -enable 1
         -data 0
@@ -368,7 +368,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.separateSkinMesh()\");\n"
+        -command "python(\"import takTools.utils.skin as skinUtil\");\npython(\"import importlib as imp; imp.reload(skinUtil)\");\npython(\"skinUtil.separateSkinMesh()\");\n"
         -optionBox 0
         -enable 1
         -data 0
@@ -388,7 +388,7 @@
         -divider 0
         -subMenu 0
         -tearOff 0
-        -command "python(\"from takTools.utils import skin as skinUtil; import imp; imp.reload(skinUtil)\");\npython(\"skinUtil.editSkinMesh(cmds.ls(sl=True)[0])\");"
+        -command "python(\"from takTools.utils import skin as skinUtil; import importlib as imp; imp.reload(skinUtil)\");\npython(\"skinUtil.editSkinMesh(cmds.ls(sl=True)[0])\");"
         -optionBox 0
         -enable 1
         -data 0

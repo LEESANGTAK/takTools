@@ -18,7 +18,7 @@
             "annotation": "DNA Editor",
             "image1": "MHC.png",
             "imageOverlayLabel": "",
-            "command": "from imp import reload\nimport dna_editor; reload(dna_editor)\ndna_editor.gui.show()",
+            "command": "from importlib import reload\nimport dna_editor; reload(dna_editor)\ndna_editor.gui.show()",
             "sourceType": "python",
             "noDefaultPopup": true
         },
@@ -42,10 +42,10 @@
         },
         {
             "label": "SkelMesh Manager",
-            "annotation": "from imp import relo...d(tsm)\ntsm.showUI()\n",
+            "annotation": "from importlib import relo...d(tsm)\ntsm.showUI()\n",
             "image1": "HIKCharacterToolSkeleton_100.png",
             "imageOverlayLabel": "",
-            "command": "from imp import reload\nimport takSkelMeshManager as tsm; reload(tsm)\ntsm.showUI()\n",
+            "command": "from importlib import reload\nimport takSkelMeshManager as tsm; reload(tsm)\ntsm.showUI()\n",
             "sourceType": "python",
             "noDefaultPopup": true
         },
