@@ -17,7 +17,7 @@ import maya.cmds as cmds
 import time
 
 
-DEFAULT_CURVATURE = 3.0  # Default curvature value for the curve creation
+DEFAULT_CURVATURE = 3.5  # Default curvature value for the curve creation
 TIME_OUT_THRESHOLD = 3.0  # Time threshold in seconds for the curve creation process
 
 
@@ -75,11 +75,9 @@ def sort_points_on_regression_line(points, regression_lines, index, sorted_point
     regression_line_prev = regression_lines[index][1] - regression_lines[index][0]
     point_tree = cKDTree(points)
 
-    start_time = time.time()
-    while True:
-        if time.time() - start_time > TIME_OUT_THRESHOLD:
-            break
-
+    count = 0
+    limit = 100
+    while count < limit:
         v = regression_lines[index][1] - regression_lines[index][0]
         if np.dot(regression_line_prev, v) < 0:
             v = regression_lines[index][0] - regression_lines[index][1]
@@ -98,6 +96,8 @@ def sort_points_on_regression_line(points, regression_lines, index, sorted_point
         index = np.where(points == nearest_point)[0][0]
 
         sorted_points.append(points[index])
+
+        count += 1
 
     return sorted_points
 
@@ -142,8 +142,8 @@ def showGUI():
     cmds.columnLayout(adjustableColumn=True)
 
     cmds.rowColumnLayout(numberOfColumns=2, columnWidth=[(1, 100), (2, 100)])
-    cmds.text(label='Curvature:', annotation='Higher value will result in a more curved line.\nDecrease value or select centric vertices manually if produce a too short curve.\nDefault is 3.0')
-    cmds.floatField('curvatureFltFld', min=1.0, value=DEFAULT_CURVATURE, precision=2)
+    cmds.text(label='Curvature:', annotation=f'Higher value will create a more curved line but increase process time.\nDecrease the value or select center vertices manually if it produces a weird curve.\nDefault is {DEFAULT_CURVATURE}')
+    cmds.floatField('curvatureFltFld', min=0.01, value=DEFAULT_CURVATURE, precision=2)
 
     cmds.setParent('..')
     cmds.rowColumnLayout(numberOfColumns=3, columnWidth=[(1, 100), (2, 100)])
@@ -170,50 +170,123 @@ def main(*args):
 def create_from_selection(curvature=DEFAULT_CURVATURE, rootLocator=None):
     centerCurves = []
 
-    # Get selected vertices and meshes
+    # Filter selected vertices and meshes
     sels = cmds.ls(sl=True, fl=True)
     selected_vertices = cmds.filterExpand(sels, sm=[28, 31])
     selected_meshes = cmds.filterExpand(sels, sm=12)
 
+    # End process if has no selected vertices or meshes
     if not selected_vertices and not selected_meshes:
         cmds.error("Please select vertices or a meshe(s).")
         return
 
+    # Create progress window
+    cmds.window('centerCrvProgWin', title='Creating center curves...', mnb=False, mxb=False)
+    cmds.columnLayout(adj=True)
+    cmds.progressBar('progBar', isMainProgressBar=True, beginProgress=True, isInterruptable=True, w=300)
+    cmds.showWindow('centerCrvProgWin')
+
+    # Process for the selected vertices
     if selected_vertices:
-        crv = create(selected_vertices, curvature)
-        postCrv = post_process_curve(selected_vertices, crv)
-        centerCurves.append(postCrv)
+        centerCrv = createCurve(curvature, rootLocator, selected_vertices)
+        if not centerCrv:
+            cmds.warning("Can't create a curve from selected vertices.")
+            return
+        centerCurves.append(centerCrv)
 
+    # Process for the selected meshes
     if selected_meshes:
+        cmds.progressBar('progBar', e=True, min=0, max=len(selected_meshes))
+        noCurveMeshes = []
+
+        # Process first pass for the meshes
         for mesh in selected_meshes:
+            if cmds.progressBar('progBar', q=True, isCancelled=True):
+                break
+
             vertices = cmds.ls(cmds.polyListComponentConversion(mesh, toVertex=True), flatten=True)
+            centerCrv = createCurve(curvature, rootLocator, vertices)
+            if centerCrv:
+                centerCurves.append(centerCrv)
+            else:
+                noCurveMeshes.append(mesh)
 
-            arcLength = 0.0
-            minArcLen = 0.001
-            tempCurvature = curvature
-            start_time = time.time()
-            while (arcLength < minArcLen):
-                if tempCurvature < 0.1:
-                    cmds.warning("Can't create a curve from '{}'.".format(mesh))
+        # Process for the meshes that could not create curve
+        if noCurveMeshes:
+            cmds.window('centerCrvProgWin', e=True, title='Creating center curves for error meshes.')
+            cmds.progressBar('progBar', e=True, min=0, max=len(noCurveMeshes))
+
+            noCurveMeshesRemesh = noCurveMeshes
+            noCurveMeshes = []
+
+            for noCrvMeshRemesh in noCurveMeshesRemesh:
+                if cmds.progressBar('progBar', q=True, isCancelled=True):
                     break
 
-                if time.time() - start_time > TIME_OUT_THRESHOLD:
-                    cmds.warning("Timed out while creating a curve from '{}'.".format(mesh))
-                    break
+                remesh = cmds.polyRemesh(
+                    noCrvMeshRemesh,
+                    constructionHistory=1,
+                    maxEdgeLength=1,
+                    useRelativeValues=1,
+                    collapseThreshold=20,
+                    smoothStrength=0,
+                    tessellateBorders=1,
+                    interpolationType=2
+                )
 
-                crv = create(vertices, tempCurvature)
-                if crv:
-                    arcLength = cmds.arclen(crv, ch=False)
-                    if arcLength < minArcLen:
-                        cmds.delete(crv)
+                vertices = cmds.ls(cmds.polyListComponentConversion(noCrvMeshRemesh, toVertex=True), flatten=True)
+                centerCrv = createCurve(curvature, rootLocator, vertices)
+                if centerCrv:
+                    centerCurves.append(centerCrv)
+                else:
+                    noCurveMeshes.append(noCrvMeshRemesh)
 
-                tempCurvature -= 0.5
+                cmds.delete(remesh)
 
-            if crv:
-                postCrv = post_process_curve(vertices, crv, rootLocator)
-                centerCurves.append(postCrv)
+        # User feedback for the final error meshes
+        if noCurveMeshes:
+            if not cmds.objExists('noCurveMeshes_set'):
+                cmds.sets(noCurveMeshes, n='noCurveMeshes_set')
+            else:
+                cmds.sets(noCurveMeshes, forceElement='noCurveMeshes_set')
+            cmds.warning("Could not create curves for the following meshes: {}\nCheck the 'noCurveMeshes_set' object set.".format(", ".join(noCurveMeshes)))
+
+    # End progress bar
+    cmds.progressBar('progBar', e=True, endProgress=True)
+    cmds.deleteUI('centerCrvProgWin')
 
     return centerCurves
+
+
+def createCurve(curvature, rootLocator, vertices):
+    cmds.progressBar('progBar', e=True, step=1)
+
+    crv = None
+
+    arcLength = 0.0
+    minArcLen = 0.001
+    tempCurvature = curvature
+    start_time = time.time()
+    while (arcLength < minArcLen):
+        if tempCurvature < 0.01:
+            break
+
+        if (time.time() - start_time) > TIME_OUT_THRESHOLD:
+            break
+
+        crv = create(vertices, tempCurvature)
+        if crv:
+            arcLength = cmds.arclen(crv, ch=False)
+            if arcLength < minArcLen:
+                cmds.delete(crv)
+
+        tempCurvature -= 0.01
+
+    if crv:
+        crv = post_process_curve(vertices, crv, rootLocator)
+
+    return crv
+
 
 def create(vertices=[], curvature=DEFAULT_CURVATURE):
     crv = None
