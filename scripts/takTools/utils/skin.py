@@ -64,7 +64,7 @@ def getInfluences(geo):
     infs = None
     skinClst = getSkinCluster(geo)
     if skinClst:
-        infs = skinClst.getInfluence()
+        infs = cmds.skinCluster(skinClst, q=True, inf=True)
     return infs
 
 
@@ -233,7 +233,7 @@ def copySkin(source, target, components=None):
         cmds.setAttr(f'{targetMesh}.visibility', True)
 
     if not trgSkinClst:
-        trgSkinClst = cmds.skinCluster(srcJointInfs, targetMesh, dr=4, tsb=True, nw=1)
+        trgSkinClst = cmds.skinCluster(srcJointInfs, targetMesh, dr=4, tsb=True, nw=1)[0]
         cmds.skinCluster(trgSkinClst, e=True, ug=True, ai=srcGeoInfs)
 
     else:

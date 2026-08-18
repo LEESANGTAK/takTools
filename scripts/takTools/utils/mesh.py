@@ -60,7 +60,10 @@ def duplicateFace(faces=None):
                 shapePlug = cmds.listConnections(objSetPlug, d=False, plugs=True)[0]
                 cmds.disconnectAttr(shapePlug, objSetPlug)
 
-        cmds.parent(dupMesh, world=True)
+        try:
+            cmds.parent(dupMesh, world=True)
+        except:
+            pass
 
         dupMeshes.append(dupMesh)
 
@@ -268,8 +271,6 @@ def restoreReferenceMesh(meshTransform):
 
 
 def cleanupMesh(mesh):
-    mesh = str(mesh)
-
     cmds.editDisplayLayerMembers('defaultLayer', mesh)  # Add to default display layer
 
     cmds.delete(mesh, ch=True)  # Delete inputs
@@ -282,9 +283,9 @@ def cleanupMesh(mesh):
             pass
 
     # Unlock channelbox
-    for attr in cmds.listAttr(mesh) or []:
+    for attr in cmds.listAttr(mesh, keyable=True) or []:
         try:
-            cmds.setAttr(attr, lock=False)
+            cmds.setAttr(f'{mesh}.{attr}', lock=False)
         except RuntimeError:
             pass
 
