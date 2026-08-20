@@ -475,6 +475,10 @@ def updateBindPose(rootJoint):
     :param rootJoint: Root joint of joint hierarchy
     :type rootJoint: str
     """
+    if cmds.nodeType(rootJoint) != 'joint':
+        cmds.error('Please select the root joint.')
+        return
+
     parent = cmds.listRelatives(rootJoint, p=True)
     if parent and cmds.nodeType(parent[0]) == 'joint':
         cmds.error('Joint "{}" has parent joint. Please use the root joint of the hierarchy.'.format(rootJoint))
