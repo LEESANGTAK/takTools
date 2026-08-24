@@ -185,7 +185,7 @@ def vectorReproduce(baseMeshes, noSymMeshes, targetMeshes, outMeshes, centerFall
 
         cmds.setAttr(f'{targetMesh}.visibility', True) # Can't get boundingbox when mesh visibility set to false
         targetGeoBoundingBox = cmds.xform(targetMesh, q=True, bb=True, ws=True)
-        bbWidth = abs(targetGeoBoundingBox[3] - targetGeoBoundingBox[1])
+        bbWidth = abs(targetGeoBoundingBox[3] - targetGeoBoundingBox[0])
         cmds.setAttr(f'{rampBS}.range', bbWidth)
 
         if noSymMeshes:
