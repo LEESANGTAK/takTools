@@ -821,30 +821,25 @@ def cleanChBox(*args):
 
 
 def resetVtx(*args):
-    selList = cmds.ls(sl = True)
+    selGeos = cmds.filterExpand(cmds.ls(sl = True), sm =[9, 10, 12])
 
     # progress window
-    cmds.progressWindow(title = 'Reset Vertex', minValue = 0, maxValue = len(selList), progress = 0, status = 'Stand by', isInterruptable = True)
+    cmds.progressWindow(title = 'Reset Vertex', minValue = 0, maxValue = len(selGeos), progress = 0, status = 'Stand by', isInterruptable = True)
 
-    for sel in selList:
+    for index, sel in enumerate(selGeos):
         if cmds.progressWindow(q = True, isCancelled = True):
             break
+        cmds.progressWindow(e = True, progress = index, status = 'Working on \'%s\'' %(sel))
 
-        cmds.progressWindow(e = True, progress = selList.index(sel), status = 'Working on \'%s\'' %(sel))
-
-        if not cmds.listRelatives(sel, path = True, s = True, ni = True):
-            continue
-        else:
-            # Reset vertex
-            try:
-                cmds.delete(cmds.polyMoveVertex(sel, localTranslate = (0, 0, 0)))
-            except:
-                pass
+        try:
+            cmds.delete(cmds.polyMoveVertex(sel, localTranslate = (0, 0, 0)))
+        except:
+            pass
 
     cmds.progressWindow(e = True, progress = 0, status = 'Reset Vertex Work Done.')
     cmds.progressWindow(endProgress = True)
 
-    cmds.select(selList, r = True)
+    cmds.select(selGeos, r = True)
 
 
 def delHis(*args):
@@ -1045,7 +1040,6 @@ def getDagPath(nodeName):
 
 
 def allInOne(*args):
-    delHis()
     delChildOfShape()
     matchShape()
     cleanChBox()
