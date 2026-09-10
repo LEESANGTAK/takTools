@@ -8,6 +8,7 @@ from importlib import reload
 from . import globalUtil; reload(globalUtil)
 from . import mesh as meshUtil; reload(meshUtil)
 from . import bifrost as bfUtil; reload(bfUtil)
+from . import joint as jntUtil; reload(jntUtil)
 from ..rigging import bSkinSaver as bsk
 from ..rigging import sculptSkinAPI as ssAPI
 
@@ -442,19 +443,28 @@ def getAffectedVertex(inf, minWeight):
 
 
 def createSkinMeshWithJoints(joints, type='ribbon'):
+    circleNormalInfo = {
+        'x': [1, 0, 0],
+        'y': [0, 1, 0],
+        'z': [0, 0, 1]
+    }
+    aimAxis = jntUtil.getAimAxis(joints)
+
+    # Get joint chain length along the aim axis to determine the width of the skin mesh
     jntsLength = 0
     for jnt in joints[1:]:
-        jntsLength += abs(jnt.tx.get())
+        jntsLength += abs(cmds.getAttr(f'{jnt}.t{aimAxis}'))
 
+    # Create profile curve for lofting
     width = jntsLength*0.05
     if type == 'ribbon':
         profileCurve = cmds.curve(degree=1, editPoint=[(0.0, 0.0, -width), (0.0, 0.0, width)], n='profile_crv')
     elif type == 'tube':
-        profileCurve = cmds.circle(normal=[1, 0, 0], radius=width, n='profile_crv')[0]
+        profileCurve = cmds.circle(normal=circleNormalInfo[aimAxis], radius=width, n='profile_crv')[0]
 
     profileCurves = []
     for jnt in joints:
-        dupProfileCrv = cmds.duplicate(profileCurve)
+        dupProfileCrv = cmds.duplicate(profileCurve)[0]
         cmds.xform(dupProfileCrv, matrix=cmds.getAttr(f'{jnt}.worldMatrix'), ws=True)
         profileCurves.append(dupProfileCrv)
 
