@@ -496,11 +496,8 @@ def updateBindPose(rootJoint):
 
     joints = cmds.ls(rootJoint, dag=True, type='joint')
     bindPoses = cmds.dagPose(rootJoint, q=True, bindPose=True)
-    if len(bindPoses) > 1:
-        cmds.delete(bindPoses)
-        cmds.dagPose(joints, n='bindPose', save=True, bindPose=True)
-    else:
-        cmds.dagPose(joints, n=bindPoses[0], reset=True)
+    cmds.delete(bindPoses)
+    cmds.dagPose(joints, n='bindPose', save=True, bindPose=True)
 
 
 def goToBindPose(rootJoint):
