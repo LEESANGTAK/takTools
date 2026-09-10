@@ -292,3 +292,37 @@ def createOnCenter(objects):
         bb.expand(objPoint)
     jnt = cmds.createNode('joint')
     cmds.xform(jnt, t=(bb.center.x, bb.center.y, bb.center.z), ws=True)
+
+
+def getAimAxis(joints):
+    startPoint = om.MPoint(cmds.xform(joints[0], q=True, t=True, ws=True))
+    endPoint = om.MPoint(cmds.xform(joints[-1], q=True, t=True, ws=True))
+    aimVector = endPoint - startPoint
+
+    xVector = om.MVector()
+    yVector = om.MVector()
+    zVector = om.MVector()
+
+    for jnt in joints:
+        jntMtx = cmds.xform(jnt, q=True, m=True, ws=True)
+        jntXVec = om.MVector(jntMtx[0:3])
+        jntYVec = om.MVector(jntMtx[4:7])
+        jntZVec = om.MVector(jntMtx[8:11])
+
+        xVector += jntXVec
+        yVector += jntYVec
+        zVector += jntZVec
+
+    aimVector.normalize()
+    xVector.normalize()
+    yVector.normalize()
+    zVector.normalize()
+
+    dotDict = {}
+
+    dotDict['x'] = aimVector * xVector
+    dotDict['y'] = aimVector * yVector
+    dotDict['z'] = aimVector * zVector
+
+    dotDict = sorted(dotDict.items(), key=lambda item: item[1], reverse=True)
+    return dotDict[0][0]
