@@ -1,0 +1,679 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [],
+    "compounds": [
+        {
+            "name": "Tak::Compounds::get_points_close_to_strands",
+            "uriImported": "stream:/stream",
+            "metadata": [
+                {
+                    "metaName": "io_nodes",
+                    "metadata": [
+                        {
+                            "metaName": "io_inodes",
+                            "metadata": [
+                                {
+                                    "metaName": "input",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "strands"
+                                                },
+                                                {
+                                                    "metaName": "points"
+                                                },
+                                                {
+                                                    "metaName": "search_distance"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "49.000000"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-489.882 -283.795"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "metaName": "io_onodes",
+                            "metadata": [
+                                {
+                                    "metaName": "output",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "out_points"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "zValue",
+                                            "metaType": "string",
+                                            "metaValue": "53.000000"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "2342.41 100.657"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "metaName": "ViewportRect",
+                    "metaType": "string",
+                    "metaValue": "-848.106 -260.526 4139.61 1271.13"
+                },
+                {
+                    "metaName": "DisplayMode",
+                    "metaType": "string",
+                    "metaValue": "2"
+                },
+                {
+                    "metaName": "LayoutPos",
+                    "metaType": "string",
+                    "metaValue": "211.992 618.063"
+                },
+                {
+                    "metaName": "zValue",
+                    "metaType": "string",
+                    "metaValue": "356.000000"
+                }
+            ],
+            "terminalStates": [
+                {
+                    "name": "Core::Graph::terminal::diagnostic",
+                    "enabled": "true"
+                }
+            ],
+            "ports": [
+                {
+                    "portName": "strands",
+                    "portDirection": "input",
+                    "portType": "Object",
+                    "portDefault": {}
+                },
+                {
+                    "portName": "points",
+                    "portDirection": "input",
+                    "portType": "Object",
+                    "portDefault": {}
+                },
+                {
+                    "portName": "out_points",
+                    "portDirection": "output"
+                },
+                {
+                    "portName": "search_distance",
+                    "portDirection": "input",
+                    "portDefaultType": "float",
+                    "portDefault": "1.64900005f",
+                    "metadata": [
+                        {
+                            "metaName": "UISoftMin",
+                            "metaType": "string",
+                            "metaValue": "0.1"
+                        }
+                    ]
+                }
+            ],
+            "compoundNodes": [
+                {
+                    "nodeName": "construct_points1",
+                    "nodeType": "Geometry::Points::construct_points",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "NodeWidthOffset",
+                            "metaType": "string",
+                            "metaValue": "0"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "51.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1929.25 340.506"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "distance",
+                    "nodeType": "Core::Math::distance",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "45.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "991.58 -251.322"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "filter_array",
+                    "nodeType": "Core::Array::filter_array",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "43.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1470.58 -108.322"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "get_closest_locations",
+                    "nodeType": "Geometry::Query::get_closest_locations",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "46.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "260.935 -306.784"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "get_from_array",
+                    "nodeType": "Core::Array::get_from_array",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "50.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1628.25 361.506"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "get_point_position",
+                    "nodeType": "Geometry::Properties::get_point_position",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "48.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "-42.0645 310.505"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "less",
+                    "nodeType": "Core::Logic::less",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "44.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "1212.58 48.6782"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "point_scope2",
+                    "nodeType": "Diagnostic::Display::point_scope",
+                    "terminalStates": [
+                        {
+                            "name": "Core::Graph::terminal::diagnostic",
+                            "enabled": "true"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::final",
+                            "enabled": "false"
+                        },
+                        {
+                            "name": "Core::Graph::terminal::proxy",
+                            "enabled": "false"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "52.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "2319.25 433.506"
+                        }
+                    ]
+                },
+                {
+                    "nodeName": "sample_property",
+                    "nodeType": "Geometry::Query::sample_property",
+                    "metadata": [
+                        {
+                            "metaName": "DisplayMode",
+                            "metaType": "string",
+                            "metaValue": "2"
+                        },
+                        {
+                            "metaName": "zValue",
+                            "metaType": "string",
+                            "metaValue": "47.000000"
+                        },
+                        {
+                            "metaName": "LayoutPos",
+                            "metaType": "string",
+                            "metaValue": "616.935 -608.784"
+                        }
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "source": "get_from_array.value",
+                    "target": "construct_points1.point_position"
+                },
+                {
+                    "source": "construct_points1.points",
+                    "target": "point_scope2.point_geo"
+                },
+                {
+                    "source": "sample_property.sampled_data",
+                    "target": "distance.first"
+                },
+                {
+                    "source": "get_point_position.point_position",
+                    "target": "distance.second"
+                },
+                {
+                    "source": "distance.distance",
+                    "target": "filter_array.array"
+                },
+                {
+                    "source": "distance.distance",
+                    "target": "less.first"
+                },
+                {
+                    "source": "less.output",
+                    "target": "filter_array.boolean_array"
+                },
+                {
+                    "source": "filter_array.filtered_indices",
+                    "target": "get_from_array.index"
+                },
+                {
+                    "source": ".strands",
+                    "target": "get_closest_locations.geometry"
+                },
+                {
+                    "source": "get_point_position.point_position",
+                    "target": "get_closest_locations.positions"
+                },
+                {
+                    "source": "get_closest_locations.locations",
+                    "target": "sample_property.locations"
+                },
+                {
+                    "source": "get_point_position.point_position",
+                    "target": "get_from_array.array"
+                },
+                {
+                    "source": ".points",
+                    "target": "get_point_position.geometry"
+                },
+                {
+                    "source": ".strands",
+                    "target": "sample_property.geometry"
+                },
+                {
+                    "source": "construct_points1.points",
+                    "target": ".out_points"
+                },
+                {
+                    "source": ".search_distance",
+                    "target": "less.second"
+                }
+            ],
+            "values": [
+                {
+                    "valueName": "filter_array.boolean_array",
+                    "valueType": "array<bool>",
+                    "value": []
+                },
+                {
+                    "valueName": "get_closest_locations.use_cutoff_distance",
+                    "valueType": "bool",
+                    "value": "true"
+                },
+                {
+                    "valueName": "get_closest_locations.cutoff_distance",
+                    "valueType": "float",
+                    "value": "10f"
+                },
+                {
+                    "valueName": "less.second",
+                    "valueType": "float",
+                    "value": "1.02499998f"
+                },
+                {
+                    "valueName": "point_scope2.shape",
+                    "valueType": "Geometry::PointShapes",
+                    "value": "Sphere"
+                },
+                {
+                    "valueName": "point_scope2.default_size",
+                    "valueType": "float",
+                    "value": "0.155100003f"
+                },
+                {
+                    "valueName": "point_scope2.color",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "1f",
+                        "y": "0.786899984f",
+                        "z": "0f"
+                    }
+                },
+                {
+                    "valueName": "point_scope2.coloring_mode",
+                    "valueType": "Diagnostic::ColoringMode",
+                    "value": "Color"
+                },
+                {
+                    "valueName": "point_scope2.coloring_property",
+                    "valueType": "string",
+                    "value": "point_normal"
+                },
+                {
+                    "valueName": "point_scope2.heatmap_R",
+                    "valueType": "Math::FCurve",
+                    "value": {
+                        "version": "1",
+                        "preExtrapolation": "0",
+                        "postExtrapolation": "0",
+                        "points": [
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "2",
+                                    "pcn": {
+                                        "xp": "-0.40000000000000002",
+                                        "yp": "0.10000000000000001",
+                                        "x": "0",
+                                        "y": "0.10000000000000001",
+                                        "xn": "0.40000000000000002",
+                                        "yn": "0.10000000000000001"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "2",
+                                    "pcn": {
+                                        "xp": "9.5999999999999996",
+                                        "yp": "1",
+                                        "x": "10",
+                                        "y": "1",
+                                        "xn": "10.4",
+                                        "yn": "1"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "valueName": "point_scope2.heatmap_G",
+                    "valueType": "Math::FCurve",
+                    "value": {
+                        "version": "1",
+                        "preExtrapolation": "0",
+                        "postExtrapolation": "0",
+                        "points": [
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "2",
+                                    "pcn": {
+                                        "xp": "-1.3999999999999999",
+                                        "yp": "0",
+                                        "x": "-1",
+                                        "y": "0",
+                                        "xn": "-0.59999999999999998",
+                                        "yn": "0"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "2",
+                                    "pcn": {
+                                        "xp": "4.7000000000000002",
+                                        "yp": "1",
+                                        "x": "5",
+                                        "y": "1",
+                                        "xn": "5.2999999999999998",
+                                        "yn": "1"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "2",
+                                    "pcn": {
+                                        "xp": "9.5999999999999996",
+                                        "yp": "0",
+                                        "x": "10",
+                                        "y": "0",
+                                        "xn": "10.4",
+                                        "yn": "0"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "valueName": "point_scope2.heatmap_B",
+                    "valueType": "Math::FCurve",
+                    "value": {
+                        "version": "1",
+                        "preExtrapolation": "0",
+                        "postExtrapolation": "0",
+                        "points": [
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "2",
+                                    "pcn": {
+                                        "xp": "-0.40000000000000002",
+                                        "yp": "1",
+                                        "x": "0",
+                                        "y": "1",
+                                        "xn": "0.40000000000000002",
+                                        "yn": "1"
+                                    }
+                                }
+                            },
+                            {
+                                "point": {
+                                    "locked": "1",
+                                    "interpolation": "2",
+                                    "pcn": {
+                                        "xp": "9.5999999999999996",
+                                        "yp": "0.10000000000000001",
+                                        "x": "10",
+                                        "y": "0.10000000000000001",
+                                        "xn": "10.4",
+                                        "yn": "0.10000000000000001"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "valueName": "point_scope2.enable_arrows",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "point_scope2.arrow_property",
+                    "valueType": "string",
+                    "value": "point_velocity"
+                },
+                {
+                    "valueName": "point_scope2.normalize_arrow",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "point_scope2.length_scale",
+                    "valueType": "float",
+                    "value": "1f"
+                },
+                {
+                    "valueName": "point_scope2.cull_by_scalar_property",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "point_scope2.cull_property",
+                    "valueType": "string",
+                    "value": "point_age"
+                },
+                {
+                    "valueName": "point_scope2.keep_max_value",
+                    "valueType": "float",
+                    "value": "3f"
+                },
+                {
+                    "valueName": "point_scope2.invert_range",
+                    "valueType": "bool",
+                    "value": "false"
+                },
+                {
+                    "valueName": "sample_property.default",
+                    "valueType": "Math::float3",
+                    "value": {
+                        "x": "0f",
+                        "y": "0f",
+                        "z": "0f"
+                    }
+                },
+                {
+                    "valueName": "sample_property.property",
+                    "valueType": "string",
+                    "value": "point_position"
+                },
+                {
+                    "valueName": "sample_property.method",
+                    "valueType": "BifrostExp::Geometry::SampleMethod",
+                    "value": "interpolated"
+                }
+            ],
+            "reservedNodeNames": [
+                {
+                    "name": "input"
+                },
+                {
+                    "name": "output"
+                }
+            ]
+        }
+    ]
+}
