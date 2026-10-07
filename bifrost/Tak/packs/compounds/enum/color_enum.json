@@ -1,0 +1,30 @@
+{
+    "header": {
+        "metadata": [
+            {
+                "metaName": "adskFileFormatVersion",
+                "metaValue": "100L"
+            }
+        ]
+    },
+    "namespaces": [],
+    "types": [
+        {
+            "enumName": "Tak::Color",
+            "enumMembers": [
+                {
+                    "enumKey": "R",
+                    "enumValue": "0"
+                },
+                {
+                    "enumKey": "G",
+                    "enumValue": "1"
+                },
+                {
+                    "enumKey": "B",
+                    "enumValue": "2"
+                }
+            ]
+        }
+    ]
+}
