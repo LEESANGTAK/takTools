@@ -409,7 +409,7 @@ def getAffectedVertex(inf, minWeight):
         vertices = om.MObject()
 
         # Get skin cluster function
-        selLs.add(skinCluster.name())
+        selLs.add(skinCluster)
         selLs.getDependNode(0, skinNode)
         if not skinNode.hasFn(om.MFn.kSkinClusterFilter):
             print("Warning: Selection has no related skin cluster.")
@@ -417,7 +417,7 @@ def getAffectedVertex(inf, minWeight):
         skinFn = oma.MFnSkinCluster(skinNode)
 
         # Get influence dag path
-        selLs.add(inf.name())
+        selLs.add(inf)
         selLs.getDagPath(1, infDagPath)
 
         # Get affected points
