@@ -146,17 +146,16 @@ def removeVaccine():
 
     # Remove script nodes
     for sNode in ['breed_gene', 'vaccine_gene']:
-        try:
+        if cmds.objExists(sNode):
             cmds.delete(sNode)
-        except RuntimeError:
-            pass
 
     # Remove python files
     userDocsDir = os.path.expanduser('~')
     scriptsDir = os.path.join(userDocsDir, 'maya', 'scripts')
-    for item in os.listdir(scriptsDir):
-        if item in ['userSetup.py', 'vaccine.py', 'vaccine.pyc']:
-            os.remove(os.path.join(scriptsDir, item))
+    if os.path.exists(scriptsDir):
+        for item in os.listdir(scriptsDir):
+            if item in ['userSetup.py', 'vaccine.py', 'vaccine.pyc']:
+                os.remove(os.path.join(scriptsDir, item))
 
 
 def unlockNodes():
