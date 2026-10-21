@@ -875,6 +875,7 @@ def setShpAttrs(*args):
                     cmds.error("%s object's name is not uniqe. May exists same object name." %sel)
 
             # turn off drawing override of the shape
+            cmds.setAttr('%s.overrideEnabled' %sel, 0)
             drovInput = cmds.listConnections('%s.drawOverride' %selShape[0], s = True, d = False, p = True)
             if drovInput:
                 cmds.disconnectAttr(drovInput[0], '%s.drawOverride' %selShape[0])
