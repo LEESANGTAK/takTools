@@ -15,6 +15,8 @@
 
 
 import os
+import shutil
+import difflib
 import maya.OpenMaya as OpenMaya
 import maya.OpenMayaAnim as OpenMayaAnim
 from maya import cmds, mel
@@ -66,6 +68,1146 @@ def getMayaWindow():
     return shiboken.wrapInstance(int(ptr), QWidget)
 
 
+
+def parseSwFileJoints(inputFile):
+    """
+    Parses a .sw file and returns:
+    - objects: list of object names
+    - objectJoints: dict of { objectName: [joint1, joint2, ...] }
+    - uniqueJoints: list of unique joint names in order of appearance
+    """
+    if not os.path.isfile(inputFile):
+        return [], {}, []
+
+    objects = []
+    objectJoints = {}
+    uniqueJoints = []
+    seen = set()
+
+    currentObj = None
+    filePosition = 0
+
+    with open(inputFile, 'r') as f:
+        for line in f:
+            stripped = line.strip()
+            if not stripped:
+                if filePosition == 2:
+                    filePosition = 0
+                continue
+
+            if filePosition == 0:
+                currentObj = stripped
+                objects.append(currentObj)
+                objectJoints[currentObj] = []
+                filePosition = 1
+            elif filePosition == 1:
+                if stripped.startswith("============"):
+                    filePosition = 2
+                else:
+                    objectJoints[currentObj].append(stripped)
+                    if stripped not in seen:
+                        seen.add(stripped)
+                        uniqueJoints.append(stripped)
+            elif filePosition == 2:
+                # weight line
+                pass
+
+    return objects, objectJoints, uniqueJoints
+
+
+def getSceneGeometryNames():
+    """
+    Returns unique short names of all geometry transforms in the Maya scene.
+    """
+    shapes = cmds.ls(dag=True, ni=True, type=['mesh', 'nurbsCurve', 'nurbsSurface']) or []
+    if not shapes:
+        return []
+    transforms = cmds.listRelatives(shapes, p=True, fullPath=False) or []
+    seen = set()
+    result = []
+    for t in transforms:
+        short = t.split('|')[-1]
+        if short not in seen:
+            seen.add(short)
+            result.append(short)
+    return result
+
+
+def checkMissingGeometries(fileGeos, namespace=''):
+    """
+    Checks which geometries in fileGeos do not exist in the Maya scene.
+    Returns:
+    - missingGeos: list of geometries in file that don't exist in scene
+    - existingGeos: list of geometries in file that do exist in scene
+    """
+    sceneGeos = set(getSceneGeometryNames())
+    missing = []
+    existing = []
+
+    for fg in fileGeos:
+        target = (namespace + fg) if namespace and not fg.startswith(namespace) else fg
+        if target in sceneGeos or fg in sceneGeos or cmds.objExists(target):
+            existing.append(fg)
+        else:
+            missing.append(fg)
+
+    return missing, existing
+
+
+def autoMatchGeometry(fileGeo, sceneGeos):
+    """
+    Tries to find the best match for fileGeo in sceneGeos.
+    """
+    if not sceneGeos or not fileGeo:
+        return None
+
+    fileLower = fileGeo.lower()
+    for sg in sceneGeos:
+        if sg.lower() == fileLower:
+            return sg
+
+    def normalizeGeo(n):
+        n = n.lower()
+        for s in ['_geo', '_mesh', '_ply', '_shape', '_geom', '_grp']:
+            if n.endswith(s):
+                n = n[:-len(s)]
+        return n
+
+    normFile = normalizeGeo(fileGeo)
+    for sg in sceneGeos:
+        if normalizeGeo(sg) == normFile:
+            return sg
+
+    matches = difflib.get_close_matches(fileGeo, sceneGeos, n=1, cutoff=0.55)
+    if matches:
+        return matches[0]
+
+    return None
+
+
+def getSceneJointNames():
+    """
+    Returns unique short names of all joints in the Maya scene.
+    """
+    joints = cmds.ls(type='joint') or []
+    shortNames = [j.split('|')[-1] for j in joints]
+    seen = set()
+    result = []
+    for name in shortNames:
+        if name not in seen:
+            seen.add(name)
+            result.append(name)
+    return result
+
+
+def checkMissingJoints(fileJoints, namespace=''):
+    """
+    Checks which joints in fileJoints do not exist in the Maya scene.
+    Returns:
+    - missingJoints: list of joints in file that don't exist in scene
+    - existingJoints: list of joints in file that do exist in scene
+    """
+    sceneJoints = set(getSceneJointNames())
+    missing = []
+    existing = []
+
+    for fj in fileJoints:
+        target = (namespace + fj) if namespace and not fj.startswith(namespace) else fj
+        if target in sceneJoints or fj in sceneJoints or cmds.objExists(target):
+            existing.append(fj)
+        else:
+            missing.append(fj)
+
+    return missing, existing
+
+
+def autoMatchJoint(fileJoint, sceneJoints):
+    """
+    Tries to find the best match for fileJoint in sceneJoints.
+    """
+    if not sceneJoints or not fileJoint:
+        return None
+
+    fileLower = fileJoint.lower()
+    for sj in sceneJoints:
+        if sj.lower() == fileLower:
+            return sj
+
+    def normalizeName(n):
+        n = n.lower()
+        if n.startswith('left_') or n.startswith('l_'):
+            n = 'l_' + n.split('_', 1)[-1]
+        elif n.startswith('right_') or n.startswith('r_'):
+            n = 'r_' + n.split('_', 1)[-1]
+        for s in ['_jnt', '_joint', '_bind', '_skn', '_drv', '_bn']:
+            if n.endswith(s):
+                n = n[:-len(s)]
+        return n
+
+    normFile = normalizeName(fileJoint)
+    for sj in sceneJoints:
+        if normalizeName(sj) == normFile:
+            return sj
+
+    matches = difflib.get_close_matches(fileJoint, sceneJoints, n=1, cutoff=0.55)
+    if matches:
+        return matches[0]
+
+    return None
+
+
+def updateSwFileWithMapping(inputFile, jointMapping=None, geoMapping=None, backup=True):
+    """
+    Updates geometry and joint names in .sw file according to:
+    - geoMapping {oldGeoName: newGeoName}
+    - jointMapping {oldJointName: newJointName}
+    Optionally creates a .bak backup.
+    """
+    if not os.path.isfile(inputFile):
+        cmds.warning("File does not exist: {}".format(inputFile))
+        return False
+
+    if backup:
+        bakFile = inputFile + '.bak'
+        try:
+            shutil.copy2(inputFile, bakFile)
+        except Exception as e:
+            cmds.warning("Failed to create backup: {}".format(e))
+
+    with open(inputFile, 'r') as f:
+        lines = f.readlines()
+
+    newLines = []
+    filePosition = 0
+    modifiedJointCount = 0
+    modifiedGeoCount = 0
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            if filePosition == 2:
+                filePosition = 0
+            newLines.append(line)
+            continue
+
+        if filePosition == 0:
+            filePosition = 1
+            if geoMapping and stripped in geoMapping and geoMapping[stripped]:
+                newGeo = geoMapping[stripped]
+                ending = '\n' if line.endswith('\n') else ''
+                newLines.append(newGeo + ending)
+                if newGeo != stripped:
+                    modifiedGeoCount += 1
+            else:
+                newLines.append(line)
+
+        elif filePosition == 1:
+            if stripped.startswith("============"):
+                filePosition = 2
+                newLines.append(line)
+            else:
+                if jointMapping and stripped in jointMapping and jointMapping[stripped]:
+                    newJoint = jointMapping[stripped]
+                    ending = '\n' if line.endswith('\n') else ''
+                    newLines.append(newJoint + ending)
+                    if newJoint != stripped:
+                        modifiedJointCount += 1
+                else:
+                    newLines.append(line)
+
+        elif filePosition == 2:
+            newLines.append(line)
+
+    with open(inputFile, 'w') as f:
+        f.writelines(newLines)
+
+    print("Updated {} geometry names and {} joint names in {}".format(
+        modifiedGeoCount, modifiedJointCount, inputFile
+    ))
+    return True
+
+
+remapDialogWin = None
+
+def showSkinRemapDialog(swFilePath, namespace='', geoCheck=False, parent=getMayaWindow(), initialTab=0):
+    global remapDialogWin
+    if remapDialogWin is not None:
+        try:
+            remapDialogWin.close()
+            remapDialogWin.deleteLater()
+        except Exception:
+            pass
+    remapDialogWin = SkinRemapDialog(
+        swFilePath=swFilePath,
+        namespace=namespace,
+        geoCheck=geoCheck,
+        parent=parent,
+        initialTab=initialTab
+    )
+    remapDialogWin.show()
+    remapDialogWin.raise_()
+    remapDialogWin.activateWindow()
+    return remapDialogWin
+
+
+class SkinRemapDialog(QDialog):
+    def __init__(self, swFilePath, namespace='', geoCheck=False, parent=getMayaWindow(), initialTab=0):
+        super(SkinRemapDialog, self).__init__(parent)
+        self.swFilePath = swFilePath
+        self.namespace = namespace
+        self.geoCheck = geoCheck
+
+        self.setWindowFlags(self.windowFlags() | Qt.Window)
+        self.setAttribute(Qt.WA_DeleteOnClose, False)
+        self.setModal(False)
+
+        self.sceneGeos = getSceneGeometryNames()
+        self.sceneJoints = getSceneJointNames()
+        self.objects, self.objectJoints, self.uniqueJoints = parseSwFileJoints(self.swFilePath)
+
+        self.setWindowTitle('bSkinSaver - Remapper (Geometry & Joint)')
+        self.resize(800, 620)
+
+        self.initUI(initialTab)
+        self.populateGeoTable()
+        self.populateJointTable()
+        self.updateSummary()
+        self.applyGeoFilter()
+        self.applyJointFilter()
+
+    def initUI(self, initialTab):
+        mainLayout = QVBoxLayout(self)
+        mainLayout.setSpacing(6)
+
+        # 1. Info Header
+        infoGroup = QGroupBox("SW File Information")
+        infoLayout = QVBoxLayout(infoGroup)
+        infoLayout.setSpacing(3)
+
+        fileLabel = QLabel("<b>File:</b> {}".format(self.swFilePath))
+        fileLabel.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        infoLayout.addWidget(fileLabel)
+
+        self.summaryLabel = QLabel("")
+        infoLayout.addWidget(self.summaryLabel)
+        mainLayout.addWidget(infoGroup)
+
+        # 2. Tab Widget
+        self.tabWidget = QTabWidget()
+
+        # Tab 1: Geometries
+        geoTab = QWidget()
+        self.initGeoTab(geoTab)
+        self.tabWidget.addTab(geoTab, "🧊 Geometries")
+
+        # Tab 2: Joints
+        jointTab = QWidget()
+        self.initJointTab(jointTab)
+        self.tabWidget.addTab(jointTab, "🦴 Joints")
+
+        self.tabWidget.setCurrentIndex(initialTab)
+        mainLayout.addWidget(self.tabWidget)
+
+        # 3. Bottom Action Buttons
+        bottomLayout = QHBoxLayout()
+        self.saveFileButton = QPushButton("Save Mapping to .sw File")
+        self.saveFileButton.setToolTip("Permanently update geometry and joint names in the .sw file (creates a .bak backup)")
+        self.saveFileButton.clicked.connect(self.saveMappingToFile)
+        bottomLayout.addWidget(self.saveFileButton)
+
+        bottomLayout.addStretch()
+
+        self.loadWeightsButton = QPushButton("Load Weights with Mapping")
+        self.loadWeightsButton.setStyleSheet("font-weight: bold; padding: 6px 16px; background-color: #3870a0; color: white;")
+        self.loadWeightsButton.clicked.connect(self.loadWeightsWithMapping)
+        bottomLayout.addWidget(self.loadWeightsButton)
+
+        self.closeButton = QPushButton("Close")
+        self.closeButton.clicked.connect(self.close)
+        bottomLayout.addWidget(self.closeButton)
+
+        mainLayout.addLayout(bottomLayout)
+
+    # ------------------ Geometries Tab ------------------
+    def initGeoTab(self, tab):
+        layout = QVBoxLayout(tab)
+        layout.setSpacing(6)
+
+        toolsLayout = QHBoxLayout()
+        self.geoShowMissingCheck = QCheckBox("Show Missing / Mapped Only")
+        self.geoShowMissingCheck.setChecked(True)
+        self.geoShowMissingCheck.toggled.connect(self.applyGeoFilter)
+        toolsLayout.addWidget(self.geoShowMissingCheck)
+
+        toolsLayout.addSpacing(10)
+        toolsLayout.addWidget(QLabel("Filter:"))
+        self.geoFilterEdit = QLineEdit()
+        self.geoFilterEdit.setPlaceholderText("Search geometry name...")
+        self.geoFilterEdit.textChanged.connect(self.applyGeoFilter)
+        toolsLayout.addWidget(self.geoFilterEdit)
+
+        self.geoAutoMatchAllButton = QPushButton("Smart Auto Match All")
+        self.geoAutoMatchAllButton.clicked.connect(self.autoMatchAllGeos)
+        toolsLayout.addWidget(self.geoAutoMatchAllButton)
+        layout.addLayout(toolsLayout)
+
+        self.geoTable = QTableWidget(0, 4)
+        self.geoTable.setHorizontalHeaderLabels(["Status", "SW File Geometry", "Scene Target Geometry", "Suggested Match"])
+        header = self.geoTable.horizontalHeader()
+        if hasattr(header, 'setSectionResizeMode'):
+            header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.Stretch)
+            header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        else:
+            header.setResizeMode(0, QHeaderView.ResizeToContents)
+            header.setResizeMode(1, QHeaderView.Stretch)
+            header.setResizeMode(2, QHeaderView.Stretch)
+            header.setResizeMode(3, QHeaderView.ResizeToContents)
+
+        self.geoTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.geoTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.geoTable.verticalHeader().setDefaultSectionSize(26)
+        layout.addWidget(self.geoTable)
+
+        selLayout = QHBoxLayout()
+        self.geoAssignButton = QPushButton("Assign Selected from Maya")
+        self.geoAssignButton.setToolTip("Assign selected mesh/curve from Maya viewport/outliner to table row(s)")
+        self.geoAssignButton.clicked.connect(self.assignSelectedGeosFromMaya)
+        selLayout.addWidget(self.geoAssignButton)
+
+        self.geoSelectButton = QPushButton("Select Target in Maya")
+        self.geoSelectButton.clicked.connect(self.selectTargetGeoInMaya)
+        selLayout.addWidget(self.geoSelectButton)
+
+        self.geoClearButton = QPushButton("Clear Selected")
+        self.geoClearButton.clicked.connect(self.clearSelectedGeoRows)
+        selLayout.addWidget(self.geoClearButton)
+        selLayout.addStretch()
+        layout.addLayout(selLayout)
+
+    def populateGeoTable(self):
+        self.geoTable.setRowCount(len(self.objects))
+        sceneGeoSet = set(self.sceneGeos)
+
+        for row, fg in enumerate(self.objects):
+            target = (self.namespace + fg) if self.namespace and not fg.startswith(self.namespace) else fg
+            inScene = (target in sceneGeoSet or fg in sceneGeoSet or cmds.objExists(target))
+
+            statusItem = QTableWidgetItem()
+            statusItem.setTextAlignment(Qt.AlignCenter)
+            statusItem.setFlags(statusItem.flags() & ~Qt.ItemIsEditable)
+
+            fgItem = QTableWidgetItem(fg)
+            fgItem.setFlags(fgItem.flags() & ~Qt.ItemIsEditable)
+            fgItem.setToolTip(fg)
+
+            combo = QComboBox()
+            combo.setEditable(True)
+            combo.setInsertPolicy(QComboBox.NoInsert)
+            combo.addItem("")
+            combo.addItems(self.sceneGeos)
+
+            completer = QCompleter(self.sceneGeos, combo)
+            completer.setCaseSensitivity(Qt.CaseInsensitive)
+            if hasattr(completer, 'setFilterMode') and hasattr(Qt, 'MatchContains'):
+                completer.setFilterMode(Qt.MatchContains)
+            combo.setCompleter(completer)
+
+            suggested = autoMatchGeometry(fg, self.sceneGeos)
+            suggestItem = QTableWidgetItem(suggested if suggested else "")
+            suggestItem.setFlags(suggestItem.flags() & ~Qt.ItemIsEditable)
+            if suggested:
+                suggestItem.setToolTip("Double-click to apply '{}'".format(suggested))
+
+            if inScene:
+                matchedName = target if target in sceneGeoSet else fg
+                combo.setCurrentText(matchedName)
+                statusItem.setText("Found")
+                statusItem.setForeground(QColor("#5cb85c"))
+            else:
+                if suggested:
+                    combo.setCurrentText(suggested)
+                    statusItem.setText("Suggested")
+                    statusItem.setForeground(QColor("#f0ad4e"))
+                else:
+                    combo.setCurrentText("")
+                    statusItem.setText("Missing")
+                    statusItem.setForeground(QColor("#d9534f"))
+
+            self.geoTable.setItem(row, 0, statusItem)
+            self.geoTable.setItem(row, 1, fgItem)
+            self.geoTable.setCellWidget(row, 2, combo)
+            self.geoTable.setItem(row, 3, suggestItem)
+
+            def makeGeoComboCallback(r):
+                return lambda text: self.onGeoComboChanged(r, text)
+
+            if hasattr(combo, 'currentTextChanged'):
+                combo.currentTextChanged.connect(makeGeoComboCallback(row))
+            else:
+                combo.editTextChanged.connect(makeGeoComboCallback(row))
+
+        self.geoTable.cellDoubleClicked.connect(self.onGeoCellDoubleClicked)
+
+    def onGeoComboChanged(self, row, text):
+        text = text.strip()
+        fgItem = self.geoTable.item(row, 1)
+        if not fgItem:
+            return
+        fg = fgItem.text()
+        statusItem = self.geoTable.item(row, 0)
+        sceneGeoSet = set(self.sceneGeos)
+
+        target = (self.namespace + text) if self.namespace and not text.startswith(self.namespace) else text
+        inScene = (target in sceneGeoSet or text in sceneGeoSet or (text and cmds.objExists(target)))
+
+        if not text or not inScene:
+            statusItem.setText("Missing")
+            statusItem.setForeground(QColor("#d9534f"))
+        elif text == fg or target == fg:
+            statusItem.setText("Found")
+            statusItem.setForeground(QColor("#5cb85c"))
+        else:
+            statusItem.setText("Mapped")
+            statusItem.setForeground(QColor("#5bc0de"))
+
+        self.updateSummary()
+
+    def onGeoCellDoubleClicked(self, row, col):
+        if col == 3:
+            suggestItem = self.geoTable.item(row, 3)
+            if suggestItem and suggestItem.text().strip():
+                combo = self.geoTable.cellWidget(row, 2)
+                if combo:
+                    combo.setCurrentText(suggestItem.text().strip())
+        elif col in [1, 2]:
+            combo = self.geoTable.cellWidget(row, 2)
+            if combo:
+                tg = combo.currentText().strip()
+                target = (self.namespace + tg) if self.namespace and not tg.startswith(self.namespace) else tg
+                if cmds.objExists(target):
+                    cmds.select(target, r=True)
+                elif cmds.objExists(tg):
+                    cmds.select(tg, r=True)
+
+    def applyGeoFilter(self):
+        onlyMissing = self.geoShowMissingCheck.isChecked()
+        filterText = self.geoFilterEdit.text().strip().lower()
+
+        for r in range(self.geoTable.rowCount()):
+            stItem = self.geoTable.item(r, 0)
+            fgItem = self.geoTable.item(r, 1)
+            combo = self.geoTable.cellWidget(r, 2)
+            if not stItem or not fgItem or not combo:
+                continue
+
+            status = stItem.text()
+            fg = fgItem.text().lower()
+            tg = combo.currentText().strip().lower()
+
+            hide = False
+            if onlyMissing and status == "Found":
+                hide = True
+            if filterText and (filterText not in fg and filterText not in tg):
+                hide = True
+
+            self.geoTable.setRowHidden(r, hide)
+
+    def autoMatchAllGeos(self):
+        self.sceneGeos = getSceneGeometryNames()
+        sceneGeoSet = set(self.sceneGeos)
+
+        selectedRows = sorted(list(set([idx.row() for idx in self.geoTable.selectedIndexes()])))
+        if selectedRows:
+            targetRows = selectedRows
+        else:
+            targetRows = []
+            for r in range(self.geoTable.rowCount()):
+                fgItem = self.geoTable.item(r, 1)
+                if not fgItem:
+                    continue
+                fg = fgItem.text()
+                target = (self.namespace + fg) if self.namespace and not fg.startswith(self.namespace) else fg
+                if target in sceneGeoSet or fg in sceneGeoSet or cmds.objExists(target):
+                    continue
+                targetRows.append(r)
+
+        matchedCount = 0
+        clearedCount = 0
+
+        for r in targetRows:
+            fgItem = self.geoTable.item(r, 1)
+            combo = self.geoTable.cellWidget(r, 2)
+            suggestItem = self.geoTable.item(r, 3)
+            if not fgItem or not combo:
+                continue
+
+            fg = fgItem.text()
+            suggested = autoMatchGeometry(fg, self.sceneGeos)
+
+            if suggestItem:
+                suggestItem.setText(suggested if suggested else "")
+                if suggested:
+                    suggestItem.setToolTip("Double-click to apply '{}'".format(suggested))
+                else:
+                    suggestItem.setToolTip("")
+
+            if suggested:
+                combo.setCurrentText(suggested)
+                matchedCount += 1
+            else:
+                combo.setCurrentText("")
+                clearedCount += 1
+
+        self.updateSummary()
+        self.applyGeoFilter()
+        cmds.inViewMessage(amg="<b>bSkinSaver:</b> Auto-matched {} geometry(s).".format(matchedCount), pos='topCenter', fade=True)
+
+    def assignSelectedGeosFromMaya(self):
+        sels = cmds.ls(sl=True) or []
+        if not sels:
+            cmds.warning("Please select geometry in Maya.")
+            return
+
+        # Find transform names of selected geometries
+        selectedTransforms = []
+        for s in sels:
+            if cmds.nodeType(s) in ['mesh', 'nurbsCurve', 'nurbsSurface']:
+                parent = cmds.listRelatives(s, p=True)
+                if parent:
+                    selectedTransforms.append(parent[0].split('|')[-1])
+            else:
+                shapes = cmds.listRelatives(s, s=True, ni=True, type=['mesh', 'nurbsCurve', 'nurbsSurface'])
+                if shapes:
+                    selectedTransforms.append(s.split('|')[-1])
+
+        if not selectedTransforms:
+            selectedTransforms = [s.split('|')[-1] for s in sels]
+
+        selectedRows = sorted(list(set([idx.row() for idx in self.geoTable.selectedIndexes()])))
+        if not selectedRows:
+            curr = self.geoTable.currentRow()
+            if curr >= 0:
+                selectedRows = [curr]
+        if not selectedRows:
+            cmds.warning("Please select row(s) in the Geometries table.")
+            return
+
+        if len(selectedTransforms) == 1:
+            for row in selectedRows:
+                combo = self.geoTable.cellWidget(row, 2)
+                if combo:
+                    combo.setCurrentText(selectedTransforms[0])
+        else:
+            for i, row in enumerate(selectedRows):
+                if i < len(selectedTransforms):
+                    combo = self.geoTable.cellWidget(row, 2)
+                    if combo:
+                        combo.setCurrentText(selectedTransforms[i])
+
+    def selectTargetGeoInMaya(self):
+        selectedRows = sorted(list(set([idx.row() for idx in self.geoTable.selectedIndexes()])))
+        targetsToSelect = []
+        for r in selectedRows:
+            combo = self.geoTable.cellWidget(r, 2)
+            if combo:
+                tg = combo.currentText().strip()
+                if tg:
+                    target = (self.namespace + tg) if self.namespace and not tg.startswith(self.namespace) else tg
+                    if cmds.objExists(target):
+                        targetsToSelect.append(target)
+                    elif cmds.objExists(tg):
+                        targetsToSelect.append(tg)
+
+        if targetsToSelect:
+            cmds.select(targetsToSelect, r=True)
+        else:
+            cmds.warning("No existing target geometries to select in Maya.")
+
+    def clearSelectedGeoRows(self):
+        selectedRows = sorted(list(set([idx.row() for idx in self.geoTable.selectedIndexes()])))
+        for r in selectedRows:
+            combo = self.geoTable.cellWidget(r, 2)
+            if combo:
+                combo.setCurrentText("")
+
+    def getGeoMappingDict(self):
+        mapping = {}
+        for r in range(self.geoTable.rowCount()):
+            fgItem = self.geoTable.item(r, 1)
+            combo = self.geoTable.cellWidget(r, 2)
+            if fgItem and combo:
+                fg = fgItem.text()
+                tg = combo.currentText().strip()
+                if tg:
+                    mapping[fg] = tg
+        return mapping
+
+    # ------------------ Joints Tab ------------------
+    def initJointTab(self, tab):
+        layout = QVBoxLayout(tab)
+        layout.setSpacing(6)
+
+        toolsLayout = QHBoxLayout()
+        self.jointShowMissingCheck = QCheckBox("Show Missing / Mapped Only")
+        self.jointShowMissingCheck.setChecked(True)
+        self.jointShowMissingCheck.toggled.connect(self.applyJointFilter)
+        toolsLayout.addWidget(self.jointShowMissingCheck)
+
+        toolsLayout.addSpacing(10)
+        toolsLayout.addWidget(QLabel("Filter:"))
+        self.jointFilterEdit = QLineEdit()
+        self.jointFilterEdit.setPlaceholderText("Search joint name...")
+        self.jointFilterEdit.textChanged.connect(self.applyJointFilter)
+        toolsLayout.addWidget(self.jointFilterEdit)
+
+        self.jointAutoMatchAllButton = QPushButton("Smart Auto Match All")
+        self.jointAutoMatchAllButton.clicked.connect(self.autoMatchAllJoints)
+        toolsLayout.addWidget(self.jointAutoMatchAllButton)
+        layout.addLayout(toolsLayout)
+
+        replaceGroup = QGroupBox("Batch Search & Replace")
+        replaceLayout = QHBoxLayout(replaceGroup)
+        replaceLayout.setContentsMargins(6, 6, 6, 6)
+        replaceLayout.addWidget(QLabel("Search:"))
+        self.searchEdit = QLineEdit()
+        self.searchEdit.setPlaceholderText("e.g. old_")
+        replaceLayout.addWidget(self.searchEdit)
+
+        replaceLayout.addWidget(QLabel("Replace:"))
+        self.replaceEdit = QLineEdit()
+        self.replaceEdit.setPlaceholderText("e.g. new_")
+        replaceLayout.addWidget(self.replaceEdit)
+
+        self.applyRuleButton = QPushButton("Apply Rule")
+        self.applyRuleButton.clicked.connect(self.applyBatchRule)
+        replaceLayout.addWidget(self.applyRuleButton)
+        layout.addWidget(replaceGroup)
+
+        self.jointTable = QTableWidget(0, 4)
+        self.jointTable.setHorizontalHeaderLabels(["Status", "SW File Joint", "Scene Target Joint", "Suggested Match"])
+        header = self.jointTable.horizontalHeader()
+        if hasattr(header, 'setSectionResizeMode'):
+            header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.Stretch)
+            header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        else:
+            header.setResizeMode(0, QHeaderView.ResizeToContents)
+            header.setResizeMode(1, QHeaderView.Stretch)
+            header.setResizeMode(2, QHeaderView.Stretch)
+            header.setResizeMode(3, QHeaderView.ResizeToContents)
+
+        self.jointTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.jointTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.jointTable.verticalHeader().setDefaultSectionSize(26)
+        layout.addWidget(self.jointTable)
+
+        selLayout = QHBoxLayout()
+        self.jointAssignButton = QPushButton("Assign Selected from Maya")
+        self.jointAssignButton.clicked.connect(self.assignSelectedJointsFromMaya)
+        selLayout.addWidget(self.jointAssignButton)
+
+        self.jointSelectButton = QPushButton("Select Target in Maya")
+        self.jointSelectButton.clicked.connect(self.selectTargetJointInMaya)
+        selLayout.addWidget(self.jointSelectButton)
+
+        self.jointClearButton = QPushButton("Clear Selected")
+        self.jointClearButton.clicked.connect(self.clearSelectedJointRows)
+        selLayout.addWidget(self.jointClearButton)
+        selLayout.addStretch()
+        layout.addLayout(selLayout)
+
+    def populateJointTable(self):
+        self.jointTable.setRowCount(len(self.uniqueJoints))
+        sceneJointSet = set(self.sceneJoints)
+
+        for row, fj in enumerate(self.uniqueJoints):
+            target = (self.namespace + fj) if self.namespace and not fj.startswith(self.namespace) else fj
+            inScene = (target in sceneJointSet or fj in sceneJointSet or cmds.objExists(target))
+
+            statusItem = QTableWidgetItem()
+            statusItem.setTextAlignment(Qt.AlignCenter)
+            statusItem.setFlags(statusItem.flags() & ~Qt.ItemIsEditable)
+
+            fjItem = QTableWidgetItem(fj)
+            fjItem.setFlags(fjItem.flags() & ~Qt.ItemIsEditable)
+            fjItem.setToolTip(fj)
+
+            combo = QComboBox()
+            combo.setEditable(True)
+            combo.setInsertPolicy(QComboBox.NoInsert)
+            combo.addItem("")
+            combo.addItems(self.sceneJoints)
+
+            completer = QCompleter(self.sceneJoints, combo)
+            completer.setCaseSensitivity(Qt.CaseInsensitive)
+            if hasattr(completer, 'setFilterMode') and hasattr(Qt, 'MatchContains'):
+                completer.setFilterMode(Qt.MatchContains)
+            combo.setCompleter(completer)
+
+            suggested = autoMatchJoint(fj, self.sceneJoints)
+            suggestItem = QTableWidgetItem(suggested if suggested else "")
+            suggestItem.setFlags(suggestItem.flags() & ~Qt.ItemIsEditable)
+            if suggested:
+                suggestItem.setToolTip("Double-click to apply '{}'".format(suggested))
+
+            if inScene:
+                matchedName = target if target in sceneJointSet else fj
+                combo.setCurrentText(matchedName)
+                statusItem.setText("Found")
+                statusItem.setForeground(QColor("#5cb85c"))
+            else:
+                if suggested:
+                    combo.setCurrentText(suggested)
+                    statusItem.setText("Suggested")
+                    statusItem.setForeground(QColor("#f0ad4e"))
+                else:
+                    combo.setCurrentText("")
+                    statusItem.setText("Missing")
+                    statusItem.setForeground(QColor("#d9534f"))
+
+            self.jointTable.setItem(row, 0, statusItem)
+            self.jointTable.setItem(row, 1, fjItem)
+            self.jointTable.setCellWidget(row, 2, combo)
+            self.jointTable.setItem(row, 3, suggestItem)
+
+            def makeJointComboCallback(r):
+                return lambda text: self.onJointComboChanged(r, text)
+
+            if hasattr(combo, 'currentTextChanged'):
+                combo.currentTextChanged.connect(makeJointComboCallback(row))
+            else:
+                combo.editTextChanged.connect(makeJointComboCallback(row))
+
+        self.jointTable.cellDoubleClicked.connect(self.onJointCellDoubleClicked)
+
+    def onJointComboChanged(self, row, text):
+        text = text.strip()
+        fjItem = self.jointTable.item(row, 1)
+        if not fjItem:
+            return
+        fj = fjItem.text()
+        statusItem = self.jointTable.item(row, 0)
+        sceneJointSet = set(self.sceneJoints)
+
+        target = (self.namespace + text) if self.namespace and not text.startswith(self.namespace) else text
+        inScene = (target in sceneJointSet or text in sceneJointSet or (text and cmds.objExists(target)))
+
+        if not text or not inScene:
+            statusItem.setText("Missing")
+            statusItem.setForeground(QColor("#d9534f"))
+        elif text == fj or target == fj:
+            statusItem.setText("Found")
+            statusItem.setForeground(QColor("#5cb85c"))
+        else:
+            statusItem.setText("Mapped")
+            statusItem.setForeground(QColor("#5bc0de"))
+
+        self.updateSummary()
+
+    def onJointCellDoubleClicked(self, row, col):
+        if col == 3:
+            suggestItem = self.jointTable.item(row, 3)
+            if suggestItem and suggestItem.text().strip():
+                combo = self.jointTable.cellWidget(row, 2)
+                if combo:
+                    combo.setCurrentText(suggestItem.text().strip())
+        elif col in [1, 2]:
+            combo = self.jointTable.cellWidget(row, 2)
+            if combo:
+                tj = combo.currentText().strip()
+                target = (self.namespace + tj) if self.namespace and not tj.startswith(self.namespace) else tj
+                if cmds.objExists(target):
+                    cmds.select(target, r=True)
+                elif cmds.objExists(tj):
+                    cmds.select(tj, r=True)
+
+    def applyJointFilter(self):
+        onlyMissing = self.jointShowMissingCheck.isChecked()
+        filterText = self.jointFilterEdit.text().strip().lower()
+
+        for r in range(self.jointTable.rowCount()):
+            stItem = self.jointTable.item(r, 0)
+            fjItem = self.jointTable.item(r, 1)
+            combo = self.jointTable.cellWidget(r, 2)
+            if not stItem or not fjItem or not combo:
+                continue
+
+            status = stItem.text()
+            fj = fjItem.text().lower()
+            tj = combo.currentText().strip().lower()
+
+            hide = False
+            if onlyMissing and status == "Found":
+                hide = True
+            if filterText and (filterText not in fj and filterText not in tj):
+                hide = True
+
+            self.jointTable.setRowHidden(r, hide)
+
+    def autoMatchAllJoints(self):
+        self.sceneJoints = getSceneJointNames()
+        sceneJointSet = set(self.sceneJoints)
+
+        selectedRows = sorted(list(set([idx.row() for idx in self.jointTable.selectedIndexes()])))
+        if selectedRows:
+            targetRows = selectedRows
+        else:
+            targetRows = []
+            for r in range(self.jointTable.rowCount()):
+                fjItem = self.jointTable.item(r, 1)
+                if not fjItem:
+                    continue
+                fj = fjItem.text()
+                target = (self.namespace + fj) if self.namespace and not fj.startswith(self.namespace) else fj
+                if target in sceneJointSet or fj in sceneJointSet or cmds.objExists(target):
+                    continue
+                targetRows.append(r)
+
+        matchedCount = 0
+        clearedCount = 0
+
+        for r in targetRows:
+            fjItem = self.jointTable.item(r, 1)
+            combo = self.jointTable.cellWidget(r, 2)
+            suggestItem = self.jointTable.item(r, 3)
+            if not fjItem or not combo:
+                continue
+
+            fj = fjItem.text()
+            suggested = autoMatchJoint(fj, self.sceneJoints)
+
+            if suggestItem:
+                suggestItem.setText(suggested if suggested else "")
+                if suggested:
+                    suggestItem.setToolTip("Double-click to apply '{}'".format(suggested))
+                else:
+                    suggestItem.setToolTip("")
+
+            if suggested:
+                combo.setCurrentText(suggested)
+                matchedCount += 1
+            else:
+                combo.setCurrentText("")
+                clearedCount += 1
+
+        self.updateSummary()
+        self.applyJointFilter()
+        cmds.inViewMessage(amg="<b>bSkinSaver:</b> Auto-matched {} joint(s).".format(matchedCount), pos='topCenter', fade=True)
+
+    def applyBatchRule(self):
+        searchTxt = self.searchEdit.text()
+        replaceTxt = self.replaceEdit.text()
+        if not searchTxt:
+            cmds.warning("Please enter a search string.")
+            return
+
+        appliedCount = 0
+
+        for r in range(self.jointTable.rowCount()):
+            fjItem = self.jointTable.item(r, 1)
+            combo = self.jointTable.cellWidget(r, 2)
+            stItem = self.jointTable.item(r, 0)
+            if not fjItem or not combo or not stItem:
+                continue
+
+            if stItem.text() == "Found":
+                continue
+
+            fj = fjItem.text()
+            if searchTxt in fj:
+                candidate = fj.replace(searchTxt, replaceTxt)
+                combo.setCurrentText(candidate)
+                appliedCount += 1
+
+        cmds.inViewMessage(amg="<b>bSkinSaver:</b> Applied rule to {} joint(s).".format(appliedCount), pos='topCenter', fade=True)
+
+    def assignSelectedJointsFromMaya(self):
+        selJoints = cmds.ls(sl=True, type='joint') or []
+        if not selJoints:
+            cmds.warning("Please select at least one joint in Maya.")
+            return
+
+        selShort = [j.split('|')[-1] for j in selJoints]
+        selectedRows = sorted(list(set([idx.row() for idx in self.jointTable.selectedIndexes()])))
+        if not selectedRows:
+            curr = self.jointTable.currentRow()
+            if curr >= 0:
+                selectedRows = [curr]
+        if not selectedRows:
+            cmds.warning("Please select row(s) in the Joints table.")
+            return
+
+        if len(selShort) == 1:
+            for row in selectedRows:
+                combo = self.jointTable.cellWidget(row, 2)
+                if combo:
+                    combo.setCurrentText(selShort[0])
+        else:
+            for i, row in enumerate(selectedRows):
+                if i < len(selShort):
+                    combo = self.jointTable.cellWidget(row, 2)
+                    if combo:
+                        combo.setCurrentText(selShort[i])
+
+    def selectTargetJointInMaya(self):
+        selectedRows = sorted(list(set([idx.row() for idx in self.jointTable.selectedIndexes()])))
+        targetsToSelect = []
+        for r in selectedRows:
+            combo = self.jointTable.cellWidget(r, 2)
+            if combo:
+                tj = combo.currentText().strip()
+                if tj:
+                    target = (self.namespace + tj) if self.namespace and not tj.startswith(self.namespace) else tj
+                    if cmds.objExists(target):
+                        targetsToSelect.append(target)
+                    elif cmds.objExists(tj):
+                        targetsToSelect.append(tj)
+
+        if targetsToSelect:
+            cmds.select(targetsToSelect, r=True)
+        else:
+            cmds.warning("No existing target joints to select in Maya.")
+
+    def clearSelectedJointRows(self):
+        selectedRows = sorted(list(set([idx.row() for idx in self.jointTable.selectedIndexes()])))
+        for r in selectedRows:
+            combo = self.jointTable.cellWidget(r, 2)
+            if combo:
+                combo.setCurrentText("")
+
+    def getJointMappingDict(self):
+        mapping = {}
+        for r in range(self.jointTable.rowCount()):
+            fjItem = self.jointTable.item(r, 1)
+            combo = self.jointTable.cellWidget(r, 2)
+            if fjItem and combo:
+                fj = fjItem.text()
+                tj = combo.currentText().strip()
+                if tj:
+                    mapping[fj] = tj
+        return mapping
+
+    # ------------------ Overall Summary & Action Buttons ------------------
+    def updateSummary(self):
+        geoTotal = self.geoTable.rowCount()
+        geoMissing = sum(1 for r in range(geoTotal) if self.geoTable.item(r, 0) and self.geoTable.item(r, 0).text() == "Missing")
+
+        jointTotal = self.jointTable.rowCount()
+        jointMissing = sum(1 for r in range(jointTotal) if self.jointTable.item(r, 0) and self.jointTable.item(r, 0).text() == "Missing")
+
+        self.summaryLabel.setText(
+            "<b>Geometries:</b> {} total (<span style='color:{};'>{} missing</span>) &nbsp;|&nbsp; "
+            "<b>Joints:</b> {} total (<span style='color:{};'>{} missing</span>)".format(
+                geoTotal, "#d9534f" if geoMissing else "#5cb85c", geoMissing,
+                jointTotal, "#d9534f" if jointMissing else "#5cb85c", jointMissing
+            )
+        )
+
+    def closeEvent(self, event):
+        global remapDialogWin
+        remapDialogWin = None
+        event.accept()
+
+    def saveMappingToFile(self):
+        geoMap = self.getGeoMappingDict()
+        jointMap = self.getJointMappingDict()
+
+        if not geoMap and not jointMap:
+            cmds.warning("No mappings to save.")
+            return
+
+        res = QMessageBox.question(
+            self,
+            "Save Mapping to .sw File",
+            "This will update geometry and joint names directly in the .sw file.\nA backup file (.sw.bak) will be created.\nDo you want to continue?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes
+        )
+        if res != QMessageBox.Yes:
+            return
+
+        success = updateSwFileWithMapping(self.swFilePath, jointMapping=jointMap, geoMapping=geoMap, backup=True)
+        if success:
+            QMessageBox.information(
+                self,
+                "Success",
+                "Successfully updated mapping in:\n{}\n\nBackup created at:\n{}.bak".format(self.swFilePath, self.swFilePath)
+            )
+            self.objects, self.objectJoints, self.uniqueJoints = parseSwFileJoints(self.swFilePath)
+            self.populateGeoTable()
+            self.populateJointTable()
+            self.updateSummary()
+            self.applyGeoFilter()
+            self.applyJointFilter()
+
+    def loadWeightsWithMapping(self):
+        geoMap = self.getGeoMappingDict()
+        jointMap = self.getJointMappingDict()
+        sceneGeoSet = set(self.sceneGeos)
+        sceneJointSet = set(self.sceneJoints)
+
+        unmappedGeos = []
+        for r in range(self.geoTable.rowCount()):
+            fgItem = self.geoTable.item(r, 1)
+            combo = self.geoTable.cellWidget(r, 2)
+            if not fgItem or not combo:
+                continue
+            fg = fgItem.text()
+            tg = combo.currentText().strip()
+            target = (self.namespace + tg) if self.namespace and not tg.startswith(self.namespace) else tg
+            inScene = (target in sceneGeoSet or tg in sceneGeoSet or (tg and cmds.objExists(target)))
+            if not inScene:
+                unmappedGeos.append(fg)
+
+        unmappedJoints = []
+        for r in range(self.jointTable.rowCount()):
+            fjItem = self.jointTable.item(r, 1)
+            combo = self.jointTable.cellWidget(r, 2)
+            if not fjItem or not combo:
+                continue
+            fj = fjItem.text()
+            tj = combo.currentText().strip()
+            target = (self.namespace + tj) if self.namespace and not tj.startswith(self.namespace) else tj
+            inScene = (target in sceneJointSet or tj in sceneJointSet or (tj and cmds.objExists(target)))
+            if not inScene:
+                unmappedJoints.append(fj)
+
+        if unmappedGeos or unmappedJoints:
+            warnLines = []
+            if unmappedGeos:
+                warnLines.append("Geometries ({} unmapped):\n - {}".format(len(unmappedGeos), "\n - ".join(unmappedGeos[:5])))
+            if unmappedJoints:
+                warnLines.append("Joints ({} unmapped):\n - {}".format(len(unmappedJoints), "\n - ".join(unmappedJoints[:5])))
+
+            res = QMessageBox.warning(
+                self,
+                "Unmapped Influences / Geometries",
+                "Some items are still missing or not properly mapped:\n\n{}\n\nDo you still want to proceed with loading?".format("\n\n".join(warnLines)),
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if res != QMessageBox.Yes:
+                return
+
+        try:
+            bLoadSkinValues(
+                loadOnSelection=False,
+                inputFile=self.swFilePath,
+                namespace=self.namespace,
+                geometry=self.geoCheck,
+                jointMapping=jointMap,
+                geoMapping=geoMap
+            )
+            cmds.inViewMessage(amg="<b>bSkinSaver:</b> Skin weights successfully loaded with mapping!", pos='topCenter', fade=True)
+            self.accept()
+        except Exception as e:
+            QMessageBox.critical(self, "Error Loading Skin", "An error occurred while loading skin weights:\n{}".format(e))
+
+
+
 class bSkinSaverUI(QDialog):
     def __init__(self, parent=getMayaWindow()):
         super(bSkinSaverUI, self).__init__(parent)
@@ -76,8 +1218,8 @@ class bSkinSaverUI(QDialog):
 
         tab_widget.addTab(objectsTab, "Objects")
         tab_widget.addTab(verticesTab, "Vertices")
-        self.descLabel = QLabel("(C) 2015 by Thomas Bittner", parent=self)
-        self.setWindowTitle('bSkinSaver 1.1')
+        self.descLabel = QLabel("(C) 2015 by Thomas Bittner\nUpdated by LEE SANGTAK", parent=self)
+        self.setWindowTitle('bSkinSaver')
 
         self.geoCheckBox = QCheckBox("Geometry", parent=self)
         self.geoCheckBox.setToolTip("If checked, the geometry will be saved/loaded with the skinWeights.\nIf not checked, only the skinWeights will be saved/loaded.")
@@ -85,7 +1227,6 @@ class bSkinSaverUI(QDialog):
         self.selectObjectsFileButton = QPushButton("Set File", parent=self)
         self.saveObjectsButton = QPushButton("Save Weights from selected Objects", parent=self)
         self.loadObjectsButton = QPushButton("Load", parent=self)
-        self.loadObjectsSelectionButton = QPushButton("Load to Selected Object", parent=self)
 
         objectsLayout = QVBoxLayout(objectsTab)
         objectsLayout.setAlignment(Qt.AlignTop)
@@ -102,7 +1243,6 @@ class bSkinSaverUI(QDialog):
         objectsButtonLayout.setSpacing(0)
         objectsButtonLayout.addWidget(self.saveObjectsButton)
         objectsButtonLayout.addWidget(self.loadObjectsButton)
-        objectsButtonLayout.addWidget(self.loadObjectsSelectionButton)
 
         objectsLayout.addLayout(objectsButtonLayout)
 
@@ -153,7 +1293,6 @@ class bSkinSaverUI(QDialog):
 
         self.connect(self.saveObjectsButton, SIGNAL("clicked()"), self.saveObjects)
         self.connect(self.loadObjectsButton, SIGNAL("clicked()"), self.loadObjects)
-        self.connect(self.loadObjectsSelectionButton, SIGNAL("clicked()"), self.loadObjectsSelection)
 
         self.connect(self.saveVerticesButton, SIGNAL("clicked()"), self.saveVertices)
         self.connect(self.loadVerticesButton, SIGNAL("clicked()"), self.loadVertices)
@@ -176,12 +1315,64 @@ class bSkinSaverUI(QDialog):
 
 
     def loadObjects(self):
+        filePath = str(self.objectsFileLine.text())
+        if not os.path.isfile(filePath):
+            cmds.warning("File does not exist: {}".format(filePath))
+            return
+
         namespace = self._namespaceCBox.currentText()
-        bLoadSkinValues (False, str(self.objectsFileLine.text()), namespace, self.geoCheckBox.isChecked())
+        fileObjs, _, fileJoints = parseSwFileJoints(filePath)
+
+        missingGeos = []
+        if fileObjs:
+            missingGeos, _ = checkMissingGeometries(fileObjs, namespace)
+
+        missingJoints = []
+        if fileJoints:
+            missingJoints, _ = checkMissingJoints(fileJoints, namespace)
+
+        if missingGeos or missingJoints:
+            details = []
+            if missingGeos:
+                details.append("- Geometries: {} missing in scene".format(len(missingGeos)))
+            if missingJoints:
+                details.append("- Joints: {} missing in scene".format(len(missingJoints)))
+
+            res = QMessageBox.question(
+                self,
+                "Missing Items Found",
+                "Some items in the .sw file were not found in the scene:\n{}\n\nWould you like to open the Remapper?".format("\n".join(details)),
+                QMessageBox.Yes | QMessageBox.Cancel,
+                QMessageBox.Yes
+            )
+            if res == QMessageBox.Yes:
+                initialTab = 0 if missingGeos else 1
+                self.openRemapUI(initialTab=initialTab)
+            else:
+                cmds.inViewMessage(amg="<b>bSkinSaver:</b> Load cancelled.", pos='topCenter', fade=True)
+            return
+
+        bLoadSkinValues(False, filePath, namespace, self.geoCheckBox.isChecked())
 
     def loadObjectsSelection(self):
+        # Kept for backward compatibility
+        self.loadObjects()
+
+    def openRemapUI(self, *args, **kwargs):
+        filePath = str(self.objectsFileLine.text())
+        if not os.path.isfile(filePath):
+            cmds.warning("File does not exist: {}".format(filePath))
+            return
+
+        initialTab = kwargs.get('initialTab', 0)
         namespace = self._namespaceCBox.currentText()
-        bLoadSkinValues (True, str(self.objectsFileLine.text()), namespace)
+        showSkinRemapDialog(
+            swFilePath=filePath,
+            namespace=namespace,
+            geoCheck=self.geoCheckBox.isChecked(),
+            parent=getMayaWindow(),
+            initialTab=initialTab
+        )
 
     def saveObjects(self):
         bSaveSkinValues(str(self.objectsFileLine.text()), self.geoCheckBox.isChecked())
@@ -788,7 +1979,7 @@ def bSkinObject(objectName, fileJoints, weights):
     cmds.setAttr('{}.visibility'.format(shape), shapeVisState)
 
 
-def bLoadSkinValues(loadOnSelection, inputFile, namespace='', geometry=False):
+def bLoadSkinValues(loadOnSelection, inputFile, namespace='', geometry=False, jointMapping=None, geoMapping=None):
 
     timeBefore = time.time()
 
@@ -825,7 +2016,18 @@ def bLoadSkinValues(loadOnSelection, inputFile, namespace='', geometry=False):
         if FilePosition != 0:
             if not line.startswith("============"):
                 if FilePosition == 1:
-                    joints.append(namespace+line)
+                    rawJoint = line
+                    if jointMapping and rawJoint in jointMapping and jointMapping[rawJoint]:
+                        mappedJoint = jointMapping[rawJoint]
+                    else:
+                        mappedJoint = rawJoint
+
+                    if namespace and not mappedJoint.startswith(namespace):
+                        finalJoint = namespace + mappedJoint
+                    else:
+                        finalJoint = mappedJoint
+
+                    joints.append(finalJoint)
                 elif FilePosition == 2:
                     if len(line) > 0:
                         weights.append(line)
@@ -843,7 +2045,17 @@ def bLoadSkinValues(loadOnSelection, inputFile, namespace='', geometry=False):
 
         else: #FilePosition is 0
             if not loadOnSelection:
-                PolygonObject = line
+                rawGeo = line
+                if geoMapping and rawGeo in geoMapping and geoMapping[rawGeo]:
+                    mappedGeo = geoMapping[rawGeo]
+                else:
+                    mappedGeo = rawGeo
+
+                if namespace and not mappedGeo.startswith(namespace):
+                    PolygonObject = namespace + mappedGeo
+                else:
+                    PolygonObject = mappedGeo
+
             FilePosition = 1
 
             if cmds.objExists(PolygonObject):
