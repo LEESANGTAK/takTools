@@ -45,8 +45,8 @@ def mirJntUi():
 
     cmds.separator(h=10, style='in')
 
-    cmds.textFieldGrp('srchTxtFldGrp', label='Search For: ', columnWidth=[(1, 70), (2, 50)], text='_L')
-    cmds.textFieldGrp('rplcTxtFldGrp', label='Replace With: ', columnWidth=[(1, 70), (2, 50)], text='_R')
+    cmds.textFieldGrp('srchTxtFldGrp', label='Search For: ', columnWidth=[(1, 70), (2, 50)], text='_l')
+    cmds.textFieldGrp('rplcTxtFldGrp', label='Replace With: ', columnWidth=[(1, 70), (2, 50)], text='_r')
 
     cmds.button(label='Mirror', h=50, c=mirrorJnt)
 
@@ -129,8 +129,8 @@ def mirObjUi():
     cmds.checkBox('mirBehaviorChkBox', label='Mirror Behavior')
     cmds.setParent('|')
 
-    cmds.textFieldGrp('srchTxtFldGrp', label='Search for: ', text='_L', columnWidth=[1, 70])
-    cmds.textFieldGrp('rplcTxtFldGrp', label='Replace with', text='_R', columnWidth=[1, 70])
+    cmds.textFieldGrp('srchTxtFldGrp', label='Search for: ', text='_l', columnWidth=[1, 70])
+    cmds.textFieldGrp('rplcTxtFldGrp', label='Replace with', text='_r', columnWidth=[1, 70])
     cmds.button(label='Apply', h=50, c=mirrorObj)
 
     cmds.window(winName, e=True, w=100, h=100)
@@ -309,8 +309,8 @@ def mirCtrlShapeUi():
     cmds.window(winName, title='Mirror Controls UI', maximizeButton=False, minimizeButton=False)
 
     cmds.columnLayout('mainClLo', adj=True)
-    cmds.textFieldGrp('srchTxtFld', label='Search: ', text='_L', columnWidth=[(1, 50), (2, 50)])
-    cmds.textFieldGrp('rplcTxtFld', label='Replace: ', text='_R', columnWidth=[(1, 50), (2, 50)])
+    cmds.textFieldGrp('srchTxtFld', label='Search: ', text='_l', columnWidth=[(1, 50), (2, 50)])
+    cmds.textFieldGrp('rplcTxtFld', label='Replace: ', text='_r', columnWidth=[(1, 50), (2, 50)])
     cmds.button(label='Apply', h=30, c=mirCtrlShape)
 
     cmds.window(winName, e=True, w=100, h=50)
@@ -1157,15 +1157,15 @@ def mirrorCtrlsUI():
 
     cmds.columnLayout('mainColLo', adj=True, p=winName)
     cmds.optionMenu('searchStrOpMenu', label='Search For: ')
-    cmds.menuItem(label='L')
-    cmds.menuItem(label='R')
-    cmds.menuItem(label='_L')
-    cmds.menuItem(label='_R')
+    cmds.menuItem(label='l')
+    cmds.menuItem(label='r')
+    cmds.menuItem(label='_l')
+    cmds.menuItem(label='_r')
     cmds.optionMenu('replaceStrOpMenu', label='Replace With: ')
-    cmds.menuItem(label='L')
-    cmds.menuItem(label='R')
-    cmds.menuItem(label='_L')
-    cmds.menuItem(label='_R')
+    cmds.menuItem(label='l')
+    cmds.menuItem(label='r')
+    cmds.menuItem(label='_l')
+    cmds.menuItem(label='_r')
     cmds.checkBox('bhvrChkBox', label='Behavior', p='mainColLo')
     cmds.checkBox('inverseScaleChkBox', label='Inversed Scale', p='mainColLo')
     cmds.button(label='Apply', c=mirrorCtrls, p='mainColLo')
