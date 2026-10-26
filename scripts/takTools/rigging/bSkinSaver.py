@@ -65,7 +65,9 @@ def showUI():
 
 def getMayaWindow():
     ptr = mui.MQtUtil.mainWindow()
-    return shiboken.wrapInstance(int(ptr), QWidget)
+    if ptr:
+        return shiboken.wrapInstance(int(ptr), QWidget)
+    return None
 
 
 
