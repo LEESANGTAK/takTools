@@ -24,6 +24,7 @@ from maya.api import OpenMayaAnim as oma
 # Custom Modules
 from importlib import reload
 from ..rigging import All_Deformers_2_SkinCluster as ad2sc; reload(ad2sc)
+from ..rigging import ssdDeformer; reload(ssdDeformer)
 from ..utils import skin as skinUtil; reload(skinUtil)
 from ..utils import bifrost as bfUtil; reload(bfUtil)
 from ..utils import decorators
@@ -763,10 +764,7 @@ def runAverageWeightsBrush(*args):
 
 # ------------ SSD
 def ssdGUI(*args):
-    cmds.window(title='SSD(Smooth Skin Decomposition)', tlb=True, p=WIN_NAME)
-    cmds.columnLayout(adj=True)
-    cmds.button(label='Decompose Skin', c=lambda x: skinUtil.SSD(cmds.ls(sl=True)[0]))
-    cmds.showWindow()
+    ssdDeformer.showUI(parent=WIN_NAME)
 # ------------
 
 

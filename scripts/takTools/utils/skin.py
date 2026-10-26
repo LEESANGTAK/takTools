@@ -565,12 +565,8 @@ def doneEditSculptMesh(skinMesh, sculptMesh):
 
 
 def SSD(geo):
-    influences = getInfluences(geo)
-    topInfluence = globalUtil.getTopDagNode(influences)
-    skinCluster = mel.eval('findRelatedSkinCluster("{}");'.format(geo))
-    cmds.skinPercent(skinCluster, str(geo), pruneWeights=0.01)
-    cmds.skinCluster(skinCluster, e=True, removeUnusedInfluence=True)
-    cmds.bakeDeformer(sm=geo, ss=topInfluence, dm=geo, ds=topInfluence, mi=8)
+    from ..rigging import ssdDeformer
+    return ssdDeformer.bakeSSD(mesh=geo, deleteOtherDeformers=True)
 
 
 def exportSkin(mesh, outputDir):
