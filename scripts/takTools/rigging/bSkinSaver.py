@@ -1199,7 +1199,7 @@ class SkinRemapDialog(QDialog):
                 loadOnSelection=False,
                 inputFile=self.swFilePath,
                 namespace=self.namespace,
-                geometry=self.geoCheck,
+                geometry=False,
                 jointMapping=jointMap,
                 geoMapping=geoMap
             )
@@ -1323,6 +1323,17 @@ class bSkinSaverUI(QDialog):
             return
 
         namespace = self._namespaceCBox.currentText()
+        geoChecked = self.geoCheckBox.isChecked()
+
+        if geoChecked:
+            dirPath = os.path.dirname(filePath.replace('\\', '/'))
+            abcFileName = os.path.basename(filePath).replace(EXT, '.abc')
+            abcFilePath = "{}/{}".format(dirPath, abcFileName)
+            if os.path.isfile(abcFilePath):
+                mel.eval('AbcImport -mode import "{}";'.format(abcFilePath))
+            else:
+                cmds.warning("Alembic file not found: {}".format(abcFilePath))
+
         fileObjs, _, fileJoints = parseSwFileJoints(filePath)
 
         missingGeos = []
@@ -1354,7 +1365,7 @@ class bSkinSaverUI(QDialog):
                 cmds.inViewMessage(amg="<b>bSkinSaver:</b> Load cancelled.", pos='topCenter', fade=True)
             return
 
-        bLoadSkinValues(False, filePath, namespace, self.geoCheckBox.isChecked())
+        bLoadSkinValues(False, filePath, namespace, False)
 
     def loadObjectsSelection(self):
         # Kept for backward compatibility
@@ -1992,7 +2003,9 @@ def bLoadSkinValues(loadOnSelection, inputFile, namespace='', geometry=False, jo
     if geometry:
         dirPath = os.path.dirname(inputFile.replace('\\', '/'))
         abcFileName = os.path.basename(inputFile).replace(EXT, '.abc')
-        mel.eval('AbcImport -mode import "{}/{}";'.format(dirPath, abcFileName))
+        abcFilePath = "{}/{}".format(dirPath, abcFileName)
+        if os.path.isfile(abcFilePath):
+            mel.eval('AbcImport -mode import "{}";'.format(abcFilePath))
 
     if loadOnSelection == True:
         sels = cmds.ls(sl=True)
