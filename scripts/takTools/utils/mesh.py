@@ -278,7 +278,7 @@ def cleanupMesh(mesh):
     # Remove attributes except for default channelbox attributes
     for attr in cmds.listAttr(mesh, ud=True) or []:
         try:
-            cmds.deleteAttr(attr)
+            cmds.deleteAttr(f'{mesh}.{attr}')
         except RuntimeError:
             pass
 
