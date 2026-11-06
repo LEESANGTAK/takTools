@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 from functools import partial
+
 from ..utils import mesh as meshUtil; reload(meshUtil)
 
 import maya.mel as mel
@@ -861,6 +862,8 @@ def delInterMediObj(*args):
 def setShpAttrs(*args):
     selList = cmds.ls(sl = True)
     for sel in selList:
+        cmds.editDisplayLayerMembers('defaultLayer', sel)  # Add to default display layer
+
         if cmds.objectType(sel) == 'transform':
             selShape = cmds.listRelatives(sel, c = True, s = True, path = True)
             # If transform has no shape, skip to next item.
