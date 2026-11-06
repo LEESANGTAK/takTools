@@ -31,6 +31,19 @@ class NormalAverageBrush(object):
         self.last_cursor_pos = None
         self.current_drag_vector = None
 
+        # 뷰포트 카메라 방향 벡터 캐시
+        self.cam_right = None
+        self.cam_up = None
+
+        # OpenMaya 2.0 고속 가속 캐시
+        self.cached_mesh_name = None
+        self.mesh_dag = None
+        self.fn_mesh = None
+        self.mesh_inv_matrix = None
+        self.neighbors_map = None          # {vtx_idx: tuple(connected_vtx_ids)}
+        self.faces_map = None              # {vtx_idx: tuple(connected_face_ids)}
+        self.face_normals_cache = None     # [MVector(face_0_normal), ...]
+
         self.setup_mel_procedures()
         self.setup_context()
 
@@ -71,63 +84,129 @@ class NormalAverageBrush(object):
                              )
 
     def get_cleanup_cmd(self):
-        return 'python("print(\'Brush tool closed.\')")'
+        return 'python("print(\'Normal Brush tool closed.\')")'
+
+    def setup_mesh_cache(self, mesh_name):
+        """ 메시의 DAG, MFnMesh, 토폴로지 연결 정보를 구축 및 캐싱 """
+        if not cmds.objExists(mesh_name):
+            return False
+
+        try:
+            sel = om.MSelectionList()
+            sel.add(mesh_name)
+            dag = sel.getDagPath(0)
+            dag.extendToShape()
+
+            self.mesh_dag = dag
+            self.fn_mesh = om.MFnMesh(dag)
+            self.mesh_inv_matrix = dag.inclusiveMatrixInverse()
+
+            # 메시가 바뀌었거나 캐시가 없을 때만 토폴로지 맵 1회 생성 (초고속 O(1) 룩업 보장)
+            if self.cached_mesh_name != mesh_name or self.neighbors_map is None:
+                num_vtx = self.fn_mesh.numVertices
+                it_vtx = om.MItMeshVertex(dag)
+                neighbors_map = [None] * num_vtx
+                faces_map = [None] * num_vtx
+
+                while not it_vtx.isDone():
+                    idx = it_vtx.index()
+                    neighbors_map[idx] = tuple(it_vtx.getConnectedVertices())
+                    faces_map[idx] = tuple(it_vtx.getConnectedFaces())
+                    it_vtx.next()
+
+                self.neighbors_map = neighbors_map
+                self.faces_map = faces_map
+
+                # 페이스 노말 캐시 (기하학적 페이스 노말은 불변이므로 캐싱)
+                num_faces = self.fn_mesh.numPolygons
+                self.face_normals_cache = [
+                    self.fn_mesh.getPolygonNormal(f_i, om.MSpace.kObject).normal()
+                    for f_i in range(num_faces)
+                ]
+                self.cached_mesh_name = mesh_name
+
+            return True
+        except Exception:
+            return False
 
     def on_stroke_init(self, surface_name=""):
-        """ 스트로크 시작 시 마우스 커서 위치 및 방향 벡터 초기화 """
+        """ 스트로크 시작 시 마우스 위치, 카메라 방향, 메시 캐시 초기화 """
         if QCursor:
             self.last_cursor_pos = QCursor.pos()
         else:
             self.last_cursor_pos = None
         self.current_drag_vector = None
 
-    def on_stroke_finalize(self):
-        """ 스트로크 종료 시 캐시 초기화 """
-        self.last_cursor_pos = None
-        self.current_drag_vector = None
-
-    def calculate_drag_vector(self, dx, dy, mesh_name):
-        """ 뷰포트 마우스 드래그(dx, dy)를 메시 오브젝트 로컬 공간의 방향 벡터로 변환 """
+        # 활성 뷰포트 카메라의 Right / Up 벡터 캡처
         try:
             view = omui.M3dView.active3dView()
             cam_dag = view.getCamera()
             cam_matrix = cam_dag.inclusiveMatrix()
-
-            # 카메라의 Right(+X), Up(+Y) 벡터
-            cam_right = om.MVector(cam_matrix[0], cam_matrix[1], cam_matrix[2]).normal()
-            cam_up = om.MVector(cam_matrix[4], cam_matrix[5], cam_matrix[6]).normal()
-
-            # 화면 2D 드래그를 뷰포트 카메라 기준 월드 3D 벡터로 변환 (스크린 Y축은 아래 방향이 +이므로 -dy)
-            world_dir = (cam_right * dx) + (cam_up * (-dy))
-            if world_dir.length() < 1e-4:
-                return None
-            world_dir.normalize()
-
-            # 월드 방향 벡터를 메시 오브젝트 로컬 좌표계로 변환
-            sel = om.MSelectionList()
-            sel.add(mesh_name)
-            mesh_dag = sel.getDagPath(0)
-            inv_matrix = mesh_dag.inclusiveMatrixInverse()
-
-            local_dir = (world_dir * inv_matrix).normal()
-            return local_dir
+            self.cam_right = om.MVector(cam_matrix[0], cam_matrix[1], cam_matrix[2]).normal()
+            self.cam_up = om.MVector(cam_matrix[4], cam_matrix[5], cam_matrix[6]).normal()
         except Exception:
+            self.cam_right = om.MVector(1, 0, 0)
+            self.cam_up = om.MVector(0, 1, 0)
+
+        # 타겟 메시 캐시 선행 설정
+        target_mesh = None
+        if surface_name and cmds.objExists(surface_name):
+            target_mesh = surface_name.split(".")[0]
+        else:
+            selection = cmds.ls(sl=True)
+            if selection:
+                target_mesh = selection[0].split(".")[0]
+
+        if target_mesh:
+            self.setup_mesh_cache(target_mesh)
+
+    def on_stroke_finalize(self):
+        """ 스트로크 종료 시 캐시 정리 및 뷰포트 갱신 """
+        self.last_cursor_pos = None
+        self.current_drag_vector = None
+        if self.fn_mesh:
+            try:
+                self.fn_mesh.updateSurface()
+            except Exception:
+                pass
+
+    def calculate_drag_vector(self, dx, dy):
+        """ 캐싱된 카메라와 메시 역행렬을 이용해 초고속으로 메시 로컬 드래그 방향 벡터 계산 """
+        if not self.cam_right or not self.cam_up or not self.mesh_inv_matrix:
             return None
 
+        # 화면 2D 드래그를 뷰포트 월드 3D 벡터로 변환 (스크린 Y축은 아래 방향이 +이므로 -dy)
+        world_dir = (self.cam_right * dx) + (self.cam_up * (-dy))
+        if world_dir.length() < 1e-4:
+            return None
+        world_dir.normalize()
+
+        # 월드 방향 벡터를 메시 오브젝트 로컬 좌표계로 변환
+        local_dir = (world_dir * self.mesh_inv_matrix).normal()
+        return local_dir
+
+    def get_vertex_normal(self, vertex_index):
+        """ 버텍스에 편집/고정된 커스텀 노말을 고속 조회 """
+        fcs = self.faces_map[vertex_index]
+        if fcs:
+            return self.fn_mesh.getFaceVertexNormal(fcs[0], vertex_index, om.MSpace.kObject).normal()
+        return self.fn_mesh.getVertexNormal(vertex_index, om.MSpace.kObject).normal()
+
     def apply_normal_to_vertex(self, vertex_index, brush_value):
-        """ 조합 키(Modifiers) 상태에 따라 각기 다른 노말 제어 연산을 수행하는 핵심 함수 """
-        selection = cmds.ls(sl=True)
-        if not selection:
-            return
-
-        # 순수 메시 이름 추출
-        mesh_name = selection[0]
-        if "." in mesh_name:
-            mesh_name = mesh_name.split(".")[0]
-
-        vtx = f"{mesh_name}.vtx[{vertex_index}]"
-
+        """ OpenMaya 2.0 기반 초고속 노말 연산 및 적용 """
         try:
+            # 캐시 유효성 검사 및 보정
+            if not self.fn_mesh or not self.neighbors_map:
+                selection = cmds.ls(sl=True)
+                if not selection:
+                    return
+                mesh_name = selection[0].split(".")[0]
+                if not self.setup_mesh_cache(mesh_name):
+                    return
+
+            if vertex_index >= len(self.neighbors_map):
+                return
+
             # 1. 키보드 수정자(Modifier Key) 상태 체크 (Shift=1, Ctrl=4)
             modifiers = cmds.getModifiers()
             is_shift_pressed = (modifiers & 1) == 1
@@ -139,63 +218,35 @@ class NormalAverageBrush(object):
                 # =============================================================
                 # [Shift 누름] 주변 버텍스들의 평균 노말 계산 (Smooth 모드)
                 # =============================================================
-                connected_edges = cmds.polyListComponentConversion(vtx, toEdge=True)
-                neighbor_vertices = cmds.polyListComponentConversion(connected_edges, toVertex=True)
-                neighbor_vertices = cmds.ls(neighbor_vertices, flatten=True)
-
-                if vtx in neighbor_vertices:
-                    neighbor_vertices.remove(vtx)
-
-                if not neighbor_vertices:
+                nbrs = self.neighbors_map[vertex_index]
+                if not nbrs:
                     return
 
-                sum_x, sum_y, sum_z = 0.0, 0.0, 0.0
-                count = 0
+                sum_norm = om.MVector(0, 0, 0)
+                for n_idx in nbrs:
+                    sum_norm += self.get_vertex_normal(n_idx)
 
-                for n_vtx in neighbor_vertices:
-                    normals = cmds.polyNormalPerVertex(n_vtx, query=True, normalXYZ=True)
-                    if normals:
-                        vtx_num_elements = len(normals) // 3
-                        vtx_sum_x = sum(normals[i] for i in range(0, len(normals), 3)) / vtx_num_elements
-                        vtx_sum_y = sum(normals[i] for i in range(1, len(normals), 3)) / vtx_num_elements
-                        vtx_sum_z = sum(normals[i] for i in range(2, len(normals), 3)) / vtx_num_elements
-
-                        sum_x += vtx_sum_x
-                        sum_y += vtx_sum_y
-                        sum_z += vtx_sum_z
-                        count += 1
-
-                if count == 0:
+                if sum_norm.length() < 1e-5:
                     return
 
-                target_vector = om.MVector(sum_x / count, sum_y / count, sum_z / count).normal()
+                target_vector = sum_norm.normal()
 
             elif is_ctrl_pressed:
                 # =============================================================
                 # [Ctrl 누름] 연결된 페이스들의 수직 노말 평균 계산 (Face Normal 수직 정렬)
                 # =============================================================
-                connected_faces = cmds.polyListComponentConversion(vtx, toFace=True)
-                connected_faces = cmds.ls(connected_faces, flatten=True)
-
-                if not connected_faces:
+                fcs = self.faces_map[vertex_index]
+                if not fcs:
                     return
 
-                f_sum_x, f_sum_y, f_sum_z = 0.0, 0.0, 0.0
-                f_count = 0
+                sum_face = om.MVector(0, 0, 0)
+                for f_idx in fcs:
+                    sum_face += self.face_normals_cache[f_idx]
 
-                for face in connected_faces:
-                    f_normals = cmds.polyInfo(face, faceNormals=True)
-                    if f_normals:
-                        parts = f_normals[0].split()
-                        f_sum_x += float(parts[-3])
-                        f_sum_y += float(parts[-2])
-                        f_sum_z += float(parts[-1])
-                        f_count += 1
-
-                if f_count == 0:
+                if sum_face.length() < 1e-5:
                     return
 
-                target_vector = om.MVector(f_sum_x / f_count, f_sum_y / f_count, f_sum_z / f_count).normal()
+                target_vector = sum_face.normal()
 
             else:
                 # =============================================================
@@ -212,7 +263,7 @@ class NormalAverageBrush(object):
 
                     # 마우스가 2픽셀 이상 움직였을 때 드래그 방향 갱신 (스트로크 내 버텍스 공유)
                     if dist_sq >= 4:
-                        new_dir = self.calculate_drag_vector(dx, dy, mesh_name)
+                        new_dir = self.calculate_drag_vector(dx, dy)
                         if new_dir:
                             self.current_drag_vector = new_dir
                             self.last_cursor_pos = curr_pos
@@ -223,44 +274,31 @@ class NormalAverageBrush(object):
                 target_vector = om.MVector(self.current_drag_vector)
 
                 # 노말이 면 안쪽으로 파고들어 뒤집히는(Flipped) 현상 방지
-                connected_faces = cmds.polyListComponentConversion(vtx, toFace=True)
-                connected_faces = cmds.ls(connected_faces, flatten=True)
-                if connected_faces:
-                    f_sum_x, f_sum_y, f_sum_z = 0.0, 0.0, 0.0
-                    f_count = 0
-                    for face in connected_faces:
-                        f_normals = cmds.polyInfo(face, faceNormals=True)
-                        if f_normals:
-                            parts = f_normals[0].split()
-                            f_sum_x += float(parts[-3])
-                            f_sum_y += float(parts[-2])
-                            f_sum_z += float(parts[-1])
-                            f_count += 1
+                fcs = self.faces_map[vertex_index]
+                if fcs:
+                    sum_face = om.MVector(0, 0, 0)
+                    for f_idx in fcs:
+                        sum_face += self.face_normals_cache[f_idx]
 
-                    if f_count > 0:
-                        face_normal = om.MVector(f_sum_x / f_count, f_sum_y / f_count, f_sum_z / f_count).normal()
-                        dot = target_vector * face_normal
+                    if sum_face.length() > 1e-5:
+                        face_norm = sum_face.normal()
+                        dot = target_vector * face_norm
                         # 페이스 노말과의 내적이 너무 낮으면(면 안쪽으로 향하면) 표면 바깥쪽으로 최소 0.1 보정
                         if dot < 0.1:
-                            target_vector = (target_vector - face_normal * dot) + face_normal * 0.1
+                            target_vector = (target_vector - face_norm * dot) + face_norm * 0.1
                             target_vector.normalize()
 
-            # 2. 브러시 압력 및 설정 강도(brush_value)를 기준으로 선형 보간(Lerp) 연산
-            current_normals = cmds.polyNormalPerVertex(vtx, query=True, normalXYZ=True)
-            if current_normals:
-                curr_x = sum(current_normals[i] for i in range(0, len(current_normals), 3)) / (len(current_normals) // 3)
-                curr_y = sum(current_normals[i] for i in range(1, len(current_normals), 3)) / (len(current_normals) // 3)
-                curr_z = sum(current_normals[i] for i in range(2, len(current_normals), 3)) / (len(current_normals) // 3)
-                curr_vector = om.MVector(curr_x, curr_y, curr_z).normal()
+            # 2. 브러시 압력 및 설정 강도(brush_value) 기준으로 선형 보간(Lerp) 연산
+            curr_vector = self.get_vertex_normal(vertex_index)
 
-                # 현재 노말에서 타겟 방향 벡터로 브러시 세기만큼 점진적으로 회전 및 변형
-                final_vector = (curr_vector * (1.0 - brush_value)) + (target_vector * brush_value)
-                final_vector.normalize()
+            # 현재 노말에서 타겟 방향 벡터로 브러시 세기만큼 점진적으로 회전 및 변형
+            final_vector = (curr_vector * (1.0 - brush_value)) + (target_vector * brush_value)
+            final_vector.normalize()
 
-                # 3. 최종 연산된 노말 방향을 버텍스에 할당
-                cmds.polyNormalPerVertex(vtx, xyz=(final_vector.x, final_vector.y, final_vector.z))
+            # 3. OpenMaya MFnMesh를 통해 버텍스 노말을 C++ 메모리 레벨에서 즉시 적용
+            self.fn_mesh.setVertexNormal(final_vector, vertex_index, om.MSpace.kObject)
 
-        except Exception as e:
+        except Exception:
             pass
 
     def run(self):
