@@ -132,7 +132,7 @@ def getSceneGeometryNames():
         if short not in seen:
             seen.add(short)
             result.append(short)
-    return result
+    return sorted(result, key=lambda x: (x.lower(), x))
 
 
 def checkMissingGeometries(fileGeos, namespace=''):
@@ -199,7 +199,7 @@ def getSceneJointNames():
         if name not in seen:
             seen.add(name)
             result.append(name)
-    return result
+    return sorted(result, key=lambda x: (x.lower(), x))
 
 
 def checkMissingJoints(fileJoints, namespace=''):
@@ -430,6 +430,25 @@ class SkinRemapDialog(QDialog):
 
         mainLayout.addLayout(bottomLayout)
 
+    def _configureRemapTable(self, table, headers):
+        """Configure a remapper table with interactively resizable columns."""
+        table.setHorizontalHeaderLabels(headers)
+        header = table.horizontalHeader()
+        if hasattr(header, 'setSectionResizeMode'):
+            header.setSectionResizeMode(QHeaderView.Interactive)
+        else:
+            header.setResizeMode(QHeaderView.Interactive)
+        header.setStretchLastSection(False)
+        header.setMinimumSectionSize(40)
+
+        for col, width in enumerate((80, 320, 320)):
+            table.setColumnWidth(col, width)
+
+        table.setHorizontalScrollMode(QAbstractItemView.ScrollPerPixel)
+        table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        table.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        table.verticalHeader().setDefaultSectionSize(26)
+
     # ------------------ Geometries Tab ------------------
     def initGeoTab(self, tab):
         layout = QVBoxLayout(tab)
@@ -453,23 +472,11 @@ class SkinRemapDialog(QDialog):
         toolsLayout.addWidget(self.geoAutoMatchAllButton)
         layout.addLayout(toolsLayout)
 
-        self.geoTable = QTableWidget(0, 4)
-        self.geoTable.setHorizontalHeaderLabels(["Status", "SW File Geometry", "Scene Target Geometry", "Suggested Match"])
-        header = self.geoTable.horizontalHeader()
-        if hasattr(header, 'setSectionResizeMode'):
-            header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
-            header.setSectionResizeMode(2, QHeaderView.Stretch)
-            header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        else:
-            header.setResizeMode(0, QHeaderView.ResizeToContents)
-            header.setResizeMode(1, QHeaderView.Stretch)
-            header.setResizeMode(2, QHeaderView.Stretch)
-            header.setResizeMode(3, QHeaderView.ResizeToContents)
-
-        self.geoTable.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.geoTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.geoTable.verticalHeader().setDefaultSectionSize(26)
+        self.geoTable = QTableWidget(0, 3)
+        self._configureRemapTable(
+            self.geoTable,
+            ["Status", "SW File Geometry", "Scene Target Geometry"]
+        )
         layout.addWidget(self.geoTable)
 
         selLayout = QHBoxLayout()
@@ -478,13 +485,6 @@ class SkinRemapDialog(QDialog):
         self.geoAssignButton.clicked.connect(self.assignSelectedGeosFromMaya)
         selLayout.addWidget(self.geoAssignButton)
 
-        self.geoSelectButton = QPushButton("Select Target in Maya")
-        self.geoSelectButton.clicked.connect(self.selectTargetGeoInMaya)
-        selLayout.addWidget(self.geoSelectButton)
-
-        self.geoClearButton = QPushButton("Clear Selected")
-        self.geoClearButton.clicked.connect(self.clearSelectedGeoRows)
-        selLayout.addWidget(self.geoClearButton)
         selLayout.addStretch()
         layout.addLayout(selLayout)
 
@@ -507,6 +507,8 @@ class SkinRemapDialog(QDialog):
             combo = QComboBox()
             combo.setEditable(True)
             combo.setInsertPolicy(QComboBox.NoInsert)
+            combo.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+            combo.setMinimumWidth(0)
             combo.addItem("")
             combo.addItems(self.sceneGeos)
 
@@ -517,10 +519,6 @@ class SkinRemapDialog(QDialog):
             combo.setCompleter(completer)
 
             suggested = autoMatchGeometry(fg, self.sceneGeos)
-            suggestItem = QTableWidgetItem(suggested if suggested else "")
-            suggestItem.setFlags(suggestItem.flags() & ~Qt.ItemIsEditable)
-            if suggested:
-                suggestItem.setToolTip("Double-click to apply '{}'".format(suggested))
 
             if inScene:
                 matchedName = target if target in sceneGeoSet else fg
@@ -540,7 +538,6 @@ class SkinRemapDialog(QDialog):
             self.geoTable.setItem(row, 0, statusItem)
             self.geoTable.setItem(row, 1, fgItem)
             self.geoTable.setCellWidget(row, 2, combo)
-            self.geoTable.setItem(row, 3, suggestItem)
 
             def makeGeoComboCallback(r):
                 return lambda text: self.onGeoComboChanged(r, text)
@@ -577,13 +574,7 @@ class SkinRemapDialog(QDialog):
         self.updateSummary()
 
     def onGeoCellDoubleClicked(self, row, col):
-        if col == 3:
-            suggestItem = self.geoTable.item(row, 3)
-            if suggestItem and suggestItem.text().strip():
-                combo = self.geoTable.cellWidget(row, 2)
-                if combo:
-                    combo.setCurrentText(suggestItem.text().strip())
-        elif col in [1, 2]:
+        if col in [1, 2]:
             combo = self.geoTable.cellWidget(row, 2)
             if combo:
                 tg = combo.currentText().strip()
@@ -641,19 +632,11 @@ class SkinRemapDialog(QDialog):
         for r in targetRows:
             fgItem = self.geoTable.item(r, 1)
             combo = self.geoTable.cellWidget(r, 2)
-            suggestItem = self.geoTable.item(r, 3)
             if not fgItem or not combo:
                 continue
 
             fg = fgItem.text()
             suggested = autoMatchGeometry(fg, self.sceneGeos)
-
-            if suggestItem:
-                suggestItem.setText(suggested if suggested else "")
-                if suggested:
-                    suggestItem.setToolTip("Double-click to apply '{}'".format(suggested))
-                else:
-                    suggestItem.setToolTip("")
 
             if suggested:
                 combo.setCurrentText(suggested)
@@ -708,32 +691,6 @@ class SkinRemapDialog(QDialog):
                     if combo:
                         combo.setCurrentText(selectedTransforms[i])
 
-    def selectTargetGeoInMaya(self):
-        selectedRows = sorted(list(set([idx.row() for idx in self.geoTable.selectedIndexes()])))
-        targetsToSelect = []
-        for r in selectedRows:
-            combo = self.geoTable.cellWidget(r, 2)
-            if combo:
-                tg = combo.currentText().strip()
-                if tg:
-                    target = (self.namespace + tg) if self.namespace and not tg.startswith(self.namespace) else tg
-                    if cmds.objExists(target):
-                        targetsToSelect.append(target)
-                    elif cmds.objExists(tg):
-                        targetsToSelect.append(tg)
-
-        if targetsToSelect:
-            cmds.select(targetsToSelect, r=True)
-        else:
-            cmds.warning("No existing target geometries to select in Maya.")
-
-    def clearSelectedGeoRows(self):
-        selectedRows = sorted(list(set([idx.row() for idx in self.geoTable.selectedIndexes()])))
-        for r in selectedRows:
-            combo = self.geoTable.cellWidget(r, 2)
-            if combo:
-                combo.setCurrentText("")
-
     def getGeoMappingDict(self):
         mapping = {}
         for r in range(self.geoTable.rowCount()):
@@ -787,23 +744,11 @@ class SkinRemapDialog(QDialog):
         replaceLayout.addWidget(self.applyRuleButton)
         layout.addWidget(replaceGroup)
 
-        self.jointTable = QTableWidget(0, 4)
-        self.jointTable.setHorizontalHeaderLabels(["Status", "SW File Joint", "Scene Target Joint", "Suggested Match"])
-        header = self.jointTable.horizontalHeader()
-        if hasattr(header, 'setSectionResizeMode'):
-            header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
-            header.setSectionResizeMode(2, QHeaderView.Stretch)
-            header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        else:
-            header.setResizeMode(0, QHeaderView.ResizeToContents)
-            header.setResizeMode(1, QHeaderView.Stretch)
-            header.setResizeMode(2, QHeaderView.Stretch)
-            header.setResizeMode(3, QHeaderView.ResizeToContents)
-
-        self.jointTable.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.jointTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.jointTable.verticalHeader().setDefaultSectionSize(26)
+        self.jointTable = QTableWidget(0, 3)
+        self._configureRemapTable(
+            self.jointTable,
+            ["Status", "SW File Joint", "Scene Target Joint"]
+        )
         layout.addWidget(self.jointTable)
 
         selLayout = QHBoxLayout()
@@ -811,13 +756,6 @@ class SkinRemapDialog(QDialog):
         self.jointAssignButton.clicked.connect(self.assignSelectedJointsFromMaya)
         selLayout.addWidget(self.jointAssignButton)
 
-        self.jointSelectButton = QPushButton("Select Target in Maya")
-        self.jointSelectButton.clicked.connect(self.selectTargetJointInMaya)
-        selLayout.addWidget(self.jointSelectButton)
-
-        self.jointClearButton = QPushButton("Clear Selected")
-        self.jointClearButton.clicked.connect(self.clearSelectedJointRows)
-        selLayout.addWidget(self.jointClearButton)
         selLayout.addStretch()
         layout.addLayout(selLayout)
 
@@ -840,6 +778,8 @@ class SkinRemapDialog(QDialog):
             combo = QComboBox()
             combo.setEditable(True)
             combo.setInsertPolicy(QComboBox.NoInsert)
+            combo.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+            combo.setMinimumWidth(0)
             combo.addItem("")
             combo.addItems(self.sceneJoints)
 
@@ -850,10 +790,6 @@ class SkinRemapDialog(QDialog):
             combo.setCompleter(completer)
 
             suggested = autoMatchJoint(fj, self.sceneJoints)
-            suggestItem = QTableWidgetItem(suggested if suggested else "")
-            suggestItem.setFlags(suggestItem.flags() & ~Qt.ItemIsEditable)
-            if suggested:
-                suggestItem.setToolTip("Double-click to apply '{}'".format(suggested))
 
             if inScene:
                 matchedName = target if target in sceneJointSet else fj
@@ -873,7 +809,6 @@ class SkinRemapDialog(QDialog):
             self.jointTable.setItem(row, 0, statusItem)
             self.jointTable.setItem(row, 1, fjItem)
             self.jointTable.setCellWidget(row, 2, combo)
-            self.jointTable.setItem(row, 3, suggestItem)
 
             def makeJointComboCallback(r):
                 return lambda text: self.onJointComboChanged(r, text)
@@ -910,13 +845,7 @@ class SkinRemapDialog(QDialog):
         self.updateSummary()
 
     def onJointCellDoubleClicked(self, row, col):
-        if col == 3:
-            suggestItem = self.jointTable.item(row, 3)
-            if suggestItem and suggestItem.text().strip():
-                combo = self.jointTable.cellWidget(row, 2)
-                if combo:
-                    combo.setCurrentText(suggestItem.text().strip())
-        elif col in [1, 2]:
+        if col in [1, 2]:
             combo = self.jointTable.cellWidget(row, 2)
             if combo:
                 tj = combo.currentText().strip()
@@ -974,19 +903,11 @@ class SkinRemapDialog(QDialog):
         for r in targetRows:
             fjItem = self.jointTable.item(r, 1)
             combo = self.jointTable.cellWidget(r, 2)
-            suggestItem = self.jointTable.item(r, 3)
             if not fjItem or not combo:
                 continue
 
             fj = fjItem.text()
             suggested = autoMatchJoint(fj, self.sceneJoints)
-
-            if suggestItem:
-                suggestItem.setText(suggested if suggested else "")
-                if suggested:
-                    suggestItem.setToolTip("Double-click to apply '{}'".format(suggested))
-                else:
-                    suggestItem.setToolTip("")
 
             if suggested:
                 combo.setCurrentText(suggested)
@@ -1053,32 +974,6 @@ class SkinRemapDialog(QDialog):
                     combo = self.jointTable.cellWidget(row, 2)
                     if combo:
                         combo.setCurrentText(selShort[i])
-
-    def selectTargetJointInMaya(self):
-        selectedRows = sorted(list(set([idx.row() for idx in self.jointTable.selectedIndexes()])))
-        targetsToSelect = []
-        for r in selectedRows:
-            combo = self.jointTable.cellWidget(r, 2)
-            if combo:
-                tj = combo.currentText().strip()
-                if tj:
-                    target = (self.namespace + tj) if self.namespace and not tj.startswith(self.namespace) else tj
-                    if cmds.objExists(target):
-                        targetsToSelect.append(target)
-                    elif cmds.objExists(tj):
-                        targetsToSelect.append(tj)
-
-        if targetsToSelect:
-            cmds.select(targetsToSelect, r=True)
-        else:
-            cmds.warning("No existing target joints to select in Maya.")
-
-    def clearSelectedJointRows(self):
-        selectedRows = sorted(list(set([idx.row() for idx in self.jointTable.selectedIndexes()])))
-        for r in selectedRows:
-            combo = self.jointTable.cellWidget(r, 2)
-            if combo:
-                combo.setCurrentText("")
 
     def getJointMappingDict(self):
         mapping = {}
