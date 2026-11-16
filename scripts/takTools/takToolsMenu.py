@@ -32,6 +32,12 @@ def showMenu():
         sourceType="python"
     )
     cmds.menuItem(
+        label="SymMesh",
+        image="symmetrize.png",
+        command="import takTools.modeling.sym_mesh_tool as sym_mesh_tool\nimport importlib;importlib.reload(sym_mesh_tool)\nsym_mesh_tool.show_ui()",
+        sourceType="python"
+    )
+    cmds.menuItem(
         label="XGen Manager",
         image="xgenManager.png",
         command="import takXgenManager.xgenManager as xgm\nimport importlib;importlib.reload(xgm)\nxgm.XGenManager.showUI()",

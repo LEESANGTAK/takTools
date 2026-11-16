@@ -5,12 +5,12 @@
     "collapse": false,
     "shelfButtonInfos": [
         {
-            "label": "abSymMesh",
-            "annotation": "abSymMesh GUI",
+            "label": "SymMesh",
+            "annotation": "SymMesh GUI (Fast OpenMaya / NumPy + Transfer Attributes Sample Space)",
             "image1": "symmetrize.png",
-            "imageOverlayLabel": "abSym",
-            "command": "abSymMesh;",
-            "sourceType": "mel",
+            "imageOverlayLabel": "SymMesh",
+            "command": "import takTools.modeling.sym_mesh_tool as sym_mesh_tool\nimport importlib\nimportlib.reload(sym_mesh_tool)\nsym_mesh_tool.show_ui()",
+            "sourceType": "python",
             "noDefaultPopup": true
         },
         {
