@@ -7,7 +7,9 @@ Description:
 """
 
 import os
+import re
 import sys
+import shutil
 import importlib
 from distutils.dir_util import copy_tree
 
@@ -33,6 +35,7 @@ def onMayaDroppedPythonFile(*args, **kwargs):
         copyFiles()
 
     createModuleFile()
+    setupAgentRules()
     cmds.confirmDialog(title='Info', message='"{}" module installed successfully.'.format(MODULE_NAME))
 
 
@@ -133,3 +136,40 @@ def getModulesDirectory():
         os.mkdir(modulesDir)
 
     return modulesDir
+
+
+def setupAgentRules():
+    agentsSrc = '{}/AGENTS.md'.format(MODULE_PATH)
+    if not os.path.exists(agentsSrc):
+        return
+
+    moduleDir = os.path.normpath(os.path.dirname(__file__))
+    try:
+        with open(agentsSrc, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        match = re.search(r'[`"]([^`"]+)[\\/]scripts[\\/]takTools[\\/]utils[\\/]maya_remote\.py[`"]', content)
+        if match:
+            oldModuleDir = match.group(1)
+            if oldModuleDir != moduleDir:
+                content = content.replace(oldModuleDir, moduleDir)
+                with open(agentsSrc, 'w', encoding='utf-8') as f:
+                    f.write(content)
+    except Exception as e:
+        print('Failed to update module path in {}: {}'.format(agentsSrc, e))
+
+    homeDir = os.path.expanduser('~')
+    targetPaths = [
+        os.path.join(homeDir, '.gemini', 'GEMINI.md'),
+        os.path.join(homeDir, '.claude', 'CLAUDE.md'),
+        os.path.join(homeDir, '.codex', 'AGENTS.md'),
+    ]
+
+    for dstPath in targetPaths:
+        try:
+            dstDir = os.path.dirname(dstPath)
+            if not os.path.exists(dstDir):
+                os.makedirs(dstDir)
+            shutil.copyfile(agentsSrc, dstPath)
+        except Exception as e:
+            print('Failed to copy agent rules to {}: {}'.format(dstPath, e))
