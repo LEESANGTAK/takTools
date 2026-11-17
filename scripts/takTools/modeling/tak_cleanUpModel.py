@@ -55,7 +55,7 @@ def UI():
     cmds.button(label = 'More than 4-Side', w=128, c=lambda args: mel.eval('polyCleanupArgList 4 { "0","2","1","0","1","0","0","0","0","1e-05","0","1e-05","0","1e-05","0","-1","0","0" };'))
     cmds.button(label = 'Overlapped Vertex', w=128, c=lambda args: mel.eval('polyCleanupArgList 4 { "0","2","1","0","0","0","0","0","0","1e-05","1","1e-05","0","1e-05","0","-1","0","0" };'))
     cmds.button(label = 'Overlapped Root Curve', w=128, c=findOverlappedRootCurve)
-    cmds.button(label = 'Check UV Sets', w=128, c=checkUVSets)
+    cmds.button(label = 'Clean UV Sets', w=128, c=clean_uv_sets_to_map1, ann='Clean UV Sets to map1. If there is no map1, create it and copy the data from LightMapUV or the first UV set.')
     cmds.button(label = 'Move to Origin', w=128, c=moveToOrigin)
 
     cmds.setParent('procColLay')
@@ -293,7 +293,67 @@ def checkUVSets(*args):
         mel.eval('uvSetEditor')
 
 
+def clean_uv_sets_to_map1(*args):
+    # Get the currently selected objects (using Transform nodes).
+    selection = cmds.ls(selection=True, objectsOnly=True, long=True)
 
+    if not selection:
+        cmds.warning("Please select one or more meshes to clean.")
+        return
+
+    processed_count = 0
+
+    for obj in selection:
+        # Find the selected object's mesh shape nodes, excluding intermediate objects.
+        shapes = cmds.listRelatives(
+            obj, shapes=True, type="mesh", noIntermediate=True, fullPath=True
+        )
+        if not shapes:
+            continue
+
+        for shape in shapes:
+            uv_sets = cmds.polyUVSet(shape, query=True, allUVSets=True)
+            if not uv_sets:
+                continue
+
+            # 1. Create a 'map1' UV set if one does not exist.
+            if "map1" not in uv_sets:
+                cmds.polyUVSet(shape, create=True, uvSet="map1")
+                uv_sets = cmds.polyUVSet(shape, query=True, allUVSets=True)
+
+            # 2. Choose the source UV set to copy ('LightMapUV' first, otherwise the first set other than 'map1').
+            source_uv = None
+            if "LightMapUV" in uv_sets:
+                source_uv = "LightMapUV"
+            else:
+                other_sets = [u for u in uv_sets if u != "map1"]
+                if other_sets:
+                    source_uv = other_sets[0]
+
+            # 3. Copy the source UV set data to 'map1'.
+            if source_uv:
+                cmds.polyCopyUV(
+                    shape, uvSetNameInput=source_uv, uvSetName="map1", ch=False
+                )
+
+            # 4. Set the current UV set to 'map1' to avoid deletion errors.
+            cmds.polyUVSet(shape, currentUVSet=True, uvSet="map1")
+
+            # 5. Delete all UV sets except 'map1'.
+            # Query the list again to iterate safely.
+            current_all_sets = cmds.polyUVSet(shape, query=True, allUVSets=True)
+            for uv_set in current_all_sets:
+                if uv_set != "map1":
+                    cmds.polyUVSet(shape, delete=True, uvSet=uv_set)
+
+            processed_count += 1
+
+    if processed_count > 0:
+        print(
+            f"Completed: Cleaned UV sets to 'map1' for {processed_count} mesh(es)."
+        )
+    else:
+        cmds.warning("No processable meshes were found in the selection.")
 
 
 def setTangentSapceLeftHanded(*args):
