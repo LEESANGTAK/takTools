@@ -18,6 +18,8 @@ import sys
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 20201
+DEFAULT_CANDIDATE_PORTS = (20201, 20211, 20221, 20231)
+PROBE_TIMEOUT = 1.5
 DEFAULT_TIMEOUT = 30.0
 
 _RUNNER_TEMPLATE = """
@@ -54,10 +56,33 @@ _MAYA_REMOTE_RES_ = json.dumps(
 """
 
 
-def _send_expression(expr, host=DEFAULT_HOST, port=DEFAULT_PORT, timeout=DEFAULT_TIMEOUT):
+def _probe_port(host, port, timeout=PROBE_TIMEOUT):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(timeout)
+            sock.connect((host, port))
+            sock.sendall(b"1+1")
+            data = sock.recv(1024)
+            return bool(data)
+    except OSError:
+        return False
+
+
+def _resolve_port(host, port, probe_timeout=PROBE_TIMEOUT):
+    if port is not None and port != DEFAULT_PORT:
+        return port
+    ports_to_try = (DEFAULT_PORT,) + tuple(p for p in DEFAULT_CANDIDATE_PORTS if p != DEFAULT_PORT)
+    for candidate in ports_to_try:
+        if _probe_port(host, candidate, timeout=probe_timeout):
+            return candidate
+    return DEFAULT_PORT
+
+
+def _send_expression(expr, host=DEFAULT_HOST, port=None, timeout=DEFAULT_TIMEOUT):
+    resolved_port = _resolve_port(host, port)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.settimeout(timeout)
-        sock.connect((host, port))
+        sock.connect((host, resolved_port))
         sock.sendall(expr.encode("utf-8"))
         chunks = []
         while True:
@@ -73,7 +98,7 @@ def _send_expression(expr, host=DEFAULT_HOST, port=DEFAULT_PORT, timeout=DEFAULT
     return b"".join(chunks).decode("utf-8", errors="replace").rstrip("\x00\r\n")
 
 
-def execute_python(code, host=DEFAULT_HOST, port=DEFAULT_PORT, timeout=DEFAULT_TIMEOUT):
+def execute_python(code, host=DEFAULT_HOST, port=None, timeout=DEFAULT_TIMEOUT):
     """Maya 세션에서 다중 라인 Python 코드를 실행하고 출력/반환값/에러를 딕셔너리로 반환한다."""
     b64_user = base64.b64encode(code.encode("utf-8")).decode("ascii")
     runner_code = _RUNNER_TEMPLATE.format(b64_user=b64_user)
@@ -89,7 +114,7 @@ def execute_python(code, host=DEFAULT_HOST, port=DEFAULT_PORT, timeout=DEFAULT_T
         return {"ok": False, "stdout": "", "stderr": "", "result": None, "error": f"Raw response: {raw}"}
 
 
-def get_script_editor_log(max_chars=15000, host=DEFAULT_HOST, port=DEFAULT_PORT, timeout=DEFAULT_TIMEOUT):
+def get_script_editor_log(max_chars=15000, host=DEFAULT_HOST, port=None, timeout=DEFAULT_TIMEOUT):
     """Maya Script Editor(cmdScrollFieldReporter)의 최근 로그 텍스트를 반환한다."""
     code = f"""
 import maya.cmds as cmds
@@ -123,7 +148,7 @@ def main():
         help="Fetch recent Maya Script Editor logs (optional max characters, default: 15000).",
     )
     parser.add_argument("--host", default=DEFAULT_HOST, help=f"Maya host (default: {DEFAULT_HOST}).")
-    parser.add_argument("-p", "--port", type=int, default=DEFAULT_PORT, help=f"Maya commandPort (default: {DEFAULT_PORT}).")
+    parser.add_argument("-p", "--port", type=int, default=None, help=f"Maya commandPort (default: auto-probe starting at {DEFAULT_PORT}).")
     parser.add_argument("-t", "--timeout", type=float, default=DEFAULT_TIMEOUT, help="Socket timeout in seconds.")
     parser.add_argument("--json", action="store_true", help="Print full result as JSON.")
 
